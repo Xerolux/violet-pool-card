@@ -24,7 +24,7 @@ Ich möchte eine Custom Lovelace Card für Home Assistant erstellen: "Violet Poo
 KONTEXT:
 - Integration: Violet Pool Controller (violet_pool_controller)
 - GitHub: https://github.com/YOUR_USERNAME/violet-pool-card
-- Style: Mushroom Cards ähnlich
+- Style: Premium Luxury Design mit Glassmorphism und modernen Animationen
 - Tech: Lit Element + TypeScript + Rollup
 
 ZIEL:

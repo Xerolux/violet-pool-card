@@ -1,4 +1,4 @@
-# 🏊 Violet Pool Card
+# 🏊 Violet Pool Card - Premium Edition
 
 [![GitHub Release](https://img.shields.io/github/release/Xerolux/VIOLET_CARD_QUICK.svg?style=flat-square)](https://github.com/Xerolux/VIOLET_CARD_QUICK/releases)
 [![GitHub Activity](https://img.shields.io/github/commit-activity/m/Xerolux/VIOLET_CARD_QUICK.svg?style=flat-square)](https://github.com/Xerolux/VIOLET_CARD_QUICK/commits/main)
@@ -10,7 +10,9 @@
 [![PayPal](https://img.shields.io/badge/paypal-donate-blue.svg?style=flat-square)](https://paypal.me/xerolux)
 [![Ko-fi](https://img.shields.io/badge/ko--fi-donate-red.svg?style=flat-square)](https://ko-fi.com/xerolux)
 
-Custom Lovelace card for the [Violet Pool Controller](https://github.com/Xerolux/violet-hass) integration for Home Assistant.
+**The Ultimate Premium Lovelace Card** for the [Violet Pool Controller](https://github.com/Xerolux/violet-hass) integration for Home Assistant.
+
+> 🌟 **Luxury Design** · **Flexible Sizes** · **6 Premium Themes** · **Advanced Animations** · **Best-in-Class UX**
 
 <p align="center">
   <img src="https://img.shields.io/badge/Made%20with-Lit-324FFF?style=for-the-badge&logo=lit" alt="Made with Lit">
@@ -37,7 +39,28 @@ Custom Lovelace card for the [Violet Pool Controller](https://github.com/Xerolux
 
 ## ✨ Features
 
-### 🎨 Multiple Card Types
+### 🎨 Premium Design System
+
+**4 Card Sizes** - Perfect for any dashboard layout:
+- **Small** - Compact cards for dense layouts
+- **Medium** - Standard size (default)
+- **Large** - Spacious cards with enhanced visuals
+- **Fullscreen** - Immersive full-screen experience
+
+**6 Premium Themes** - Choose your perfect style:
+- **Luxury** - Enhanced glassmorphism with subtle gradients
+- **Modern** - Clean, minimal design with smooth transitions
+- **Minimalist** - Ultra-clean, borderless aesthetic
+- **Glass** - Pure glassmorphism with blur effects
+- **Neon** - Vibrant, energetic with animated glows
+- **Premium** - High-end gradient design with dynamic shine
+
+**3 Animation Levels** - Control the energy:
+- **Subtle** - Minimal, professional animations
+- **Smooth** - Balanced, pleasant motion
+- **Energetic** - Dynamic, eye-catching effects
+
+### 🎴 Multiple Card Types
 - **Pump Card** - Speed control with RPM display and runtime counter
 - **Heater Card** - Temperature control with outside temp monitoring
 - **Solar Card** - Temperature delta calculation with color-coded hints
@@ -63,19 +86,101 @@ Custom Lovelace card for the [Violet Pool Controller](https://github.com/Xerolux
 
 ---
 
-## 📸 Screenshots
+## 📸 Screenshots & Design Showcase
 
-### Modern & Luxury Styles
+### Premium Theme Gallery
+
+#### 🌟 Luxury Theme (Default)
 ```yaml
 type: custom:violet-pool-card
 entity: switch.violet_pool_pump
 card_type: pump
-style: modern # or luxury
-show_flow_animation: true
+size: large
+theme: luxury
+animation: smooth
 ```
-- **Modern**: Clean, flat design with rounded corners
-- **Luxury**: Glassmorphism, gradients, and advanced shadows
-- **Flow Animation**: Animated background effects when devices are active
+- **Glassmorphism** with enhanced blur effects
+- **Subtle gradients** for depth
+- **Inset shadows** for premium feel
+- **Perfect for** modern dashboards
+
+#### 🎯 Modern Theme
+```yaml
+type: custom:violet-pool-card
+entity: climate.violet_pool_heater
+card_type: heater
+size: medium
+theme: modern
+animation: subtle
+```
+- **Clean lines** and minimal design
+- **Smooth hover effects**
+- **Elevation on interaction**
+- **Perfect for** professional setups
+
+#### 💎 Glass Theme
+```yaml
+type: custom:violet-pool-card
+entity: climate.violet_pool_solar
+card_type: solar
+size: large
+theme: glass
+animation: smooth
+```
+- **Pure glassmorphism** with deep blur
+- **Transparent backgrounds**
+- **Frosted glass effect**
+- **Perfect for** layered dashboards
+
+#### ⚡ Neon Theme
+```yaml
+type: custom:violet-pool-card
+entity: switch.violet_pool_dos_1_cl
+card_type: dosing
+size: medium
+theme: neon
+animation: energetic
+```
+- **Vibrant animated borders**
+- **Dark gradient backgrounds**
+- **RGB glow effects**
+- **Perfect for** gaming rooms
+
+#### 👑 Premium Theme
+```yaml
+type: custom:violet-pool-card
+entity: switch.violet_pool_pump
+card_type: pump
+size: fullscreen
+theme: premium
+animation: energetic
+```
+- **Luxury gradient backgrounds**
+- **Animated shine effects**
+- **High-end feel**
+- **Perfect for** main displays
+
+### Size Comparison
+
+#### Small - Perfect for compact dashboards
+```yaml
+size: small    # 12px padding, 13px font
+```
+
+#### Medium - Balanced default (Recommended)
+```yaml
+size: medium   # 16px padding, 16px font (default)
+```
+
+#### Large - Spacious and prominent
+```yaml
+size: large    # 24px padding, 16px font, 32px icons
+```
+
+#### Fullscreen - Immersive experience
+```yaml
+size: fullscreen   # 32px padding, 18px font, 48px icons, full viewport
+```
 
 ### Pump Card
 ```yaml
@@ -193,11 +298,25 @@ lovelace:
 |------|------|---------|-------------|
 | `type` | string | **Required** | `custom:violet-pool-card` |
 | `entity` | string | **Required** | Entity ID (except for overview) |
-| `card_type` | string | **Required** | `pump`, `heater`, `solar`, `dosing`, `overview`, or `compact` |
+| `card_type` | string | **Required** | `pump`, `heater`, `solar`, `dosing`, `overview`, `compact`, or `system` |
 | `name` | string | Optional | Custom name for the card |
 | `icon` | string | Optional | Custom icon (MDI) |
-| `style` | string | `standard` | `standard`, `modern`, or `luxury` |
-| `show_flow_animation` | boolean | `false` | Enable animated flow effects (Luxury style) |
+
+### Premium Design Options
+
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| `size` | string | `medium` | Card size: `small`, `medium`, `large`, or `fullscreen` |
+| `theme` | string | `luxury` | Design theme: `luxury`, `modern`, `minimalist`, `glass`, `neon`, or `premium` |
+| `animation` | string | `smooth` | Animation level: `none`, `subtle`, `smooth`, or `energetic` |
+| `blur_intensity` | number | `10` | Blur intensity for glassmorphism effects (0-30) |
+
+### Legacy Options (Backward Compatible)
+
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| `style` | string | `standard` | Legacy: `standard`, `modern`, or `luxury` |
+| `show_flow_animation` | boolean | `false` | Legacy: Enable animated flow effects |
 
 ### Display Options
 
@@ -298,6 +417,82 @@ lovelace:
 ---
 
 ## 📖 Examples
+
+### Premium Showcase Dashboard
+
+```yaml
+# Fullscreen Premium Main Card
+type: custom:violet-pool-card
+entity: switch.violet_pool_pump
+card_type: system
+size: fullscreen
+theme: premium
+animation: energetic
+```
+
+### Mixed Sizes Dashboard
+
+```yaml
+type: vertical-stack
+cards:
+  # Large Overview with Luxury Theme
+  - type: custom:violet-pool-card
+    card_type: overview
+    name: Pool Status
+    size: large
+    theme: luxury
+    animation: smooth
+
+  # Row of Medium Cards with Glass Theme
+  - type: horizontal-stack
+    cards:
+      - type: custom:violet-pool-card
+        entity: switch.violet_pool_pump
+        card_type: pump
+        size: medium
+        theme: glass
+        animation: smooth
+
+      - type: custom:violet-pool-card
+        entity: climate.violet_pool_heater
+        card_type: heater
+        size: medium
+        theme: glass
+        animation: smooth
+
+  # Neon Theme for Dosing
+  - type: custom:violet-pool-card
+    entity: switch.violet_pool_dos_1_cl
+    card_type: dosing
+    dosing_type: chlorine
+    size: medium
+    theme: neon
+    animation: energetic
+```
+
+### Compact Modern Dashboard
+
+```yaml
+type: vertical-stack
+cards:
+  - type: custom:violet-pool-card
+    entity: switch.violet_pool_pump
+    card_type: compact
+    size: small
+    theme: modern
+
+  - type: custom:violet-pool-card
+    entity: climate.violet_pool_heater
+    card_type: compact
+    size: small
+    theme: modern
+
+  - type: custom:violet-pool-card
+    entity: climate.violet_pool_solar
+    card_type: compact
+    size: small
+    theme: modern
+```
 
 ### Complete Dashboard
 

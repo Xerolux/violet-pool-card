@@ -8,10 +8,10 @@
 ### Ziel
 Eine dedizierte, visuell ansprechende Lovelace Card für die Violet Pool Controller Integration, die alle Funktionen in einer kompakten, benutzerfreundlichen UI darstellt.
 
-### Inspiration
-- **Multiple Entity Row**: Kompakte Multi-Entity-Darstellung
-- **Mushroom Cards**: Moderne, cleane UI mit Icons
-- **Better Sliders**: Intuitive Slider-Steuerung
+### Design Philosophy
+- **Premium Luxury**: Glassmorphism, Gradients, und moderne Animationen
+- **Flexible Layouts**: Von kompakt bis fullscreen - alles individuell anpassbar
+- **Best-in-Class UX**: Intuitive Steuerung mit außergewöhnlichem visuellen Feedback
 
 ### Besonderheit
 **All-in-One Card pro Entity**: Jede Entität (Pumpe, Heizung, Solar, Dosierung) bekommt eine eigene Card, die:
@@ -283,10 +283,10 @@ violet-pool-card/
 ### Technologie-Stack
 
 **Framework & Build:**
-- **Lit** (wie Mushroom) - Moderne Web Components
-- **TypeScript** - Type Safety
-- **Rollup** - Bundling
-- **SCSS** - Styling
+- **Lit** - Moderne, performante Web Components
+- **TypeScript** - Type Safety & Developer Experience
+- **Rollup** - Optimiertes Bundling
+- **Advanced CSS** - Glassmorphism, Animations, Gradients
 
 **Dependencies:**
 ```json
@@ -1112,12 +1112,11 @@ export default {
 
 ## 📚 Resources & Links
 
-### Inspiration Projects
-- **Mushroom Cards**: https://github.com/piitaya/lovelace-mushroom
-- **Better Sliders**: https://github.com/phischdev/lovelace-mushroom-better-sliders
-- **Multiple Entity Row**: https://github.com/benct/lovelace-multiple-entity-row
-- **Mini Graph Card**: https://github.com/kalkih/mini-graph-card
-- **Button Card**: https://github.com/custom-cards/button-card
+### Design References
+- **Material Design 3**: https://m3.material.io/
+- **Apple Design**: https://developer.apple.com/design/
+- **Premium UI Patterns**: Glassmorphism, Neumorphism, Micro-interactions
+- **Modern Dashboards**: Luxury smart home interfaces
 
 ### Documentation
 - **Lit Element**: https://lit.dev/
