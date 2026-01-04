@@ -66,6 +66,27 @@
       </div>
     </div>
 
+    <h2>Modern Style</h2>
+    <div class="card-container">
+      <div class="card-wrapper">
+        <violet-pool-card id="modern-pump"></violet-pool-card>
+      </div>
+    </div>
+
+    <h2>Luxury Style + Flow</h2>
+    <div class="card-container">
+      <div class="card-wrapper">
+        <violet-pool-card id="luxury-heater"></violet-pool-card>
+      </div>
+    </div>
+
+    <h2>System Card</h2>
+    <div class="card-container" style="max-width: 100%;">
+      <div class="card-wrapper" style="flex-basis: 100%; max-width: 100%;">
+        <violet-pool-card id="system-card"></violet-pool-card>
+      </div>
+    </div>
+
     <script type="module">
       import { VioletPoolCard } from '../dist/violet-pool-card.js';
 
@@ -210,6 +231,37 @@
         card_type: 'compact'
       });
       compactCard.hass = mockHass;
+
+      // Modern Pump
+      const modernPump = document.getElementById('modern-pump');
+      modernPump.setConfig({
+        type: 'custom:violet-pool-card',
+        entity: 'switch.violet_pool_pump',
+        card_type: 'pump',
+        style: 'modern'
+      });
+      modernPump.hass = mockHass;
+
+      // Luxury Heater
+      const luxuryHeater = document.getElementById('luxury-heater');
+      luxuryHeater.setConfig({
+        type: 'custom:violet-pool-card',
+        entity: 'climate.violet_pool_heater',
+        card_type: 'heater',
+        style: 'luxury',
+        show_flow_animation: true
+      });
+      luxuryHeater.hass = mockHass;
+
+      // System Card
+      const systemCard = document.getElementById('system-card');
+      systemCard.setConfig({
+        type: 'custom:violet-pool-card',
+        card_type: 'system',
+        style: 'luxury',
+        show_flow_animation: true
+      });
+      systemCard.hass = mockHass;
 
     </script>
   </body>

@@ -65,6 +65,18 @@ Custom Lovelace card for the [Violet Pool Controller](https://github.com/Xerolux
 
 ## 📸 Screenshots
 
+### Modern & Luxury Styles
+```yaml
+type: custom:violet-pool-card
+entity: switch.violet_pool_pump
+card_type: pump
+style: modern # or luxury
+show_flow_animation: true
+```
+- **Modern**: Clean, flat design with rounded corners
+- **Luxury**: Glassmorphism, gradients, and advanced shadows
+- **Flow Animation**: Animated background effects when devices are active
+
 ### Pump Card
 ```yaml
 type: custom:violet-pool-card
@@ -184,6 +196,8 @@ lovelace:
 | `card_type` | string | **Required** | `pump`, `heater`, `solar`, `dosing`, `overview`, or `compact` |
 | `name` | string | Optional | Custom name for the card |
 | `icon` | string | Optional | Custom icon (MDI) |
+| `style` | string | `standard` | `standard`, `modern`, or `luxury` |
+| `show_flow_animation` | boolean | `false` | Enable animated flow effects (Luxury style) |
 
 ### Display Options
 
@@ -263,6 +277,13 @@ lovelace:
   - pH out of range alerts
   - ❄️ Frost protection status
 - ✅ "All systems normal" indicator when no warnings
+
+### 🖥️ System Card
+- Full-screen dashboard view combining all controls
+- Responsive grid layout (desktop/mobile)
+- Aggregates Pump, Heater, Solar, Dosing, and Overview
+- Perfect for a main panel view
+- Supports all themes (Modern/Luxury)
 
 ### 📊 Compact Card
 - One-line compact display per entity
@@ -440,7 +461,6 @@ MIT License - see [LICENSE](LICENSE) file for details
 
 ## 🙏 Credits
 
-- Inspired by [Mushroom Cards](https://github.com/piitaya/lovelace-mushroom)
 - Built with [Lit](https://lit.dev/)
 - For the [Violet Pool Controller](https://github.com/Xerolux/violet-hass) integration
 - Created by [Xerolux](https://github.com/Xerolux)

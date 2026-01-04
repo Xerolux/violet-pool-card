@@ -25,9 +25,11 @@ interface LovelaceCardConfig {
   type: string;
   entity?: string;
   entities?: string[];
-  card_type: 'pump' | 'heater' | 'solar' | 'dosing' | 'overview' | 'compact';
+  card_type: 'pump' | 'heater' | 'solar' | 'dosing' | 'overview' | 'compact' | 'system';
   name?: string;
   icon?: string;
+  style?: 'standard' | 'modern' | 'luxury';
+  show_flow_animation?: boolean;
   show_state?: boolean;
   show_detail_status?: boolean;
   show_controls?: boolean;
@@ -65,6 +67,8 @@ export class VioletPoolCard extends LitElement {
       show_controls: true,
       show_runtime: false,
       show_history: false,
+      style: 'standard',
+      show_flow_animation: false,
       ...config,
     };
   }
@@ -103,6 +107,8 @@ export class VioletPoolCard extends LitElement {
         return this.renderOverviewCard();
       case 'compact':
         return this.renderCompactCard();
+      case 'system':
+        return this.renderSystemCard();
       default:
         return html`
           <ha-card>
@@ -115,10 +121,55 @@ export class VioletPoolCard extends LitElement {
     }
   }
 
-  private renderPumpCard(): TemplateResult {
-    const entity = this.hass.states[this.config.entity!];
+  private _getCardClasses(isActive: boolean, config: VioletPoolCardConfig): string {
+    const classes = [config.style || 'standard'];
+    if (config.show_flow_animation && isActive) {
+      classes.push('flow-animation');
+    }
+    return classes.join(' ');
+  }
+
+  private renderSystemCard(): TemplateResult {
+    // Default entities if not specified
+    const pumpEntity = 'switch.violet_pool_pump';
+    const heaterEntity = 'climate.violet_pool_heater';
+    const solarEntity = 'climate.violet_pool_solar';
+    const dosingEntity = 'switch.violet_pool_dos_1_cl';
+
+    // Helper to create config for sub-cards
+    const createSubConfig = (type: string, entity: string, extra: any = {}): VioletPoolCardConfig | null => {
+      // For overview, entity check is not strict
+      if (type !== 'overview' && !this.hass.states[entity]) return null;
+
+      return {
+        ...this.config,
+        card_type: type as any,
+        entity: entity,
+        ...extra
+      };
+    };
+
+    const overviewConfig = createSubConfig('overview', '', { name: 'Pool Overview' });
+    const pumpConfig = createSubConfig('pump', pumpEntity, { show_runtime: true });
+    const heaterConfig = createSubConfig('heater', heaterEntity);
+    const solarConfig = createSubConfig('solar', solarEntity);
+    const dosingConfig = createSubConfig('dosing', dosingEntity, { dosing_type: 'chlorine' });
+
+    return html`
+      <div class="system-grid">
+        ${overviewConfig ? this.renderOverviewCard(overviewConfig) : ''}
+        ${pumpConfig ? this.renderPumpCard(pumpConfig) : ''}
+        ${heaterConfig ? this.renderHeaterCard(heaterConfig) : ''}
+        ${solarConfig ? this.renderSolarCard(solarConfig) : ''}
+        ${dosingConfig ? this.renderDosingCard(dosingConfig) : ''}
+      </div>
+    `;
+  }
+
+  private renderPumpCard(config: VioletPoolCardConfig = this.config): TemplateResult {
+    const entity = this.hass.states[config.entity!];
     const state = entity.state;
-    const name = this.config.name || entity.attributes.friendly_name || 'Pump';
+    const name = config.name || entity.attributes.friendly_name || 'Pump';
     const pumpState = entity.attributes?.PUMPSTATE || '';
 
     // Get current pump speed from PUMPSTATE
@@ -148,7 +199,7 @@ export class VioletPoolCard extends LitElement {
         label: 'OFF',
         action: async () => {
           const serviceCaller = new ServiceCaller(this.hass);
-          await serviceCaller.turnOff(this.config.entity!);
+          await serviceCaller.turnOff(config.entity!);
         },
         active: state === 'off',
         color: '#757575',
@@ -158,7 +209,7 @@ export class VioletPoolCard extends LitElement {
         label: 'AUTO',
         action: async () => {
           const serviceCaller = new ServiceCaller(this.hass);
-          await serviceCaller.controlPump(this.config.entity!, 'auto');
+          await serviceCaller.controlPump(config.entity!, 'auto');
         },
         active: state === 'auto',
         color: '#2196F3',
@@ -168,7 +219,7 @@ export class VioletPoolCard extends LitElement {
         label: 'ECO',
         action: async () => {
           const serviceCaller = new ServiceCaller(this.hass);
-          await serviceCaller.setPumpSpeed(this.config.entity!, 1);
+          await serviceCaller.setPumpSpeed(config.entity!, 1);
         },
         active: currentSpeed === 1,
         color: '#4CAF50',
@@ -178,7 +229,7 @@ export class VioletPoolCard extends LitElement {
         label: 'Normal',
         action: async () => {
           const serviceCaller = new ServiceCaller(this.hass);
-          await serviceCaller.setPumpSpeed(this.config.entity!, 2);
+          await serviceCaller.setPumpSpeed(config.entity!, 2);
         },
         active: currentSpeed === 2,
         color: '#FF9800',
@@ -188,7 +239,7 @@ export class VioletPoolCard extends LitElement {
         label: 'Boost',
         action: async () => {
           const serviceCaller = new ServiceCaller(this.hass);
-          await serviceCaller.setPumpSpeed(this.config.entity!, 3);
+          await serviceCaller.setPumpSpeed(config.entity!, 3);
         },
         active: currentSpeed === 3,
         color: '#F44336',
@@ -198,15 +249,15 @@ export class VioletPoolCard extends LitElement {
     const isRunning = state === 'on' || currentSpeed > 0;
 
     return html`
-      <ha-card>
+      <ha-card class="${this._getCardClasses(isRunning, config)}">
         <div class="card-content">
           <div class="header">
             <ha-icon
-              icon="${this.config.icon || 'mdi:pump'}"
+              icon="${config.icon || 'mdi:pump'}"
               class="${isRunning ? 'pump-running' : ''}"
             ></ha-icon>
             <span class="name">${name}</span>
-            ${this.config.show_state
+            ${config.show_state
               ? html`<status-badge .state="${state}" .pulse="${isRunning}"></status-badge>`
               : ''}
             ${currentSpeed > 0
@@ -214,7 +265,7 @@ export class VioletPoolCard extends LitElement {
               : ''}
           </div>
 
-          ${this.config.show_detail_status && pumpState
+          ${config.show_detail_status && pumpState
             ? html`<detail-status .raw="${pumpState}"></detail-status>`
             : ''}
 
@@ -227,7 +278,7 @@ export class VioletPoolCard extends LitElement {
               `
             : ''}
 
-          ${this.config.show_controls
+          ${config.show_controls
             ? html`
                 <slider-control
                   label="Pump Speed"
@@ -236,14 +287,14 @@ export class VioletPoolCard extends LitElement {
                   step="1"
                   .value="${currentSpeed}"
                   .labels="${['OFF', 'ECO', 'Normal', 'Boost']}"
-                  @value-changed="${(e: CustomEvent) => this._handlePumpSpeedChange(e)}"
+                  @value-changed="${(e: CustomEvent) => this._handlePumpSpeedChange(e, config.entity!)}"
                 ></slider-control>
 
                 <quick-actions .actions="${quickActions}"></quick-actions>
               `
             : ''}
 
-          ${this.config.show_runtime && runtimeSeconds > 0
+          ${config.show_runtime && runtimeSeconds > 0
             ? html`
                 <div class="runtime-display">
                   <ha-icon icon="mdi:timer-outline"></ha-icon>
@@ -256,16 +307,16 @@ export class VioletPoolCard extends LitElement {
     `;
   }
 
-  private async _handlePumpSpeedChange(e: CustomEvent) {
+  private async _handlePumpSpeedChange(e: CustomEvent, entityId: string) {
     const speed = e.detail.value;
     const serviceCaller = new ServiceCaller(this.hass);
-    await serviceCaller.setPumpSpeed(this.config.entity!, speed);
+    await serviceCaller.setPumpSpeed(entityId, speed);
   }
 
-  private renderHeaterCard(): TemplateResult {
-    const entity = this.hass.states[this.config.entity!];
+  private renderHeaterCard(config: VioletPoolCardConfig = this.config): TemplateResult {
+    const entity = this.hass.states[config.entity!];
     const state = entity.state;
-    const name = this.config.name || entity.attributes.friendly_name || 'Heater';
+    const name = config.name || entity.attributes.friendly_name || 'Heater';
 
     // Get temperature values
     const currentTemp = EntityHelper.getCurrentTemperature(entity);
@@ -292,7 +343,7 @@ export class VioletPoolCard extends LitElement {
         label: 'OFF',
         action: async () => {
           const serviceCaller = new ServiceCaller(this.hass);
-          await serviceCaller.setHvacMode(this.config.entity!, 'off');
+          await serviceCaller.setHvacMode(config.entity!, 'off');
         },
         active: state === 'off',
         color: '#757575',
@@ -302,7 +353,7 @@ export class VioletPoolCard extends LitElement {
         label: 'AUTO',
         action: async () => {
           const serviceCaller = new ServiceCaller(this.hass);
-          await serviceCaller.setHvacMode(this.config.entity!, 'auto');
+          await serviceCaller.setHvacMode(config.entity!, 'auto');
         },
         active: state === 'auto',
         color: '#2196F3',
@@ -312,7 +363,7 @@ export class VioletPoolCard extends LitElement {
         label: 'HEAT',
         action: async () => {
           const serviceCaller = new ServiceCaller(this.hass);
-          await serviceCaller.setHvacMode(this.config.entity!, 'heat');
+          await serviceCaller.setHvacMode(config.entity!, 'heat');
         },
         active: state === 'heat' || state === 'heating',
         color: '#FF5722',
@@ -322,15 +373,15 @@ export class VioletPoolCard extends LitElement {
     const isHeating = state === 'heating' || state === 'heat';
 
     return html`
-      <ha-card>
+      <ha-card class="${this._getCardClasses(isHeating, config)}">
         <div class="card-content">
           <div class="header">
             <ha-icon
-              icon="${this.config.icon || 'mdi:radiator'}"
+              icon="${config.icon || 'mdi:radiator'}"
               class="${isHeating ? 'heater-active' : ''}"
             ></ha-icon>
             <span class="name">${name}</span>
-            ${this.config.show_state
+            ${config.show_state
               ? html`<status-badge .state="${state}"></status-badge>`
               : ''}
           </div>
@@ -347,7 +398,7 @@ export class VioletPoolCard extends LitElement {
               `
             : ''}
 
-          ${this.config.show_detail_status && heaterState
+          ${config.show_detail_status && heaterState
             ? html`<detail-status .raw="${heaterState}"></detail-status>`
             : ''}
 
@@ -363,7 +414,7 @@ export class VioletPoolCard extends LitElement {
               `
             : ''}
 
-          ${this.config.show_controls
+          ${config.show_controls
             ? html`
                 ${targetTemp !== undefined
                   ? html`
@@ -375,7 +426,7 @@ export class VioletPoolCard extends LitElement {
                         .value="${targetTemp}"
                         unit="°C"
                         showMinMax
-                        @value-changed="${(e: CustomEvent) => this._handleTemperatureChange(e)}"
+                        @value-changed="${(e: CustomEvent) => this._handleTemperatureChange(e, config.entity!)}"
                       ></slider-control>
                     `
                   : ''}
@@ -388,16 +439,16 @@ export class VioletPoolCard extends LitElement {
     `;
   }
 
-  private async _handleTemperatureChange(e: CustomEvent) {
+  private async _handleTemperatureChange(e: CustomEvent, entityId: string) {
     const temperature = e.detail.value;
     const serviceCaller = new ServiceCaller(this.hass);
-    await serviceCaller.setTemperature(this.config.entity!, temperature);
+    await serviceCaller.setTemperature(entityId, temperature);
   }
 
-  private renderSolarCard(): TemplateResult {
-    const entity = this.hass.states[this.config.entity!];
+  private renderSolarCard(config: VioletPoolCardConfig = this.config): TemplateResult {
+    const entity = this.hass.states[config.entity!];
     const state = entity.state;
-    const name = this.config.name || entity.attributes.friendly_name || 'Solar';
+    const name = config.name || entity.attributes.friendly_name || 'Solar';
 
     // Get temperature values
     const poolTemp = EntityHelper.getCurrentTemperature(entity);
@@ -423,7 +474,7 @@ export class VioletPoolCard extends LitElement {
         label: 'OFF',
         action: async () => {
           const serviceCaller = new ServiceCaller(this.hass);
-          await serviceCaller.setHvacMode(this.config.entity!, 'off');
+          await serviceCaller.setHvacMode(config.entity!, 'off');
         },
         active: state === 'off',
         color: '#757575',
@@ -433,7 +484,7 @@ export class VioletPoolCard extends LitElement {
         label: 'AUTO',
         action: async () => {
           const serviceCaller = new ServiceCaller(this.hass);
-          await serviceCaller.setHvacMode(this.config.entity!, 'auto');
+          await serviceCaller.setHvacMode(config.entity!, 'auto');
         },
         active: state === 'auto',
         color: '#2196F3',
@@ -443,7 +494,7 @@ export class VioletPoolCard extends LitElement {
         label: 'ON',
         action: async () => {
           const serviceCaller = new ServiceCaller(this.hass);
-          await serviceCaller.setHvacMode(this.config.entity!, 'heat');
+          await serviceCaller.setHvacMode(config.entity!, 'heat');
         },
         active: state === 'heat' || state === 'heating',
         color: '#FF9800',
@@ -453,20 +504,20 @@ export class VioletPoolCard extends LitElement {
     const isSolarActive = state === 'heating' || state === 'heat';
 
     return html`
-      <ha-card>
+      <ha-card class="${this._getCardClasses(isSolarActive, config)}">
         <div class="card-content">
           <div class="header">
             <ha-icon
-              icon="${this.config.icon || 'mdi:solar-power'}"
+              icon="${config.icon || 'mdi:solar-power'}"
               class="${isSolarActive ? 'solar-active' : ''}"
             ></ha-icon>
             <span class="name">${name}</span>
-            ${this.config.show_state
+            ${config.show_state
               ? html`<status-badge .state="${state}"></status-badge>`
               : ''}
           </div>
 
-          ${this.config.show_detail_status && solarState
+          ${config.show_detail_status && solarState
             ? html`<detail-status .raw="${solarState}"></detail-status>`
             : ''}
 
@@ -504,7 +555,7 @@ export class VioletPoolCard extends LitElement {
               : ''}
           </div>
 
-          ${this.config.show_controls
+          ${config.show_controls
             ? html`
                 ${targetTemp !== undefined
                   ? html`
@@ -516,7 +567,7 @@ export class VioletPoolCard extends LitElement {
                         .value="${targetTemp}"
                         unit="°C"
                         showMinMax
-                        @value-changed="${(e: CustomEvent) => this._handleTemperatureChange(e)}"
+                        @value-changed="${(e: CustomEvent) => this._handleTemperatureChange(e, config.entity!)}"
                       ></slider-control>
                     `
                   : ''}
@@ -529,13 +580,13 @@ export class VioletPoolCard extends LitElement {
     `;
   }
 
-  private renderDosingCard(): TemplateResult {
-    const entity = this.hass.states[this.config.entity!];
+  private renderDosingCard(config: VioletPoolCardConfig = this.config): TemplateResult {
+    const entity = this.hass.states[config.entity!];
     const state = entity.state;
-    const name = this.config.name || entity.attributes.friendly_name || 'Dosing';
+    const name = config.name || entity.attributes.friendly_name || 'Dosing';
 
     // Determine dosing type from entity ID or config
-    const dosingType = this.config.dosing_type || this._detectDosingType(this.config.entity!);
+    const dosingType = config.dosing_type || this._detectDosingType(config.entity!);
 
     // Get dosing state array (e.g., DOS_1_CL_STATE)
     const dosingStateKey = Object.keys(entity.attributes || {}).find(
@@ -583,7 +634,7 @@ export class VioletPoolCard extends LitElement {
         label: 'OFF',
         action: async () => {
           const serviceCaller = new ServiceCaller(this.hass);
-          await serviceCaller.turnOff(this.config.entity!);
+          await serviceCaller.turnOff(config.entity!);
         },
         active: state === 'off',
         color: '#757575',
@@ -593,7 +644,7 @@ export class VioletPoolCard extends LitElement {
         label: 'AUTO',
         action: async () => {
           const serviceCaller = new ServiceCaller(this.hass);
-          await serviceCaller.turnOn(this.config.entity!);
+          await serviceCaller.turnOn(config.entity!);
         },
         active: state === 'on' || state === 'auto',
         color: '#2196F3',
@@ -603,7 +654,7 @@ export class VioletPoolCard extends LitElement {
         label: 'Dose 30s',
         action: async () => {
           const serviceCaller = new ServiceCaller(this.hass);
-          await serviceCaller.manualDosing(this.config.entity!, 30);
+          await serviceCaller.manualDosing(config.entity!, 30);
         },
         color: '#4CAF50',
         confirmMessage: 'Start manual dosing for 30 seconds?',
@@ -613,7 +664,7 @@ export class VioletPoolCard extends LitElement {
         label: 'Dose 60s',
         action: async () => {
           const serviceCaller = new ServiceCaller(this.hass);
-          await serviceCaller.manualDosing(this.config.entity!, 60);
+          await serviceCaller.manualDosing(config.entity!, 60);
         },
         color: '#FF9800',
         confirmMessage: 'Start manual dosing for 60 seconds?',
@@ -623,15 +674,15 @@ export class VioletPoolCard extends LitElement {
     const isDosing = state === 'on' && dosingState.some((s: string) => s.includes('ACTIVE'));
 
     return html`
-      <ha-card>
+      <ha-card class="${this._getCardClasses(isDosing, config)}">
         <div class="card-content">
           <div class="header">
             <ha-icon
-              icon="${this.config.icon || this._getDosingIcon(dosingType)}"
+              icon="${config.icon || this._getDosingIcon(dosingType)}"
               class="${isDosing ? 'dosing-active' : ''}"
             ></ha-icon>
             <span class="name">${name}</span>
-            ${this.config.show_state
+            ${config.show_state
               ? html`<status-badge .state="${state}" .pulse="${isDosing}"></status-badge>`
               : ''}
           </div>
@@ -660,15 +711,15 @@ export class VioletPoolCard extends LitElement {
               `
             : ''}
 
-          ${this.config.show_detail_status && dosingState && Array.isArray(dosingState) && dosingState.length > 0
+          ${config.show_detail_status && dosingState && Array.isArray(dosingState) && dosingState.length > 0
             ? html`<warning-chips .warnings="${dosingState}" defaultType="warning"></warning-chips>`
             : ''}
 
-          ${this.config.show_controls
+          ${config.show_controls
             ? html`<quick-actions .actions="${quickActions}"></quick-actions>`
             : ''}
 
-          ${this.config.show_history && dosingVolume24h !== undefined
+          ${config.show_history && dosingVolume24h !== undefined
             ? html`
                 <div class="dosing-history">
                   <ha-icon icon="mdi:chart-line"></ha-icon>
@@ -704,8 +755,8 @@ export class VioletPoolCard extends LitElement {
     }
   }
 
-  private renderOverviewCard(): TemplateResult {
-    const name = this.config.name || 'Pool Status';
+  private renderOverviewCard(config: VioletPoolCardConfig = this.config): TemplateResult {
+    const name = config.name || 'Pool Status';
 
     // Get all pool entities
     const pumpEntity = this.hass.states['switch.violet_pool_pump'];
@@ -814,8 +865,10 @@ export class VioletPoolCard extends LitElement {
       warnings.push(`Frost protection active${outsideTemp ? ` (${outsideTemp.toFixed(1)}°C)` : ''}`);
     }
 
+    const anyActive = activeDevices.some(d => ['on', 'auto', 'heat', 'heating'].includes(d.state));
+
     return html`
-      <ha-card>
+      <ha-card class="${this._getCardClasses(anyActive, config)}">
         <div class="card-content overview-content">
           <div class="header">
             <ha-icon icon="mdi:pool"></ha-icon>
@@ -912,22 +965,22 @@ export class VioletPoolCard extends LitElement {
     `;
   }
 
-  private renderCompactCard(): TemplateResult {
-    const entity = this.hass.states[this.config.entity!];
+  private renderCompactCard(config: VioletPoolCardConfig = this.config): TemplateResult {
+    const entity = this.hass.states[config.entity!];
     const state = entity.state;
-    const name = this.config.name || entity.attributes.friendly_name || 'Entity';
-    const domain = this.config.entity!.split('.')[0];
+    const name = config.name || entity.attributes.friendly_name || 'Entity';
+    const domain = config.entity!.split('.')[0];
 
     // Determine icon based on domain and entity
-    let icon = this.config.icon;
+    let icon = config.icon;
     if (!icon) {
-      if (domain === 'switch' && this.config.entity!.includes('pump')) {
+      if (domain === 'switch' && config.entity!.includes('pump')) {
         icon = 'mdi:pump';
-      } else if (domain === 'climate' && this.config.entity!.includes('heater')) {
+      } else if (domain === 'climate' && config.entity!.includes('heater')) {
         icon = 'mdi:radiator';
-      } else if (domain === 'climate' && this.config.entity!.includes('solar')) {
+      } else if (domain === 'climate' && config.entity!.includes('solar')) {
         icon = 'mdi:solar-power';
-      } else if (domain === 'switch' && this.config.entity!.includes('dos')) {
+      } else if (domain === 'switch' && config.entity!.includes('dos')) {
         icon = 'mdi:flask-outline';
       } else {
         icon = 'mdi:circle';
@@ -975,7 +1028,7 @@ export class VioletPoolCard extends LitElement {
       }
 
       // Get current dosing value
-      const dosingType = this._detectDosingType(this.config.entity!);
+      const dosingType = this._detectDosingType(config.entity!);
       if (dosingType === 'chlorine') {
         const orpSensor = this.hass.states['sensor.violet_pool_orp_value'];
         if (orpSensor) {
@@ -992,7 +1045,7 @@ export class VioletPoolCard extends LitElement {
     const isActive = state === 'on' || state === 'auto' || state === 'heat' || state === 'heating';
 
     return html`
-      <ha-card class="compact-card">
+      <ha-card class="compact-card ${this._getCardClasses(isActive, config)}">
         <div class="card-content compact">
           <ha-icon
             icon="${icon}"
@@ -1611,6 +1664,108 @@ export class VioletPoolCard extends LitElement {
         .header {
           flex-wrap: wrap;
         }
+      }
+
+      /* Modern Style */
+      ha-card.modern {
+        border-radius: 16px;
+        border: 1px solid var(--divider-color, #e0e0e0);
+        box-shadow: none;
+      }
+
+      ha-card.modern .header {
+        margin-bottom: 8px;
+      }
+
+      ha-card.modern .badge-secondary {
+        border-radius: 6px;
+      }
+
+      /* Luxury Style */
+      ha-card.luxury {
+        background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.7));
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.5);
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+        border-radius: 20px;
+      }
+
+      ha-card.luxury .card-content {
+        gap: 16px;
+      }
+
+      ha-card.luxury .rpm-display,
+      ha-card.luxury .runtime-display,
+      ha-card.luxury .outside-temp-display,
+      ha-card.luxury .dosing-values,
+      ha-card.luxury .dosing-history,
+      ha-card.luxury .chemistry-item,
+      ha-card.luxury .device-item,
+      ha-card.luxury .badge-secondary {
+        background: rgba(255, 255, 255, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+      }
+
+      /* Flow Animation */
+      @keyframes flow {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+      }
+
+      ha-card.flow-animation {
+        position: relative;
+        overflow: hidden;
+      }
+
+      ha-card.flow-animation::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border-radius: inherit;
+        padding: 2px;
+        background: linear-gradient(270deg, var(--primary-color), transparent, var(--primary-color));
+        background-size: 200% 200%;
+        animation: flow 3s ease infinite;
+        -webkit-mask:
+           linear-gradient(#fff 0 0) content-box,
+           linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        pointer-events: none;
+        opacity: 0.5;
+      }
+
+      /* Dark mode adjustments for Luxury */
+      @media (prefers-color-scheme: dark) {
+        ha-card.luxury {
+          background: linear-gradient(135deg, rgba(30,30,30,0.9), rgba(30,30,30,0.7));
+          border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        ha-card.luxury .rpm-display,
+        ha-card.luxury .runtime-display,
+        ha-card.luxury .outside-temp-display,
+        ha-card.luxury .dosing-values,
+        ha-card.luxury .dosing-history,
+        ha-card.luxury .chemistry-item,
+        ha-card.luxury .device-item,
+        ha-card.luxury .badge-secondary {
+          background: rgba(0, 0, 0, 0.2);
+          border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+      }
+
+      /* System Card Grid */
+      .system-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 16px;
       }
     `;
   }

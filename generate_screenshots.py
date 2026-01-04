@@ -32,7 +32,10 @@ def generate_screenshots():
             "solar-card": "solar_card.png",
             "dosing-card": "dosing_card.png",
             "overview-card": "overview_card.png",
-            "compact-card": "compact_card.png"
+            "compact-card": "compact_card.png",
+            "modern-pump": "modern_pump.png",
+            "luxury-heater": "luxury_heater.png",
+            "system-card": "system_card.png"
         }
 
         for card_id, filename in cards.items():
