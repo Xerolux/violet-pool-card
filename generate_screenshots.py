@@ -27,15 +27,27 @@ def generate_screenshots():
 
         # Take individual card screenshots
         cards = {
+            # Premium Theme Gallery
+            "luxury-pump-large": "theme_luxury_pump.png",
+            "modern-heater-medium": "theme_modern_heater.png",
+            "glass-solar-large": "theme_glass_solar.png",
+            "neon-dosing-medium": "theme_neon_dosing.png",
+            "premium-pump-fullscreen": "theme_premium_pump.png",
+
+            # Card Types
             "pump-card": "pump_card.png",
             "heater-card": "heater_card.png",
             "solar-card": "solar_card.png",
             "dosing-card": "dosing_card.png",
             "overview-card": "overview_card.png",
             "compact-card": "compact_card.png",
-            "modern-pump": "modern_pump.png",
-            "luxury-heater": "luxury_heater.png",
-            "system-card": "system_card.png"
+
+            # Examples
+            "system-fullscreen-premium": "example_system_fullscreen.png",
+            "overview-luxury-large": "example_overview_large.png",
+            "compact-modern-pump-small": "example_compact_pump.png",
+            "compact-modern-heater-small": "example_compact_heater.png",
+            "compact-modern-solar-small": "example_compact_solar.png"
         }
 
         for card_id, filename in cards.items():

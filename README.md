@@ -136,6 +136,7 @@
 ### Premium Theme Gallery
 
 #### 🌟 Luxury Theme (Default)
+![Luxury Theme](screenshots/theme_luxury_pump.png)
 ```yaml
 type: custom:violet-pool-card
 entity: switch.violet_pool_pump
@@ -150,6 +151,7 @@ animation: smooth
 - **Perfect for** modern dashboards
 
 #### 🎯 Modern Theme
+![Modern Theme](screenshots/theme_modern_heater.png)
 ```yaml
 type: custom:violet-pool-card
 entity: climate.violet_pool_heater
@@ -164,6 +166,7 @@ animation: subtle
 - **Perfect for** professional setups
 
 #### 💎 Glass Theme
+![Glass Theme](screenshots/theme_glass_solar.png)
 ```yaml
 type: custom:violet-pool-card
 entity: climate.violet_pool_solar
@@ -178,6 +181,7 @@ animation: smooth
 - **Perfect for** layered dashboards
 
 #### ⚡ Neon Theme
+![Neon Theme](screenshots/theme_neon_dosing.png)
 ```yaml
 type: custom:violet-pool-card
 entity: switch.violet_pool_dos_1_cl
@@ -192,6 +196,7 @@ animation: energetic
 - **Perfect for** gaming rooms
 
 #### 👑 Premium Theme
+![Premium Theme](screenshots/theme_premium_pump.png)
 ```yaml
 type: custom:violet-pool-card
 entity: switch.violet_pool_pump
@@ -228,6 +233,7 @@ size: fullscreen   # 32px padding, 18px font, 48px icons, full viewport
 ```
 
 ### Pump Card
+![Pump Card](screenshots/pump_card.png)
 ```yaml
 type: custom:violet-pool-card
 entity: switch.violet_pool_pump
@@ -241,6 +247,7 @@ show_runtime: true
 - Quick action buttons
 
 ### Heater Card
+![Heater Card](screenshots/heater_card.png)
 ```yaml
 type: custom:violet-pool-card
 entity: climate.violet_pool_heater
@@ -253,6 +260,7 @@ card_type: heater
 - Blockage status display
 
 ### Solar Card
+![Solar Card](screenshots/solar_card.png)
 ```yaml
 type: custom:violet-pool-card
 entity: climate.violet_pool_solar
@@ -266,6 +274,7 @@ card_type: solar
 - Target temperature control
 
 ### Dosing Card
+![Dosing Card](screenshots/dosing_card.png)
 ```yaml
 type: custom:violet-pool-card
 entity: switch.violet_pool_dos_1_cl
@@ -280,6 +289,7 @@ show_history: true
 - 24h volume history
 
 ### Overview Card
+![Overview Card](screenshots/overview_card.png)
 ```yaml
 type: custom:violet-pool-card
 card_type: overview
@@ -293,6 +303,7 @@ card_type: overview
 - "All systems normal" indicator
 
 ### Compact Card
+![Compact Card](screenshots/compact_card.png)
 ```yaml
 type: custom:violet-pool-card
 entity: switch.violet_pool_pump
@@ -465,6 +476,8 @@ lovelace:
 
 ### Premium Showcase Dashboard
 
+![System Fullscreen Premium](screenshots/example_system_fullscreen.png)
+
 ```yaml
 # Fullscreen Premium Main Card
 type: custom:violet-pool-card
@@ -476,6 +489,8 @@ animation: energetic
 ```
 
 ### Mixed Sizes Dashboard
+
+![Overview Large Luxury](screenshots/example_overview_large.png)
 
 ```yaml
 type: vertical-stack
@@ -516,6 +531,10 @@ cards:
 ```
 
 ### Compact Modern Dashboard
+
+![Compact Pump](screenshots/example_compact_pump.png)
+![Compact Heater](screenshots/example_compact_heater.png)
+![Compact Solar](screenshots/example_compact_solar.png)
 
 ```yaml
 type: vertical-stack

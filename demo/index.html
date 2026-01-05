@@ -25,6 +25,7 @@
         gap: 20px;
         max-width: 1200px;
         margin: 0 auto;
+        margin-bottom: 40px;
       }
       .card-wrapper {
         flex: 1 1 350px;
@@ -34,56 +35,102 @@
       h2 {
         text-align: center;
         color: #333;
+        margin-top: 40px;
+      }
+      h3 {
+        text-align: center;
+        color: #666;
+        font-weight: normal;
       }
     </style>
   </head>
   <body>
-    <h2>Violet Pool Card Types</h2>
+    <!-- Premium Theme Gallery -->
+    <h2>Premium Theme Gallery</h2>
+
+    <h3>Luxury Theme (Default) - Large Pump</h3>
     <div class="card-container">
-      <div class="card-wrapper" id="pump-card-container">
-        <!-- Pump Card -->
+      <div class="card-wrapper" style="flex-basis: 100%; max-width: 600px;">
+        <violet-pool-card id="luxury-pump-large"></violet-pool-card>
+      </div>
+    </div>
+
+    <h3>Modern Theme - Medium Heater</h3>
+    <div class="card-container">
+      <div class="card-wrapper">
+        <violet-pool-card id="modern-heater-medium"></violet-pool-card>
+      </div>
+    </div>
+
+    <h3>Glass Theme - Large Solar</h3>
+    <div class="card-container">
+      <div class="card-wrapper" style="flex-basis: 100%; max-width: 600px;">
+        <violet-pool-card id="glass-solar-large"></violet-pool-card>
+      </div>
+    </div>
+
+    <h3>Neon Theme - Medium Dosing</h3>
+    <div class="card-container">
+      <div class="card-wrapper">
+        <violet-pool-card id="neon-dosing-medium"></violet-pool-card>
+      </div>
+    </div>
+
+    <h3>Premium Theme - Fullscreen Pump</h3>
+    <div class="card-container" style="max-width: 100%;">
+      <div class="card-wrapper" style="flex-basis: 100%; max-width: 100%;">
+        <violet-pool-card id="premium-pump-fullscreen"></violet-pool-card>
+      </div>
+    </div>
+
+    <!-- Card Types -->
+    <h2>Card Types</h2>
+    <div class="card-container">
+      <div class="card-wrapper">
         <violet-pool-card id="pump-card"></violet-pool-card>
       </div>
-      <div class="card-wrapper" id="heater-card-container">
-        <!-- Heater Card -->
+      <div class="card-wrapper">
         <violet-pool-card id="heater-card"></violet-pool-card>
       </div>
-      <div class="card-wrapper" id="solar-card-container">
-        <!-- Solar Card -->
+      <div class="card-wrapper">
         <violet-pool-card id="solar-card"></violet-pool-card>
       </div>
-      <div class="card-wrapper" id="dosing-card-container">
-        <!-- Dosing Card -->
+      <div class="card-wrapper">
         <violet-pool-card id="dosing-card"></violet-pool-card>
       </div>
-      <div class="card-wrapper" id="overview-card-container" style="flex-basis: 100%; max-width: 100%;">
-        <!-- Overview Card -->
+      <div class="card-wrapper" style="flex-basis: 100%; max-width: 100%;">
         <violet-pool-card id="overview-card"></violet-pool-card>
       </div>
-      <div class="card-wrapper" id="compact-card-container">
-        <!-- Compact Card -->
+      <div class="card-wrapper">
         <violet-pool-card id="compact-card"></violet-pool-card>
       </div>
     </div>
 
-    <h2>Modern Style</h2>
-    <div class="card-container">
-      <div class="card-wrapper">
-        <violet-pool-card id="modern-pump"></violet-pool-card>
-      </div>
-    </div>
+    <!-- Examples -->
+    <h2>Examples</h2>
 
-    <h2>Luxury Style + Flow</h2>
-    <div class="card-container">
-      <div class="card-wrapper">
-        <violet-pool-card id="luxury-heater"></violet-pool-card>
-      </div>
-    </div>
-
-    <h2>System Card</h2>
+    <h3>Fullscreen Premium System</h3>
     <div class="card-container" style="max-width: 100%;">
       <div class="card-wrapper" style="flex-basis: 100%; max-width: 100%;">
-        <violet-pool-card id="system-card"></violet-pool-card>
+        <violet-pool-card id="system-fullscreen-premium"></violet-pool-card>
+      </div>
+    </div>
+
+    <h3>Large Overview (Luxury)</h3>
+    <div class="card-container">
+      <div class="card-wrapper" style="flex-basis: 100%; max-width: 800px;">
+        <violet-pool-card id="overview-luxury-large"></violet-pool-card>
+      </div>
+    </div>
+
+    <h3>Compact Modern Dashboard</h3>
+    <div class="card-container" style="max-width: 400px;">
+      <div class="card-wrapper" style="flex-basis: 100%;">
+        <violet-pool-card id="compact-modern-pump-small"></violet-pool-card>
+        <div style="height: 10px;"></div>
+        <violet-pool-card id="compact-modern-heater-small"></violet-pool-card>
+        <div style="height: 10px;"></div>
+        <violet-pool-card id="compact-modern-solar-small"></violet-pool-card>
       </div>
     </div>
 
@@ -181,87 +228,140 @@
         }
       };
 
-      // Configure cards
-      const pumpCard = document.getElementById('pump-card');
-      pumpCard.setConfig({
-        type: 'custom:violet-pool-card',
+      // Helper to configure card
+      const configureCard = (id, config) => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.setConfig({
+            type: 'custom:violet-pool-card',
+            ...config
+          });
+          el.hass = mockHass;
+        }
+      };
+
+      // --- Premium Theme Gallery ---
+
+      // Luxury Theme (Default) - Large Pump
+      configureCard('luxury-pump-large', {
+        entity: 'switch.violet_pool_pump',
+        card_type: 'pump',
+        size: 'large',
+        theme: 'luxury',
+        animation: 'smooth'
+      });
+
+      // Modern Theme - Medium Heater
+      configureCard('modern-heater-medium', {
+        entity: 'climate.violet_pool_heater',
+        card_type: 'heater',
+        size: 'medium',
+        theme: 'modern',
+        animation: 'subtle'
+      });
+
+      // Glass Theme - Large Solar
+      configureCard('glass-solar-large', {
+        entity: 'climate.violet_pool_solar',
+        card_type: 'solar',
+        size: 'large',
+        theme: 'glass',
+        animation: 'smooth'
+      });
+
+      // Neon Theme - Medium Dosing
+      configureCard('neon-dosing-medium', {
+        entity: 'switch.violet_pool_dos_1_cl',
+        card_type: 'dosing',
+        size: 'medium',
+        theme: 'neon',
+        animation: 'energetic'
+      });
+
+      // Premium Theme - Fullscreen Pump
+      configureCard('premium-pump-fullscreen', {
+        entity: 'switch.violet_pool_pump',
+        card_type: 'pump',
+        size: 'fullscreen',
+        theme: 'premium',
+        animation: 'energetic'
+      });
+
+      // --- Card Types ---
+
+      configureCard('pump-card', {
         entity: 'switch.violet_pool_pump',
         card_type: 'pump',
         show_runtime: true
       });
-      pumpCard.hass = mockHass;
 
-      const heaterCard = document.getElementById('heater-card');
-      heaterCard.setConfig({
-        type: 'custom:violet-pool-card',
+      configureCard('heater-card', {
         entity: 'climate.violet_pool_heater',
         card_type: 'heater'
       });
-      heaterCard.hass = mockHass;
 
-      const solarCard = document.getElementById('solar-card');
-      solarCard.setConfig({
-        type: 'custom:violet-pool-card',
+      configureCard('solar-card', {
         entity: 'climate.violet_pool_solar',
         card_type: 'solar'
       });
-      solarCard.hass = mockHass;
 
-      const dosingCard = document.getElementById('dosing-card');
-      dosingCard.setConfig({
-        type: 'custom:violet-pool-card',
+      configureCard('dosing-card', {
         entity: 'switch.violet_pool_dos_1_cl',
         card_type: 'dosing',
         dosing_type: 'chlorine',
         show_history: true
       });
-      dosingCard.hass = mockHass;
 
-      const overviewCard = document.getElementById('overview-card');
-      overviewCard.setConfig({
-        type: 'custom:violet-pool-card',
+      configureCard('overview-card', {
         card_type: 'overview'
       });
-      overviewCard.hass = mockHass;
 
-      const compactCard = document.getElementById('compact-card');
-      compactCard.setConfig({
-        type: 'custom:violet-pool-card',
+      configureCard('compact-card', {
         entity: 'switch.violet_pool_pump',
         card_type: 'compact'
       });
-      compactCard.hass = mockHass;
 
-      // Modern Pump
-      const modernPump = document.getElementById('modern-pump');
-      modernPump.setConfig({
-        type: 'custom:violet-pool-card',
+      // --- Examples ---
+
+      // Fullscreen Premium System
+      configureCard('system-fullscreen-premium', {
         entity: 'switch.violet_pool_pump',
-        card_type: 'pump',
-        style: 'modern'
-      });
-      modernPump.hass = mockHass;
-
-      // Luxury Heater
-      const luxuryHeater = document.getElementById('luxury-heater');
-      luxuryHeater.setConfig({
-        type: 'custom:violet-pool-card',
-        entity: 'climate.violet_pool_heater',
-        card_type: 'heater',
-        style: 'luxury',
-        show_flow_animation: true
-      });
-      luxuryHeater.hass = mockHass;
-
-      // System Card
-      const systemCard = document.getElementById('system-card');
-      systemCard.setConfig({
-        type: 'custom:violet-pool-card',
         card_type: 'system',
-        style: 'luxury',
-        show_flow_animation: true
+        size: 'fullscreen',
+        theme: 'premium',
+        animation: 'energetic'
       });
-      systemCard.hass = mockHass;
+
+      // Large Overview (Luxury)
+      configureCard('overview-luxury-large', {
+        card_type: 'overview',
+        name: 'Pool Status',
+        size: 'large',
+        theme: 'luxury',
+        animation: 'smooth'
+      });
+
+      // Compact Modern Dashboard
+      configureCard('compact-modern-pump-small', {
+        entity: 'switch.violet_pool_pump',
+        card_type: 'compact',
+        size: 'small',
+        theme: 'modern'
+      });
+
+      configureCard('compact-modern-heater-small', {
+        entity: 'climate.violet_pool_heater',
+        card_type: 'compact',
+        size: 'small',
+        theme: 'modern'
+      });
+
+      configureCard('compact-modern-solar-small', {
+        entity: 'climate.violet_pool_solar',
+        card_type: 'compact',
+        size: 'small',
+        theme: 'modern'
+      });
 
     </script>
   </body>
