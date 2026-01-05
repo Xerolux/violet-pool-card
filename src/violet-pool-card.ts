@@ -1135,7 +1135,6 @@ export class VioletPoolCard extends LitElement {
   static get styles(): CSSResultGroup {
     return css`
       :host {
-        /* Base Variables */
         --vpc-spacing: 16px;
         --vpc-radius: 16px;
         --vpc-bg: var(--ha-card-background, var(--card-background-color, #fff));
@@ -1151,9 +1150,6 @@ export class VioletPoolCard extends LitElement {
         display: block;
       }
 
-      /* --- Theme Definitions --- */
-
-      /* Luxury / iOS Style */
       :host(.theme-luxury), :host(.theme-glass) {
         --vpc-bg: rgba(255, 255, 255, 0.65);
         --vpc-backdrop: blur(20px) saturate(180%);
@@ -1166,15 +1162,13 @@ export class VioletPoolCard extends LitElement {
         --vpc-border: 1px solid rgba(255, 255, 255, 0.1);
       }
 
-      /* Modern / One UI Style */
       :host(.theme-modern) {
-        --vpc-radius: 26px; /* Squircle-ish */
+        --vpc-radius: 26px;
         --vpc-spacing: 20px;
         --vpc-bg: var(--card-background-color, #fff);
         --vpc-shadow: 0 4px 12px rgba(0,0,0,0.05);
       }
 
-      /* Neon / Cyberpunk */
       :host(.theme-neon) {
         --vpc-bg: linear-gradient(145deg, #1a1a1a, #0a0a0a);
         --vpc-border: 1px solid rgba(0, 255, 255, 0.2);
@@ -1185,7 +1179,6 @@ export class VioletPoolCard extends LitElement {
         --vpc-text-secondary: #b0b0b0;
       }
 
-      /* Premium / Ultimate */
       :host(.theme-premium) {
         --vpc-bg: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(240,240,255,0.9) 100%);
         --vpc-radius: 20px;
@@ -1196,8 +1189,6 @@ export class VioletPoolCard extends LitElement {
         --vpc-bg: linear-gradient(135deg, rgba(30,30,40,0.95) 0%, rgba(20,20,30,0.95) 100%);
         --vpc-border: 1px solid rgba(255,255,255,0.05);
       }
-
-      /* --- Card Layout --- */
 
       ha-card {
         padding: var(--vpc-spacing);
@@ -1212,7 +1203,6 @@ export class VioletPoolCard extends LitElement {
         position: relative;
       }
 
-      /* Neon Glow Effect */
       :host(.theme-neon) ha-card.is-active {
         box-shadow: 0 0 20px rgba(0, 255, 255, 0.3), inset 0 0 10px rgba(0, 255, 255, 0.1);
         border-color: rgba(0, 255, 255, 0.6);
@@ -1251,7 +1241,6 @@ export class VioletPoolCard extends LitElement {
         color: var(--vpc-text);
       }
 
-      /* Sub-components Common Styles */
       .rpm-display, .runtime-display, .outside-temp-display,
       .solar-temps, .dosing-history, .error, .chemistry-item,
       .device-item, .warning-item {
@@ -1295,7 +1284,6 @@ export class VioletPoolCard extends LitElement {
         color: var(--secondary-text-color);
       }
 
-      /* Animations */
       @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
       @keyframes pulse-glow { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
 
@@ -1304,7 +1292,6 @@ export class VioletPoolCard extends LitElement {
       .solar-active { color: #ff9800; }
       .dosing-active { animation: pulse-glow 2s ease-in-out infinite; color: #4caf50; }
 
-      /* Detailed Elements */
       .solar-temps { display: flex; flex-direction: column; gap: 8px; }
       .temp-item { display: flex; align-items: center; gap: 8px; font-size: 14px; }
       .temp-label { color: var(--vpc-text-secondary); width: 80px; }
@@ -1313,14 +1300,12 @@ export class VioletPoolCard extends LitElement {
       .temp-delta.positive { color: #4caf50; }
       .temp-delta.negative { color: #f44336; }
 
-      /* Dosing Specific */
       .dosing-values { display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 12px; background: rgba(var(--rgb-primary-text-color), 0.03); }
       .value-row { display: flex; align-items: center; justify-content: center; gap: 16px; font-size: 20px; }
       .current-value { font-weight: 700; }
       .target-value { color: var(--vpc-text-secondary); font-weight: 500; }
       .threshold-row { display: flex; justify-content: center; gap: 8px; font-size: 12px; color: var(--vpc-text-secondary); }
 
-      /* Overview Layout */
       .water-chemistry { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
       .chemistry-item { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
       .chemistry-value .value { font-size: 15px; font-weight: 700; }
@@ -1344,10 +1329,8 @@ export class VioletPoolCard extends LitElement {
       .current-value-compact { font-weight: 600; color: var(--vpc-text); }
       .detail-compact { color: var(--vpc-text-secondary); }
 
-      /* Error State */
       .error { background: rgba(244, 67, 54, 0.1); color: #d32f2f; display: flex; align-items: center; gap: 8px; }
 
-      /* Sizes */
       .size-small { --vpc-spacing: 12px; --vpc-icon-size: 20px; }
       .size-large { --vpc-spacing: 24px; --vpc-icon-size: 28px; }
       .size-fullscreen { --vpc-spacing: 32px; --vpc-icon-size: 32px; height: 100%; min-height: 80vh; }
