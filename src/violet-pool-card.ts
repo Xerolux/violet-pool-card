@@ -1115,14 +1115,87 @@ export class VioletPoolCard extends LitElement {
   static get styles(): CSSResultGroup {
     return css`
       :host {
+        /* Base Variables */
+        --vpc-spacing: 16px;
+        --vpc-radius: 16px;
+        --vpc-bg: var(--ha-card-background, var(--card-background-color, #fff));
+        --vpc-border: none;
+        --vpc-shadow: var(--ha-card-box-shadow, none);
+        --vpc-backdrop: none;
+        --vpc-primary: var(--primary-color);
+        --vpc-text: var(--primary-text-color);
+        --vpc-text-secondary: var(--secondary-text-color);
+        --vpc-icon-size: 24px;
+        --vpc-transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+
         display: block;
       }
 
+      /* --- Theme Definitions --- */
+
+      /* Luxury / iOS Style */
+      :host(.theme-luxury), :host(.theme-glass) {
+        --vpc-bg: rgba(255, 255, 255, 0.65);
+        --vpc-backdrop: blur(20px) saturate(180%);
+        --vpc-radius: 24px;
+        --vpc-border: 1px solid rgba(255, 255, 255, 0.3);
+        --vpc-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+      }
+      .dark :host(.theme-luxury), .dark :host(.theme-glass) {
+        --vpc-bg: rgba(20, 20, 20, 0.65);
+        --vpc-border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      /* Modern / One UI Style */
+      :host(.theme-modern) {
+        --vpc-radius: 26px; /* Squircle-ish */
+        --vpc-spacing: 20px;
+        --vpc-bg: var(--card-background-color, #fff);
+        --vpc-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      }
+
+      /* Neon / Cyberpunk */
+      :host(.theme-neon) {
+        --vpc-bg: linear-gradient(145deg, #1a1a1a, #0a0a0a);
+        --vpc-border: 1px solid rgba(0, 255, 255, 0.2);
+        --vpc-shadow: 0 0 15px rgba(0, 255, 255, 0.1);
+        --vpc-radius: 4px;
+        --vpc-primary: #00ffff;
+        --vpc-text: #ffffff;
+        --vpc-text-secondary: #b0b0b0;
+      }
+
+      /* Premium / Ultimate */
+      :host(.theme-premium) {
+        --vpc-bg: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(240,240,255,0.9) 100%);
+        --vpc-radius: 20px;
+        --vpc-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.1);
+        --vpc-border: 1px solid rgba(255,255,255,0.8);
+      }
+      .dark :host(.theme-premium) {
+        --vpc-bg: linear-gradient(135deg, rgba(30,30,40,0.95) 0%, rgba(20,20,30,0.95) 100%);
+        --vpc-border: 1px solid rgba(255,255,255,0.05);
+      }
+
+      /* --- Card Layout --- */
+
       ha-card {
-        padding: 16px;
-        background: var(--card-background-color);
-        border-radius: var(--ha-card-border-radius, 12px);
-        box-shadow: var(--ha-card-box-shadow, none);
+        padding: var(--vpc-spacing);
+        background: var(--vpc-bg);
+        border-radius: var(--vpc-radius);
+        box-shadow: var(--vpc-shadow);
+        border: var(--vpc-border);
+        backdrop-filter: var(--vpc-backdrop);
+        -webkit-backdrop-filter: var(--vpc-backdrop);
+        transition: var(--vpc-transition);
+        overflow: hidden;
+        position: relative;
+      }
+
+      /* Neon Glow Effect */
+      :host(.theme-neon) ha-card.is-active {
+        box-shadow: 0 0 20px rgba(0, 255, 255, 0.3), inset 0 0 10px rgba(0, 255, 255, 0.1);
+        border-color: rgba(0, 255, 255, 0.6);
       }
 
       .card-content {
@@ -1134,295 +1207,110 @@ export class VioletPoolCard extends LitElement {
       .card-content.compact {
         flex-direction: row;
         align-items: center;
-        gap: 8px;
+        gap: 12px;
       }
 
       .header {
         display: flex;
         align-items: center;
         gap: 12px;
+        margin-bottom: 4px;
       }
 
       ha-icon {
-        --mdc-icon-size: 24px;
-        color: var(--primary-color);
+        --mdc-icon-size: var(--vpc-icon-size);
+        color: var(--vpc-primary);
+        transition: var(--vpc-transition);
       }
 
       .name {
         flex: 1;
-        font-size: 16px;
-        font-weight: 500;
-        color: var(--primary-text-color);
-      }
-
-      .detail-compact {
-        font-size: 11px;
-        color: var(--secondary-text-color);
-        opacity: 0.8;
-      }
-
-      .error {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 16px;
-        color: var(--error-color);
-        background: var(--error-color-alpha, rgba(244, 67, 54, 0.1));
-        border-radius: 8px;
-      }
-
-      .error ha-icon {
-        color: var(--error-color);
-      }
-
-      /* Component spacing */
-      status-badge,
-      value-display,
-      detail-status,
-      warning-chips {
-        display: block;
-      }
-
-      detail-status {
-        margin: 8px 0;
-      }
-
-      warning-chips {
-        margin: 8px 0;
-      }
-
-      /* Pump Card Styles */
-      .pump-running {
-        animation: rotate 2s linear infinite;
-        color: var(--primary-color);
-      }
-
-      @keyframes rotate {
-        from {
-          transform: rotate(0deg);
-        }
-        to {
-          transform: rotate(360deg);
-        }
-      }
-
-      .badge-secondary {
-        padding: 2px 8px;
-        border-radius: 8px;
-        font-size: 11px;
-        font-weight: 500;
-        background: var(--secondary-background-color);
-        color: var(--secondary-text-color);
-      }
-
-      .rpm-display,
-      .runtime-display {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px;
-        background: var(--secondary-background-color);
-        border-radius: 8px;
-        font-size: 14px;
-        color: var(--primary-text-color);
-      }
-
-      .rpm-display ha-icon,
-      .runtime-display ha-icon {
-        --mdc-icon-size: 18px;
-        color: var(--primary-color);
-      }
-
-      /* Heater Card Styles */
-      .heater-active {
-        animation: pulse-glow 2s ease-in-out infinite;
-        color: #FF5722;
-      }
-
-      @keyframes pulse-glow {
-        0%,
-        100% {
-          opacity: 1;
-        }
-        50% {
-          opacity: 0.6;
-        }
-      }
-
-      .outside-temp-display {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px;
-        background: var(--secondary-background-color);
-        border-radius: 8px;
-        font-size: 14px;
-        color: var(--primary-text-color);
-      }
-
-      .outside-temp-display.blocked {
-        background: rgba(255, 152, 0, 0.1);
-        border: 1px solid #ff9800;
-      }
-
-      .outside-temp-display ha-icon {
-        --mdc-icon-size: 18px;
-        color: var(--primary-color);
-      }
-
-      .warning-text {
-        color: #ff9800;
-        font-size: 12px;
-        margin-left: 4px;
-      }
-
-      /* Solar Card Styles */
-      .solar-active {
-        color: #ff9800;
-      }
-
-      .solar-temps {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        padding: 8px;
-        background: var(--secondary-background-color);
-        border-radius: 8px;
-      }
-
-      .temp-item {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 14px;
-      }
-
-      .temp-item ha-icon {
-        --mdc-icon-size: 18px;
-        color: var(--primary-color);
-      }
-
-      .temp-label {
-        color: var(--secondary-text-color);
-        min-width: 70px;
-      }
-
-      .temp-value {
+        font-size: 17px;
         font-weight: 600;
-        color: var(--primary-text-color);
+        letter-spacing: 0.3px;
+        color: var(--vpc-text);
       }
 
-      .temp-delta {
+      /* Sub-components Common Styles */
+      .rpm-display, .runtime-display, .outside-temp-display,
+      .solar-temps, .dosing-history, .error, .chemistry-item,
+      .device-item, .warning-item {
+        background: rgba(var(--rgb-primary-text-color, 0,0,0), 0.04);
+        border-radius: 12px;
+        padding: 10px;
+      }
+
+      .theme-neon .rpm-display, .theme-neon .runtime-display,
+      .theme-neon .outside-temp-display, .theme-neon .solar-temps {
+        background: rgba(0, 255, 255, 0.05);
+        border: 1px solid rgba(0, 255, 255, 0.1);
+      }
+
+      .rpm-display, .runtime-display, .outside-temp-display {
         display: flex;
         align-items: center;
-        gap: 8px;
-        padding: 8px;
-        margin-top: 4px;
-        border-radius: 8px;
+        gap: 10px;
+        font-size: 14px;
         font-weight: 500;
+        color: var(--vpc-text);
       }
 
+      /* Animations */
+      @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+      @keyframes pulse-glow { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+
+      .pump-running { animation: rotate 2s linear infinite; }
+      .heater-active, .dosing-active { animation: pulse-glow 2s ease-in-out infinite; color: #FF5722; }
+      .solar-active { color: #ff9800; }
+      .dosing-active { color: #4caf50; }
+
+      /* Detailed Elements */
+      .solar-temps { display: flex; flex-direction: column; gap: 8px; }
+      .temp-item { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+      .temp-label { color: var(--vpc-text-secondary); width: 80px; }
+      .temp-value { font-weight: 600; color: var(--vpc-text); }
+      .temp-delta { display: flex; align-items: center; gap: 8px; margin-top: 4px; font-weight: 600; }
       .temp-delta.positive { color: #4caf50; }
       .temp-delta.negative { color: #f44336; }
-      .temp-delta ha-icon { --mdc-icon-size: 18px; }
-      .delta-hint { font-size: 11px; opacity: 0.8; }
 
-      /* Dosing Card Styles */
-      .dosing-active {
-        animation: pulse-glow 2s ease-in-out infinite;
-        color: #4caf50;
-      }
+      /* Dosing Specific */
+      .dosing-values { display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 12px; background: rgba(var(--rgb-primary-text-color), 0.03); }
+      .value-row { display: flex; align-items: center; justify-content: center; gap: 16px; font-size: 20px; }
+      .current-value { font-weight: 700; }
+      .target-value { color: var(--vpc-text-secondary); font-weight: 500; }
+      .threshold-row { display: flex; justify-content: center; gap: 8px; font-size: 12px; color: var(--vpc-text-secondary); }
 
-      .dosing-values { display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 8px; }
-      .value-row { display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 18px; }
-      .value-row ha-icon { --mdc-icon-size: 20px; color: var(--primary-color); }
-      .current-value { font-weight: 700; font-size: 20px; }
-      .arrow-icon { --mdc-icon-size: 16px; color: var(--secondary-text-color); }
-      .target-value { font-weight: 600; font-size: 18px; color: var(--secondary-text-color); }
-      .threshold-row { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 12px; color: var(--secondary-text-color); }
-      .threshold-label { font-weight: 500; }
-      .threshold-value { font-weight: 600; }
-      .separator { opacity: 0.5; }
-      .dosing-history { display: flex; align-items: center; gap: 8px; padding: 8px; border-radius: 8px; font-size: 13px; }
-      .dosing-history ha-icon { --mdc-icon-size: 16px; color: var(--primary-color); }
+      /* Overview Layout */
+      .water-chemistry { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+      .chemistry-item { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
+      .chemistry-value .value { font-size: 15px; font-weight: 700; }
 
-      .overview-content { gap: 16px; }
-      .water-chemistry { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 12px; }
+      .status-indicator { padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+      .status-indicator.ok { background: rgba(76, 175, 80, 0.2); color: #2e7d32; }
+      .status-indicator.warning { background: rgba(255, 152, 0, 0.2); color: #ef6c00; }
+      .status-indicator.high { background: rgba(244, 67, 54, 0.2); color: #c62828; }
 
-      .chemistry-item {
-        display: flex; flex-direction: column; align-items: center;
-        gap: 8px; padding: 12px; border-radius: 8px;
-      }
-      .chemistry-item ha-icon { --mdc-icon-size: 24px; color: var(--primary-color); }
-      .chemistry-value { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-      .chemistry-value .value { font-size: 16px; font-weight: 600; }
+      .device-list, .warnings-list { display: flex; flex-direction: column; gap: 8px; }
+      .device-item, .warning-item { display: flex; align-items: center; gap: 12px; }
+      .device-name { font-weight: 500; flex: 1; }
+      .device-status { color: var(--vpc-text-secondary); font-size: 13px; }
+      .device-item ha-icon.active { color: var(--vpc-primary); }
+      .device-item ha-icon.inactive { color: var(--vpc-text-secondary); opacity: 0.5; }
 
-      .status-indicator { padding: 2px 8px; border-radius: 8px; font-size: 10px; font-weight: 600; text-transform: uppercase; }
-      .status-indicator.ok { color: #4caf50; }
-      .status-indicator.warning { color: #ff9800; }
-      .status-indicator.high { color: #f44336; }
+      .system-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
 
-      .overview-section { margin-top: 8px; }
-      .section-title { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+      .compact-info { flex: 1; }
+      .compact-details { display: flex; gap: 10px; font-size: 12px; margin-top: 2px; }
+      .current-value-compact { font-weight: 600; color: var(--vpc-text); }
+      .detail-compact { color: var(--vpc-text-secondary); }
 
-      .device-list { display: flex; flex-direction: column; gap: 8px; }
-      .device-item { display: flex; align-items: center; gap: 12px; padding: 8px; border-radius: 8px; }
-      .device-item ha-icon { --mdc-icon-size: 20px; }
-      .device-item ha-icon.active { color: var(--primary-color); }
-      .device-item ha-icon.inactive { color: var(--disabled-text-color); }
-      .device-name { font-weight: 500; min-width: 80px; }
-      .device-status { color: var(--secondary-text-color); font-size: 13px; }
+      /* Error State */
+      .error { background: rgba(244, 67, 54, 0.1); color: #d32f2f; display: flex; align-items: center; gap: 8px; }
 
-      .warnings-list { display: flex; flex-direction: column; gap: 8px; }
-      .warning-item {
-        display: flex; align-items: center; gap: 8px; padding: 8px;
-        border-radius: 8px; color: #ff9800; font-size: 13px;
-      }
-      .warning-item ha-icon { --mdc-icon-size: 18px; }
-
-      .all-ok {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        padding: 16px;
-        color: #4caf50;
-        font-weight: 500;
-      }
-
-      .all-ok ha-icon { --mdc-icon-size: 24px; }
-
-      /* Compact Card Styles */
-      .compact-card { cursor: pointer; }
-      .card-content.compact { display: flex; align-items: center; gap: 12px; }
-      .card-content.compact ha-icon { --mdc-icon-size: 24px; }
-      .card-content.compact ha-icon.active { color: var(--primary-color); }
-      .card-content.compact ha-icon.inactive { color: var(--disabled-text-color); }
-      .compact-info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
-      .compact-info .name { font-size: 14px; font-weight: 500; }
-      .compact-details { display: flex; gap: 8px; font-size: 11px; }
-      .current-value-compact { font-weight: 600; }
-      .detail-compact { color: var(--secondary-text-color); }
-
-      /* System Card Grid */
-      .system-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 16px;
-      }
-
-      /* Modern Theme */
-      ha-card.theme-luxury,
-      ha-card.theme-modern,
-      ha-card.theme-minimalist,
-      ha-card.theme-glass {
-        border-radius: 16px;
-        transition: all 0.3s ease;
-      }
-
-      ha-card.is-active {
-        box-shadow: 0 0 20px rgba(var(--rgb-primary-color, 33, 150, 243), 0.2);
-      }
+      /* Sizes */
+      .size-small { --vpc-spacing: 12px; --vpc-icon-size: 20px; }
+      .size-large { --vpc-spacing: 24px; --vpc-icon-size: 28px; }
+      .size-fullscreen { --vpc-spacing: 32px; --vpc-icon-size: 32px; height: 100%; min-height: 80vh; }
     `;
   }
 
