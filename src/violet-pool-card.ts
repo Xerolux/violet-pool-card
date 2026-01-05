@@ -13,8 +13,6 @@ import type { QuickAction } from './components/quick-actions';
 // Import utilities
 import { ServiceCaller } from './utils/service-caller';
 import { EntityHelper } from './utils/entity-helper';
-import { ActionHandler } from './utils/action-handler';
-import { StateColorHelper } from './utils/state-color';
 
 // HomeAssistant types
 interface HomeAssistant {
@@ -66,10 +64,6 @@ export interface VioletPoolCardConfig extends LovelaceCardConfig {}
 export class VioletPoolCard extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
   @state() private config!: VioletPoolCardConfig;
-
-  // Action handler instances
-  private actionHandler?: ActionHandler;
-  private holdTimer?: number;
 
   public setConfig(config: VioletPoolCardConfig): void {
     if (!config.card_type) {
@@ -181,111 +175,6 @@ export class VioletPoolCard extends LitElement {
     }
 
     return classes.join(' ');
-  }
-
-  /**
-   * Create action handler for entity
-   */
-  private _createActionHandler(entity: string): ActionHandler {
-    return new ActionHandler(
-      this.hass,
-      entity,
-      this.config.tap_action,
-      this.config.hold_action,
-      this.config.double_tap_action
-    );
-  }
-
-  /**
-   * Handle tap action
-   */
-  private _handleTap(event: Event, entity: string): void {
-    const handler = this._createActionHandler(entity);
-    handler.handleTap(event);
-  }
-
-  /**
-   * Handle hold start
-   */
-  private _handleHoldStart(event: Event, entity: string): void {
-    const handler = this._createActionHandler(entity);
-    handler.handleHoldStart(event);
-  }
-
-  /**
-   * Handle hold end
-   */
-  private _handleHoldEnd(): void {
-    if (this.holdTimer) {
-      clearTimeout(this.holdTimer);
-      this.holdTimer = undefined;
-    }
-  }
-
-  /**
-   * Handle double tap
-   */
-  private _handleDoubleTap(event: Event, entity: string): void {
-    const handler = this._createActionHandler(entity);
-    handler.handleDoubleTap(event);
-  }
-
-  /**
-   * Get state-based color for temperature
-   */
-  private _getTemperatureColor(temp: number): string {
-    const colorConfig = StateColorHelper.getTemperatureColor(temp);
-    return colorConfig.color;
-  }
-
-  /**
-   * Get state-based color for pH
-   */
-  private _getPhColor(ph: number, target: number = 7.2): string {
-    const colorConfig = StateColorHelper.getPhColor(ph, target);
-    return colorConfig.color;
-  }
-
-  /**
-   * Get state-based color for ORP
-   */
-  private _getOrpColor(orp: number, target: number = 700): string {
-    const colorConfig = StateColorHelper.getOrpColor(orp, target);
-    return colorConfig.color;
-  }
-
-  /**
-   * Get state-based color for pump speed
-   */
-  private _getPumpSpeedColor(speed: number): string {
-    const colorConfig = StateColorHelper.getPumpSpeedColor(speed);
-    return colorConfig.color;
-  }
-
-  /**
-   * Get state-based background with opacity
-   */
-  private _getStateBackground(colorConfig: { color: string; intensity: 'low' | 'medium' | 'high' }): string {
-    const opacity = StateColorHelper.getIntensityOpacity(colorConfig.intensity);
-    const rgb = this._hexToRgb(colorConfig.color);
-    if (rgb) {
-      return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity})`;
-    }
-    return 'transparent';
-  }
-
-  /**
-   * Convert hex to RGB
-   */
-  private _hexToRgb(hex: string): { r: number; g: number; b: number } | null {
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result
-      ? {
-          r: parseInt(result[1], 16),
-          g: parseInt(result[2], 16),
-          b: parseInt(result[3], 16),
-        }
-      : null;
   }
 
   private renderSystemCard(): TemplateResult {
@@ -1266,56 +1155,6 @@ export class VioletPoolCard extends LitElement {
         color: var(--primary-text-color);
       }
 
-      .state {
-        padding: 4px 12px;
-        border-radius: 12px;
-        font-size: 12px;
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-      }
-
-      .state.on,
-      .state.heat,
-      .state.heating {
-        background: #4caf50;
-        color: white;
-      }
-
-      .state.off {
-        background: #757575;
-        color: white;
-      }
-
-      .state.auto {
-        background: #2196f3;
-        color: white;
-      }
-
-      .state.manual {
-        background: #ff9800;
-        color: white;
-      }
-
-      .state.idle {
-        background: #9e9e9e;
-        color: white;
-      }
-
-      .info {
-        color: var(--secondary-text-color);
-        font-size: 14px;
-      }
-
-      .info p {
-        margin: 4px 0;
-      }
-
-      .detail {
-        font-size: 12px;
-        color: var(--disabled-text-color);
-      }
-
       .detail-compact {
         font-size: 11px;
         color: var(--secondary-text-color);
@@ -1483,27 +1322,10 @@ export class VioletPoolCard extends LitElement {
         font-weight: 500;
       }
 
-      .temp-delta.positive {
-        background: rgba(76, 175, 80, 0.1);
-        border: 1px solid #4caf50;
-        color: #4caf50;
-      }
-
-      .temp-delta.negative {
-        background: rgba(244, 67, 54, 0.1);
-        border: 1px solid #f44336;
-        color: #f44336;
-      }
-
-      .temp-delta ha-icon {
-        --mdc-icon-size: 18px;
-      }
-
-      .delta-hint {
-        font-size: 11px;
-        opacity: 0.8;
-        margin-left: 4px;
-      }
+      .temp-delta.positive { color: #4caf50; }
+      .temp-delta.negative { color: #f44336; }
+      .temp-delta ha-icon { --mdc-icon-size: 18px; }
+      .delta-hint { font-size: 11px; opacity: 0.8; }
 
       /* Dosing Card Styles */
       .dosing-active {
@@ -1511,221 +1333,52 @@ export class VioletPoolCard extends LitElement {
         color: #4caf50;
       }
 
-      .dosing-values {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        padding: 12px;
-        background: var(--secondary-background-color);
-        border-radius: 8px;
-      }
+      .dosing-values { display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 8px; }
+      .value-row { display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 18px; }
+      .value-row ha-icon { --mdc-icon-size: 20px; color: var(--primary-color); }
+      .current-value { font-weight: 700; font-size: 20px; }
+      .arrow-icon { --mdc-icon-size: 16px; color: var(--secondary-text-color); }
+      .target-value { font-weight: 600; font-size: 18px; color: var(--secondary-text-color); }
+      .threshold-row { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 12px; color: var(--secondary-text-color); }
+      .threshold-label { font-weight: 500; }
+      .threshold-value { font-weight: 600; }
+      .separator { opacity: 0.5; }
+      .dosing-history { display: flex; align-items: center; gap: 8px; padding: 8px; border-radius: 8px; font-size: 13px; }
+      .dosing-history ha-icon { --mdc-icon-size: 16px; color: var(--primary-color); }
 
-      .value-row {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 12px;
-        font-size: 18px;
-      }
-
-      .value-row ha-icon {
-        --mdc-icon-size: 20px;
-        color: var(--primary-color);
-      }
-
-      .current-value {
-        font-weight: 700;
-        font-size: 20px;
-        color: var(--primary-text-color);
-      }
-
-      .arrow-icon {
-        --mdc-icon-size: 16px;
-        color: var(--secondary-text-color);
-      }
-
-      .target-value {
-        font-weight: 600;
-        font-size: 18px;
-        color: var(--secondary-text-color);
-      }
-
-      .threshold-row {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        font-size: 12px;
-        color: var(--secondary-text-color);
-      }
-
-      .threshold-label {
-        font-weight: 500;
-      }
-
-      .threshold-value {
-        font-weight: 600;
-        color: var(--primary-text-color);
-      }
-
-      .separator {
-        opacity: 0.5;
-        margin: 0 4px;
-      }
-
-      .dosing-history {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px;
-        background: var(--secondary-background-color);
-        border-radius: 8px;
-        font-size: 13px;
-        color: var(--primary-text-color);
-      }
-
-      .dosing-history ha-icon {
-        --mdc-icon-size: 16px;
-        color: var(--primary-color);
-      }
-
-      /* Overview Card Styles */
-      .overview-content {
-        gap: 16px;
-      }
-
-      .water-chemistry {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-        gap: 12px;
-      }
+      .overview-content { gap: 16px; }
+      .water-chemistry { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 12px; }
 
       .chemistry-item {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 8px;
-        padding: 12px;
-        background: var(--secondary-background-color);
-        border-radius: 8px;
+        display: flex; flex-direction: column; align-items: center;
+        gap: 8px; padding: 12px; border-radius: 8px;
       }
+      .chemistry-item ha-icon { --mdc-icon-size: 24px; color: var(--primary-color); }
+      .chemistry-value { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+      .chemistry-value .value { font-size: 16px; font-weight: 600; }
 
-      .chemistry-item ha-icon {
-        --mdc-icon-size: 24px;
-        color: var(--primary-color);
-      }
+      .status-indicator { padding: 2px 8px; border-radius: 8px; font-size: 10px; font-weight: 600; text-transform: uppercase; }
+      .status-indicator.ok { color: #4caf50; }
+      .status-indicator.warning { color: #ff9800; }
+      .status-indicator.high { color: #f44336; }
 
-      .chemistry-value {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 4px;
-      }
+      .overview-section { margin-top: 8px; }
+      .section-title { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
 
-      .chemistry-value .value {
-        font-size: 16px;
-        font-weight: 600;
-        color: var(--primary-text-color);
-      }
+      .device-list { display: flex; flex-direction: column; gap: 8px; }
+      .device-item { display: flex; align-items: center; gap: 12px; padding: 8px; border-radius: 8px; }
+      .device-item ha-icon { --mdc-icon-size: 20px; }
+      .device-item ha-icon.active { color: var(--primary-color); }
+      .device-item ha-icon.inactive { color: var(--disabled-text-color); }
+      .device-name { font-weight: 500; min-width: 80px; }
+      .device-status { color: var(--secondary-text-color); font-size: 13px; }
 
-      .status-indicator {
-        padding: 2px 8px;
-        border-radius: 8px;
-        font-size: 10px;
-        font-weight: 600;
-        text-transform: uppercase;
-      }
-
-      .status-indicator.ok {
-        background: rgba(76, 175, 80, 0.2);
-        color: #4caf50;
-      }
-
-      .status-indicator.warning {
-        background: rgba(255, 152, 0, 0.2);
-        color: #ff9800;
-      }
-
-      .status-indicator.high {
-        background: rgba(244, 67, 54, 0.2);
-        color: #f44336;
-      }
-
-      .status-indicator.unknown {
-        background: var(--secondary-background-color);
-        color: var(--secondary-text-color);
-      }
-
-      .overview-section {
-        margin-top: 8px;
-      }
-
-      .section-title {
-        font-size: 14px;
-        font-weight: 600;
-        color: var(--primary-text-color);
-        margin-bottom: 8px;
-      }
-
-      .device-list {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-      }
-
-      .device-item {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 8px;
-        background: var(--secondary-background-color);
-        border-radius: 8px;
-      }
-
-      .device-item ha-icon {
-        --mdc-icon-size: 20px;
-      }
-
-      .device-item ha-icon.active {
-        color: var(--primary-color);
-      }
-
-      .device-item ha-icon.inactive {
-        color: var(--disabled-text-color);
-      }
-
-      .device-name {
-        font-weight: 500;
-        color: var(--primary-text-color);
-        min-width: 80px;
-      }
-
-      .device-status {
-        color: var(--secondary-text-color);
-        font-size: 13px;
-      }
-
-      .warnings-list {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-      }
-
+      .warnings-list { display: flex; flex-direction: column; gap: 8px; }
       .warning-item {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px;
-        background: rgba(255, 152, 0, 0.1);
-        border: 1px solid #ff9800;
-        border-radius: 8px;
-        color: #ff9800;
-        font-size: 13px;
+        display: flex; align-items: center; gap: 8px; padding: 8px;
+        border-radius: 8px; color: #ff9800; font-size: 13px;
       }
-
-      .warning-item ha-icon {
-        --mdc-icon-size: 18px;
-      }
+      .warning-item ha-icon { --mdc-icon-size: 18px; }
 
       .all-ok {
         display: flex;
@@ -1733,192 +1386,23 @@ export class VioletPoolCard extends LitElement {
         justify-content: center;
         gap: 8px;
         padding: 16px;
-        background: rgba(76, 175, 80, 0.1);
-        border: 1px solid #4caf50;
-        border-radius: 8px;
         color: #4caf50;
         font-weight: 500;
       }
 
-      .all-ok ha-icon {
-        --mdc-icon-size: 24px;
-      }
+      .all-ok ha-icon { --mdc-icon-size: 24px; }
 
       /* Compact Card Styles */
-      .compact-card {
-        cursor: pointer;
-        transition: background 0.2s ease;
-      }
-
-      .compact-card:hover {
-        background: var(--secondary-background-color);
-      }
-
-      .card-content.compact {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 12px;
-      }
-
-      .card-content.compact ha-icon {
-        --mdc-icon-size: 24px;
-        flex-shrink: 0;
-      }
-
-      .card-content.compact ha-icon.active {
-        color: var(--primary-color);
-      }
-
-      .card-content.compact ha-icon.inactive {
-        color: var(--disabled-text-color);
-      }
-
-      .compact-info {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-        min-width: 0;
-      }
-
-      .compact-info .name {
-        font-size: 14px;
-        font-weight: 500;
-        color: var(--primary-text-color);
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-
-      .compact-details {
-        display: flex;
-        gap: 8px;
-        align-items: center;
-        font-size: 11px;
-      }
-
-      .current-value-compact {
-        font-weight: 600;
-        color: var(--primary-text-color);
-      }
-
-      .detail-compact {
-        color: var(--secondary-text-color);
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-
-      /* Responsive Design */
-      @media (max-width: 768px) {
-        .water-chemistry {
-          grid-template-columns: 1fr;
-        }
-
-        .card-content {
-          padding: 12px;
-        }
-
-        .header {
-          flex-wrap: wrap;
-        }
-      }
-
-      /* Modern Style */
-      ha-card.modern {
-        border-radius: 16px;
-        border: 1px solid var(--divider-color, #e0e0e0);
-        box-shadow: none;
-      }
-
-      ha-card.modern .header {
-        margin-bottom: 8px;
-      }
-
-      ha-card.modern .badge-secondary {
-        border-radius: 6px;
-      }
-
-      /* Luxury Style */
-      ha-card.luxury {
-        background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.7));
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(255,255,255,0.5);
-        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
-        border-radius: 20px;
-      }
-
-      ha-card.luxury .card-content {
-        gap: 16px;
-      }
-
-      ha-card.luxury .rpm-display,
-      ha-card.luxury .runtime-display,
-      ha-card.luxury .outside-temp-display,
-      ha-card.luxury .dosing-values,
-      ha-card.luxury .dosing-history,
-      ha-card.luxury .chemistry-item,
-      ha-card.luxury .device-item,
-      ha-card.luxury .badge-secondary {
-        background: rgba(255, 255, 255, 0.4);
-        border: 1px solid rgba(255, 255, 255, 0.6);
-        box-shadow: 0 2px 8px rgba(0,0,0,0.02);
-      }
-
-      /* Flow Animation */
-      @keyframes flow {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
-      }
-
-      ha-card.flow-animation {
-        position: relative;
-        overflow: hidden;
-      }
-
-      ha-card.flow-animation::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        border-radius: inherit;
-        padding: 2px;
-        background: linear-gradient(270deg, var(--primary-color), transparent, var(--primary-color));
-        background-size: 200% 200%;
-        animation: flow 3s ease infinite;
-        -webkit-mask:
-           linear-gradient(#fff 0 0) content-box,
-           linear-gradient(#fff 0 0);
-        -webkit-mask-composite: xor;
-        mask-composite: exclude;
-        pointer-events: none;
-        opacity: 0.5;
-      }
-
-      /* Dark mode adjustments for Luxury */
-      @media (prefers-color-scheme: dark) {
-        ha-card.luxury {
-          background: linear-gradient(135deg, rgba(30,30,30,0.9), rgba(30,30,30,0.7));
-          border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        ha-card.luxury .rpm-display,
-        ha-card.luxury .runtime-display,
-        ha-card.luxury .outside-temp-display,
-        ha-card.luxury .dosing-values,
-        ha-card.luxury .dosing-history,
-        ha-card.luxury .chemistry-item,
-        ha-card.luxury .device-item,
-        ha-card.luxury .badge-secondary {
-          background: rgba(0, 0, 0, 0.2);
-          border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-      }
+      .compact-card { cursor: pointer; }
+      .card-content.compact { display: flex; align-items: center; gap: 12px; }
+      .card-content.compact ha-icon { --mdc-icon-size: 24px; }
+      .card-content.compact ha-icon.active { color: var(--primary-color); }
+      .card-content.compact ha-icon.inactive { color: var(--disabled-text-color); }
+      .compact-info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+      .compact-info .name { font-size: 14px; font-weight: 500; }
+      .compact-details { display: flex; gap: 8px; font-size: 11px; }
+      .current-value-compact { font-weight: 600; }
+      .detail-compact { color: var(--secondary-text-color); }
 
       /* System Card Grid */
       .system-grid {
@@ -1927,348 +1411,17 @@ export class VioletPoolCard extends LitElement {
         gap: 16px;
       }
 
-      /* ========================================
-         PREMIUM DESIGN SYSTEM
-         ======================================== */
-
-      /* ===== CARD SIZES ===== */
-      ha-card.size-small {
-        padding: 12px;
-        font-size: 13px;
-      }
-
-      ha-card.size-small .header ha-icon {
-        --mdc-icon-size: 20px;
-      }
-
-      ha-card.size-small .name {
-        font-size: 14px;
-      }
-
-      ha-card.size-medium {
-        padding: 16px;
-      }
-
-      ha-card.size-large {
-        padding: 24px;
-        font-size: 16px;
-      }
-
-      ha-card.size-large .header {
-        margin-bottom: 16px;
-      }
-
-      ha-card.size-large .header ha-icon {
-        --mdc-icon-size: 32px;
-      }
-
-      ha-card.size-large .name {
-        font-size: 20px;
-      }
-
-      ha-card.size-large .card-content {
-        gap: 20px;
-      }
-
-      ha-card.size-fullscreen {
-        padding: 32px;
-        font-size: 18px;
-        min-height: calc(100vh - 100px);
-      }
-
-      ha-card.size-fullscreen .header {
-        margin-bottom: 24px;
-      }
-
-      ha-card.size-fullscreen .header ha-icon {
-        --mdc-icon-size: 48px;
-      }
-
-      ha-card.size-fullscreen .name {
-        font-size: 28px;
-        font-weight: 600;
-      }
-
-      ha-card.size-fullscreen .card-content {
-        gap: 28px;
-      }
-
-      /* ===== PREMIUM THEMES ===== */
-
-      /* Theme: Luxury (Enhanced Glassmorphism) */
-      ha-card.theme-luxury {
-        background: linear-gradient(135deg,
-          rgba(255, 255, 255, 0.95) 0%,
-          rgba(255, 255, 255, 0.85) 100%);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border: 2px solid rgba(255, 255, 255, 0.6);
-        box-shadow:
-          0 8px 32px 0 rgba(31, 38, 135, 0.2),
-          inset 0 1px 0 0 rgba(255, 255, 255, 0.8);
-        border-radius: 24px;
-        position: relative;
-        overflow: hidden;
-      }
-
-      ha-card.theme-luxury::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 100%;
-        background: linear-gradient(
-          135deg,
-          rgba(var(--rgb-primary-color, 33, 150, 243), 0.1) 0%,
-          transparent 50%,
-          rgba(var(--rgb-primary-color, 33, 150, 243), 0.05) 100%
-        );
-        pointer-events: none;
-      }
-
-      /* Theme: Modern (Clean & Minimal) */
-      ha-card.theme-modern {
-        background: var(--card-background-color);
-        border: 1px solid var(--divider-color);
-        border-radius: 20px;
-        box-shadow:
-          0 2px 8px rgba(0, 0, 0, 0.08),
-          0 1px 3px rgba(0, 0, 0, 0.06);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      }
-
-      ha-card.theme-modern:hover {
-        box-shadow:
-          0 4px 16px rgba(0, 0, 0, 0.12),
-          0 2px 6px rgba(0, 0, 0, 0.08);
-        transform: translateY(-2px);
-      }
-
-      /* Theme: Minimalist (Ultra Clean) */
-      ha-card.theme-minimalist {
-        background: var(--card-background-color);
-        border: none;
-        border-radius: 16px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-      }
-
-      ha-card.theme-minimalist .header {
-        border-bottom: 1px solid var(--divider-color);
-        padding-bottom: 12px;
-        margin-bottom: 16px;
-      }
-
-      /* Theme: Glass (Pure Glassmorphism) */
+      /* Modern Theme */
+      ha-card.theme-luxury,
+      ha-card.theme-modern,
+      ha-card.theme-minimalist,
       ha-card.theme-glass {
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(30px) saturate(180%);
-        -webkit-backdrop-filter: blur(30px) saturate(180%);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 28px;
-        box-shadow:
-          0 8px 32px 0 rgba(0, 0, 0, 0.1),
-          inset 0 1px 1px 0 rgba(255, 255, 255, 0.3);
-      }
-
-      ha-card.theme-glass .card-content > * {
-        background: rgba(255, 255, 255, 0.05);
-        backdrop-filter: blur(10px);
         border-radius: 16px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-      }
-
-      /* Theme: Neon (Vibrant & Energetic) */
-      ha-card.theme-neon {
-        background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
-        border: 2px solid transparent;
-        border-radius: 24px;
-        box-shadow:
-          0 0 30px rgba(var(--rgb-primary-color, 33, 150, 243), 0.4),
-          inset 0 1px 1px rgba(255, 255, 255, 0.1);
-        position: relative;
-      }
-
-      ha-card.theme-neon::before {
-        content: '';
-        position: absolute;
-        top: -2px;
-        left: -2px;
-        right: -2px;
-        bottom: -2px;
-        background: linear-gradient(
-          45deg,
-          var(--primary-color, #2196f3),
-          #00bcd4,
-          #4caf50,
-          var(--primary-color, #2196f3)
-        );
-        border-radius: 24px;
-        z-index: -1;
-        background-size: 300% 300%;
-        animation: neonGlow 6s ease infinite;
-      }
-
-      @keyframes neonGlow {
-        0%, 100% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-      }
-
-      ha-card.theme-neon .name,
-      ha-card.theme-neon .value,
-      ha-card.theme-neon * {
-        color: #ffffff !important;
-      }
-
-      /* Theme: Premium (High-End Look) */
-      ha-card.theme-premium {
-        background: linear-gradient(
-          135deg,
-          #667eea 0%,
-          #764ba2 100%
-        );
-        border: none;
-        border-radius: 24px;
-        box-shadow:
-          0 20px 60px rgba(102, 126, 234, 0.4),
-          inset 0 1px 2px rgba(255, 255, 255, 0.3);
-        color: white;
-        position: relative;
-        overflow: hidden;
-      }
-
-      ha-card.theme-premium::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(
-          circle,
-          rgba(255, 255, 255, 0.2) 0%,
-          transparent 70%
-        );
-        animation: premiumShine 8s linear infinite;
-      }
-
-      @keyframes premiumShine {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-      }
-
-      ha-card.theme-premium .name,
-      ha-card.theme-premium .value,
-      ha-card.theme-premium *:not(ha-icon) {
-        color: #ffffff !important;
-      }
-
-      /* ===== ANIMATION STYLES ===== */
-
-      /* Animation: Subtle */
-      ha-card.animation-subtle {
         transition: all 0.3s ease;
       }
 
-      ha-card.animation-subtle.is-active {
+      ha-card.is-active {
         box-shadow: 0 0 20px rgba(var(--rgb-primary-color, 33, 150, 243), 0.2);
-      }
-
-      /* Animation: Smooth */
-      ha-card.animation-smooth {
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      }
-
-      ha-card.animation-smooth.is-active {
-        transform: scale(1.02);
-        box-shadow: 0 8px 24px rgba(var(--rgb-primary-color, 33, 150, 243), 0.3);
-      }
-
-      /* Animation: Energetic */
-      ha-card.animation-energetic {
-        transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-      }
-
-      ha-card.animation-energetic.is-active {
-        animation: energeticPulse 2s ease-in-out infinite;
-      }
-
-      @keyframes energeticPulse {
-        0%, 100% {
-          transform: scale(1);
-          box-shadow: 0 0 20px rgba(var(--rgb-primary-color, 33, 150, 243), 0.3);
-        }
-        50% {
-          transform: scale(1.05);
-          box-shadow: 0 0 40px rgba(var(--rgb-primary-color, 33, 150, 243), 0.5);
-        }
-      }
-
-      /* Flow Active State (Enhanced) */
-      ha-card.flow-active::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        border-radius: inherit;
-        padding: 3px;
-        background: linear-gradient(
-          90deg,
-          transparent,
-          var(--primary-color),
-          transparent
-        );
-        background-size: 200% 100%;
-        animation: flowSweep 3s linear infinite;
-        -webkit-mask:
-          linear-gradient(#fff 0 0) content-box,
-          linear-gradient(#fff 0 0);
-        -webkit-mask-composite: xor;
-        mask-composite: exclude;
-        pointer-events: none;
-        opacity: 0.6;
-      }
-
-      @keyframes flowSweep {
-        0% { background-position: -200% 0; }
-        100% { background-position: 200% 0; }
-      }
-
-      /* ===== DARK MODE ADJUSTMENTS ===== */
-      @media (prefers-color-scheme: dark) {
-        ha-card.theme-luxury {
-          background: linear-gradient(135deg,
-            rgba(30, 30, 30, 0.95) 0%,
-            rgba(20, 20, 20, 0.90) 100%);
-          border: 2px solid rgba(255, 255, 255, 0.15);
-        }
-
-        ha-card.theme-glass {
-          background: rgba(30, 30, 30, 0.3);
-          border: 1px solid rgba(255, 255, 255, 0.15);
-        }
-
-        ha-card.theme-minimalist {
-          border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-      }
-
-      /* ===== RESPONSIVE FULLSCREEN ===== */
-      @media (max-width: 768px) {
-        ha-card.size-fullscreen {
-          padding: 20px;
-          font-size: 16px;
-        }
-
-        ha-card.size-fullscreen .header ha-icon {
-          --mdc-icon-size: 36px;
-        }
-
-        ha-card.size-fullscreen .name {
-          font-size: 22px;
-        }
       }
     `;
   }
