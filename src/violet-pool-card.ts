@@ -13,7 +13,7 @@ import type { QuickAction } from './components/quick-actions';
 // Import utilities
 import { ServiceCaller } from './utils/service-caller';
 import { EntityHelper } from './utils/entity-helper';
-import { ActionHandler, ActionConfig } from './utils/action-handler';
+import { ActionHandler } from './utils/action-handler';
 import { StateColorHelper } from './utils/state-color';
 
 // HomeAssistant types
