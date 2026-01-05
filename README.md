@@ -21,8 +21,6 @@
 
 **Die Premium Lovelace Card** für die [Violet Pool Controller](https://github.com/Xerolux/violet-hass) Integration für Home Assistant.
 
-> ⚠️ **HINWEIS:** Aufgrund einer Speicherbeschränkung von 100kb mussten einige Design-Themes konsolidiert werden. Die Kartenfunktion bleibt vollständig erhalten, aber die visuellen Unterschiede zwischen den Themes sind nun minimal.
-
 </div>
 
 ---
