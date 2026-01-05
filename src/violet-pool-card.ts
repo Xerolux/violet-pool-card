@@ -13,6 +13,8 @@ import type { QuickAction } from './components/quick-actions';
 // Import utilities
 import { ServiceCaller } from './utils/service-caller';
 import { EntityHelper } from './utils/entity-helper';
+import { ActionHandler, ActionConfig } from './utils/action-handler';
+import { StateColorHelper } from './utils/state-color';
 
 // HomeAssistant types
 interface HomeAssistant {
@@ -64,6 +66,10 @@ export interface VioletPoolCardConfig extends LovelaceCardConfig {}
 export class VioletPoolCard extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
   @state() private config!: VioletPoolCardConfig;
+
+  // Action handler instances
+  private actionHandler?: ActionHandler;
+  private holdTimer?: number;
 
   public setConfig(config: VioletPoolCardConfig): void {
     if (!config.card_type) {
@@ -175,6 +181,111 @@ export class VioletPoolCard extends LitElement {
     }
 
     return classes.join(' ');
+  }
+
+  /**
+   * Create action handler for entity
+   */
+  private _createActionHandler(entity: string): ActionHandler {
+    return new ActionHandler(
+      this.hass,
+      entity,
+      this.config.tap_action,
+      this.config.hold_action,
+      this.config.double_tap_action
+    );
+  }
+
+  /**
+   * Handle tap action
+   */
+  private _handleTap(event: Event, entity: string): void {
+    const handler = this._createActionHandler(entity);
+    handler.handleTap(event);
+  }
+
+  /**
+   * Handle hold start
+   */
+  private _handleHoldStart(event: Event, entity: string): void {
+    const handler = this._createActionHandler(entity);
+    handler.handleHoldStart(event);
+  }
+
+  /**
+   * Handle hold end
+   */
+  private _handleHoldEnd(): void {
+    if (this.holdTimer) {
+      clearTimeout(this.holdTimer);
+      this.holdTimer = undefined;
+    }
+  }
+
+  /**
+   * Handle double tap
+   */
+  private _handleDoubleTap(event: Event, entity: string): void {
+    const handler = this._createActionHandler(entity);
+    handler.handleDoubleTap(event);
+  }
+
+  /**
+   * Get state-based color for temperature
+   */
+  private _getTemperatureColor(temp: number): string {
+    const colorConfig = StateColorHelper.getTemperatureColor(temp);
+    return colorConfig.color;
+  }
+
+  /**
+   * Get state-based color for pH
+   */
+  private _getPhColor(ph: number, target: number = 7.2): string {
+    const colorConfig = StateColorHelper.getPhColor(ph, target);
+    return colorConfig.color;
+  }
+
+  /**
+   * Get state-based color for ORP
+   */
+  private _getOrpColor(orp: number, target: number = 700): string {
+    const colorConfig = StateColorHelper.getOrpColor(orp, target);
+    return colorConfig.color;
+  }
+
+  /**
+   * Get state-based color for pump speed
+   */
+  private _getPumpSpeedColor(speed: number): string {
+    const colorConfig = StateColorHelper.getPumpSpeedColor(speed);
+    return colorConfig.color;
+  }
+
+  /**
+   * Get state-based background with opacity
+   */
+  private _getStateBackground(colorConfig: { color: string; intensity: 'low' | 'medium' | 'high' }): string {
+    const opacity = StateColorHelper.getIntensityOpacity(colorConfig.intensity);
+    const rgb = this._hexToRgb(colorConfig.color);
+    if (rgb) {
+      return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity})`;
+    }
+    return 'transparent';
+  }
+
+  /**
+   * Convert hex to RGB
+   */
+  private _hexToRgb(hex: string): { r: number; g: number; b: number } | null {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result
+      ? {
+          r: parseInt(result[1], 16),
+          g: parseInt(result[2], 16),
+          b: parseInt(result[3], 16),
+        }
+      : null;
   }
 
   private renderSystemCard(): TemplateResult {
