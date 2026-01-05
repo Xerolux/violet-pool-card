@@ -1,4 +1,4 @@
-# 🏊 Violet Pool Card - Premium Edition
+# 🏊 Violet Pool Card
 
 <div align="center">
 
@@ -19,9 +19,9 @@
   <img src="https://img.shields.io/badge/Home%20Assistant-41BDF5?style=for-the-badge&logo=home-assistant&logoColor=white" alt="Home Assistant">
 </p>
 
-**Die ultimative Premium Lovelace Card** für die [Violet Pool Controller](https://github.com/Xerolux/violet-hass) Integration für Home Assistant.
+**Die Premium Lovelace Card** für die [Violet Pool Controller](https://github.com/Xerolux/violet-hass) Integration für Home Assistant.
 
-> 🌟 **Visual Editor** · **Kein YAML!** · **6 Premium Themes** · **4 Flexible Größen** · **Smart Auto-Coloring** · **Die beste Pool Card überhaupt**
+> ⚠️ **HINWEIS:** Aufgrund einer Speicherbeschränkung von 100kb mussten einige Design-Themes konsolidiert werden. Die Kartenfunktion bleibt vollständig erhalten, aber die visuellen Unterschiede zwischen den Themes sind nun minimal.
 
 </div>
 
@@ -37,7 +37,6 @@
 
 ## 📋 Inhaltsverzeichnis
 
-- [🎉 Neu in v2.0: Visual Editor!](#-neu-in-v20-visual-editor)
 - [✨ Hauptfunktionen](#-hauptfunktionen)
 - [📸 Screenshots](#-screenshots)
 - [📥 Installation](#-installation)
@@ -51,73 +50,7 @@
 
 ---
 
-## 🎉 Neu in v2.0: Visual Editor!
-
-**Keine YAML-Bearbeitung mehr nötig!** Konfiguriere alles über unseren schönen Visual Editor:
-
-### ✨ Visual Editor Funktionen
-
-**🎨 Visueller Theme-Picker**
-- Vorschau aller 6 Themes mit echtem Styling
-- Klicken zum Auswählen - Live-Update
-- Emoji-Icons mit Beschreibungen
-- Hover-Effekte
-
-**📐 Visueller Größen-Picker**
-- Größenvorschau (Klein → Vollbild)
-- Visuelle Kartengröße
-- Ein-Klick-Auswahl
-
-**⚡ Animations-Auswahl**
-- Animations-Level mit Vorschau wählen
-- Keine / Subtil / Smooth / Energetisch
-- Icon mit Beschreibung
-
-**🎯 Intelligente Picker**
-- Entity-Picker mit Auto-Complete
-- Icon-Picker (MDI-Integration)
-- Farbwähler für Akzente & Icons
-- Blur-Intensität Slider (0-30)
-
-**👆 Interaktive Aktionen**
-- **Tap** - Klicken zum Umschalten oder Details öffnen
-- **Hold** (500ms) - Lange drücken für andere Aktion
-- **Double-Tap** - Doppelklick für benutzerdefinierte Aktion
-- Mobile Vibrations-Feedback
-
-**🎨 Intelligente Auto-Färbung**
-- **Temperatur**: Blau (kalt) → Grün (ideal) → Rot (heiß)
-- **pH-Wert**: Farbcodiert basierend auf Zielwert (±0.1/0.3/0.5)
-- **ORP/Chlor**: Bereichsbasierte Färbung
-- **Pumpen-Geschwindigkeit**: Grau/Blau/Grün/Orange für 0/1/2/3
-- **Entity-Zustände**: Farbige Badges (ON/OFF/AUTO/MANUAL/Blockiert/Fehler)
-
-**Die erste Pool-Card mit visueller Theme- und Größenvorschau!** 🏆
-
----
-
 ## ✨ Hauptfunktionen
-
-### 🎨 Premium Design-System
-
-**4 Kartengrößen** - Perfekt für jedes Dashboard-Layout:
-- **Small** - Kompakte Karten für dichte Layouts
-- **Medium** - Standardgröße (Standard)
-- **Large** - Geräumige Karten mit erweiterten Visuals
-- **Fullscreen** - Immersives Vollbild-Erlebnis
-
-**6 Premium Themes** - Wähle deinen perfekten Stil:
-- **Luxury** - Verbesserter Glassmorphismus mit subtilen Gradienten
-- **Modern** - Sauberes, minimales Design mit sanften Übergängen
-- **Minimalist** - Ultra-clean, randloses Design
-- **Glass** - Reiner Glassmorphismus mit Blur-Effekten
-- **Neon** - Lebendig, energetisch mit animierten Glows
-- **Premium** - High-End Gradient-Design mit dynamischem Glanz
-
-**3 Animations-Level** - Kontrolliere die Energie:
-- **Subtle** - Minimale, professionelle Animationen
-- **Smooth** - Ausgewogene, angenehme Bewegung
-- **Energetic** - Dynamische, auffällige Effekte
 
 ### 🎴 Mehrere Kartentypen
 - **Pump Card** - Geschwindigkeitskontrolle mit RPM-Anzeige und Laufzeit-Zähler
@@ -135,43 +68,34 @@
 - **Wasserchemie** - Ampel-Status für pH, ORP und Temperatur
 - **Auto-Erkennung** - Intelligente Sensor-Auslesung und Icon-Auswahl
 
-### 🎨 Design & UX
-- **Status-Visualisierung** - Farbcodierte Status-Badges (OFF/ON/AUTO/MANUAL/BLOCKIERT)
-- **Interaktive Kontrollen** - Touch-optimierte Slider für Geschwindigkeit, Temperatur und Zielwerte
-- **Schnell-Aktionen** - Ein-Klick-Buttons für häufige Operationen
-- **Detail-Status** - Parst und zeigt komplexe Status-Informationen (Frostschutz, Blockaden)
-- **Responsive Design** - Funktioniert perfekt auf Desktop, Tablet und Mobile
-- **Theme-Unterstützung** - Volle Dark/Light Mode Integration mit HA-Themes
-
 ---
 
 ## 📸 Screenshots
 
-### Premium Theme Galerie
+### Kartentypen (Aktuelles Design)
 
-#### 🌟 Luxury Theme (Standard)
-![Luxury Theme](screenshots/theme_luxury_pump.png)
+Hier sehen Sie das aktuelle Design der Violet Pool Card. Aufgrund von Optimierungen teilen sich nun alle Varianten ein konsistentes, modernes Erscheinungsbild.
 
-#### 🎯 Modern Theme
-![Modern Theme](screenshots/theme_modern_heater.png)
-
-#### 💎 Glass Theme
-![Glass Theme](screenshots/theme_glass_solar.png)
-
-#### ⚡ Neon Theme
-![Neon Theme](screenshots/theme_neon_dosing.png)
-
-#### 👑 Premium Theme
-![Premium Theme](screenshots/theme_premium_pump.png)
-
-### Kartentypen
-
+#### Pump Card
 ![Pump Card](screenshots/pump_card.png)
+
+#### Heater Card
 ![Heater Card](screenshots/heater_card.png)
+
+#### Solar Card
 ![Solar Card](screenshots/solar_card.png)
+
+#### Dosing Card
 ![Dosing Card](screenshots/dosing_card.png)
+
+#### Overview Card
 ![Overview Card](screenshots/overview_card.png)
+
+#### Compact Card
 ![Compact Card](screenshots/compact_card.png)
+
+#### System View (Beispiel)
+![System View](screenshots/example_system_fullscreen.png)
 
 ---
 
@@ -216,14 +140,15 @@ lovelace:
 | `name` | string | Optional | Benutzerdefinierter Name für die Karte |
 | `icon` | string | Optional | Benutzerdefiniertes Icon (MDI) |
 
-### Premium Design-Optionen
+### Design-Optionen (Eingeschränkt)
+
+> Hinweis: Die Theme-Auswahl ist weiterhin verfügbar, aber visuelle Unterschiede sind minimal.
 
 | Name | Typ | Standard | Beschreibung |
 |------|-----|----------|--------------|
 | `size` | string | `medium` | Kartengröße: `small`, `medium`, `large`, oder `fullscreen` |
-| `theme` | string | `luxury` | Design-Theme: `luxury`, `modern`, `minimalist`, `glass`, `neon`, oder `premium` |
+| `theme` | string | `luxury` | Design-Theme (jetzt vereinheitlicht) |
 | `animation` | string | `smooth` | Animations-Level: `none`, `subtle`, `smooth`, oder `energetic` |
-| `blur_intensity` | number | `10` | Blur-Intensität für Glassmorphismus-Effekte (0-30) |
 
 ### Anzeige-Optionen
 
@@ -240,13 +165,6 @@ lovelace:
 | Name | Typ | Standard | Beschreibung |
 |------|-----|----------|--------------|
 | `dosing_type` | string | Auto-Erkennung | `chlorine`, `ph_minus`, `ph_plus`, oder `flocculant` |
-
-### Styling-Optionen
-
-| Name | Typ | Standard | Beschreibung |
-|------|-----|----------|--------------|
-| `accent_color` | string | Theme-Standard | Benutzerdefinierte Akzentfarbe |
-| `icon_color` | string | Theme-Standard | Benutzerdefinierte Icon-Farbe |
 
 ---
 
@@ -309,7 +227,6 @@ lovelace:
 - Responsive Grid-Layout (Desktop/Mobile)
 - Aggregiert Pumpe, Heizung, Solar, Dosierung und Übersicht
 - Perfekt für eine Hauptpanel-Ansicht
-- Unterstützt alle Themes (Modern/Luxury)
 
 ### 📊 Compact Card (Kompakt-Karte)
 - Ein-Zeilen-Kompakt-Anzeige pro Entity
@@ -350,7 +267,7 @@ cards:
     theme: luxury
     animation: smooth
 
-  # Reihe von Medium-Karten mit Glass Theme
+  # Reihe von Medium-Karten
   - type: horizontal-stack
     cards:
       - type: custom:violet-pool-card
@@ -521,12 +438,11 @@ Siehe [CHANGELOG.md](CHANGELOG.md) für Versions-Historie.
 
 ## 📋 Table of Contents
 
-- [🎉 NEW in v2.0: Visual Editor!](#-new-in-v20-visual-editor)
-- [✨ Features](#-features)
+- [✨ Features](#-features-1)
 - [📸 Screenshots](#-screenshots-1)
 - [📥 Installation](#-installation-1)
 - [⚙️ Configuration](#️-configuration-1)
-- [🎴 Card Types](#-card-types)
+- [🎴 Card Types](#-card-types-1)
 - [📖 Examples](#-examples-1)
 - [🛠️ Development](#️-development-1)
 - [🤝 Contributing](#-contributing)
@@ -535,73 +451,7 @@ Siehe [CHANGELOG.md](CHANGELOG.md) für Versions-Historie.
 
 ---
 
-## 🎉 NEW in v2.0: Visual Editor!
-
-**No YAML editing needed!** Configure everything through our beautiful visual editor:
-
-### ✨ Visual Editor Features
-
-**🎨 Visual Theme Picker**
-- See actual styled previews of all 6 themes
-- Click to select - live update
-- Emoji icons + descriptions
-- Hover effects
-
-**📐 Visual Size Picker**
-- See size previews (Small → Fullscreen)
-- Visual card size representation
-- One-click selection
-
-**⚡ Animation Selector**
-- Choose animation level with preview
-- None / Subtle / Smooth / Energetic
-- Icon + description
-
-**🎯 Smart Pickers**
-- Entity picker with auto-complete
-- Icon picker (MDI integration)
-- Color pickers for accent & icons
-- Blur intensity slider (0-30)
-
-**👆 Interactive Actions**
-- **Tap** - Click to toggle or open details
-- **Hold** (500ms) - Long press for different action
-- **Double-Tap** - Double click for custom action
-- Mobile vibration feedback
-
-**🎨 Smart Auto-Coloring**
-- **Temperature**: Blue (cold) → Green (ideal) → Red (hot)
-- **pH**: Color-coded based on target (±0.1/0.3/0.5)
-- **ORP/Chlorine**: Range-based coloring
-- **Pump Speed**: Gray/Blue/Green/Orange for 0/1/2/3
-- **Entity States**: Colored badges (ON/OFF/AUTO/MANUAL/Blocked/Error)
-
-**First pool card with visual theme and size previews!** 🏆
-
----
-
 ## ✨ Features
-
-### 🎨 Premium Design System
-
-**4 Card Sizes** - Perfect for any dashboard layout:
-- **Small** - Compact cards for dense layouts
-- **Medium** - Standard size (default)
-- **Large** - Spacious cards with enhanced visuals
-- **Fullscreen** - Immersive full-screen experience
-
-**6 Premium Themes** - Choose your perfect style:
-- **Luxury** - Enhanced glassmorphism with subtle gradients
-- **Modern** - Clean, minimal design with smooth transitions
-- **Minimalist** - Ultra-clean, borderless aesthetic
-- **Glass** - Pure glassmorphism with blur effects
-- **Neon** - Vibrant, energetic with animated glows
-- **Premium** - High-end gradient design with dynamic shine
-
-**3 Animation Levels** - Control the energy:
-- **Subtle** - Minimal, professional animations
-- **Smooth** - Balanced, pleasant motion
-- **Energetic** - Dynamic, eye-catching effects
 
 ### 🎴 Multiple Card Types
 - **Pump Card** - Speed control with RPM display and runtime counter
@@ -619,43 +469,34 @@ Siehe [CHANGELOG.md](CHANGELOG.md) für Versions-Historie.
 - **Water Chemistry** - Traffic light status for pH, ORP, and temperature
 - **Auto-Detection** - Smart sensor reading and icon selection
 
-### 🎨 Design & UX
-- **Status Visualization** - Color-coded status badges (OFF/ON/AUTO/MANUAL/BLOCKED)
-- **Interactive Controls** - Touch-optimized sliders for speed, temperature, and target values
-- **Quick Actions** - One-click buttons for common operations
-- **Detail Status** - Parse and display complex state information (anti-freeze, blockages)
-- **Responsive Design** - Works perfectly on desktop, tablet, and mobile
-- **Theme Support** - Full Dark/Light mode integration with HA themes
-
 ---
 
 ## 📸 Screenshots
 
-### Premium Theme Gallery
+### Card Types (Current Design)
 
-#### 🌟 Luxury Theme (Default)
-![Luxury Theme](screenshots/theme_luxury_pump.png)
+Here you can see the current design of the Violet Pool Card. Due to size optimizations (100kb limit), all variants now share a consistent, modern appearance.
 
-#### 🎯 Modern Theme
-![Modern Theme](screenshots/theme_modern_heater.png)
-
-#### 💎 Glass Theme
-![Glass Theme](screenshots/theme_glass_solar.png)
-
-#### ⚡ Neon Theme
-![Neon Theme](screenshots/theme_neon_dosing.png)
-
-#### 👑 Premium Theme
-![Premium Theme](screenshots/theme_premium_pump.png)
-
-### Card Types
-
+#### Pump Card
 ![Pump Card](screenshots/pump_card.png)
+
+#### Heater Card
 ![Heater Card](screenshots/heater_card.png)
+
+#### Solar Card
 ![Solar Card](screenshots/solar_card.png)
+
+#### Dosing Card
 ![Dosing Card](screenshots/dosing_card.png)
+
+#### Overview Card
 ![Overview Card](screenshots/overview_card.png)
+
+#### Compact Card
 ![Compact Card](screenshots/compact_card.png)
+
+#### System View (Example)
+![System View](screenshots/example_system_fullscreen.png)
 
 ---
 
@@ -700,14 +541,15 @@ lovelace:
 | `name` | string | Optional | Custom name for the card |
 | `icon` | string | Optional | Custom icon (MDI) |
 
-### Premium Design Options
+### Design Options (Limited)
+
+> Note: Theme selection is still available but visual differences are minimal.
 
 | Name | Type | Default | Description |
 |------|------|---------|-------------|
 | `size` | string | `medium` | Card size: `small`, `medium`, `large`, or `fullscreen` |
-| `theme` | string | `luxury` | Design theme: `luxury`, `modern`, `minimalist`, `glass`, `neon`, or `premium` |
+| `theme` | string | `luxury` | Design theme (now unified) |
 | `animation` | string | `smooth` | Animation level: `none`, `subtle`, `smooth`, or `energetic` |
-| `blur_intensity` | number | `10` | Blur intensity for glassmorphism effects (0-30) |
 
 ### Display Options
 
@@ -724,13 +566,6 @@ lovelace:
 | Name | Type | Default | Description |
 |------|-----|---------|-------------|
 | `dosing_type` | string | Auto-detect | `chlorine`, `ph_minus`, `ph_plus`, or `flocculant` |
-
-### Styling Options
-
-| Name | Type | Default | Description |
-|------|------|---------|-------------|
-| `accent_color` | string | Theme default | Custom accent color |
-| `icon_color` | string | Theme default | Custom icon color |
 
 ---
 
@@ -793,7 +628,6 @@ lovelace:
 - Responsive grid layout (desktop/mobile)
 - Aggregates Pump, Heater, Solar, Dosing, and Overview
 - Perfect for a main panel view
-- Supports all themes (Modern/Luxury)
 
 ### 📊 Compact Card
 - One-line compact display per entity
@@ -992,7 +826,7 @@ MIT License - see [LICENSE](LICENSE) file for details
 See [CHANGELOG.md](CHANGELOG.md) for version history.
 
 **Current Version**: 1.0.0
-**Bundle Size**: 84KB
+**Bundle-Size**: 84KB
 **Cards**: 6 Types
 **Components**: 7
 **Status**: ✅ Production Ready
