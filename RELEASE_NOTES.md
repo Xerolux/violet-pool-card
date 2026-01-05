@@ -1,4 +1,4 @@
-## v0.1.0-alpha.2 – Violet Pool Card
+## v0.1.0-alpha.3 – Violet Pool Card
 
 🔴 **ALPHA RELEASE** - Experimental features, use with caution!
 
@@ -6,13 +6,15 @@
 
 ### ✨ New Features | Neue Funktionen
 
+- add-bundle-size-reporting (fdd0189)
+- feat: Add dynamic entity prefix support for multiple controllers (dd1f9aa)
 - feat: add advanced release workflow (461bf61)
 - 🌐 Improve README: Fix badges & add bilingual structure (ea3e55c)
-- add-screenshots (c84ab5c)
-- Add screenshots to README.md (6a7d97a)
 
 ### 🚀 Improvements | Verbesserungen
 
+- chore: Update package-lock.json (d1e8ba2)
+- 📝 Release v0.1.0-alpha.2 - Update changelog and version (9b28e69)
 - Resolve conflicts and optimize bundle size (1add116)
 - Resolve PR #15 merge conflicts and optimize bundle size (d8f138f)
 - Implement Premium UI themes (iOS/OneUI style) and optimize bundle size (2fcb805)
@@ -25,10 +27,10 @@
 - 🌐 Improve README: Fix badges & add bilingual structure (ea3e55c)
 - Update README.md (bdd83d3)
 - Update FUNDING.yml (5c442ba)
-- 📖 README Update: Visual Editor Showcase (1a3da5d)
 
 ### 🔧 Bug Fixes | Fehlerbehebungen
 
+- fix: Reduce bundle size to under 100KB limit (9bff871)
 - fix-pr-15-comments (18c4bcb)
 - Fix PR 15 issues: Configurable entities, CSS fixes, and Docs refactoring (6403ada)
 - 🌐 Improve README: Fix badges & add bilingual structure (ea3e55c)
@@ -43,8 +45,6 @@
 - improve-readme-badges (7ed69bb)
 - 🌐 Improve README: Fix badges & add bilingual structure (ea3e55c)
 - Update README.md (bdd83d3)
-- Add screenshots to README.md (6a7d97a)
-- 📖 README Update: Visual Editor Showcase (1a3da5d)
 
 ---
 
@@ -92,4 +92,4 @@ Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
 
 ---
 
-_Generated automatically by GitHub Actions on 2026-01-05 12:40:37 UTC_
+_Generated automatically by GitHub Actions on 2026-01-05 13:09:46 UTC_
