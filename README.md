@@ -6,9 +6,12 @@
 [![hacs](https://img.shields.io/badge/HACS-Custom-orange.svg?style=flat-square)](https://github.com/hacs/integration)
 [![Validate](https://github.com/Xerolux/VIOLET_CARD_QUICK/actions/workflows/validate.yml/badge.svg)](https://github.com/Xerolux/VIOLET_CARD_QUICK/actions/workflows/validate.yml)
 
-[![Buy Me A Coffee](https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg?style=flat-square)](https://www.buymeacoffee.com/xerolux)
+[![Discord][discord-shield]][discord]
+[![Community Forum][forum-shield]][forum]
+[![Buy Me A Coffee][buymeacoffee-badge]][buymeacoffee]
 [![PayPal](https://img.shields.io/badge/paypal-donate-blue.svg?style=flat-square)](https://paypal.me/xerolux)
 [![Ko-fi](https://img.shields.io/badge/ko--fi-donate-red.svg?style=flat-square)](https://ko-fi.com/xerolux)
+[![Tesla](https://img.shields.io/badge/Tesla-Referral-red?style=for-the-badge&logo=tesla)](https://ts.la/sebastian564489)
 
 **The Ultimate Premium Lovelace Card** for the [Violet Pool Controller](https://github.com/Xerolux/violet-hass) integration for Home Assistant.
 
