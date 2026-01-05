@@ -52,6 +52,29 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
           </ha-select>
         </div>
 
+        <!-- Controller Configuration -->
+        <div class="config-section">
+          <div class="section-header">
+            <ha-icon icon="mdi:chip"></ha-icon>
+            <span>Controller Configuration</span>
+          </div>
+
+          <ha-textfield
+            label="Entity Prefix"
+            .value="${this._config.entity_prefix || 'violet_pool'}"
+            @input="${this._entityPrefixChanged}"
+            helper="Name of your pool controller (e.g., 'violet_pool', 'pool_1', 'garden_pool')"
+          ></ha-textfield>
+
+          <div class="prefix-info">
+            <ha-icon icon="mdi:information-outline"></ha-icon>
+            <span>
+              The entity prefix should match your Violet Pool Controller name in Home Assistant.
+              All entities will be automatically discovered based on this prefix.
+            </span>
+          </div>
+        </div>
+
         <!-- Entity Selection (not for overview/system) -->
         ${this._config.card_type !== 'overview' && this._config.card_type !== 'system'
           ? html`
@@ -307,6 +330,18 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
     this._fireConfigChanged();
   }
 
+  private _entityPrefixChanged(ev: Event): void {
+    const target = ev.target as HTMLInputElement;
+    const value = target.value.trim().toLowerCase().replace(/[^a-z0-9_]/g, '_');
+    if (this._config.entity_prefix === value) return;
+
+    this._config = {
+      ...this._config,
+      entity_prefix: value || 'violet_pool',
+    };
+    this._fireConfigChanged();
+  }
+
   private _entityChanged(ev: CustomEvent): void {
     const target = ev.detail;
     if (this._config.entity === target.value) return;
@@ -478,6 +513,26 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
       .section-header ha-icon {
         --mdc-icon-size: 20px;
         color: var(--primary-color);
+      }
+
+      .prefix-info {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        padding: 12px;
+        margin-top: 12px;
+        background: rgba(var(--rgb-primary-color, 33, 150, 243), 0.1);
+        border-radius: 8px;
+        font-size: 12px;
+        color: var(--secondary-text-color);
+        line-height: 1.4;
+      }
+
+      .prefix-info ha-icon {
+        --mdc-icon-size: 18px;
+        color: var(--primary-color);
+        flex-shrink: 0;
+        margin-top: 2px;
       }
 
       .premium-section {

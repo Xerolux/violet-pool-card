@@ -59,6 +59,10 @@ interface LovelaceCardConfig {
 }
 
 export interface VioletPoolCardConfig extends LovelaceCardConfig {
+  // Dynamic entity naming - supports multiple controllers
+  entity_prefix?: string; // e.g., 'violet_pool', 'pool_1', 'garden_pool'
+
+  // Individual entity overrides (optional - auto-generated from prefix if not set)
   pump_entity?: string;
   heater_entity?: string;
   solar_entity?: string;
@@ -68,6 +72,8 @@ export interface VioletPoolCardConfig extends LovelaceCardConfig {
   pool_temp_entity?: string;
   ph_value_entity?: string;
   orp_value_entity?: string;
+  target_orp_entity?: string;
+  target_ph_entity?: string;
 }
 
 @customElement('violet-pool-card')
@@ -104,8 +110,48 @@ export class VioletPoolCard extends LitElement {
       style: 'standard',
       show_flow_animation: false,
 
+      // Default entity prefix (matches violet-hass integration default)
+      entity_prefix: 'violet_pool',
+
       ...config,
     };
+  }
+
+  /**
+   * Build entity ID from prefix and suffix
+   * Supports dynamic entity naming for multiple controllers
+   *
+   * @example
+   * _buildEntityId('switch', 'pump') => 'switch.violet_pool_pump'
+   * With entity_prefix: 'pool_1' => 'switch.pool_1_pump'
+   */
+  private _buildEntityId(domain: string, suffix: string): string {
+    const prefix = this.config.entity_prefix || 'violet_pool';
+    return `${domain}.${prefix}_${suffix}`;
+  }
+
+  /**
+   * Get entity ID with fallback to config override or auto-generated from prefix
+   */
+  private _getEntityId(
+    configKey: keyof VioletPoolCardConfig,
+    domain: string,
+    suffix: string,
+    entitiesIndex?: number
+  ): string {
+    // First: Check explicit config override
+    const configValue = this.config[configKey] as string | undefined;
+    if (configValue) {
+      return configValue;
+    }
+
+    // Second: Check entities array
+    if (entitiesIndex !== undefined && this.config.entities && this.config.entities[entitiesIndex]) {
+      return this.config.entities[entitiesIndex];
+    }
+
+    // Third: Build from prefix
+    return this._buildEntityId(domain, suffix);
   }
 
   protected render(): TemplateResult {
@@ -188,11 +234,11 @@ export class VioletPoolCard extends LitElement {
   }
 
   private renderSystemCard(): TemplateResult {
-    // Determine entities from config or defaults
-    const pumpEntity = this.config.pump_entity || (this.config.entities && this.config.entities[0]) || 'switch.violet_pool_pump';
-    const heaterEntity = this.config.heater_entity || (this.config.entities && this.config.entities[1]) || 'climate.violet_pool_heater';
-    const solarEntity = this.config.solar_entity || (this.config.entities && this.config.entities[2]) || 'climate.violet_pool_solar';
-    const dosingEntity = this.config.chlorine_entity || (this.config.entities && this.config.entities[3]) || 'switch.violet_pool_dos_1_cl';
+    // Determine entities from config or prefix-based defaults
+    const pumpEntity = this._getEntityId('pump_entity', 'switch', 'pump', 0);
+    const heaterEntity = this._getEntityId('heater_entity', 'climate', 'heater', 1);
+    const solarEntity = this._getEntityId('solar_entity', 'climate', 'solar', 2);
+    const dosingEntity = this._getEntityId('chlorine_entity', 'switch', 'dos_1_cl', 3);
 
     // Helper to create config for sub-cards
     const createSubConfig = (type: string, entity: string, extra: any = {}): VioletPoolCardConfig | null => {
@@ -661,20 +707,24 @@ export class VioletPoolCard extends LitElement {
     let valueIcon = 'mdi:test-tube';
 
     if (dosingType === 'chlorine') {
-      // ORP sensor
-      const orpSensor = this.hass.states['sensor.violet_pool_orp_value'];
+      // ORP sensor - use dynamic entity IDs
+      const orpSensorId = this._getEntityId('orp_value_entity', 'sensor', 'orp_value');
+      const orpSensor = this.hass.states[orpSensorId];
       currentValue = orpSensor ? parseFloat(orpSensor.state) : undefined;
-      const targetEntity = this.hass.states['number.violet_pool_target_orp'];
+      const targetOrpId = this._getEntityId('target_orp_entity', 'number', 'target_orp');
+      const targetEntity = this.hass.states[targetOrpId];
       targetValue = targetEntity ? parseFloat(targetEntity.state) : undefined;
       minValue = targetEntity?.attributes?.min || 600;
       maxValue = targetEntity?.attributes?.max || 800;
       unit = 'mV';
       valueIcon = 'mdi:flash';
     } else if (dosingType === 'ph_minus' || dosingType === 'ph_plus') {
-      // pH sensor
-      const phSensor = this.hass.states['sensor.violet_pool_ph_value'];
+      // pH sensor - use dynamic entity IDs
+      const phSensorId = this._getEntityId('ph_value_entity', 'sensor', 'ph_value');
+      const phSensor = this.hass.states[phSensorId];
       currentValue = phSensor ? parseFloat(phSensor.state) : undefined;
-      const targetEntity = this.hass.states['number.violet_pool_target_ph'];
+      const targetPhId = this._getEntityId('target_ph_entity', 'number', 'target_ph');
+      const targetEntity = this.hass.states[targetPhId];
       targetValue = targetEntity ? parseFloat(targetEntity.state) : undefined;
       minValue = targetEntity?.attributes?.min || 6.8;
       maxValue = targetEntity?.attributes?.max || 7.8;
@@ -816,12 +866,12 @@ export class VioletPoolCard extends LitElement {
   private renderOverviewCard(config: VioletPoolCardConfig = this.config): TemplateResult {
     const name = config.name || 'Pool Status';
 
-    // Get all pool entities
-    const pumpEntityId = this.config.pump_entity || (this.config.entities && this.config.entities[0]) || 'switch.violet_pool_pump';
-    const heaterEntityId = this.config.heater_entity || (this.config.entities && this.config.entities[1]) || 'climate.violet_pool_heater';
-    const solarEntityId = this.config.solar_entity || (this.config.entities && this.config.entities[2]) || 'climate.violet_pool_solar';
-    const chlorineEntityId = this.config.chlorine_entity || (this.config.entities && this.config.entities[3]) || 'switch.violet_pool_dos_1_cl';
-    const phEntityId = this.config.ph_minus_entity || (this.config.entities && this.config.entities[4]) || 'switch.violet_pool_dos_2_phm';
+    // Get all pool entities - using dynamic entity IDs based on prefix
+    const pumpEntityId = this._getEntityId('pump_entity', 'switch', 'pump', 0);
+    const heaterEntityId = this._getEntityId('heater_entity', 'climate', 'heater', 1);
+    const solarEntityId = this._getEntityId('solar_entity', 'climate', 'solar', 2);
+    const chlorineEntityId = this._getEntityId('chlorine_entity', 'switch', 'dos_1_cl', 3);
+    const phEntityId = this._getEntityId('ph_minus_entity', 'switch', 'dos_2_phm', 4);
 
     const pumpEntity = this.hass.states[pumpEntityId];
     const heaterEntity = this.hass.states[heaterEntityId];
@@ -829,10 +879,10 @@ export class VioletPoolCard extends LitElement {
     const chlorineEntity = this.hass.states[chlorineEntityId];
     const phEntity = this.hass.states[phEntityId];
 
-    // Get sensor values
-    const poolTempSensorId = this.config.pool_temp_entity || (this.config.entities && this.config.entities[5]) || 'sensor.violet_pool_temperature';
-    const phSensorId = this.config.ph_value_entity || (this.config.entities && this.config.entities[6]) || 'sensor.violet_pool_ph_value';
-    const orpSensorId = this.config.orp_value_entity || (this.config.entities && this.config.entities[7]) || 'sensor.violet_pool_orp_value';
+    // Get sensor values - using dynamic entity IDs based on prefix
+    const poolTempSensorId = this._getEntityId('pool_temp_entity', 'sensor', 'temperature', 5);
+    const phSensorId = this._getEntityId('ph_value_entity', 'sensor', 'ph_value', 6);
+    const orpSensorId = this._getEntityId('orp_value_entity', 'sensor', 'orp_value', 7);
 
     const poolTempSensor = this.hass.states[poolTempSensorId];
     const phSensor = this.hass.states[phSensorId];
@@ -1095,15 +1145,17 @@ export class VioletPoolCard extends LitElement {
         detailStatus = EntityHelper.formatSnakeCase(dosingState[0]);
       }
 
-      // Get current dosing value
+      // Get current dosing value - using dynamic entity IDs
       const dosingType = this._detectDosingType(config.entity!);
       if (dosingType === 'chlorine') {
-        const orpSensor = this.hass.states['sensor.violet_pool_orp_value'];
+        const orpSensorId = this._getEntityId('orp_value_entity', 'sensor', 'orp_value');
+        const orpSensor = this.hass.states[orpSensorId];
         if (orpSensor) {
           currentValue = `${parseFloat(orpSensor.state).toFixed(0)}mV`;
         }
       } else if (dosingType === 'ph_minus' || dosingType === 'ph_plus') {
-        const phSensor = this.hass.states['sensor.violet_pool_ph_value'];
+        const phSensorId = this._getEntityId('ph_value_entity', 'sensor', 'ph_value');
+        const phSensor = this.hass.states[phSensorId];
         if (phSensor) {
           currentValue = `pH ${parseFloat(phSensor.state).toFixed(1)}`;
         }
@@ -1351,6 +1403,7 @@ export class VioletPoolCard extends LitElement {
   public static getStubConfig(): VioletPoolCardConfig {
     return {
       type: 'custom:violet-pool-card',
+      entity_prefix: 'violet_pool',
       entity: 'switch.violet_pool_pump',
       card_type: 'pump',
     };
