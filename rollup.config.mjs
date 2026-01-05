@@ -19,6 +19,15 @@ export default {
       declaration: false,
     }),
     !dev && terser({
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+        pure_funcs: ['console.info', 'console.debug', 'console.log'],
+        passes: 2,
+      },
+      mangle: {
+        properties: false,
+      },
       format: {
         comments: false,
       },
