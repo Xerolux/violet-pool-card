@@ -1,27 +1,537 @@
 # 🏊 Violet Pool Card - Premium Edition
 
+<div align="center">
+
 [![GitHub Release](https://img.shields.io/github/release/Xerolux/VIOLET_CARD_QUICK.svg?style=flat-square)](https://github.com/Xerolux/VIOLET_CARD_QUICK/releases)
 [![GitHub Activity](https://img.shields.io/github/commit-activity/m/Xerolux/VIOLET_CARD_QUICK.svg?style=flat-square)](https://github.com/Xerolux/VIOLET_CARD_QUICK/commits/main)
 [![License](https://img.shields.io/github/license/Xerolux/VIOLET_CARD_QUICK.svg?style=flat-square)](LICENSE)
-[![hacs](https://img.shields.io/badge/HACS-Custom-orange.svg?style=flat-square)](https://github.com/hacs/integration)
+[![HACS](https://img.shields.io/badge/HACS-Custom-orange.svg?style=flat-square)](https://github.com/hacs/integration)
 [![Validate](https://github.com/Xerolux/VIOLET_CARD_QUICK/actions/workflows/validate.yml/badge.svg)](https://github.com/Xerolux/VIOLET_CARD_QUICK/actions/workflows/validate.yml)
 
-[![Discord][discord-shield]][discord]
-[![Community Forum][forum-shield]][forum]
-[![Buy Me A Coffee][buymeacoffee-badge]][buymeacoffee]
-[![PayPal](https://img.shields.io/badge/paypal-donate-blue.svg?style=flat-square)](https://paypal.me/xerolux)
-[![Ko-fi](https://img.shields.io/badge/ko--fi-donate-red.svg?style=flat-square)](https://ko-fi.com/xerolux)
-[![Tesla](https://img.shields.io/badge/Tesla-Referral-red?style=for-the-badge&logo=tesla)](https://ts.la/sebastian564489)
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-donate-yellow.svg?style=for-the-badge&logo=buy-me-a-coffee)](https://www.buymeacoffee.com/xerolux)
+[![PayPal](https://img.shields.io/badge/PayPal-donate-blue.svg?style=for-the-badge&logo=paypal)](https://paypal.me/xerolux)
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-donate-red.svg?style=for-the-badge&logo=ko-fi)](https://ko-fi.com/xerolux)
+[![Tesla Referral](https://img.shields.io/badge/Tesla-Referral-red?style=for-the-badge&logo=tesla)](https://ts.la/sebastian564489)
 
-**The Ultimate Premium Lovelace Card** for the [Violet Pool Controller](https://github.com/Xerolux/violet-hass) integration for Home Assistant.
-
-> 🌟 **Visual Editor** · **No YAML!** · **6 Premium Themes** · **4 Flexible Sizes** · **Smart Auto-Coloring** · **Best Pool Card Available**
-
-<p align="center">
+<p>
   <img src="https://img.shields.io/badge/Made%20with-Lit-324FFF?style=for-the-badge&logo=lit" alt="Made with Lit">
   <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript">
   <img src="https://img.shields.io/badge/Home%20Assistant-41BDF5?style=for-the-badge&logo=home-assistant&logoColor=white" alt="Home Assistant">
 </p>
+
+**Die ultimative Premium Lovelace Card** für die [Violet Pool Controller](https://github.com/Xerolux/violet-hass) Integration für Home Assistant.
+
+> 🌟 **Visual Editor** · **Kein YAML!** · **6 Premium Themes** · **4 Flexible Größen** · **Smart Auto-Coloring** · **Die beste Pool Card überhaupt**
+
+</div>
+
+---
+
+## 🌐 Language / Sprache
+
+**[🇩🇪 Deutsche Dokumentation](#-deutsche-dokumentation)** | **[🇬🇧 English Documentation](#-english-documentation)**
+
+---
+
+# 🇩🇪 Deutsche Dokumentation
+
+## 📋 Inhaltsverzeichnis
+
+- [🎉 Neu in v2.0: Visual Editor!](#-neu-in-v20-visual-editor)
+- [✨ Hauptfunktionen](#-hauptfunktionen)
+- [📸 Screenshots](#-screenshots)
+- [📥 Installation](#-installation)
+- [⚙️ Konfiguration](#️-konfiguration)
+- [🎴 Kartentypen](#-kartentypen)
+- [📖 Beispiele](#-beispiele)
+- [🛠️ Entwicklung](#️-entwicklung)
+- [🤝 Mitwirken](#-mitwirken)
+- [💝 Unterstützung](#-unterstützung)
+- [📜 Lizenz](#-lizenz)
+
+---
+
+## 🎉 Neu in v2.0: Visual Editor!
+
+**Keine YAML-Bearbeitung mehr nötig!** Konfiguriere alles über unseren schönen Visual Editor:
+
+### ✨ Visual Editor Funktionen
+
+**🎨 Visueller Theme-Picker**
+- Vorschau aller 6 Themes mit echtem Styling
+- Klicken zum Auswählen - Live-Update
+- Emoji-Icons mit Beschreibungen
+- Hover-Effekte
+
+**📐 Visueller Größen-Picker**
+- Größenvorschau (Klein → Vollbild)
+- Visuelle Kartengröße
+- Ein-Klick-Auswahl
+
+**⚡ Animations-Auswahl**
+- Animations-Level mit Vorschau wählen
+- Keine / Subtil / Smooth / Energetisch
+- Icon mit Beschreibung
+
+**🎯 Intelligente Picker**
+- Entity-Picker mit Auto-Complete
+- Icon-Picker (MDI-Integration)
+- Farbwähler für Akzente & Icons
+- Blur-Intensität Slider (0-30)
+
+**👆 Interaktive Aktionen**
+- **Tap** - Klicken zum Umschalten oder Details öffnen
+- **Hold** (500ms) - Lange drücken für andere Aktion
+- **Double-Tap** - Doppelklick für benutzerdefinierte Aktion
+- Mobile Vibrations-Feedback
+
+**🎨 Intelligente Auto-Färbung**
+- **Temperatur**: Blau (kalt) → Grün (ideal) → Rot (heiß)
+- **pH-Wert**: Farbcodiert basierend auf Zielwert (±0.1/0.3/0.5)
+- **ORP/Chlor**: Bereichsbasierte Färbung
+- **Pumpen-Geschwindigkeit**: Grau/Blau/Grün/Orange für 0/1/2/3
+- **Entity-Zustände**: Farbige Badges (ON/OFF/AUTO/MANUAL/Blockiert/Fehler)
+
+**Die erste Pool-Card mit visueller Theme- und Größenvorschau!** 🏆
+
+---
+
+## ✨ Hauptfunktionen
+
+### 🎨 Premium Design-System
+
+**4 Kartengrößen** - Perfekt für jedes Dashboard-Layout:
+- **Small** - Kompakte Karten für dichte Layouts
+- **Medium** - Standardgröße (Standard)
+- **Large** - Geräumige Karten mit erweiterten Visuals
+- **Fullscreen** - Immersives Vollbild-Erlebnis
+
+**6 Premium Themes** - Wähle deinen perfekten Stil:
+- **Luxury** - Verbesserter Glassmorphismus mit subtilen Gradienten
+- **Modern** - Sauberes, minimales Design mit sanften Übergängen
+- **Minimalist** - Ultra-clean, randloses Design
+- **Glass** - Reiner Glassmorphismus mit Blur-Effekten
+- **Neon** - Lebendig, energetisch mit animierten Glows
+- **Premium** - High-End Gradient-Design mit dynamischem Glanz
+
+**3 Animations-Level** - Kontrolliere die Energie:
+- **Subtle** - Minimale, professionelle Animationen
+- **Smooth** - Ausgewogene, angenehme Bewegung
+- **Energetic** - Dynamische, auffällige Effekte
+
+### 🎴 Mehrere Kartentypen
+- **Pump Card** - Geschwindigkeitskontrolle mit RPM-Anzeige und Laufzeit-Zähler
+- **Heater Card** - Temperaturkontrolle mit Außentemperatur-Überwachung
+- **Solar Card** - Temperatur-Delta-Berechnung mit farbcodierten Hinweisen
+- **Dosing Card** - Auto-Erkennung des Dosiertyps mit aktuellen/Zielwerten
+- **Overview Card** - Wasserchemie-Dashboard mit Ampel-System
+- **Compact Card** - Ein-Zeilen-Anzeige für Dashboard-Übersicht
+
+### 🎯 Intelligente Funktionen
+- **Animierte Icons** - Rotierende Pumpe, pulsierende Heizungs-/Dosier-Icons
+- **Laufzeit-Zähler** - Pumpen-Laufzeit im h/min-Format
+- **RPM-Anzeige** - Zeigt aktuelle Pumpengeschwindigkeit in RPM
+- **Temperatur-Delta** - Solar-Absorber vs. Pool-Temperatur mit Hinweisen
+- **Wasserchemie** - Ampel-Status für pH, ORP und Temperatur
+- **Auto-Erkennung** - Intelligente Sensor-Auslesung und Icon-Auswahl
+
+### 🎨 Design & UX
+- **Status-Visualisierung** - Farbcodierte Status-Badges (OFF/ON/AUTO/MANUAL/BLOCKIERT)
+- **Interaktive Kontrollen** - Touch-optimierte Slider für Geschwindigkeit, Temperatur und Zielwerte
+- **Schnell-Aktionen** - Ein-Klick-Buttons für häufige Operationen
+- **Detail-Status** - Parst und zeigt komplexe Status-Informationen (Frostschutz, Blockaden)
+- **Responsive Design** - Funktioniert perfekt auf Desktop, Tablet und Mobile
+- **Theme-Unterstützung** - Volle Dark/Light Mode Integration mit HA-Themes
+
+---
+
+## 📸 Screenshots
+
+### Premium Theme Galerie
+
+#### 🌟 Luxury Theme (Standard)
+![Luxury Theme](screenshots/theme_luxury_pump.png)
+
+#### 🎯 Modern Theme
+![Modern Theme](screenshots/theme_modern_heater.png)
+
+#### 💎 Glass Theme
+![Glass Theme](screenshots/theme_glass_solar.png)
+
+#### ⚡ Neon Theme
+![Neon Theme](screenshots/theme_neon_dosing.png)
+
+#### 👑 Premium Theme
+![Premium Theme](screenshots/theme_premium_pump.png)
+
+### Kartentypen
+
+![Pump Card](screenshots/pump_card.png)
+![Heater Card](screenshots/heater_card.png)
+![Solar Card](screenshots/solar_card.png)
+![Dosing Card](screenshots/dosing_card.png)
+![Overview Card](screenshots/overview_card.png)
+![Compact Card](screenshots/compact_card.png)
+
+---
+
+## 📥 Installation
+
+### HACS (Empfohlen)
+
+1. Öffne **HACS** in deinem Home Assistant
+2. Klicke auf **"Frontend"**
+3. Klicke auf die **drei Punkte** in der oberen rechten Ecke
+4. Wähle **"Custom repositories"**
+5. Füge `https://github.com/Xerolux/VIOLET_CARD_QUICK` als **Lovelace** Plugin hinzu
+6. Klicke auf **"Install"**
+7. **Starte Home Assistant neu**
+
+### Manuelle Installation
+
+1. Lade `violet-pool-card.js` vom [neuesten Release](https://github.com/Xerolux/VIOLET_CARD_QUICK/releases) herunter
+2. Kopiere es nach `config/www/violet-pool-card.js`
+3. Füge die Ressource in deiner `configuration.yaml` hinzu:
+
+```yaml
+lovelace:
+  resources:
+    - url: /local/violet-pool-card.js
+      type: module
+```
+
+4. **Starte Home Assistant neu**
+
+---
+
+## ⚙️ Konfiguration
+
+### Basis-Konfiguration
+
+| Name | Typ | Standard | Beschreibung |
+|------|-----|----------|--------------|
+| `type` | string | **Erforderlich** | `custom:violet-pool-card` |
+| `entity` | string | **Erforderlich** | Entity ID (außer für overview) |
+| `card_type` | string | **Erforderlich** | `pump`, `heater`, `solar`, `dosing`, `overview`, `compact`, oder `system` |
+| `name` | string | Optional | Benutzerdefinierter Name für die Karte |
+| `icon` | string | Optional | Benutzerdefiniertes Icon (MDI) |
+
+### Premium Design-Optionen
+
+| Name | Typ | Standard | Beschreibung |
+|------|-----|----------|--------------|
+| `size` | string | `medium` | Kartengröße: `small`, `medium`, `large`, oder `fullscreen` |
+| `theme` | string | `luxury` | Design-Theme: `luxury`, `modern`, `minimalist`, `glass`, `neon`, oder `premium` |
+| `animation` | string | `smooth` | Animations-Level: `none`, `subtle`, `smooth`, oder `energetic` |
+| `blur_intensity` | number | `10` | Blur-Intensität für Glassmorphismus-Effekte (0-30) |
+
+### Anzeige-Optionen
+
+| Name | Typ | Standard | Beschreibung |
+|------|-----|----------|--------------|
+| `show_state` | boolean | `true` | Status-Badge anzeigen |
+| `show_detail_status` | boolean | `true` | Detaillierte Status-Info anzeigen |
+| `show_controls` | boolean | `true` | Kontroll-Slider/Buttons anzeigen |
+| `show_runtime` | boolean | `false` | Laufzeit-Zähler anzeigen (nur Pumpe) |
+| `show_history` | boolean | `false` | Dosier-Historie anzeigen (nur Dosierung) |
+
+### Dosier-Optionen
+
+| Name | Typ | Standard | Beschreibung |
+|------|-----|----------|--------------|
+| `dosing_type` | string | Auto-Erkennung | `chlorine`, `ph_minus`, `ph_plus`, oder `flocculant` |
+
+### Styling-Optionen
+
+| Name | Typ | Standard | Beschreibung |
+|------|-----|----------|--------------|
+| `accent_color` | string | Theme-Standard | Benutzerdefinierte Akzentfarbe |
+| `icon_color` | string | Theme-Standard | Benutzerdefinierte Icon-Farbe |
+
+---
+
+## 🎴 Kartentypen
+
+### 🔵 Pump Card (Pumpen-Karte)
+- Geschwindigkeitskontrolle (0-3: OFF/ECO/Normal/Boost)
+- Animiertes rotierendes Pumpen-Icon wenn aktiv ⚙️
+- RPM-Anzeige für aktuelles Geschwindigkeitslevel
+- Status-Badge mit aktuellem Level-Indikator
+- Detail-Status (z.B. "Pump Anti Freeze")
+- Schnell-Aktions-Buttons (OFF/AUTO/ECO/Normal/Boost)
+- Optionaler Laufzeit-Zähler (h/min Format)
+
+### 🔥 Heater Card (Heizungs-Karte)
+- Temperatur-Slider (18-35°C mit 0.5° Schritten)
+- Animiertes pulsierendes Icon beim Heizen 🔥
+- Aktuelle vs. Ziel-Temperatur-Anzeige
+- Außentemperatur-Indikator mit Warnung
+- Blockade-Status-Anzeige (min. Außentemperatur)
+- Schnell-Aktions-Buttons (OFF/AUTO/HEAT)
+
+### ☀️ Solar Card (Solar-Karte)
+- Pool- vs. Absorber-Temperatur-Anzeige
+- Temperatur-Delta-Berechnung mit farbcodierten Hinweisen:
+  - 🔴 **Rot**: Zu kalt zum Heizen (negatives Delta)
+  - 🟡 **Gelb**: Heizen möglich (0-3°C)
+  - 🟢 **Grün**: Ideal zum Heizen (>3°C)
+- Zieltemperatur-Kontrolle (18-32°C)
+- Frostschutz-Status-Anzeige
+- Schnell-Aktions-Buttons (OFF/AUTO/ON)
+
+### 💧 Dosing Card (Dosier-Karte)
+- Auto-Erkennung des Dosier-Typs (Chlor, pH-, pH+, Flockungsmittel)
+- Aktueller Wert-Anzeige mit korrekter Formatierung:
+  - ORP: 0 Dezimalstellen (650mV)
+  - pH: 1 Dezimalstelle (7.2)
+- Zielwert mit Pfeil-Indikator (→)
+- Min/Max-Schwellenwert-Anzeige
+- Animiertes pulsierendes Icon beim Dosieren 💫
+- Blockade-Gründe als abweisbare Chips
+- Schnell-Aktions-Buttons (OFF/AUTO/Dosieren 30s/Dosieren 60s)
+- Optionale Dosier-Historie (24h Volumen)
+
+### 🏊 Overview Card (Übersichts-Karte)
+- Wasserchemie-Dashboard mit Ampel-Indikatoren:
+  - 🌡️ Pool-Temperatur mit OK-Status
+  - 🧪 pH-Wert mit Bereichsprüfung (7.0-7.4)
+  - ⚡ ORP-Wert mit Bereichsprüfung (650-750mV)
+- Aktive Geräte-Liste mit Status-Icons
+- Farbcodierte Gerätezustände (aktiv/inaktiv)
+- Warnungs-Bereich mit Icons:
+  - ORP zu niedrig/hoch Alarme
+  - pH außerhalb des Bereichs Alarme
+  - ❄️ Frostschutz-Status
+- ✅ "Alle Systeme normal" Indikator wenn keine Warnungen
+
+### 🖥️ System Card (System-Karte)
+- Vollbild-Dashboard-Ansicht mit allen Kontrollen kombiniert
+- Responsive Grid-Layout (Desktop/Mobile)
+- Aggregiert Pumpe, Heizung, Solar, Dosierung und Übersicht
+- Perfekt für eine Hauptpanel-Ansicht
+- Unterstützt alle Themes (Modern/Luxury)
+
+### 📊 Compact Card (Kompakt-Karte)
+- Ein-Zeilen-Kompakt-Anzeige pro Entity
+- Auto-erkanntes Icon basierend auf Entity-Typ
+- Status-Badge mit Zustands-Indikator
+- Aktueller Wert-Anzeige (Temperatur, Level, pH, ORP)
+- Detail-Status (Frostschutz, Blockade, etc.)
+- Farbcodierte aktive/inaktive Icons
+- Hover-Effekt für bessere UX
+- Perfekt für Dashboard-Übersicht
+
+---
+
+## 📖 Beispiele
+
+### Premium Showcase Dashboard
+
+```yaml
+# Vollbild Premium Hauptkarte
+type: custom:violet-pool-card
+entity: switch.violet_pool_pump
+card_type: system
+size: fullscreen
+theme: premium
+animation: energetic
+```
+
+### Gemischte Größen Dashboard
+
+```yaml
+type: vertical-stack
+cards:
+  # Große Übersicht mit Luxury Theme
+  - type: custom:violet-pool-card
+    card_type: overview
+    name: Pool Status
+    size: large
+    theme: luxury
+    animation: smooth
+
+  # Reihe von Medium-Karten mit Glass Theme
+  - type: horizontal-stack
+    cards:
+      - type: custom:violet-pool-card
+        entity: switch.violet_pool_pump
+        card_type: pump
+        size: medium
+        theme: glass
+        animation: smooth
+
+      - type: custom:violet-pool-card
+        entity: climate.violet_pool_heater
+        card_type: heater
+        size: medium
+        theme: glass
+        animation: smooth
+
+  # Neon Theme für Dosierung
+  - type: custom:violet-pool-card
+    entity: switch.violet_pool_dos_1_cl
+    card_type: dosing
+    dosing_type: chlorine
+    size: medium
+    theme: neon
+    animation: energetic
+```
+
+### Vollständiges Dashboard
+
+```yaml
+type: vertical-stack
+cards:
+  # Übersicht oben
+  - type: custom:violet-pool-card
+    card_type: overview
+    name: Pool Status
+
+  # Detaillierte Karten
+  - type: custom:violet-pool-card
+    entity: switch.violet_pool_pump
+    card_type: pump
+    show_runtime: true
+
+  - type: custom:violet-pool-card
+    entity: climate.violet_pool_heater
+    card_type: heater
+
+  - type: custom:violet-pool-card
+    entity: climate.violet_pool_solar
+    card_type: solar
+
+  - type: custom:violet-pool-card
+    entity: switch.violet_pool_dos_1_cl
+    card_type: dosing
+    dosing_type: chlorine
+    show_history: true
+```
+
+Siehe [VIOLET_CARD_EXAMPLES.yaml](VIOLET_CARD_EXAMPLES.yaml) für weitere Konfigurationsbeispiele.
+
+---
+
+## 🛠️ Entwicklung
+
+### Aus Quellcode bauen
+
+```bash
+# Repository klonen
+git clone https://github.com/Xerolux/VIOLET_CARD_QUICK.git
+cd VIOLET_CARD_QUICK
+
+# Abhängigkeiten installieren
+npm install
+
+# Build
+npm run build
+
+# Entwicklung mit Auto-Reload
+npm run watch
+```
+
+### Entwicklungsserver
+
+```bash
+npm run serve
+# Card verfügbar unter http://localhost:5000/violet-pool-card.js
+```
+
+Zur Home Assistant Konfiguration für Entwicklung hinzufügen:
+
+```yaml
+lovelace:
+  resources:
+    - url: http://localhost:5000/violet-pool-card.js
+      type: module
+```
+
+---
+
+## 🤝 Mitwirken
+
+Beiträge sind willkommen! Bitte erstelle gerne einen Pull Request.
+
+1. Fork das Repository
+2. Erstelle deinen Feature-Branch (`git checkout -b feature/amazing-feature`)
+3. Committe deine Änderungen (`git commit -m 'Add amazing feature'`)
+4. Push zum Branch (`git push origin feature/amazing-feature`)
+5. Öffne einen Pull Request
+
+---
+
+## 💝 Unterstützung
+
+Wenn du dieses Projekt hilfreich findest, unterstütze bitte die Entwicklung:
+
+<div align="center">
+
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-donate-yellow.svg?style=for-the-badge&logo=buy-me-a-coffee)](https://www.buymeacoffee.com/xerolux)
+[![PayPal](https://img.shields.io/badge/PayPal-donate-blue.svg?style=for-the-badge&logo=paypal)](https://paypal.me/xerolux)
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-donate-red.svg?style=for-the-badge&logo=ko-fi)](https://ko-fi.com/xerolux)
+
+</div>
+
+### Hilfe erhalten
+
+- 🐛 **Issues**: [GitHub Issues](https://github.com/Xerolux/VIOLET_CARD_QUICK/issues)
+- 💬 **Diskussionen**: [GitHub Discussions](https://github.com/Xerolux/VIOLET_CARD_QUICK/discussions)
+- 🏠 **Violet Pool Controller**: [Haupt-Integration](https://github.com/Xerolux/violet-hass)
+
+---
+
+## 📜 Lizenz
+
+MIT License - siehe [LICENSE](LICENSE) Datei für Details
+
+---
+
+## 🙏 Credits
+
+- Gebaut mit [Lit](https://lit.dev/)
+- Für die [Violet Pool Controller](https://github.com/Xerolux/violet-hass) Integration
+- Erstellt von [Xerolux](https://github.com/Xerolux)
+
+---
+
+## 📊 Projekt-Stats
+
+![GitHub stars](https://img.shields.io/github/stars/Xerolux/VIOLET_CARD_QUICK?style=social)
+![GitHub forks](https://img.shields.io/github/forks/Xerolux/VIOLET_CARD_QUICK?style=social)
+![GitHub watchers](https://img.shields.io/github/watchers/Xerolux/VIOLET_CARD_QUICK?style=social)
+
+---
+
+## 📝 Changelog
+
+Siehe [CHANGELOG.md](CHANGELOG.md) für Versions-Historie.
+
+**Aktuelle Version**: 1.0.0
+**Bundle-Größe**: 84KB
+**Karten**: 6 Typen
+**Komponenten**: 7
+**Status**: ✅ Produktionsreif
+
+---
+---
+---
+
+# 🇬🇧 English Documentation
+
+## 📋 Table of Contents
+
+- [🎉 NEW in v2.0: Visual Editor!](#-new-in-v20-visual-editor)
+- [✨ Features](#-features)
+- [📸 Screenshots](#-screenshots-1)
+- [📥 Installation](#-installation-1)
+- [⚙️ Configuration](#️-configuration-1)
+- [🎴 Card Types](#-card-types)
+- [📖 Examples](#-examples-1)
+- [🛠️ Development](#️-development-1)
+- [🤝 Contributing](#-contributing)
+- [💝 Support](#-support-1)
+- [📜 License](#-license)
 
 ---
 
@@ -67,21 +577,6 @@
 - **Entity States**: Colored badges (ON/OFF/AUTO/MANUAL/Blocked/Error)
 
 **First pool card with visual theme and size previews!** 🏆
-
----
-
-## 📋 Table of Contents
-
-- [✨ Features](#-features)
-- [📸 Screenshots](#-screenshots)
-- [📥 Installation](#-installation)
-- [⚙️ Configuration](#️-configuration)
-- [🎴 Card Types](#-card-types)
-- [📖 Examples](#-examples)
-- [🛠️ Development](#️-development)
-- [🤝 Contributing](#-contributing)
-- [💝 Support](#-support)
-- [📜 License](#-license)
 
 ---
 
@@ -134,189 +629,33 @@
 
 ---
 
-## 📸 Screenshots & Design Showcase
+## 📸 Screenshots
 
 ### Premium Theme Gallery
 
 #### 🌟 Luxury Theme (Default)
 ![Luxury Theme](screenshots/theme_luxury_pump.png)
-```yaml
-type: custom:violet-pool-card
-entity: switch.violet_pool_pump
-card_type: pump
-size: large
-theme: luxury
-animation: smooth
-```
-- **Glassmorphism** with enhanced blur effects
-- **Subtle gradients** for depth
-- **Inset shadows** for premium feel
-- **Perfect for** modern dashboards
 
 #### 🎯 Modern Theme
 ![Modern Theme](screenshots/theme_modern_heater.png)
-```yaml
-type: custom:violet-pool-card
-entity: climate.violet_pool_heater
-card_type: heater
-size: medium
-theme: modern
-animation: subtle
-```
-- **Clean lines** and minimal design
-- **Smooth hover effects**
-- **Elevation on interaction**
-- **Perfect for** professional setups
 
 #### 💎 Glass Theme
 ![Glass Theme](screenshots/theme_glass_solar.png)
-```yaml
-type: custom:violet-pool-card
-entity: climate.violet_pool_solar
-card_type: solar
-size: large
-theme: glass
-animation: smooth
-```
-- **Pure glassmorphism** with deep blur
-- **Transparent backgrounds**
-- **Frosted glass effect**
-- **Perfect for** layered dashboards
 
 #### ⚡ Neon Theme
 ![Neon Theme](screenshots/theme_neon_dosing.png)
-```yaml
-type: custom:violet-pool-card
-entity: switch.violet_pool_dos_1_cl
-card_type: dosing
-size: medium
-theme: neon
-animation: energetic
-```
-- **Vibrant animated borders**
-- **Dark gradient backgrounds**
-- **RGB glow effects**
-- **Perfect for** gaming rooms
 
 #### 👑 Premium Theme
 ![Premium Theme](screenshots/theme_premium_pump.png)
-```yaml
-type: custom:violet-pool-card
-entity: switch.violet_pool_pump
-card_type: pump
-size: fullscreen
-theme: premium
-animation: energetic
-```
-- **Luxury gradient backgrounds**
-- **Animated shine effects**
-- **High-end feel**
-- **Perfect for** main displays
 
-### Size Comparison
+### Card Types
 
-#### Small - Perfect for compact dashboards
-```yaml
-size: small    # 12px padding, 13px font
-```
-
-#### Medium - Balanced default (Recommended)
-```yaml
-size: medium   # 16px padding, 16px font (default)
-```
-
-#### Large - Spacious and prominent
-```yaml
-size: large    # 24px padding, 16px font, 32px icons
-```
-
-#### Fullscreen - Immersive experience
-```yaml
-size: fullscreen   # 32px padding, 18px font, 48px icons, full viewport
-```
-
-### Pump Card
 ![Pump Card](screenshots/pump_card.png)
-```yaml
-type: custom:violet-pool-card
-entity: switch.violet_pool_pump
-card_type: pump
-show_runtime: true
-```
-- Animated rotating icon when running
-- RPM display for current speed
-- Speed slider (OFF/ECO/Normal/Boost)
-- Runtime counter (2h 34min)
-- Quick action buttons
-
-### Heater Card
 ![Heater Card](screenshots/heater_card.png)
-```yaml
-type: custom:violet-pool-card
-entity: climate.violet_pool_heater
-card_type: heater
-```
-- Animated pulsing icon when heating
-- Current vs target temperature
-- Outside temperature warning
-- Temperature slider (18-35°C)
-- Blockage status display
-
-### Solar Card
 ![Solar Card](screenshots/solar_card.png)
-```yaml
-type: custom:violet-pool-card
-entity: climate.violet_pool_solar
-card_type: solar
-```
-- Pool vs absorber temperature
-- Temperature delta with color hints
-  - 🔴 Too cold (negative delta)
-  - 🟡 Heating possible (0-3°C)
-  - 🟢 Ideal (>3°C)
-- Target temperature control
-
-### Dosing Card
 ![Dosing Card](screenshots/dosing_card.png)
-```yaml
-type: custom:violet-pool-card
-entity: switch.violet_pool_dos_1_cl
-card_type: dosing
-dosing_type: chlorine
-show_history: true
-```
-- Auto-detect dosing type
-- Current → Target display (650mV → 700mV)
-- Min/Max thresholds
-- Manual dosing buttons (30s/60s)
-- 24h volume history
-
-### Overview Card
 ![Overview Card](screenshots/overview_card.png)
-```yaml
-type: custom:violet-pool-card
-card_type: overview
-```
-- Water chemistry dashboard
-  - Temperature: 24.5°C ✅
-  - pH: 7.2 ✅
-  - ORP: 650mV ⚠️
-- Active devices list
-- Warnings & alerts
-- "All systems normal" indicator
-
-### Compact Card
 ![Compact Card](screenshots/compact_card.png)
-```yaml
-type: custom:violet-pool-card
-entity: switch.violet_pool_pump
-card_type: compact
-```
-- One-line compact display
-- Auto-detected icons
-- Current values (temp, level, pH, ORP)
-- Status badge
-- Perfect for dashboards
 
 ---
 
@@ -370,13 +709,6 @@ lovelace:
 | `animation` | string | `smooth` | Animation level: `none`, `subtle`, `smooth`, or `energetic` |
 | `blur_intensity` | number | `10` | Blur intensity for glassmorphism effects (0-30) |
 
-### Legacy Options (Backward Compatible)
-
-| Name | Type | Default | Description |
-|------|------|---------|-------------|
-| `style` | string | `standard` | Legacy: `standard`, `modern`, or `luxury` |
-| `show_flow_animation` | boolean | `false` | Legacy: Enable animated flow effects |
-
 ### Display Options
 
 | Name | Type | Default | Description |
@@ -390,7 +722,7 @@ lovelace:
 ### Dosing Options
 
 | Name | Type | Default | Description |
-|------|------|---------|-------------|
+|------|-----|---------|-------------|
 | `dosing_type` | string | Auto-detect | `chlorine`, `ph_minus`, `ph_plus`, or `flocculant` |
 
 ### Styling Options
@@ -479,8 +811,6 @@ lovelace:
 
 ### Premium Showcase Dashboard
 
-![System Fullscreen Premium](screenshots/example_system_fullscreen.png)
-
 ```yaml
 # Fullscreen Premium Main Card
 type: custom:violet-pool-card
@@ -492,8 +822,6 @@ animation: energetic
 ```
 
 ### Mixed Sizes Dashboard
-
-![Overview Large Luxury](screenshots/example_overview_large.png)
 
 ```yaml
 type: vertical-stack
@@ -533,34 +861,6 @@ cards:
     animation: energetic
 ```
 
-### Compact Modern Dashboard
-
-![Compact Pump](screenshots/example_compact_pump.png)
-![Compact Heater](screenshots/example_compact_heater.png)
-![Compact Solar](screenshots/example_compact_solar.png)
-
-```yaml
-type: vertical-stack
-cards:
-  - type: custom:violet-pool-card
-    entity: switch.violet_pool_pump
-    card_type: compact
-    size: small
-    theme: modern
-
-  - type: custom:violet-pool-card
-    entity: climate.violet_pool_heater
-    card_type: compact
-    size: small
-    theme: modern
-
-  - type: custom:violet-pool-card
-    entity: climate.violet_pool_solar
-    card_type: compact
-    size: small
-    theme: modern
-```
-
 ### Complete Dashboard
 
 ```yaml
@@ -590,28 +890,6 @@ cards:
     card_type: dosing
     dosing_type: chlorine
     show_history: true
-```
-
-### Compact Dashboard
-
-```yaml
-type: vertical-stack
-cards:
-  - type: custom:violet-pool-card
-    entity: switch.violet_pool_pump
-    card_type: compact
-
-  - type: custom:violet-pool-card
-    entity: climate.violet_pool_heater
-    card_type: compact
-
-  - type: custom:violet-pool-card
-    entity: climate.violet_pool_solar
-    card_type: compact
-
-  - type: custom:violet-pool-card
-    entity: switch.violet_pool_dos_1_cl
-    card_type: compact
 ```
 
 See [VIOLET_CARD_EXAMPLES.yaml](VIOLET_CARD_EXAMPLES.yaml) for more configuration examples.
@@ -653,38 +931,6 @@ lovelace:
       type: module
 ```
 
-### Project Structure
-
-```
-violet-pool-card/
-├── src/
-│   ├── violet-pool-card.ts          # Main card class
-│   ├── components/                   # Reusable components
-│   │   ├── status-badge.ts
-│   │   ├── value-display.ts
-│   │   ├── detail-status.ts
-│   │   ├── warning-chips.ts
-│   │   ├── slider-control.ts
-│   │   └── quick-actions.ts
-│   └── utils/                        # Helper utilities
-│       ├── service-caller.ts
-│       └── entity-helper.ts
-├── dist/                             # Build output
-│   └── violet-pool-card.js
-├── .github/
-│   ├── workflows/
-│   │   ├── release.yml              # Release automation
-│   │   └── validate.yml             # Build validation
-│   └── FUNDING.yml                   # Sponsorship info
-├── package.json
-├── tsconfig.json
-├── rollup.config.mjs
-├── hacs.json
-├── README.md
-├── CHANGELOG.md
-└── LICENSE
-```
-
 ---
 
 ## 🤝 Contributing
@@ -703,9 +949,13 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 If you find this project helpful, please consider supporting its development:
 
-[![Buy Me A Coffee](https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg?style=for-the-badge)](https://www.buymeacoffee.com/xerolux)
-[![PayPal](https://img.shields.io/badge/paypal-donate-blue.svg?style=for-the-badge)](https://paypal.me/xerolux)
-[![Ko-fi](https://img.shields.io/badge/ko--fi-donate-red.svg?style=for-the-badge)](https://ko-fi.com/xerolux)
+<div align="center">
+
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-donate-yellow.svg?style=for-the-badge&logo=buy-me-a-coffee)](https://www.buymeacoffee.com/xerolux)
+[![PayPal](https://img.shields.io/badge/PayPal-donate-blue.svg?style=for-the-badge&logo=paypal)](https://paypal.me/xerolux)
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-donate-red.svg?style=for-the-badge&logo=ko-fi)](https://ko-fi.com/xerolux)
+
+</div>
 
 ### Get Help
 
