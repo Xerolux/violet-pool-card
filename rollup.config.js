@@ -12,6 +12,8 @@ export default {
     format: 'es',
     sourcemap: dev ? true : false,
   },
+  // Mark home-assistant-js-websocket as external - it's provided by Home Assistant
+  external: ['home-assistant-js-websocket'],
   plugins: [
     resolve(),
     typescript({
