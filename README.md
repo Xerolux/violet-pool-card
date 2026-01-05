@@ -12,13 +12,58 @@
 
 **The Ultimate Premium Lovelace Card** for the [Violet Pool Controller](https://github.com/Xerolux/violet-hass) integration for Home Assistant.
 
-> 🌟 **Luxury Design** · **Flexible Sizes** · **6 Premium Themes** · **Advanced Animations** · **Best-in-Class UX**
+> 🌟 **Visual Editor** · **No YAML!** · **6 Premium Themes** · **4 Flexible Sizes** · **Smart Auto-Coloring** · **Best Pool Card Available**
 
 <p align="center">
   <img src="https://img.shields.io/badge/Made%20with-Lit-324FFF?style=for-the-badge&logo=lit" alt="Made with Lit">
   <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript">
   <img src="https://img.shields.io/badge/Home%20Assistant-41BDF5?style=for-the-badge&logo=home-assistant&logoColor=white" alt="Home Assistant">
 </p>
+
+---
+
+## 🎉 NEW in v2.0: Visual Editor!
+
+**No YAML editing needed!** Configure everything through our beautiful visual editor:
+
+### ✨ Visual Editor Features
+
+**🎨 Visual Theme Picker**
+- See actual styled previews of all 6 themes
+- Click to select - live update
+- Emoji icons + descriptions
+- Hover effects
+
+**📐 Visual Size Picker**
+- See size previews (Small → Fullscreen)
+- Visual card size representation
+- One-click selection
+
+**⚡ Animation Selector**
+- Choose animation level with preview
+- None / Subtle / Smooth / Energetic
+- Icon + description
+
+**🎯 Smart Pickers**
+- Entity picker with auto-complete
+- Icon picker (MDI integration)
+- Color pickers for accent & icons
+- Blur intensity slider (0-30)
+
+**👆 Interactive Actions**
+- **Tap** - Click to toggle or open details
+- **Hold** (500ms) - Long press for different action
+- **Double-Tap** - Double click for custom action
+- Mobile vibration feedback
+
+**🎨 Smart Auto-Coloring**
+- **Temperature**: Blue (cold) → Green (ideal) → Red (hot)
+- **pH**: Color-coded based on target (±0.1/0.3/0.5)
+- **ORP/Chlorine**: Range-based coloring
+- **Pump Speed**: Gray/Blue/Green/Orange for 0/1/2/3
+- **Entity States**: Colored badges (ON/OFF/AUTO/MANUAL/Blocked/Error)
+
+**First pool card with visual theme and size previews!** 🏆
 
 ---
 

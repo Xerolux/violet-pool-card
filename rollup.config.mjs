@@ -11,6 +11,7 @@ export default {
     file: 'dist/violet-pool-card.js',
     format: 'es',
     sourcemap: dev ? true : false,
+    inlineDynamicImports: true,
   },
   plugins: [
     resolve(),
