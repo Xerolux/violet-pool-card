@@ -1,8 +1,7 @@
 # Dependencies
 node_modules/
 
-# Build output
-dist/
+# Build output (dist/ tracked for HACS compliance)
 *.js.map
 *.d.ts
 
