@@ -104,85 +104,19 @@ export class ValueDisplay extends LitElement {
 
   static get styles(): CSSResultGroup {
     return css`
-      :host {
-        display: block;
-      }
-
-      .value-display {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-      }
-
-      .label {
-        font-size: 12px;
-        font-weight: 500;
-        color: var(--secondary-text-color);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-      }
-
-      .value-container {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-
-      .value {
-        font-size: 24px;
-        font-weight: 700;
-        line-height: 1;
-        color: var(--primary-text-color);
-        display: flex;
-        align-items: baseline;
-        gap: 4px;
-      }
-
-      .value-display.large .value {
-        font-size: 32px;
-        font-weight: 800;
-      }
-
-      .unit {
-        font-size: 16px;
-        font-weight: 500;
-        opacity: 0.8;
-      }
-
-      .value-display.large .unit {
-        font-size: 20px;
-      }
-
-      ha-icon {
-        --mdc-icon-size: 20px;
-        flex-shrink: 0;
-      }
-
-      .target {
-        font-size: 14px;
-        color: var(--secondary-text-color);
-        display: flex;
-        align-items: center;
-        gap: 4px;
-      }
-
-      .range {
-        display: flex;
-        gap: 12px;
-        font-size: 11px;
-        color: var(--disabled-text-color);
-        margin-top: 4px;
-      }
-
-      .range-min::before {
-        content: '▼ ';
-        color: var(--info-color, #2196F3);
-      }
-
-      .range-max::before {
-        content: '▲ ';
-        color: var(--warning-color, #FF9800);
-      }
+      :host{display:block}
+      .value-display{display:flex;flex-direction:column;gap:4px}
+      .label{font-size:12px;font-weight:500;color:var(--secondary-text-color);text-transform:uppercase;letter-spacing:0.5px}
+      .value-container{display:flex;align-items:center;gap:8px}
+      .value{font-size:24px;font-weight:700;line-height:1;color:var(--primary-text-color);display:flex;align-items:baseline;gap:4px}
+      .value-display.large .value{font-size:32px;font-weight:800}
+      .unit{font-size:16px;font-weight:500;opacity:0.8}
+      .value-display.large .unit{font-size:20px}
+      ha-icon{--mdc-icon-size:20px;flex-shrink:0}
+      .target{font-size:14px;color:var(--secondary-text-color);display:flex;align-items:center;gap:4px}
+      .range{display:flex;gap:12px;font-size:11px;color:var(--disabled-text-color);margin-top:4px}
+      .range-min::before{content:'\\25BC ';color:var(--info-color,#2196F3)}
+      .range-max::before{content:'\\25B2 ';color:var(--warning-color,#FF9800)}
     `;
   }
 }

@@ -168,100 +168,18 @@ export class WarningChips extends LitElement {
 
   static get styles(): CSSResultGroup {
     return css`
-      :host {
-        display: block;
-      }
-
-      .warning-chips {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-      }
-
-      .chip {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 8px 12px;
-        border-radius: 16px;
-        background: var(--chip-bg);
-        color: var(--chip-color);
-        font-size: 13px;
-        font-weight: 500;
-        line-height: 1.2;
-        border: 1px solid var(--chip-color);
-        transition: all 0.2s ease;
-      }
-
-      .chip:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      }
-
-      .chip ha-icon {
-        --mdc-icon-size: 16px;
-        flex-shrink: 0;
-      }
-
-      .chip-text {
-        flex: 1;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-
-      .dismiss-button {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0;
-        margin: 0;
-        border: none;
-        background: none;
-        color: var(--chip-color);
-        cursor: pointer;
-        opacity: 0.7;
-        transition: opacity 0.2s ease;
-      }
-
-      .dismiss-button:hover {
-        opacity: 1;
-      }
-
-      .dismiss-button ha-icon {
-        --mdc-icon-size: 14px;
-      }
-
-      /* Pulse animation for error chips */
-      .chip.error {
-        animation: pulse-error 2s ease-in-out infinite;
-      }
-
-      @keyframes pulse-error {
-        0%, 100% {
-          opacity: 1;
-        }
-        50% {
-          opacity: 0.85;
-        }
-      }
-
-      /* Responsive: Stack chips on small screens */
-      @media (max-width: 600px) {
-        .warning-chips {
-          flex-direction: column;
-        }
-
-        .chip {
-          width: 100%;
-          box-sizing: border-box;
-        }
-
-        .chip-text {
-          white-space: normal;
-          overflow: visible;
-        }
-      }
+      :host{display:block}
+      .warning-chips{display:flex;flex-wrap:wrap;gap:8px}
+      .chip{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:16px;background:var(--chip-bg);color:var(--chip-color);font-size:13px;font-weight:500;line-height:1.2;border:1px solid var(--chip-color);transition:all 0.2s ease}
+      .chip:hover{transform:translateY(-1px);box-shadow:0 2px 4px rgba(0,0,0,0.1)}
+      .chip ha-icon{--mdc-icon-size:16px;flex-shrink:0}
+      .chip-text{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      .dismiss-button{display:flex;align-items:center;justify-content:center;padding:0;margin:0;border:none;background:none;color:var(--chip-color);cursor:pointer;opacity:0.7;transition:opacity 0.2s ease}
+      .dismiss-button:hover{opacity:1}
+      .dismiss-button ha-icon{--mdc-icon-size:14px}
+      .chip.error{animation:pulse-error 2s ease-in-out infinite}
+      @keyframes pulse-error{0%,100%{opacity:1}50%{opacity:0.85}}
+      @media(max-width:600px){.warning-chips{flex-direction:column}.chip{width:100%;box-sizing:border-box}.chip-text{white-space:normal;overflow:visible}}
     `;
   }
 }

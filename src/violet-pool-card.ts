@@ -1437,7 +1437,7 @@ window.customCards.push({
 
 // Inform Home Assistant about the card
 console.info(
-  '%c VIOLET-POOL-CARD %c 1.0.0 ',
+  '%c VIOLET-POOL-CARD %c 0.1.0-alpha.3 ',
   'color: white; background: #2196F3; font-weight: 700;',
   'color: #2196F3; background: white; font-weight: 700;'
 );

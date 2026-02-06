@@ -141,92 +141,21 @@ export class DetailStatus extends LitElement {
 
   static get styles(): CSSResultGroup {
     return css`
-      :host {
-        display: block;
-      }
-
-      .detail-status {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px 12px;
-        background: var(--card-background-color);
-        border-radius: 8px;
-        border-left: 3px solid currentColor;
-        font-size: 14px;
-        line-height: 1.4;
-      }
-
-      .detail-status.compact {
-        padding: 4px 8px;
-        font-size: 12px;
-      }
-
-      .detail-status ha-icon {
-        --mdc-icon-size: 20px;
-        flex-shrink: 0;
-      }
-
-      .detail-status.compact ha-icon {
-        --mdc-icon-size: 16px;
-      }
-
-      .status-content {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 4px;
-        flex: 1;
-      }
-
-      .level {
-        font-weight: 600;
-        opacity: 0.9;
-      }
-
-      .status-text {
-        font-weight: 500;
-      }
-
-      /* List styles for array input */
-      .detail-status-list {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-      }
-
-      .detail-status-list.compact {
-        gap: 4px;
-      }
-
-      .status-item {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        padding: 6px 10px;
-        background: var(--card-background-color);
-        border-radius: 6px;
-        border-left: 2px solid currentColor;
-        font-size: 13px;
-      }
-
-      .detail-status-list.compact .status-item {
-        padding: 4px 8px;
-        font-size: 11px;
-      }
-
-      .status-item ha-icon {
-        --mdc-icon-size: 16px;
-        flex-shrink: 0;
-      }
-
-      .detail-status-list.compact .status-item ha-icon {
-        --mdc-icon-size: 14px;
-      }
-
-      .status-item .status-text {
-        font-weight: 500;
-      }
+      :host{display:block}
+      .detail-status{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--card-background-color);border-radius:8px;border-left:3px solid currentColor;font-size:14px;line-height:1.4}
+      .detail-status.compact{padding:4px 8px;font-size:12px}
+      .detail-status ha-icon{--mdc-icon-size:20px;flex-shrink:0}
+      .detail-status.compact ha-icon{--mdc-icon-size:16px}
+      .status-content{display:flex;flex-wrap:wrap;align-items:center;gap:4px;flex:1}
+      .level{font-weight:600;opacity:0.9}
+      .status-text{font-weight:500}
+      .detail-status-list{display:flex;flex-direction:column;gap:6px}
+      .detail-status-list.compact{gap:4px}
+      .status-item{display:flex;align-items:center;gap:6px;padding:6px 10px;background:var(--card-background-color);border-radius:6px;border-left:2px solid currentColor;font-size:13px}
+      .detail-status-list.compact .status-item{padding:4px 8px;font-size:11px}
+      .status-item ha-icon{--mdc-icon-size:16px;flex-shrink:0}
+      .detail-status-list.compact .status-item ha-icon{--mdc-icon-size:14px}
+      .status-item .status-text{font-weight:500}
     `;
   }
 }

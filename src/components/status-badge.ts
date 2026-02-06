@@ -49,79 +49,17 @@ export class StatusBadge extends LitElement {
 
   static get styles(): CSSResultGroup {
     return css`
-      :host {
-        display: inline-block;
-      }
-
-      .badge {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-        padding: 6px 14px;
-        border-radius: 16px;
-        background: var(--badge-color);
-        color: white;
-        font-size: 12px;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        white-space: nowrap;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        transition: all 0.2s ease;
-      }
-
-      .badge:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
-      }
-
-      .badge ha-icon {
-        --mdc-icon-size: 16px;
-        display: flex;
-        align-items: center;
-      }
-
-      .label {
-        line-height: 1;
-      }
-
-      /* Pulse animation for active/warning states */
-      .badge.pulse {
-        animation: pulse 2s ease-in-out infinite;
-      }
-
-      @keyframes pulse {
-        0%, 100% {
-          opacity: 1;
-          transform: scale(1);
-        }
-        50% {
-          opacity: 0.85;
-          transform: scale(1.02);
-        }
-      }
-
-      /* Rotate animation for auto state */
-      .badge.auto ha-icon {
-        animation: rotate 3s linear infinite;
-      }
-
-      @keyframes rotate {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
-      }
-
-      /* Breathing animation for heating/cooling */
-      .badge.heating,
-      .badge.cooling {
-        animation: breathe 2s ease-in-out infinite;
-      }
-
-      @keyframes breathe {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.7; }
-      }
+      :host{display:inline-block}
+      .badge{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:6px 14px;border-radius:16px;background:var(--badge-color);color:white;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap;box-shadow:0 2px 4px rgba(0,0,0,0.1);transition:all 0.2s ease}
+      .badge:hover{transform:translateY(-1px);box-shadow:0 3px 6px rgba(0,0,0,0.15)}
+      .badge ha-icon{--mdc-icon-size:16px;display:flex;align-items:center}
+      .label{line-height:1}
+      .badge.pulse{animation:pulse 2s ease-in-out infinite}
+      @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.85;transform:scale(1.02)}}
+      .badge.auto ha-icon{animation:rotate 3s linear infinite}
+      @keyframes rotate{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+      .badge.heating,.badge.cooling{animation:breathe 2s ease-in-out infinite}
+      @keyframes breathe{0%,100%{opacity:1}50%{opacity:0.7}}
     `;
   }
 }
