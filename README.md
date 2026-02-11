@@ -331,7 +331,7 @@ Die Karte arbeitet mit folgenden Entity-Typen der Violet Pool Controller Integra
 ## Entwicklung
 
 ```bash
-git clone https://github.com/Xerolux/VIOLET_CARD_QUICK.git
+git clone (https://github.com/Xerolux/violet-pool-card)
 cd VIOLET_CARD_QUICK
 npm install
 npm run build        # Produktions-Build
