@@ -80,7 +80,7 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
           ? html`
               <div class="config-section">
                 <div class="section-header">
-                  <ha-icon icon="mdi:account-circle"></ha-icon>
+                  <ha-icon icon="mdi:lightning-bolt"></ha-icon>
                   <span>Entity</span>
                 </div>
 
