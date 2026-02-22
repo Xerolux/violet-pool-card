@@ -137,7 +137,7 @@
     <script type="module">
       import { VioletPoolCard } from '../dist/violet-pool-card.js';
 
-      const mockHass = {
+      const baseHass = {
         states: {
           'switch.violet_pool_pump': {
             entity_id: 'switch.violet_pool_pump',
@@ -149,7 +149,7 @@
               PUMP_RPM_1: 1500,
               PUMP_RPM_2: 2200,
               PUMP_RPM_3: 2800,
-              runtime: 9240 // 2h 34m
+              runtime: 9240
             }
           },
           'climate.violet_pool_heater': {
@@ -173,7 +173,7 @@
               friendly_name: 'Solar Heating',
               SOLARSTATE: 'WAITING_FOR_TEMP_DIFF',
               absorber_temperature: 45.2,
-              current_temperature: 24.5, // Used for pool temp comparison
+              current_temperature: 24.5,
               temperature: 30.0,
               min_temp: 18,
               max_temp: 32
@@ -228,83 +228,142 @@
         }
       };
 
+      // Helper to create a new hass object with overrides
+      const createMockHass = (overrides = {}) => {
+        // Deep clone the base hass object
+        const newHass = JSON.parse(JSON.stringify(baseHass));
+        newHass.callService = baseHass.callService;
+
+        // Apply overrides
+        for (const [entityId, stateObj] of Object.entries(overrides)) {
+          if (newHass.states[entityId]) {
+            const { attributes: newAttributes, ...otherStateProps } = stateObj;
+            newHass.states[entityId] = { ...newHass.states[entityId], ...otherStateProps };
+             // Merge attributes if provided
+             if (newAttributes) {
+                newHass.states[entityId].attributes = { ...newHass.states[entityId].attributes, ...newAttributes };
+             }
+          }
+        }
+        return newHass;
+      };
+
       // Helper to configure card
-      const configureCard = (id, config) => {
+      const configureCard = (id, config, stateOverrides = {}) => {
         const el = document.getElementById(id);
         if (el) {
           el.setConfig({
             type: 'custom:violet-pool-card',
             ...config
           });
-          el.hass = mockHass;
+          el.hass = createMockHass(stateOverrides);
         }
       };
 
       // --- Premium Theme Gallery ---
 
       // Luxury Theme (Default) - Large Pump
+      // High Speed, Active
       configureCard('luxury-pump-large', {
         entity: 'switch.violet_pool_pump',
         card_type: 'pump',
         size: 'large',
         theme: 'luxury',
         animation: 'smooth'
+      }, {
+        'switch.violet_pool_pump': {
+            state: 'on',
+            attributes: { PUMPSTATE: '3|OK', runtime: 15400 } // Speed 3, longer runtime
+        }
       });
 
       // Modern Theme - Medium Heater
+      // Heating actively
       configureCard('modern-heater-medium', {
         entity: 'climate.violet_pool_heater',
         card_type: 'heater',
         size: 'medium',
         theme: 'modern',
         animation: 'subtle'
+      }, {
+         'climate.violet_pool_heater': {
+            state: 'heating',
+            attributes: { current_temperature: 26.0, temperature: 29.0 }
+         }
       });
 
       // Glass Theme - Large Solar
+      // Active Solar
       configureCard('glass-solar-large', {
         entity: 'climate.violet_pool_solar',
         card_type: 'solar',
         size: 'large',
         theme: 'glass',
         animation: 'smooth'
+      }, {
+        'climate.violet_pool_solar': {
+            state: 'auto',
+            attributes: { SOLARSTATE: 'ACTIVE', absorber_temperature: 55.0 }
+        }
       });
 
       // Neon Theme - Medium Dosing
+      // Warning State
       configureCard('neon-dosing-medium', {
         entity: 'switch.violet_pool_dos_1_cl',
         card_type: 'dosing',
         size: 'medium',
         theme: 'neon',
         animation: 'energetic'
+      }, {
+         'switch.violet_pool_dos_1_cl': {
+             state: 'on',
+             attributes: { DOS_1_CL_STATE: ['ALARM_LEVEL'], dosing_volume_24h: 300 }
+         }
       });
 
       // Premium Theme - Fullscreen Pump
+      // Error State
       configureCard('premium-pump-fullscreen', {
         entity: 'switch.violet_pool_pump',
         card_type: 'pump',
         size: 'fullscreen',
         theme: 'premium',
         animation: 'energetic'
+      }, {
+          'switch.violet_pool_pump': {
+              state: 'off',
+              attributes: { PUMPSTATE: 'ERROR', runtime: 0 }
+          }
       });
 
       // --- Card Types ---
 
+      // Default Pump
       configureCard('pump-card', {
         entity: 'switch.violet_pool_pump',
         card_type: 'pump',
         show_runtime: true
       });
 
+      // Default Heater (Idle)
       configureCard('heater-card', {
         entity: 'climate.violet_pool_heater',
         card_type: 'heater'
+      }, {
+          'climate.violet_pool_heater': {
+              state: 'off',
+              attributes: { HEATERSTATE: 'OFF', current_temperature: 28.0, temperature: 28.0 }
+          }
       });
 
+      // Default Solar (Waiting)
       configureCard('solar-card', {
         entity: 'climate.violet_pool_solar',
         card_type: 'solar'
       });
 
+      // Default Dosing
       configureCard('dosing-card', {
         entity: 'switch.violet_pool_dos_1_cl',
         card_type: 'dosing',
@@ -312,8 +371,12 @@
         show_history: true
       });
 
+      // Overview
       configureCard('overview-card', {
         card_type: 'overview'
+      }, {
+          'sensor.violet_pool_orp_value': { state: '750' },
+          'sensor.violet_pool_ph_value': { state: '7.4' }
       });
 
       configureCard('compact-card', {
@@ -324,12 +387,18 @@
       // --- Examples ---
 
       // Fullscreen Premium System
+      // Everything running perfectly
       configureCard('system-fullscreen-premium', {
         entity: 'switch.violet_pool_pump',
         card_type: 'system',
         size: 'fullscreen',
         theme: 'premium',
         animation: 'energetic'
+      }, {
+          'switch.violet_pool_pump': { state: 'on', attributes: { PUMPSTATE: '2|OK' } },
+          'climate.violet_pool_heater': { state: 'heating' },
+          'climate.violet_pool_solar': { state: 'auto', attributes: { SOLARSTATE: 'ACTIVE' } },
+          'sensor.violet_pool_temperature': { state: '26.5' }
       });
 
       // Large Overview (Luxury)
@@ -339,6 +408,8 @@
         size: 'large',
         theme: 'luxury',
         animation: 'smooth'
+      }, {
+         'sensor.violet_pool_temperature': { state: '27.0' }
       });
 
       // Compact Modern Dashboard
@@ -347,6 +418,8 @@
         card_type: 'compact',
         size: 'small',
         theme: 'modern'
+      }, {
+          'switch.violet_pool_pump': { state: 'on', attributes: { PUMPSTATE: '1|OK', runtime: 1200 } }
       });
 
       configureCard('compact-modern-heater-small', {
@@ -354,6 +427,8 @@
         card_type: 'compact',
         size: 'small',
         theme: 'modern'
+      }, {
+          'climate.violet_pool_heater': { state: 'heating' }
       });
 
       configureCard('compact-modern-solar-small', {
@@ -361,6 +436,8 @@
         card_type: 'compact',
         size: 'small',
         theme: 'modern'
+      }, {
+          'climate.violet_pool_solar': { state: 'auto', attributes: { SOLARSTATE: 'ACTIVE' } }
       });
 
     </script>
