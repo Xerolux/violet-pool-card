@@ -24,17 +24,11 @@ export class ActionHandler {
     private doubleTapAction?: ActionConfig
   ) {}
 
-  /**
-   * Handle tap action
-   */
   public handleTap(event: Event): void {
     event.stopPropagation();
     this._executeAction(this.tapAction || { action: 'more-info' });
   }
 
-  /**
-   * Handle hold start (mousedown/touchstart)
-   */
   public handleHoldStart(event: Event): void {
     event.preventDefault();
 
@@ -47,9 +41,6 @@ export class ActionHandler {
     }, this.holdDelay);
   }
 
-  /**
-   * Handle hold end (mouseup/touchend)
-   */
   public handleHoldEnd(): void {
     if (this.holdTimer) {
       clearTimeout(this.holdTimer);
@@ -57,17 +48,11 @@ export class ActionHandler {
     }
   }
 
-  /**
-   * Handle double tap
-   */
   public handleDoubleTap(event: Event): void {
     event.stopPropagation();
     this._executeAction(this.doubleTapAction || { action: 'more-info' });
   }
 
-  /**
-   * Execute the action
-   */
   private _executeAction(action: ActionConfig): void {
     switch (action.action) {
       case 'more-info':
@@ -99,9 +84,6 @@ export class ActionHandler {
     }
   }
 
-  /**
-   * Show more-info dialog
-   */
   private _showMoreInfo(): void {
     const event = new CustomEvent('hass-more-info', {
       detail: { entityId: this.entity },
@@ -111,9 +93,6 @@ export class ActionHandler {
     window.dispatchEvent(event);
   }
 
-  /**
-   * Toggle entity
-   */
   private _toggleEntity(): void {
     const domain = this.entity.split('.')[0];
     this.hass.callService(domain, 'toggle', {

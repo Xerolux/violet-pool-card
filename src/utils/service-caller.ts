@@ -1,7 +1,3 @@
-/**
- * Service Caller Utility
- * Handles all Home Assistant service calls with error handling and toast notifications
- */
 
 interface HomeAssistant {
   callService: (domain: string, service: string, serviceData?: any) => Promise<any>;
@@ -16,9 +12,6 @@ export interface ServiceCallResult {
 export class ServiceCaller {
   constructor(private hass: HomeAssistant) {}
 
-  /**
-   * Show toast notification (if available)
-   */
   private showToast(message: string, duration = 3000) {
     // Dispatch event for toast notification
     const event = new CustomEvent('hass-notification', {
@@ -29,9 +22,6 @@ export class ServiceCaller {
     window.dispatchEvent(event);
   }
 
-  /**
-   * Generic service call with error handling
-   */
   private async callService(
     domain: string,
     service: string,
@@ -48,13 +38,6 @@ export class ServiceCaller {
     }
   }
 
-  /**
-   * Control Violet Pool Pump
-   * @param entity - Entity ID (e.g., switch.violet_pool_pump)
-   * @param action - 'on' | 'off' | 'auto'
-   * @param speed - Speed level (0-3: OFF, ECO, Normal, Boost)
-   * @param duration - Duration in seconds (optional)
-   */
   async controlPump(
     entity: string,
     action: 'on' | 'off' | 'auto',
@@ -84,11 +67,6 @@ export class ServiceCaller {
     return result;
   }
 
-  /**
-   * Set temperature for climate entity
-   * @param entity - Climate entity ID
-   * @param temperature - Target temperature
-   */
   async setTemperature(entity: string, temperature: number): Promise<ServiceCallResult> {
     const result = await this.callService('climate', 'set_temperature', {
       entity_id: entity,
@@ -102,11 +80,6 @@ export class ServiceCaller {
     return result;
   }
 
-  /**
-   * Set HVAC mode for climate entity
-   * @param entity - Climate entity ID
-   * @param mode - HVAC mode ('off' | 'heat' | 'cool' | 'auto')
-   */
   async setHvacMode(
     entity: string,
     mode: 'off' | 'heat' | 'cool' | 'auto'
@@ -123,11 +96,6 @@ export class ServiceCaller {
     return result;
   }
 
-  /**
-   * Set value for number entity
-   * @param entity - Number entity ID
-   * @param value - Target value
-   */
   async setNumberValue(entity: string, value: number): Promise<ServiceCallResult> {
     const result = await this.callService('number', 'set_value', {
       entity_id: entity,
@@ -141,10 +109,6 @@ export class ServiceCaller {
     return result;
   }
 
-  /**
-   * Turn on switch or other entity
-   * @param entity - Entity ID
-   */
   async turnOn(entity: string): Promise<ServiceCallResult> {
     const domain = entity.split('.')[0];
     const result = await this.callService(domain, 'turn_on', {
@@ -158,10 +122,6 @@ export class ServiceCaller {
     return result;
   }
 
-  /**
-   * Turn off switch or other entity
-   * @param entity - Entity ID
-   */
   async turnOff(entity: string): Promise<ServiceCallResult> {
     const domain = entity.split('.')[0];
     const result = await this.callService(domain, 'turn_off', {
@@ -175,10 +135,6 @@ export class ServiceCaller {
     return result;
   }
 
-  /**
-   * Toggle switch or other entity
-   * @param entity - Entity ID
-   */
   async toggle(entity: string): Promise<ServiceCallResult> {
     const domain = entity.split('.')[0];
     const result = await this.callService(domain, 'toggle', {
@@ -192,12 +148,6 @@ export class ServiceCaller {
     return result;
   }
 
-  /**
-   * Smart Dosing for Violet Pool Controller
-   * @param dosingType - Type of dosing ('cl' | 'phm' | 'php' | 'floc')
-   * @param duration - Duration in seconds
-   * @param action - 'on' | 'off' | 'auto'
-   */
   async smartDosing(
     dosingType: 'cl' | 'phm' | 'php' | 'floc',
     duration: number,
@@ -222,11 +172,6 @@ export class ServiceCaller {
     return result;
   }
 
-  /**
-   * Manual dosing trigger
-   * @param entity - Dosing entity ID
-   * @param duration - Duration in seconds (default: 30)
-   */
   async manualDosing(entity: string, duration = 30): Promise<ServiceCallResult> {
     // Extract dosing type from entity name
     const dosingTypeMatch = entity.match(/dos_\d+_(\w+)/);
@@ -255,11 +200,6 @@ export class ServiceCaller {
     return this.smartDosing(dosingType, duration);
   }
 
-  /**
-   * Set pump speed directly
-   * @param entity - Pump entity ID
-   * @param speed - Speed level (0-3)
-   */
   async setPumpSpeed(entity: string, speed: number): Promise<ServiceCallResult> {
     if (speed < 0 || speed > 3) {
       return {
@@ -271,11 +211,6 @@ export class ServiceCaller {
     return this.controlPump(entity, 'on', speed);
   }
 
-  /**
-   * Set pool controller mode
-   * @param entity - Controller entity ID
-   * @param mode - Mode ('auto' | 'manual' | 'off')
-   */
   async setControllerMode(
     entity: string,
     mode: 'auto' | 'manual' | 'off'

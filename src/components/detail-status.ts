@@ -7,10 +7,6 @@ export class DetailStatus extends LitElement {
   @property() public icon?: string;
   @property({ type: Boolean }) public compact = false;
 
-  /**
-   * Parse pipe-separated status string
-   * Example: "3|PUMP_ANTI_FREEZE" -> { level: 3, status: "Pump Anti Freeze" }
-   */
   private parsePipeSeparated(raw: string): { level?: number; status: string } {
     if (!raw || typeof raw !== 'string') {
       return { status: '' };
@@ -26,10 +22,6 @@ export class DetailStatus extends LitElement {
     return { status: this.formatStatusText(raw) };
   }
 
-  /**
-   * Format status text from SNAKE_CASE to readable format
-   * Example: "PUMP_ANTI_FREEZE" -> "Pump Anti Freeze"
-   */
   private formatStatusText(text: string): string {
     if (!text) return '';
 
@@ -39,18 +31,11 @@ export class DetailStatus extends LitElement {
       .join(' ');
   }
 
-  /**
-   * Parse array of status strings
-   * Example: ["BLOCKED_BY_TRESHOLDS", "TRESHOLDS_REACHED"]
-   */
   private parseArray(raw: string[]): string[] {
     if (!Array.isArray(raw)) return [];
     return raw.map((item) => this.formatStatusText(item)).filter((item) => item);
   }
 
-  /**
-   * Get icon based on status text
-   */
   private getIconForStatus(status: string): string {
     const lowerStatus = status.toLowerCase();
 
@@ -76,9 +61,6 @@ export class DetailStatus extends LitElement {
     return 'mdi:information';
   }
 
-  /**
-   * Get color based on status severity
-   */
   private getColorForStatus(status: string): string {
     const lowerStatus = status.toLowerCase();
 
@@ -105,10 +87,7 @@ export class DetailStatus extends LitElement {
       const statuses = this.parseArray(this.raw);
       if (statuses.length === 0) return html``;
 
-      return html`
-        <div class="detail-status-list ${this.compact ? 'compact' : ''}">
-          ${statuses.map(
-            (status) => html`
+      return html` <div class="detail-status-list ${this.compact ? 'compact' : ''}"> ${statuses.map( (status) => html`
               <div class="status-item" style="color: ${this.getColorForStatus(status)}">
                 <ha-icon icon="${this.icon || this.getIconForStatus(status)}"></ha-icon>
                 <span class="status-text">${status}</span>
@@ -126,12 +105,7 @@ export class DetailStatus extends LitElement {
     const statusColor = this.getColorForStatus(parsed.status);
     const statusIcon = this.icon || this.getIconForStatus(parsed.status);
 
-    return html`
-      <div class="detail-status ${this.compact ? 'compact' : ''}" style="color: ${statusColor}">
-        <ha-icon icon="${statusIcon}"></ha-icon>
-        <div class="status-content">
-          ${parsed.level !== undefined
-            ? html`<span class="level">Level ${parsed.level}:</span>`
+    return html` <div class="detail-status ${this.compact ? 'compact' : ''}" style="color: ${statusColor}"><ha-icon icon="${statusIcon}"></ha-icon><div class="status-content"> ${parsed.level !== undefined ? html`<span class="level">Level ${parsed.level}:</span>`
             : ''}
           <span class="status-text">${parsed.status}</span>
         </div>
@@ -140,23 +114,7 @@ export class DetailStatus extends LitElement {
   }
 
   static get styles(): CSSResultGroup {
-    return css`
-      :host{display:block}
-      .detail-status{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--card-background-color);border-radius:8px;border-left:3px solid currentColor;font-size:14px;line-height:1.4}
-      .detail-status.compact{padding:4px 8px;font-size:12px}
-      .detail-status ha-icon{--mdc-icon-size:20px;flex-shrink:0}
-      .detail-status.compact ha-icon{--mdc-icon-size:16px}
-      .status-content{display:flex;flex-wrap:wrap;align-items:center;gap:4px;flex:1}
-      .level{font-weight:600;opacity:0.9}
-      .status-text{font-weight:500}
-      .detail-status-list{display:flex;flex-direction:column;gap:6px}
-      .detail-status-list.compact{gap:4px}
-      .status-item{display:flex;align-items:center;gap:6px;padding:6px 10px;background:var(--card-background-color);border-radius:6px;border-left:2px solid currentColor;font-size:13px}
-      .detail-status-list.compact .status-item{padding:4px 8px;font-size:11px}
-      .status-item ha-icon{--mdc-icon-size:16px;flex-shrink:0}
-      .detail-status-list.compact .status-item ha-icon{--mdc-icon-size:14px}
-      .status-item .status-text{font-weight:500}
-    `;
+    return css`:host{display:block}.detail-status{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--card-background-color);border-radius:8px;border-left:3px solid currentColor;font-size:14px;line-height:1.4}.detail-status.compact{padding:4px 8px;font-size:12px}.detail-status ha-icon{--mdc-icon-size:20px;flex-shrink:0}.detail-status.compact ha-icon{--mdc-icon-size:16px}.status-content{display:flex;flex-wrap:wrap;align-items:center;gap:4px;flex:1}.level{font-weight:600;opacity:0.9}.status-text{font-weight:500}.detail-status-list{display:flex;flex-direction:column;gap:6px}.detail-status-list.compact{gap:4px}.status-item{display:flex;align-items:center;gap:6px;padding:6px 10px;background:var(--card-background-color);border-radius:6px;border-left:2px solid currentColor;font-size:13px}.detail-status-list.compact .status-item{padding:4px 8px;font-size:11px}.status-item ha-icon{--mdc-icon-size:16px;flex-shrink:0}.detail-status-list.compact .status-item ha-icon{--mdc-icon-size:14px}.status-item .status-text{font-weight:500}`;
   }
 }
 
