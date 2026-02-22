@@ -31,7 +31,7 @@ interface LovelaceCardConfig {
 
   // PREMIUM DESIGN SYSTEM
   size?: 'small' | 'medium' | 'large' | 'fullscreen';
-  theme?: 'luxury' | 'modern' | 'minimalist' | 'glass' | 'neon' | 'premium';
+  theme?: 'apple' | 'dark' | 'luxury' | 'modern' | 'minimalist' | 'glass' | 'neon' | 'premium';
   animation?: 'none' | 'subtle' | 'smooth' | 'energetic';
 
   // Legacy (backward compatible)
@@ -97,7 +97,7 @@ export class VioletPoolCard extends LitElement {
       show_runtime: false,
       show_history: false,
       size: 'medium',
-      theme: 'luxury',
+      theme: 'apple',
       animation: 'smooth',
       blur_intensity: 10,
       style: 'standard',
@@ -126,6 +126,35 @@ export class VioletPoolCard extends LitElement {
       return this.config.entities[entitiesIndex];
     }
     return this._buildEntityId(domain, suffix);
+  }
+
+  /**
+   * Returns human-readable state label
+   */
+  private _getFriendlyState(state: string, cardType?: string): string {
+    const map: Record<string, string> = {
+      'on': 'Active',
+      'off': 'Off',
+      'auto': 'Auto',
+      'heat': 'Heating',
+      'heating': 'Heating',
+      'cool': 'Cooling',
+      'cooling': 'Cooling',
+      'idle': 'Idle',
+      'unavailable': 'Unavailable',
+      'unknown': 'Unknown',
+      'manual': 'Manual',
+    };
+    if (cardType === 'pump' && state === 'on') return 'Running';
+    return map[state] ?? state.charAt(0).toUpperCase() + state.slice(1);
+  }
+
+  /**
+   * Returns percentage (0-100) of value within min-max range, clamped.
+   */
+  private _getValuePercent(value: number, min: number, max: number): number {
+    if (max <= min) return 0;
+    return Math.min(100, Math.max(0, ((value - min) / (max - min)) * 100));
   }
 
   /**
@@ -249,6 +278,8 @@ export class VioletPoolCard extends LitElement {
         ...this.config,
         card_type: type as any,
         entity: entity,
+        // Ensure entity_prefix is always propagated to sub-cards (bug fix)
+        entity_prefix: this.config.entity_prefix || 'violet_pool',
         ...extra
       };
     };
@@ -295,61 +326,10 @@ export class VioletPoolCard extends LitElement {
       : `${runtimeMinutes}min`;
 
     const speedColor = StateColorHelper.getPumpSpeedColor(currentSpeed);
-
-    const quickActions: QuickAction[] = [
-      {
-        icon: 'mdi:power-off',
-        label: 'OFF',
-        action: async () => {
-          const serviceCaller = new ServiceCaller(this.hass);
-          await serviceCaller.turnOff(config.entity!);
-        },
-        active: state === 'off',
-        color: '#757575',
-      },
-      {
-        icon: 'mdi:autorenew',
-        label: 'AUTO',
-        action: async () => {
-          const serviceCaller = new ServiceCaller(this.hass);
-          await serviceCaller.controlPump(config.entity!, 'auto');
-        },
-        active: state === 'auto',
-        color: '#2196F3',
-      },
-      {
-        icon: 'mdi:speedometer-slow',
-        label: 'ECO',
-        action: async () => {
-          const serviceCaller = new ServiceCaller(this.hass);
-          await serviceCaller.setPumpSpeed(config.entity!, 1);
-        },
-        active: currentSpeed === 1,
-        color: '#4CAF50',
-      },
-      {
-        icon: 'mdi:speedometer-medium',
-        label: 'Normal',
-        action: async () => {
-          const serviceCaller = new ServiceCaller(this.hass);
-          await serviceCaller.setPumpSpeed(config.entity!, 2);
-        },
-        active: currentSpeed === 2,
-        color: '#FF9800',
-      },
-      {
-        icon: 'mdi:speedometer',
-        label: 'Boost',
-        action: async () => {
-          const serviceCaller = new ServiceCaller(this.hass);
-          await serviceCaller.setPumpSpeed(config.entity!, 3);
-        },
-        active: currentSpeed === 3,
-        color: '#F44336',
-      },
-    ];
-
     const isRunning = state === 'on' || currentSpeed > 0;
+    const speedLabels = ['OFF', 'ECO', 'Normal', 'Boost'];
+    const speedColors = ['#8E8E93', '#34C759', '#FF9F0A', '#FF3B30'];
+    const speedIcons = ['mdi:power-off', 'mdi:speedometer-slow', 'mdi:speedometer-medium', 'mdi:speedometer'];
 
     return html`
       <ha-card
@@ -360,7 +340,7 @@ export class VioletPoolCard extends LitElement {
         <div class="accent-bar"></div>
         <div class="card-content">
           <div class="header">
-            <div class="header-icon ${isRunning ? 'icon-active' : ''}">
+            <div class="header-icon ${isRunning ? 'icon-active' : ''}" style="--icon-accent: ${accentColor}">
               <ha-icon
                 icon="${config.icon || 'mdi:pump'}"
                 class="${isRunning ? 'pump-running' : ''}"
@@ -368,13 +348,40 @@ export class VioletPoolCard extends LitElement {
             </div>
             <div class="header-info">
               <span class="name">${name}</span>
-              ${currentSpeed > 0
-                ? html`<span class="header-subtitle" style="color: ${speedColor.color}">Level ${currentSpeed} ${currentRPM > 0 ? `\u00B7 ${currentRPM} RPM` : ''}</span>`
-                : html`<span class="header-subtitle">${state}</span>`}
+              <span class="header-subtitle" style="${isRunning ? `color: ${speedColor.color}` : ''}">
+                ${isRunning
+                  ? `${speedLabels[currentSpeed]}${currentRPM > 0 ? ` \u00B7 ${currentRPM} RPM` : ''}`
+                  : this._getFriendlyState(state, 'pump')}
+              </span>
             </div>
             ${config.show_state
               ? html`<status-badge .state="${state}" .pulse="${isRunning}"></status-badge>`
               : ''}
+          </div>
+
+          <!-- Speed Segments Visual Indicator -->
+          <div class="speed-segments-container">
+            <div class="speed-segments">
+              ${[1, 2, 3].map(level => html`
+                <button
+                  class="speed-segment ${currentSpeed === level ? 'seg-active' : currentSpeed > level ? 'seg-past' : ''}"
+                  style="--seg-color: ${speedColors[level]}"
+                  @click="${(e: Event) => { e.stopPropagation(); const sc = new ServiceCaller(this.hass); sc.setPumpSpeed(config.entity!, level); }}"
+                  title="${speedLabels[level]}"
+                >
+                  <ha-icon icon="${speedIcons[level]}" style="--mdc-icon-size: 14px"></ha-icon>
+                  <span>${speedLabels[level]}</span>
+                </button>
+              `)}
+            </div>
+            <button
+              class="speed-off-btn ${currentSpeed === 0 ? 'seg-active' : ''}"
+              style="--seg-color: ${speedColors[0]}"
+              @click="${(e: Event) => { e.stopPropagation(); const sc = new ServiceCaller(this.hass); sc.turnOff(config.entity!); }}"
+              title="OFF"
+            >
+              <ha-icon icon="mdi:power" style="--mdc-icon-size: 16px"></ha-icon>
+            </button>
           </div>
 
           ${config.show_detail_status && pumpState
@@ -384,7 +391,7 @@ export class VioletPoolCard extends LitElement {
           ${config.show_controls
             ? html`
                 <slider-control
-                  label="Pump Speed"
+                  label="Speed Level"
                   min="0"
                   max="3"
                   step="1"
@@ -392,8 +399,6 @@ export class VioletPoolCard extends LitElement {
                   .labels="${['OFF', 'ECO', 'Normal', 'Boost']}"
                   @value-changed="${(e: CustomEvent) => this._handlePumpSpeedChange(e, config.entity!)}"
                 ></slider-control>
-
-                <quick-actions .actions="${quickActions}"></quick-actions>
               `
             : ''}
 
@@ -475,6 +480,12 @@ export class VioletPoolCard extends LitElement {
     ];
 
     const isHeating = state === 'heating' || state === 'heat';
+    const tempPct = currentTemp !== undefined
+      ? this._getValuePercent(currentTemp, minTemp, maxTemp)
+      : undefined;
+    const targetPct = targetTemp !== undefined
+      ? this._getValuePercent(targetTemp, minTemp, maxTemp)
+      : undefined;
 
     return html`
       <ha-card
@@ -485,7 +496,7 @@ export class VioletPoolCard extends LitElement {
         <div class="accent-bar"></div>
         <div class="card-content">
           <div class="header">
-            <div class="header-icon ${isHeating ? 'icon-active' : ''}">
+            <div class="header-icon ${isHeating ? 'icon-active' : ''}" style="--icon-accent: ${accentColor}">
               <ha-icon
                 icon="${config.icon || 'mdi:radiator'}"
                 class="${isHeating ? 'heater-active' : ''}"
@@ -493,7 +504,7 @@ export class VioletPoolCard extends LitElement {
             </div>
             <div class="header-info">
               <span class="name">${name}</span>
-              <span class="header-subtitle">${state}</span>
+              <span class="header-subtitle">${this._getFriendlyState(state)}</span>
             </div>
             ${config.show_state
               ? html`<status-badge .state="${state}"></status-badge>`
@@ -503,12 +514,35 @@ export class VioletPoolCard extends LitElement {
           ${currentTemp !== undefined
             ? html`
                 <div class="temp-hero" style="--temp-color: ${tempColor?.color || 'var(--vpc-primary)'}">
-                  <span class="temp-hero-value">${currentTemp.toFixed(1)}</span>
-                  <span class="temp-hero-unit">°C</span>
+                  <div class="temp-hero-main">
+                    <span class="temp-hero-value">${currentTemp.toFixed(1)}</span>
+                    <span class="temp-hero-unit">°C</span>
+                  </div>
                   ${targetTemp !== undefined
-                    ? html`<span class="temp-hero-target">→ ${targetTemp.toFixed(1)}°C</span>`
+                    ? html`
+                        <div class="temp-hero-target-pill">
+                          <ha-icon icon="mdi:target" style="--mdc-icon-size: 13px"></ha-icon>
+                          <span>${targetTemp.toFixed(1)}°C</span>
+                        </div>
+                      `
                     : ''}
                 </div>
+                ${tempPct !== undefined
+                  ? html`
+                      <div class="temp-range-bar">
+                        <div class="temp-range-track">
+                          <div class="temp-range-fill" style="width: ${tempPct}%; background: ${tempColor?.color || accentColor}"></div>
+                          ${targetPct !== undefined
+                            ? html`<div class="temp-range-target" style="left: ${targetPct}%"></div>`
+                            : ''}
+                        </div>
+                        <div class="temp-range-labels">
+                          <span>${minTemp}°C</span>
+                          <span>${maxTemp}°C</span>
+                        </div>
+                      </div>
+                    `
+                  : ''}
               `
             : ''}
 
@@ -612,6 +646,12 @@ export class VioletPoolCard extends LitElement {
     ];
 
     const isSolarActive = state === 'heating' || state === 'heat';
+    const poolTempPct = poolTemp !== undefined
+      ? this._getValuePercent(poolTemp, minTemp, maxTemp)
+      : undefined;
+    const targetTempPct = targetTemp !== undefined
+      ? this._getValuePercent(targetTemp, minTemp, maxTemp)
+      : undefined;
 
     return html`
       <ha-card
@@ -622,7 +662,7 @@ export class VioletPoolCard extends LitElement {
         <div class="accent-bar"></div>
         <div class="card-content">
           <div class="header">
-            <div class="header-icon ${isSolarActive ? 'icon-active' : ''}">
+            <div class="header-icon ${isSolarActive ? 'icon-active' : ''}" style="--icon-accent: ${accentColor}">
               <ha-icon
                 icon="${config.icon || 'mdi:solar-power'}"
                 class="${isSolarActive ? 'solar-active' : ''}"
@@ -630,7 +670,7 @@ export class VioletPoolCard extends LitElement {
             </div>
             <div class="header-info">
               <span class="name">${name}</span>
-              <span class="header-subtitle">${state}</span>
+              <span class="header-subtitle">${this._getFriendlyState(state)}</span>
             </div>
             ${config.show_state
               ? html`<status-badge .state="${state}"></status-badge>`
@@ -642,34 +682,59 @@ export class VioletPoolCard extends LitElement {
             : ''}
 
           <div class="solar-temps">
-            ${poolTemp !== undefined
+            <!-- Solar temperature comparison: pool vs absorber -->
+            <div class="solar-temp-comparison">
+              ${poolTemp !== undefined
+                ? html`
+                    <div class="solar-temp-tile">
+                      <ha-icon icon="mdi:pool" style="--mdc-icon-size: 18px"></ha-icon>
+                      <div class="solar-temp-tile-val">${poolTemp.toFixed(1)}°C</div>
+                      <div class="solar-temp-tile-label">Pool</div>
+                    </div>
+                  `
+                : ''}
+              ${tempDelta !== undefined
+                ? html`
+                    <div class="solar-delta-badge ${tempDelta >= 3 ? 'delta-great' : tempDelta > 0 ? 'delta-ok' : 'delta-low'}">
+                      <ha-icon icon="${tempDelta >= 0 ? 'mdi:trending-up' : 'mdi:trending-down'}" style="--mdc-icon-size: 16px"></ha-icon>
+                      <span>${tempDelta > 0 ? '+' : ''}${tempDelta.toFixed(1)}°C</span>
+                    </div>
+                  `
+                : ''}
+              ${absorberTemp !== undefined
+                ? html`
+                    <div class="solar-temp-tile">
+                      <ha-icon icon="mdi:solar-panel" style="--mdc-icon-size: 18px"></ha-icon>
+                      <div class="solar-temp-tile-val">${absorberTemp.toFixed(1)}°C</div>
+                      <div class="solar-temp-tile-label">Absorber</div>
+                    </div>
+                  `
+                : ''}
+            </div>
+            ${poolTempPct !== undefined
               ? html`
-                  <div class="info-row">
-                    <ha-icon icon="mdi:pool"></ha-icon>
-                    <span class="info-label">Pool</span>
-                    <span class="info-value">${poolTemp.toFixed(1)}°C</span>
-                  </div>
-                `
-              : ''}
-            ${absorberTemp !== undefined
-              ? html`
-                  <div class="info-row">
-                    <ha-icon icon="mdi:solar-panel"></ha-icon>
-                    <span class="info-label">Absorber</span>
-                    <span class="info-value">${absorberTemp.toFixed(1)}°C</span>
+                  <div class="temp-range-bar">
+                    <div class="temp-range-track">
+                      <div class="temp-range-fill" style="width: ${poolTempPct}%; background: ${accentColor}"></div>
+                      ${targetTempPct !== undefined
+                        ? html`<div class="temp-range-target" style="left: ${targetTempPct}%"></div>`
+                        : ''}
+                    </div>
+                    <div class="temp-range-labels">
+                      <span>${minTemp}°C</span>
+                      <span>${maxTemp}°C</span>
+                    </div>
                   </div>
                 `
               : ''}
             ${tempDelta !== undefined
               ? html`
-                  <div class="delta-display ${tempDelta > 0 ? 'delta-positive' : 'delta-negative'}">
-                    <ha-icon icon="${tempDelta > 0 ? 'mdi:arrow-up' : 'mdi:arrow-down'}"></ha-icon>
-                    <span class="delta-value">\u0394 ${tempDelta > 0 ? '+' : ''}${tempDelta.toFixed(1)}°C</span>
-                    <span class="delta-hint">${tempDelta < 0
-                      ? 'Too cold for heating'
+                  <div class="delta-hint-text">
+                    ${tempDelta < 0
+                      ? '❄ Too cold for solar heating'
                       : tempDelta < 3
-                      ? 'Heating possible'
-                      : 'Ideal for heating'}</span>
+                      ? '⚡ Solar heating possible'
+                      : '☀ Ideal conditions for solar heating'}
                   </div>
                 `
               : ''}
@@ -717,7 +782,6 @@ export class VioletPoolCard extends LitElement {
     let minValue: number | undefined;
     let maxValue: number | undefined;
     let unit = '';
-    let valueIcon = 'mdi:test-tube';
 
     if (dosingType === 'chlorine') {
       const orpSensorId = this._getEntityId('orp_value_entity', 'sensor', 'orp_value');
@@ -729,7 +793,6 @@ export class VioletPoolCard extends LitElement {
       minValue = targetEntity?.attributes?.min || 600;
       maxValue = targetEntity?.attributes?.max || 800;
       unit = 'mV';
-      valueIcon = 'mdi:flash';
     } else if (dosingType === 'ph_minus' || dosingType === 'ph_plus') {
       const phSensorId = this._getEntityId('ph_value_entity', 'sensor', 'ph_value');
       const phSensor = this.hass.states[phSensorId];
@@ -740,7 +803,6 @@ export class VioletPoolCard extends LitElement {
       minValue = targetEntity?.attributes?.min || 6.8;
       maxValue = targetEntity?.attributes?.max || 7.8;
       unit = '';
-      valueIcon = 'mdi:ph';
     }
 
     const dosingVolume24h = entity.attributes?.dosing_volume_24h;
@@ -788,15 +850,30 @@ export class VioletPoolCard extends LitElement {
       },
     ];
 
-    // BUG FIX: Safely check dosingState is an array before calling .some()
+    // Safely check dosingState is an array before calling .some()
     const isDosing = state === 'on' && Array.isArray(dosingState) && dosingState.some((s: string) => s.includes('ACTIVE'));
 
-    // Get color for current value
+    // Get color and percent for current value
     const valueColor = currentValue !== undefined
       ? dosingType === 'chlorine'
         ? StateColorHelper.getOrpColor(currentValue, targetValue)
         : StateColorHelper.getPhColor(currentValue, targetValue)
       : undefined;
+
+    const valuePct = currentValue !== undefined && minValue !== undefined && maxValue !== undefined
+      ? this._getValuePercent(currentValue, minValue, maxValue)
+      : undefined;
+    const targetPct = targetValue !== undefined && minValue !== undefined && maxValue !== undefined
+      ? this._getValuePercent(targetValue, minValue, maxValue)
+      : undefined;
+
+    const decimals = dosingType === 'chlorine' ? 0 : 1;
+    const dosingLabel = dosingType === 'chlorine' ? 'ORP' : dosingType === 'ph_minus' ? 'pH' : dosingType === 'ph_plus' ? 'pH' : 'Floc';
+    const valueStatusLabel = valueColor
+      ? (dosingType === 'chlorine'
+          ? (currentValue! < (targetValue ?? 650) ? 'Low' : currentValue! > (targetValue ?? 750) ? 'High' : 'Optimal')
+          : (currentValue! < 7.0 ? 'Acidic' : currentValue! > 7.4 ? 'Alkaline' : 'Optimal'))
+      : '';
 
     return html`
       <ha-card
@@ -807,7 +884,7 @@ export class VioletPoolCard extends LitElement {
         <div class="accent-bar"></div>
         <div class="card-content">
           <div class="header">
-            <div class="header-icon ${isDosing ? 'icon-active' : ''}">
+            <div class="header-icon ${isDosing ? 'icon-active' : ''}" style="--icon-accent: ${accentColor}">
               <ha-icon
                 icon="${config.icon || this._getDosingIcon(dosingType)}"
                 class="${isDosing ? 'dosing-active' : ''}"
@@ -815,7 +892,7 @@ export class VioletPoolCard extends LitElement {
             </div>
             <div class="header-info">
               <span class="name">${name}</span>
-              <span class="header-subtitle">${state}</span>
+              <span class="header-subtitle">${this._getFriendlyState(state)}</span>
             </div>
             ${config.show_state
               ? html`<status-badge .state="${state}" .pulse="${isDosing}"></status-badge>`
@@ -824,26 +901,36 @@ export class VioletPoolCard extends LitElement {
 
           ${currentValue !== undefined
             ? html`
-                <div class="dosing-hero">
-                  <div class="dosing-current" style="color: ${valueColor?.color || 'var(--vpc-text)'}">
-                    <ha-icon icon="${valueIcon}"></ha-icon>
-                    <span class="dosing-current-value">${currentValue.toFixed(dosingType === 'chlorine' ? 0 : 1)}</span>
-                    <span class="dosing-current-unit">${unit}</span>
+                <!-- Dosing value hero with progress bar -->
+                <div class="dosing-value-block">
+                  <div class="dosing-value-row">
+                    <div class="dosing-value-main" style="color: ${valueColor?.color || 'var(--vpc-text)'}">
+                      <span class="dosing-label-tag">${dosingLabel}</span>
+                      <span class="dosing-current-value">${currentValue.toFixed(decimals)}</span>
+                      <span class="dosing-current-unit">${unit}</span>
+                    </div>
+                    <div class="dosing-status-pill" style="background: ${valueColor?.color ? valueColor.color + '18' : 'rgba(0,0,0,0.05)'}; color: ${valueColor?.color || 'var(--vpc-text-secondary)'}">
+                      ${valueStatusLabel}
+                    </div>
                   </div>
-                  ${targetValue !== undefined
+                  ${valuePct !== undefined
                     ? html`
-                        <div class="dosing-target">
-                          <ha-icon icon="mdi:arrow-right-thin"></ha-icon>
-                          <span>${targetValue.toFixed(dosingType === 'chlorine' ? 0 : 1)}${unit}</span>
-                        </div>
-                      `
-                    : ''}
-                  ${minValue !== undefined && maxValue !== undefined
-                    ? html`
-                        <div class="dosing-range">
-                          <span>Min ${minValue.toFixed(dosingType === 'chlorine' ? 0 : 1)}${unit}</span>
-                          <span class="dosing-range-sep">\u2022</span>
-                          <span>Max ${maxValue.toFixed(dosingType === 'chlorine' ? 0 : 1)}${unit}</span>
+                        <div class="chem-range-bar">
+                          <div class="chem-range-track">
+                            <div class="chem-range-fill" style="width: ${valuePct}%; background: ${valueColor?.color || accentColor}"></div>
+                            ${targetPct !== undefined
+                              ? html`
+                                  <div class="chem-range-target" style="left: ${targetPct}%">
+                                    <div class="chem-target-line"></div>
+                                    <div class="chem-target-label">${targetValue!.toFixed(decimals)}${unit}</div>
+                                  </div>
+                                `
+                              : ''}
+                          </div>
+                          <div class="chem-range-labels">
+                            <span>${minValue!.toFixed(decimals)}${unit}</span>
+                            <span>${maxValue!.toFixed(decimals)}${unit}</span>
+                          </div>
                         </div>
                       `
                     : ''}
@@ -1017,6 +1104,18 @@ export class VioletPoolCard extends LitElement {
     }
 
     const anyActive = activeDevices.some(d => ['on', 'auto', 'heat', 'heating'].includes(d.state));
+    const activeCount = activeDevices.filter(d => ['on', 'auto', 'heat', 'heating'].includes(d.state)).length;
+
+    // Progress percentages for chemistry tiles
+    const tempPct = poolTemp !== undefined ? this._getValuePercent(poolTemp, 18, 35) : undefined;
+    const phPct = phValue !== undefined ? this._getValuePercent(phValue, 6.5, 8.0) : undefined;
+    const orpPct = orpValue !== undefined ? this._getValuePercent(orpValue, 500, 900) : undefined;
+
+    // Ideal zone positions for range bar (pH: 7.0-7.4, ORP: 650-750)
+    const phIdealStartPct = this._getValuePercent(7.0, 6.5, 8.0);
+    const phIdealEndPct = this._getValuePercent(7.4, 6.5, 8.0);
+    const orpIdealStartPct = this._getValuePercent(650, 500, 900);
+    const orpIdealEndPct = this._getValuePercent(750, 500, 900);
 
     return html`
       <ha-card
@@ -1025,25 +1124,39 @@ export class VioletPoolCard extends LitElement {
       >
         <div class="accent-bar"></div>
         <div class="card-content">
+          <!-- Header -->
           <div class="header">
-            <div class="header-icon ${anyActive ? 'icon-active' : ''}">
+            <div class="header-icon ${anyActive ? 'icon-active' : ''}" style="--icon-accent: ${accentColor}">
               <ha-icon icon="mdi:pool"></ha-icon>
             </div>
             <div class="header-info">
               <span class="name">${name}</span>
-              <span class="header-subtitle">${anyActive ? 'Active' : 'Idle'}</span>
+              <span class="header-subtitle">
+                ${anyActive ? `${activeCount} device${activeCount !== 1 ? 's' : ''} active` : 'All systems idle'}
+              </span>
             </div>
+            ${warnings.length > 0
+              ? html`<div class="overview-warning-badge">${warnings.length}</div>`
+              : anyActive
+              ? html`<div class="overview-active-dot"></div>`
+              : ''}
           </div>
 
-          <!-- Water Chemistry Grid -->
+          <!-- Water Chemistry - Apple Health style metric tiles -->
           <div class="chemistry-grid">
             ${poolTemp !== undefined
               ? html`
                   <div class="chemistry-card" style="--chem-color: ${tempColor?.color || '#4CAF50'}"
                     @click="${(e: Event) => { e.stopPropagation(); this._showMoreInfo(poolTempSensorId); }}">
-                    <ha-icon icon="mdi:thermometer-water"></ha-icon>
-                    <span class="chemistry-val">${poolTemp.toFixed(1)}°C</span>
-                    <span class="chemistry-label">Temperature</span>
+                    <div class="chem-icon-wrap">
+                      <ha-icon icon="mdi:thermometer-water"></ha-icon>
+                    </div>
+                    <span class="chemistry-val">${poolTemp.toFixed(1)}°</span>
+                    <span class="chemistry-unit">°C</span>
+                    <span class="chemistry-label">Temp</span>
+                    ${tempPct !== undefined
+                      ? html`<div class="chem-mini-bar"><div class="chem-mini-fill" style="width: ${tempPct}%; background: ${tempColor?.color || '#4CAF50'}"></div></div>`
+                      : ''}
                   </div>
                 `
               : ''}
@@ -1051,9 +1164,20 @@ export class VioletPoolCard extends LitElement {
               ? html`
                   <div class="chemistry-card" style="--chem-color: ${phColor?.color || '#4CAF50'}"
                     @click="${(e: Event) => { e.stopPropagation(); this._showMoreInfo(phSensorId); }}">
-                    <ha-icon icon="mdi:ph"></ha-icon>
-                    <span class="chemistry-val">pH ${phValue.toFixed(1)}</span>
+                    <div class="chem-icon-wrap">
+                      <ha-icon icon="mdi:ph"></ha-icon>
+                    </div>
+                    <span class="chemistry-val">${phValue.toFixed(1)}</span>
+                    <span class="chemistry-unit">pH</span>
                     <span class="chemistry-label">${phStatus === 'ok' ? 'Optimal' : 'Attention'}</span>
+                    ${phPct !== undefined
+                      ? html`
+                          <div class="chem-mini-bar">
+                            <div class="chem-mini-ideal" style="left: ${phIdealStartPct}%; width: ${phIdealEndPct - phIdealStartPct}%"></div>
+                            <div class="chem-mini-fill" style="width: ${phPct}%; background: ${phColor?.color || '#4CAF50'}"></div>
+                          </div>
+                        `
+                      : ''}
                   </div>
                 `
               : ''}
@@ -1061,33 +1185,45 @@ export class VioletPoolCard extends LitElement {
               ? html`
                   <div class="chemistry-card" style="--chem-color: ${orpColor?.color || '#4CAF50'}"
                     @click="${(e: Event) => { e.stopPropagation(); this._showMoreInfo(orpSensorId); }}">
-                    <ha-icon icon="mdi:flash"></ha-icon>
-                    <span class="chemistry-val">${orpValue.toFixed(0)}mV</span>
+                    <div class="chem-icon-wrap">
+                      <ha-icon icon="mdi:lightning-bolt"></ha-icon>
+                    </div>
+                    <span class="chemistry-val">${orpValue.toFixed(0)}</span>
+                    <span class="chemistry-unit">mV</span>
                     <span class="chemistry-label">${orpStatus === 'ok' ? 'Optimal' : orpStatus === 'warning' ? 'Low' : 'High'}</span>
+                    ${orpPct !== undefined
+                      ? html`
+                          <div class="chem-mini-bar">
+                            <div class="chem-mini-ideal" style="left: ${orpIdealStartPct}%; width: ${orpIdealEndPct - orpIdealStartPct}%"></div>
+                            <div class="chem-mini-fill" style="width: ${orpPct}%; background: ${orpColor?.color || '#4CAF50'}"></div>
+                          </div>
+                        `
+                      : ''}
                   </div>
                 `
               : ''}
           </div>
 
-          <!-- Active Devices -->
+          <!-- Device List - clean rows -->
           ${activeDevices.length > 0
             ? html`
                 <div class="overview-section">
                   <div class="section-title">
-                    <ha-icon icon="mdi:devices"></ha-icon>
                     <span>Devices</span>
+                    <span class="section-count">${activeDevices.length}</span>
                   </div>
                   <div class="device-list">
                     ${activeDevices.map(
                       (device) => html`
                         <div class="device-row"
                           @click="${(e: Event) => { e.stopPropagation(); this._showMoreInfo(device.entityId); }}">
-                          <ha-icon
-                            icon="${device.icon}"
-                            class="${['on', 'auto', 'heat', 'heating'].includes(device.state) ? 'device-active' : 'device-inactive'}"
-                          ></ha-icon>
-                          <span class="device-name">${device.name}</span>
-                          <span class="device-status">${device.status}</span>
+                          <div class="device-icon-wrap ${['on', 'auto', 'heat', 'heating'].includes(device.state) ? 'device-icon-active' : ''}">
+                            <ha-icon icon="${device.icon}"></ha-icon>
+                          </div>
+                          <div class="device-info">
+                            <span class="device-name">${device.name}</span>
+                            <span class="device-status">${device.status}</span>
+                          </div>
                           <div class="device-dot ${['on', 'auto', 'heat', 'heating'].includes(device.state) ? 'dot-active' : 'dot-inactive'}"></div>
                         </div>
                       `
@@ -1097,19 +1233,19 @@ export class VioletPoolCard extends LitElement {
               `
             : ''}
 
-          <!-- Warnings -->
+          <!-- Warnings / All OK -->
           ${warnings.length > 0
             ? html`
                 <div class="overview-section">
                   <div class="section-title warning-title">
-                    <ha-icon icon="mdi:alert-outline"></ha-icon>
-                    <span>Warnings</span>
+                    <ha-icon icon="mdi:alert-outline" style="--mdc-icon-size: 14px"></ha-icon>
+                    <span>Alerts</span>
                   </div>
                   <div class="warning-list">
                     ${warnings.map(
                       (warning) => html`
                         <div class="warning-row">
-                          <ha-icon icon="${warning.includes('Frost') ? 'mdi:snowflake-alert' : 'mdi:alert-circle'}"></ha-icon>
+                          <ha-icon icon="${warning.includes('Frost') ? 'mdi:snowflake-alert' : 'mdi:alert-circle'}" style="--mdc-icon-size: 16px"></ha-icon>
                           <span>${warning}</span>
                         </div>
                       `
@@ -1119,7 +1255,7 @@ export class VioletPoolCard extends LitElement {
               `
             : html`
                 <div class="all-ok-display">
-                  <ha-icon icon="mdi:check-circle"></ha-icon>
+                  <ha-icon icon="mdi:check-circle" style="--mdc-icon-size: 18px"></ha-icon>
                   <span>All systems normal</span>
                 </div>
               `}
@@ -1227,80 +1363,161 @@ export class VioletPoolCard extends LitElement {
   static get styles(): CSSResultGroup {
     return css`
       /* ============================================
-         BASE VARIABLES
+         BASE VARIABLES — Apple / Samsung design system
          ============================================ */
       :host {
-        --vpc-spacing: 16px;
-        --vpc-radius: 16px;
-        --vpc-bg: var(--ha-card-background, var(--card-background-color, #fff));
+        /* Typography — SF Pro on Apple, Roboto on Android, system-ui everywhere */
+        --vpc-font: -apple-system, 'SF Pro Display', 'SF Pro Text', system-ui,
+                    'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+        /* Spacing */
+        --vpc-spacing: 18px;
+        --vpc-radius: 20px;
+        --vpc-inner-radius: 12px;
+
+        /* Color tokens */
+        --vpc-bg: var(--ha-card-background, var(--card-background-color, #ffffff));
+        --vpc-surface: rgba(120,120,128,0.06);
         --vpc-border: none;
-        --vpc-shadow: var(--ha-card-box-shadow, 0 2px 8px rgba(0,0,0,0.08));
+        --vpc-shadow: 0 2px 20px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.04);
         --vpc-backdrop: none;
-        --vpc-primary: var(--primary-color, #2196F3);
-        --vpc-text: var(--primary-text-color, #212121);
-        --vpc-text-secondary: var(--secondary-text-color, #757575);
-        --vpc-icon-size: 24px;
-        --vpc-transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-        --card-accent: var(--primary-color, #2196F3);
+
+        /* Semantic colors — Apple system palette */
+        --vpc-primary: var(--primary-color, #007AFF);
+        --vpc-success: #34C759;
+        --vpc-warning: #FF9F0A;
+        --vpc-danger: #FF3B30;
+        --vpc-purple: #AF52DE;
+        --vpc-teal: #5AC8FA;
+        --vpc-orange: #FF9500;
+        --vpc-indigo: #5856D6;
+
+        /* Text */
+        --vpc-text: var(--primary-text-color, #1C1C1E);
+        --vpc-text-secondary: var(--secondary-text-color, #6D6D72);
+        --vpc-text-tertiary: rgba(60,60,67,0.45);
+
+        /* Icon */
+        --vpc-icon-size: 22px;
+
+        /* Motion — Apple spring curve */
+        --vpc-transition: all 0.28s cubic-bezier(0.34, 1.4, 0.64, 1);
+        --vpc-transition-fast: all 0.18s ease;
+
+        /* Card accent (per-card) */
+        --card-accent: var(--primary-color, #007AFF);
+        --icon-accent: var(--card-accent);
 
         display: block;
+        font-family: var(--vpc-font);
       }
 
       /* ============================================
-         THEME OVERRIDES (fixed: on ha-card, not :host)
+         THEME OVERRIDES — applied on ha-card
          ============================================ */
+
+      /* ---- Apple (default) ---- */
+      ha-card.theme-apple {
+        --vpc-bg: #ffffff;
+        --vpc-shadow: 0 2px 20px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04);
+        --vpc-radius: 22px;
+        --vpc-inner-radius: 13px;
+        --vpc-surface: rgba(120,120,128,0.06);
+        --vpc-primary: #007AFF;
+      }
+
+      /* ---- Dark ---- */
+      ha-card.theme-dark {
+        --vpc-bg: #1C1C1E;
+        --vpc-surface: rgba(255,255,255,0.06);
+        --vpc-border: 1px solid rgba(255,255,255,0.08);
+        --vpc-shadow: 0 4px 30px rgba(0,0,0,0.4);
+        --vpc-radius: 22px;
+        --vpc-text: #FFFFFF;
+        --vpc-text-secondary: #8E8E93;
+        --vpc-text-tertiary: rgba(255,255,255,0.25);
+        --vpc-primary: #0A84FF;
+        --vpc-success: #30D158;
+        --vpc-warning: #FFD60A;
+        --vpc-danger: #FF453A;
+      }
+
+      /* ---- Luxury / Glass ---- */
       ha-card.theme-luxury,
       ha-card.theme-glass {
-        --vpc-bg: rgba(255, 255, 255, 0.65);
-        --vpc-backdrop: blur(20px) saturate(180%);
-        --vpc-radius: 24px;
-        --vpc-border: 1px solid rgba(255, 255, 255, 0.3);
-        --vpc-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+        --vpc-bg: rgba(255,255,255,0.72);
+        --vpc-backdrop: blur(24px) saturate(180%);
+        --vpc-radius: 26px;
+        --vpc-border: 1px solid rgba(255,255,255,0.4);
+        --vpc-shadow: 0 8px 40px rgba(31,38,135,0.12), 0 2px 8px rgba(0,0,0,0.06);
       }
 
+      /* ---- Modern ---- */
       ha-card.theme-modern {
-        --vpc-radius: 20px;
+        --vpc-radius: 18px;
         --vpc-spacing: 20px;
-        --vpc-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04);
+        --vpc-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 0 0 1px rgba(0,0,0,0.04);
       }
 
+      /* ---- Minimalist ---- */
       ha-card.theme-minimalist {
-        --vpc-radius: 12px;
+        --vpc-radius: 14px;
         --vpc-shadow: none;
-        --vpc-border: 1px solid rgba(0,0,0,0.06);
+        --vpc-border: 1px solid rgba(0,0,0,0.07);
+        --vpc-surface: transparent;
       }
 
+      /* ---- Neon (legacy) — remapped to a cleaner dark neon ---- */
       ha-card.theme-neon {
-        --vpc-bg: linear-gradient(145deg, #1a1a2e, #0a0a1a);
-        --vpc-border: 1px solid rgba(0, 255, 255, 0.15);
-        --vpc-shadow: 0 0 20px rgba(0, 255, 255, 0.08);
-        --vpc-radius: 8px;
-        --vpc-primary: #00ffff;
-        --vpc-text: #e0e0e0;
-        --vpc-text-secondary: #808080;
+        --vpc-bg: #0D0D14;
+        --vpc-border: 1px solid rgba(0,212,255,0.2);
+        --vpc-shadow: 0 0 30px rgba(0,212,255,0.07);
+        --vpc-radius: 14px;
+        --vpc-primary: #00D4FF;
+        --vpc-text: #E8E8F0;
+        --vpc-text-secondary: #6E6E80;
+        --vpc-surface: rgba(0,212,255,0.04);
+        --vpc-success: #00E676;
+        --vpc-warning: #FFEA00;
+        --vpc-danger: #FF1744;
       }
 
+      /* ---- Premium (legacy) — refined frosted gradient ---- */
       ha-card.theme-premium {
-        --vpc-bg: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(245,245,255,0.95) 100%);
-        --vpc-radius: 20px;
-        --vpc-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(255,255,255,0.8);
-        --vpc-border: 1px solid rgba(255,255,255,0.6);
+        --vpc-bg: linear-gradient(145deg, rgba(255,255,255,0.96) 0%, rgba(248,248,255,0.96) 100%);
+        --vpc-radius: 24px;
+        --vpc-shadow: 0 12px 50px -8px rgba(80,80,160,0.15), 0 0 0 1px rgba(255,255,255,0.9);
+        --vpc-border: 1px solid rgba(255,255,255,0.7);
       }
 
-      /* Dark mode support via HA's dark-mode variables */
+      /* ---- Auto dark mode ---- */
       @media (prefers-color-scheme: dark) {
+        ha-card.theme-apple {
+          --vpc-bg: #1C1C1E;
+          --vpc-surface: rgba(255,255,255,0.06);
+          --vpc-border: 1px solid rgba(255,255,255,0.08);
+          --vpc-text: #FFFFFF;
+          --vpc-text-secondary: #8E8E93;
+          --vpc-primary: #0A84FF;
+          --vpc-success: #30D158;
+          --vpc-warning: #FFD60A;
+          --vpc-danger: #FF453A;
+        }
         ha-card.theme-luxury,
         ha-card.theme-glass {
-          --vpc-bg: rgba(20, 20, 30, 0.7);
-          --vpc-border: 1px solid rgba(255, 255, 255, 0.08);
-          --vpc-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+          --vpc-bg: rgba(18,18,30,0.80);
+          --vpc-border: 1px solid rgba(255,255,255,0.09);
+          --vpc-shadow: 0 8px 40px rgba(0,0,0,0.45);
         }
         ha-card.theme-premium {
-          --vpc-bg: linear-gradient(135deg, rgba(30,30,45,0.95) 0%, rgba(20,20,35,0.95) 100%);
-          --vpc-border: 1px solid rgba(255,255,255,0.06);
+          --vpc-bg: linear-gradient(145deg, rgba(28,28,38,0.97) 0%, rgba(20,20,32,0.97) 100%);
+          --vpc-border: 1px solid rgba(255,255,255,0.07);
         }
         ha-card.theme-minimalist {
-          --vpc-border: 1px solid rgba(255,255,255,0.06);
+          --vpc-border: 1px solid rgba(255,255,255,0.07);
+        }
+        ha-card.theme-modern {
+          --vpc-shadow: 0 1px 3px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.04);
         }
       }
 
@@ -1308,6 +1525,7 @@ export class VioletPoolCard extends LitElement {
          HA-CARD BASE
          ============================================ */
       ha-card {
+        font-family: var(--vpc-font);
         padding: var(--vpc-spacing);
         background: var(--vpc-bg);
         border-radius: var(--vpc-radius);
@@ -1315,24 +1533,37 @@ export class VioletPoolCard extends LitElement {
         border: var(--vpc-border);
         backdrop-filter: var(--vpc-backdrop);
         -webkit-backdrop-filter: var(--vpc-backdrop);
-        transition: var(--vpc-transition);
+        transition: transform 0.22s cubic-bezier(0.34,1.4,0.64,1),
+                    box-shadow 0.22s ease;
         overflow: hidden;
         position: relative;
         cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+        user-select: none;
       }
 
       ha-card:hover {
         transform: translateY(-2px);
-        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.11), 0 2px 6px rgba(0,0,0,0.05);
+      }
+
+      ha-card:active {
+        transform: scale(0.985);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+        transition: transform 0.1s ease, box-shadow 0.1s ease;
+      }
+
+      ha-card.theme-dark:hover {
+        box-shadow: 0 8px 30px rgba(0,0,0,0.5);
       }
 
       ha-card.theme-neon:hover {
-        box-shadow: 0 0 30px rgba(0, 255, 255, 0.15);
+        box-shadow: 0 0 40px rgba(0,212,255,0.12), 0 4px 20px rgba(0,0,0,0.3);
       }
 
       ha-card.theme-neon.is-active {
-        box-shadow: 0 0 30px rgba(0, 255, 255, 0.25), inset 0 0 15px rgba(0, 255, 255, 0.05);
-        border-color: rgba(0, 255, 255, 0.4);
+        box-shadow: 0 0 50px rgba(0,212,255,0.2), inset 0 0 20px rgba(0,212,255,0.04);
+        border-color: rgba(0,212,255,0.35);
       }
 
       /* ============================================
@@ -1345,24 +1576,30 @@ export class VioletPoolCard extends LitElement {
         right: 0;
         height: 3px;
         background: var(--card-accent);
-        opacity: 0.7;
+        opacity: 0.65;
         transition: opacity 0.3s ease, height 0.3s ease;
       }
 
       ha-card.is-active .accent-bar {
         height: 4px;
         opacity: 1;
-        background: linear-gradient(90deg, var(--card-accent), color-mix(in srgb, var(--card-accent) 70%, white));
       }
 
       ha-card.theme-neon .accent-bar {
-        background: linear-gradient(90deg, #00ffff, #7c4dff, #00ffff);
-        box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        background: linear-gradient(90deg, #00D4FF, #7C4DFF, #00D4FF);
+        box-shadow: 0 0 12px rgba(0,212,255,0.5);
+        height: 2px;
+        animation: neon-flow 3s linear infinite;
       }
 
       ha-card.theme-minimalist .accent-bar {
         height: 2px;
-        opacity: 0.5;
+        opacity: 0.45;
+      }
+
+      @keyframes neon-flow {
+        0% { background-position: 0% 50%; }
+        100% { background-position: 200% 50%; }
       }
 
       /* ============================================
@@ -1390,35 +1627,35 @@ export class VioletPoolCard extends LitElement {
       }
 
       .header-icon {
-        width: 44px;
-        height: 44px;
-        border-radius: 14px;
+        width: 46px;
+        height: 46px;
+        border-radius: 15px;
         display: flex;
         align-items: center;
         justify-content: center;
-        background: rgba(var(--rgb-primary-color, 33,150,243), 0.08);
-        transition: var(--vpc-transition);
+        /* Use the per-card accent as tinted background */
+        background: color-mix(in srgb, var(--icon-accent, var(--vpc-primary)) 12%, transparent);
+        transition: background 0.25s ease, box-shadow 0.25s ease;
         flex-shrink: 0;
       }
 
       .header-icon.icon-active {
-        background: rgba(var(--rgb-primary-color, 33,150,243), 0.15);
-        box-shadow: 0 0 0 4px rgba(var(--rgb-primary-color, 33,150,243), 0.06);
+        background: color-mix(in srgb, var(--icon-accent, var(--vpc-primary)) 18%, transparent);
+        box-shadow: 0 0 0 5px color-mix(in srgb, var(--icon-accent, var(--vpc-primary)) 8%, transparent);
       }
 
       ha-card.theme-neon .header-icon {
-        background: rgba(0, 255, 255, 0.08);
-        border: 1px solid rgba(0, 255, 255, 0.15);
+        background: rgba(0,212,255,0.08);
+        border: 1px solid rgba(0,212,255,0.18);
       }
 
       ha-card.theme-neon .header-icon.icon-active {
-        background: rgba(0, 255, 255, 0.12);
-        box-shadow: 0 0 12px rgba(0, 255, 255, 0.15);
+        box-shadow: 0 0 16px rgba(0,212,255,0.25);
       }
 
       .header-icon ha-icon {
         --mdc-icon-size: 24px;
-        color: var(--vpc-primary);
+        color: var(--icon-accent, var(--vpc-primary));
       }
 
       .header-info {
@@ -1430,17 +1667,19 @@ export class VioletPoolCard extends LitElement {
       }
 
       .name {
+        font-family: var(--vpc-font);
         font-size: 16px;
         font-weight: 600;
-        letter-spacing: 0.2px;
+        letter-spacing: -0.3px;
         color: var(--vpc-text);
-        line-height: 1.3;
+        line-height: 1.25;
       }
 
       .header-subtitle {
+        font-family: var(--vpc-font);
         font-size: 13px;
+        font-weight: 400;
         color: var(--vpc-text-secondary);
-        text-transform: capitalize;
         line-height: 1.2;
       }
 
@@ -1450,17 +1689,542 @@ export class VioletPoolCard extends LitElement {
       ha-icon {
         --mdc-icon-size: var(--vpc-icon-size);
         color: var(--vpc-primary);
-        transition: var(--vpc-transition);
+        transition: color 0.2s ease;
       }
 
-      @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-      @keyframes pulse-glow { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
-      @keyframes breathe { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.8; } }
+      @keyframes rotate {
+        from { transform: rotate(0deg); }
+        to   { transform: rotate(360deg); }
+      }
+      @keyframes pulse-glow {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50%  { opacity: 0.65; transform: scale(0.95); }
+      }
+      @keyframes breathe {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.08); opacity: 0.85; }
+      }
+      @keyframes spin-slow {
+        from { transform: rotate(0deg); }
+        to   { transform: rotate(360deg); }
+      }
 
-      .pump-running { animation: rotate 2s linear infinite; }
-      .heater-active { animation: breathe 2s ease-in-out infinite; color: #FF5722; }
-      .solar-active { animation: breathe 3s ease-in-out infinite; color: #FF9800; }
-      .dosing-active { animation: pulse-glow 2s ease-in-out infinite; color: #4CAF50; }
+      .pump-running { animation: rotate 1.8s linear infinite; }
+      .heater-active { animation: breathe 2.5s ease-in-out infinite; color: var(--vpc-danger, #FF3B30); }
+      .solar-active  { animation: breathe 3s ease-in-out infinite; color: var(--vpc-warning, #FF9F0A); }
+      .dosing-active { animation: pulse-glow 2s ease-in-out infinite; color: var(--vpc-success, #34C759); }
+
+      /* ============================================
+         PUMP — SPEED SEGMENTS
+         ============================================ */
+      .speed-segments-container {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .speed-segments {
+        display: flex;
+        flex: 1;
+        gap: 6px;
+      }
+
+      .speed-segment {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        padding: 9px 6px;
+        border-radius: var(--vpc-inner-radius, 12px);
+        border: none;
+        background: var(--vpc-surface, rgba(120,120,128,0.06));
+        color: var(--vpc-text-secondary);
+        font-family: var(--vpc-font);
+        font-size: 12px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.18s ease;
+        -webkit-tap-highlight-color: transparent;
+        letter-spacing: -0.2px;
+      }
+
+      .speed-segment:hover {
+        background: color-mix(in srgb, var(--seg-color) 10%, transparent);
+        color: var(--seg-color);
+      }
+
+      .speed-segment.seg-active {
+        background: color-mix(in srgb, var(--seg-color) 15%, transparent);
+        color: var(--seg-color);
+        font-weight: 600;
+        box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--seg-color) 40%, transparent);
+      }
+
+      .speed-segment.seg-past {
+        background: color-mix(in srgb, var(--seg-color) 08%, transparent);
+        color: color-mix(in srgb, var(--seg-color) 70%, var(--vpc-text-secondary));
+      }
+
+      .speed-off-btn {
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
+        border: none;
+        background: var(--vpc-surface);
+        color: var(--vpc-text-secondary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.18s ease;
+        flex-shrink: 0;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .speed-off-btn:hover {
+        background: rgba(255,59,48,0.1);
+        color: var(--vpc-danger, #FF3B30);
+      }
+
+      .speed-off-btn.seg-active {
+        background: rgba(255,59,48,0.12);
+        color: var(--vpc-danger, #FF3B30);
+        box-shadow: inset 0 0 0 1.5px rgba(255,59,48,0.3);
+      }
+
+      ha-card.theme-neon .speed-segment {
+        border: 1px solid rgba(0,212,255,0.1);
+      }
+      ha-card.theme-neon .speed-segment.seg-active {
+        box-shadow: 0 0 12px color-mix(in srgb, var(--seg-color) 50%, transparent);
+      }
+
+      /* ============================================
+         TEMPERATURE HERO
+         ============================================ */
+      .temp-hero {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 6px 0 4px;
+      }
+
+      .temp-hero-main {
+        display: flex;
+        align-items: baseline;
+        gap: 4px;
+      }
+
+      .temp-hero-value {
+        font-family: var(--vpc-font);
+        font-size: 44px;
+        font-weight: 700;
+        line-height: 1;
+        letter-spacing: -2px;
+        color: var(--temp-color, var(--vpc-text));
+      }
+
+      .temp-hero-unit {
+        font-size: 22px;
+        font-weight: 400;
+        color: var(--temp-color, var(--vpc-text));
+        opacity: 0.65;
+        letter-spacing: -0.5px;
+      }
+
+      .temp-hero-target-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 10px;
+        border-radius: 100px;
+        background: var(--vpc-surface);
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--vpc-text-secondary);
+        white-space: nowrap;
+      }
+
+      /* ============================================
+         TEMPERATURE / VALUE RANGE BAR
+         ============================================ */
+      .temp-range-bar,
+      .chem-range-bar {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+
+      .temp-range-track,
+      .chem-range-track {
+        height: 6px;
+        background: var(--vpc-surface);
+        border-radius: 100px;
+        position: relative;
+        overflow: visible;
+      }
+
+      .temp-range-fill,
+      .chem-range-fill {
+        height: 100%;
+        border-radius: 100px;
+        transition: width 0.5s cubic-bezier(0.34,1.4,0.64,1);
+      }
+
+      .temp-range-target {
+        position: absolute;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: 3px;
+        height: 14px;
+        background: var(--vpc-text-secondary);
+        border-radius: 2px;
+        opacity: 0.7;
+      }
+
+      .temp-range-labels,
+      .chem-range-labels {
+        display: flex;
+        justify-content: space-between;
+        font-size: 11px;
+        font-weight: 400;
+        color: var(--vpc-text-tertiary, rgba(60,60,67,0.45));
+        letter-spacing: 0px;
+      }
+
+      /* ============================================
+         CHEMICAL RANGE BAR (dosing card)
+         ============================================ */
+      .dosing-value-block {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding: 14px;
+        border-radius: var(--vpc-inner-radius, 12px);
+        background: var(--vpc-surface);
+      }
+
+      ha-card.theme-neon .dosing-value-block {
+        background: rgba(0,212,255,0.04);
+        border: 1px solid rgba(0,212,255,0.08);
+      }
+
+      .dosing-value-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .dosing-value-main {
+        display: flex;
+        align-items: baseline;
+        gap: 6px;
+      }
+
+      .dosing-label-tag {
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        color: var(--vpc-text-secondary);
+      }
+
+      .dosing-current-value {
+        font-family: var(--vpc-font);
+        font-size: 32px;
+        font-weight: 700;
+        line-height: 1;
+        letter-spacing: -1px;
+      }
+
+      .dosing-current-unit {
+        font-size: 15px;
+        font-weight: 400;
+        opacity: 0.65;
+      }
+
+      .dosing-status-pill {
+        padding: 4px 10px;
+        border-radius: 100px;
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
+      .chem-range-target {
+        position: absolute;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+      }
+
+      .chem-target-line {
+        width: 2px;
+        height: 14px;
+        background: var(--vpc-text);
+        border-radius: 2px;
+        opacity: 0.5;
+      }
+
+      .chem-target-label {
+        position: absolute;
+        top: 16px;
+        font-size: 9px;
+        font-weight: 600;
+        color: var(--vpc-text-secondary);
+        white-space: nowrap;
+        transform: translateX(-50%);
+      }
+
+      .chem-mini-bar {
+        width: 100%;
+        height: 4px;
+        background: var(--vpc-surface, rgba(120,120,128,0.1));
+        border-radius: 100px;
+        overflow: hidden;
+        position: relative;
+        margin-top: 4px;
+      }
+
+      .chem-mini-fill {
+        height: 100%;
+        border-radius: 100px;
+        transition: width 0.5s cubic-bezier(0.34,1.4,0.64,1);
+      }
+
+      .chem-mini-ideal {
+        position: absolute;
+        top: 0;
+        height: 100%;
+        background: rgba(52,199,89,0.18);
+        border-radius: 2px;
+      }
+
+      /* ============================================
+         SOLAR — TEMPERATURE COMPARISON
+         ============================================ */
+      .solar-temp-comparison {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 12px;
+        background: var(--vpc-surface);
+        border-radius: var(--vpc-inner-radius, 12px);
+      }
+
+      ha-card.theme-neon .solar-temp-comparison {
+        background: rgba(0,212,255,0.04);
+        border: 1px solid rgba(0,212,255,0.08);
+      }
+
+      .solar-temp-tile {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        flex: 1;
+      }
+
+      .solar-temp-tile ha-icon {
+        --mdc-icon-size: 18px;
+        color: var(--vpc-text-secondary);
+      }
+
+      .solar-temp-tile-val {
+        font-size: 20px;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+        color: var(--vpc-text);
+        line-height: 1;
+      }
+
+      .solar-temp-tile-label {
+        font-size: 11px;
+        font-weight: 500;
+        color: var(--vpc-text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+      }
+
+      .solar-delta-badge {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 3px;
+        padding: 8px 12px;
+        border-radius: 100px;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .delta-great {
+        background: rgba(52,199,89,0.12);
+        color: var(--vpc-success, #34C759);
+      }
+      .delta-ok {
+        background: rgba(255,159,10,0.12);
+        color: var(--vpc-warning, #FF9F0A);
+      }
+      .delta-low {
+        background: rgba(255,59,48,0.10);
+        color: var(--vpc-danger, #FF3B30);
+      }
+
+      .delta-hint-text {
+        font-size: 12px;
+        font-weight: 400;
+        color: var(--vpc-text-secondary);
+        padding: 2px 0;
+      }
+
+      /* ============================================
+         OVERVIEW — CHEMISTRY GRID
+         ============================================ */
+      .chemistry-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+      }
+
+      .chemistry-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        padding: 14px 8px 12px;
+        border-radius: var(--vpc-inner-radius, 12px);
+        background: var(--vpc-surface);
+        cursor: pointer;
+        transition: transform 0.18s ease, background 0.18s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .chemistry-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--chem-color, var(--vpc-primary));
+        opacity: 0.6;
+        border-radius: 100px;
+      }
+
+      .chemistry-card:hover {
+        transform: scale(1.02);
+        background: color-mix(in srgb, var(--chem-color) 8%, var(--vpc-surface));
+      }
+
+      ha-card.theme-neon .chemistry-card {
+        background: rgba(0,212,255,0.04);
+        border: 1px solid rgba(0,212,255,0.08);
+      }
+
+      .chem-icon-wrap {
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: color-mix(in srgb, var(--chem-color, var(--vpc-primary)) 12%, transparent);
+        margin-bottom: 4px;
+      }
+
+      .chem-icon-wrap ha-icon {
+        --mdc-icon-size: 16px;
+        color: var(--chem-color, var(--vpc-primary));
+      }
+
+      .chemistry-val {
+        font-family: var(--vpc-font);
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+        color: var(--chem-color, var(--vpc-text));
+        line-height: 1;
+      }
+
+      .chemistry-unit {
+        font-size: 11px;
+        font-weight: 500;
+        color: var(--vpc-text-secondary);
+        letter-spacing: 0.2px;
+      }
+
+      .chemistry-label {
+        font-size: 10px;
+        font-weight: 500;
+        color: var(--vpc-text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+      }
+
+      /* ============================================
+         OVERVIEW — HEADER EXTRAS
+         ============================================ */
+      .overview-warning-badge {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: var(--vpc-danger, #FF3B30);
+        color: #fff;
+        font-size: 12px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      .overview-active-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--vpc-success, #34C759);
+        box-shadow: 0 0 8px rgba(52,199,89,0.5);
+        flex-shrink: 0;
+        animation: pulse-glow 2s ease-in-out infinite;
+      }
+
+      /* ============================================
+         OVERVIEW — SECTIONS
+         ============================================ */
+      .overview-section {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .section-title {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--vpc-text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        padding: 0 2px;
+      }
+
+      .section-count {
+        margin-left: auto;
+        font-size: 11px;
+        font-weight: 500;
+        color: var(--vpc-text-tertiary);
+      }
+
+      .warning-title ha-icon { color: var(--vpc-warning, #FF9F0A); }
+      .warning-title { color: var(--vpc-warning, #FF9F0A); }
 
       /* ============================================
          TEMPERATURE HERO DISPLAY
@@ -1495,124 +2259,58 @@ export class VioletPoolCard extends LitElement {
       }
 
       /* ============================================
-         DOSING HERO DISPLAY
-         ============================================ */
-      .dosing-hero {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 6px;
-        padding: 12px;
-        border-radius: 16px;
-        background: rgba(var(--rgb-primary-text-color, 0,0,0), 0.03);
-      }
-
-      ha-card.theme-neon .dosing-hero {
-        background: rgba(0, 255, 255, 0.04);
-        border: 1px solid rgba(0, 255, 255, 0.08);
-      }
-
-      .dosing-current {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-
-      .dosing-current ha-icon {
-        --mdc-icon-size: 20px;
-      }
-
-      .dosing-current-value {
-        font-size: 32px;
-        font-weight: 800;
-        line-height: 1;
-        letter-spacing: -0.5px;
-      }
-
-      .dosing-current-unit {
-        font-size: 16px;
-        font-weight: 500;
-        opacity: 0.7;
-      }
-
-      .dosing-target {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        color: var(--vpc-text-secondary);
-        font-size: 14px;
-        font-weight: 500;
-      }
-
-      .dosing-target ha-icon {
-        --mdc-icon-size: 18px;
-        opacity: 0.6;
-      }
-
-      .dosing-range {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 12px;
-        color: var(--vpc-text-secondary);
-        opacity: 0.8;
-      }
-
-      .dosing-range-sep {
-        opacity: 0.4;
-      }
-
-      /* ============================================
-         INFO ROWS (unified: rpm, runtime, outside temp, etc.)
+         INFO ROWS — runtime, outside temp, etc.
          ============================================ */
       .info-row {
         display: flex;
         align-items: center;
         gap: 10px;
         padding: 10px 14px;
-        border-radius: 12px;
-        background: rgba(var(--rgb-primary-text-color, 0,0,0), 0.03);
+        border-radius: var(--vpc-inner-radius, 12px);
+        background: var(--vpc-surface);
         font-size: 14px;
         color: var(--vpc-text);
+        font-family: var(--vpc-font);
       }
 
       ha-card.theme-neon .info-row {
-        background: rgba(0, 255, 255, 0.04);
-        border: 1px solid rgba(0, 255, 255, 0.08);
+        background: rgba(0,212,255,0.04);
+        border: 1px solid rgba(0,212,255,0.08);
       }
 
       .info-row ha-icon {
-        --mdc-icon-size: 18px;
+        --mdc-icon-size: 17px;
         color: var(--vpc-text-secondary);
         flex-shrink: 0;
       }
 
       .info-label {
         flex: 1;
-        font-weight: 500;
+        font-weight: 400;
         color: var(--vpc-text-secondary);
       }
 
       .info-value {
         font-weight: 600;
         color: var(--vpc-text);
+        letter-spacing: -0.2px;
       }
 
       .info-badge {
-        padding: 2px 8px;
-        border-radius: 6px;
+        padding: 3px 9px;
+        border-radius: 100px;
         font-size: 11px;
         font-weight: 600;
       }
 
       .info-badge.warning {
-        background: rgba(255, 152, 0, 0.15);
-        color: #ef6c00;
+        background: color-mix(in srgb, var(--vpc-warning, #FF9F0A) 12%, transparent);
+        color: var(--vpc-warning, #FF9F0A);
       }
 
       .info-row-warning {
-        background: rgba(255, 152, 0, 0.08);
-        border: 1px solid rgba(255, 152, 0, 0.2);
+        background: color-mix(in srgb, var(--vpc-warning, #FF9F0A) 06%, transparent);
+        border: 1px solid color-mix(in srgb, var(--vpc-warning, #FF9F0A) 18%, transparent);
       }
 
       /* ============================================
@@ -1622,41 +2320,6 @@ export class VioletPoolCard extends LitElement {
         display: flex;
         flex-direction: column;
         gap: 8px;
-      }
-
-      .delta-display {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 10px 14px;
-        border-radius: 12px;
-        font-weight: 600;
-        font-size: 14px;
-      }
-
-      .delta-positive {
-        background: rgba(76, 175, 80, 0.08);
-        color: #2e7d32;
-      }
-
-      .delta-negative {
-        background: rgba(244, 67, 54, 0.08);
-        color: #c62828;
-      }
-
-      .delta-display ha-icon {
-        --mdc-icon-size: 18px;
-      }
-
-      .delta-value {
-        font-weight: 700;
-      }
-
-      .delta-hint {
-        font-size: 12px;
-        font-weight: 400;
-        opacity: 0.7;
-        margin-left: auto;
       }
 
       /* ============================================
@@ -1746,58 +2409,85 @@ export class VioletPoolCard extends LitElement {
       }
 
       /* ============================================
-         OVERVIEW: DEVICE LIST
+         OVERVIEW — DEVICE LIST
          ============================================ */
       .device-list {
         display: flex;
         flex-direction: column;
-        gap: 4px;
+        gap: 3px;
       }
 
       .device-row {
         display: flex;
         align-items: center;
         gap: 12px;
-        padding: 10px 14px;
-        border-radius: 12px;
-        background: rgba(var(--rgb-primary-text-color, 0,0,0), 0.03);
+        padding: 10px 12px;
+        border-radius: var(--vpc-inner-radius, 12px);
+        background: var(--vpc-surface);
         cursor: pointer;
-        transition: var(--vpc-transition);
+        transition: background 0.18s ease, transform 0.15s ease;
       }
 
       .device-row:hover {
-        background: rgba(var(--rgb-primary-text-color, 0,0,0), 0.06);
+        background: color-mix(in srgb, var(--vpc-primary) 6%, var(--vpc-surface));
+        transform: scale(1.005);
       }
 
       ha-card.theme-neon .device-row {
-        background: rgba(0, 255, 255, 0.04);
-        border: 1px solid rgba(0, 255, 255, 0.06);
+        background: rgba(0,212,255,0.04);
+        border: 1px solid rgba(0,212,255,0.06);
       }
 
-      .device-row ha-icon {
-        --mdc-icon-size: 20px;
+      .device-icon-wrap {
+        width: 32px;
+        height: 32px;
+        border-radius: 9px;
+        background: var(--vpc-surface);
+        display: flex;
+        align-items: center;
+        justify-content: center;
         flex-shrink: 0;
+        transition: background 0.2s ease;
       }
 
-      .device-active {
+      .device-icon-wrap ha-icon {
+        --mdc-icon-size: 18px;
+        color: var(--vpc-text-secondary);
+      }
+
+      .device-icon-active {
+        background: color-mix(in srgb, var(--vpc-primary) 12%, transparent);
+      }
+
+      .device-icon-active ha-icon {
         color: var(--vpc-primary) !important;
       }
 
-      .device-inactive {
-        color: var(--vpc-text-secondary) !important;
-        opacity: 0.5;
+      .device-info {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
       }
 
       .device-name {
         font-weight: 500;
-        flex: 1;
         font-size: 14px;
+        letter-spacing: -0.1px;
         color: var(--vpc-text);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       .device-status {
         color: var(--vpc-text-secondary);
-        font-size: 13px;
+        font-size: 12px;
+        font-weight: 400;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       .device-dot {
@@ -1808,40 +2498,39 @@ export class VioletPoolCard extends LitElement {
       }
 
       .dot-active {
-        background: #4CAF50;
-        box-shadow: 0 0 6px rgba(76, 175, 80, 0.4);
+        background: var(--vpc-success, #34C759);
+        box-shadow: 0 0 6px rgba(52,199,89,0.5);
       }
 
       .dot-inactive {
         background: var(--vpc-text-secondary);
-        opacity: 0.3;
+        opacity: 0.25;
       }
 
       /* ============================================
-         OVERVIEW: WARNINGS
+         OVERVIEW — WARNINGS & ALL-OK
          ============================================ */
       .warning-list {
         display: flex;
         flex-direction: column;
-        gap: 6px;
+        gap: 5px;
       }
 
       .warning-row {
         display: flex;
         align-items: center;
         gap: 10px;
-        padding: 10px 14px;
-        border-radius: 12px;
-        background: rgba(255, 152, 0, 0.08);
-        border: 1px solid rgba(255, 152, 0, 0.15);
+        padding: 10px 12px;
+        border-radius: var(--vpc-inner-radius, 12px);
+        background: color-mix(in srgb, var(--vpc-warning, #FF9F0A) 8%, transparent);
+        border: 1px solid color-mix(in srgb, var(--vpc-warning, #FF9F0A) 20%, transparent);
         font-size: 13px;
         font-weight: 500;
-        color: #ef6c00;
+        color: var(--vpc-warning, #FF9F0A);
       }
 
       .warning-row ha-icon {
-        --mdc-icon-size: 18px;
-        color: #ef6c00;
+        color: var(--vpc-warning, #FF9F0A);
         flex-shrink: 0;
       }
 
@@ -1851,24 +2540,23 @@ export class VioletPoolCard extends LitElement {
         justify-content: center;
         gap: 8px;
         padding: 14px;
-        border-radius: 12px;
-        background: rgba(76, 175, 80, 0.08);
-        border: 1px solid rgba(76, 175, 80, 0.15);
-        color: #2e7d32;
+        border-radius: var(--vpc-inner-radius, 12px);
+        background: color-mix(in srgb, var(--vpc-success, #34C759) 8%, transparent);
+        border: 1px solid color-mix(in srgb, var(--vpc-success, #34C759) 18%, transparent);
+        color: var(--vpc-success, #34C759);
         font-weight: 500;
         font-size: 14px;
       }
 
       .all-ok-display ha-icon {
-        --mdc-icon-size: 20px;
-        color: #2e7d32;
+        color: var(--vpc-success, #34C759);
       }
 
       /* ============================================
          COMPACT CARD
          ============================================ */
       ha-card.compact-card {
-        padding: 12px 16px;
+        padding: 12px 14px;
       }
 
       .compact-icon {
@@ -1878,17 +2566,17 @@ export class VioletPoolCard extends LitElement {
         display: flex;
         align-items: center;
         justify-content: center;
-        background: rgba(var(--rgb-primary-text-color, 0,0,0), 0.04);
+        background: var(--vpc-surface);
         flex-shrink: 0;
-        transition: var(--vpc-transition);
+        transition: background 0.2s ease;
       }
 
       .compact-icon-active {
-        background: rgba(var(--rgb-primary-color, 33,150,243), 0.1);
+        background: color-mix(in srgb, var(--vpc-primary) 12%, transparent);
       }
 
       .compact-icon ha-icon {
-        --mdc-icon-size: 22px;
+        --mdc-icon-size: 20px;
       }
 
       .compact-icon ha-icon.active {
@@ -1897,7 +2585,7 @@ export class VioletPoolCard extends LitElement {
 
       .compact-icon ha-icon.inactive {
         color: var(--vpc-text-secondary);
-        opacity: 0.5;
+        opacity: 0.45;
       }
 
       .compact-info {
@@ -1910,15 +2598,18 @@ export class VioletPoolCard extends LitElement {
         gap: 8px;
         font-size: 12px;
         margin-top: 2px;
+        align-items: center;
       }
 
       .compact-value {
         font-weight: 600;
         color: var(--vpc-text);
+        letter-spacing: -0.2px;
       }
 
       .compact-detail {
         color: var(--vpc-text-secondary);
+        font-size: 11px;
       }
 
       /* ============================================
@@ -1979,100 +2670,146 @@ export class VioletPoolCard extends LitElement {
       ha-card.size-small {
         --vpc-spacing: 12px;
         --vpc-icon-size: 20px;
+        --vpc-radius: 16px;
       }
 
       ha-card.size-small .header-icon {
-        width: 36px;
-        height: 36px;
-        border-radius: 10px;
+        width: 38px;
+        height: 38px;
+        border-radius: 11px;
       }
 
-      ha-card.size-small .name {
-        font-size: 14px;
-      }
-
-      ha-card.size-small .temp-hero-value {
-        font-size: 32px;
-      }
+      ha-card.size-small .name { font-size: 14px; }
+      ha-card.size-small .temp-hero-value { font-size: 34px; letter-spacing: -1.5px; }
 
       ha-card.size-large {
-        --vpc-spacing: 24px;
+        --vpc-spacing: 22px;
         --vpc-icon-size: 28px;
+        --vpc-radius: 26px;
       }
 
       ha-card.size-large .header-icon {
-        width: 52px;
-        height: 52px;
-        border-radius: 16px;
+        width: 54px;
+        height: 54px;
+        border-radius: 17px;
       }
 
-      ha-card.size-large .name {
-        font-size: 18px;
-      }
-
-      ha-card.size-large .temp-hero-value {
-        font-size: 52px;
-      }
+      ha-card.size-large .name { font-size: 18px; }
+      ha-card.size-large .temp-hero-value { font-size: 56px; letter-spacing: -3px; }
 
       ha-card.size-fullscreen {
-        --vpc-spacing: 32px;
+        --vpc-spacing: 28px;
         --vpc-icon-size: 32px;
+        --vpc-radius: 28px;
         height: 100%;
         min-height: 80vh;
       }
 
       ha-card.size-fullscreen .header-icon {
-        width: 56px;
-        height: 56px;
-        border-radius: 18px;
+        width: 60px;
+        height: 60px;
+        border-radius: 19px;
       }
 
-      ha-card.size-fullscreen .name {
-        font-size: 20px;
-      }
-
-      ha-card.size-fullscreen .temp-hero-value {
-        font-size: 64px;
-      }
+      ha-card.size-fullscreen .name { font-size: 20px; }
+      ha-card.size-fullscreen .temp-hero-value { font-size: 68px; letter-spacing: -4px; }
 
       /* ============================================
          ANIMATION VARIANTS
          ============================================ */
-      ha-card.animation-subtle {
-        transition: all 0.2s ease;
+      ha-card.animation-none {
+        transition: none !important;
+      }
+      ha-card.animation-none:hover,
+      ha-card.animation-none:active {
+        transform: none !important;
       }
 
+      ha-card.animation-subtle {
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+      }
       ha-card.animation-subtle:hover {
         transform: translateY(-1px);
       }
 
       ha-card.animation-smooth {
-        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        transition: transform 0.25s cubic-bezier(0.34,1.4,0.64,1),
+                    box-shadow 0.25s ease;
       }
 
       ha-card.animation-energetic {
-        transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        transition: transform 0.2s cubic-bezier(0.34,1.6,0.64,1),
+                    box-shadow 0.2s ease;
       }
-
       ha-card.animation-energetic:hover {
-        transform: translateY(-3px) scale(1.005);
+        transform: translateY(-4px) scale(1.008);
       }
 
-      /* Flow animation for active state */
+      /* Flow animation for active cards */
       @keyframes flow-gradient {
         0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
+        100% { background-position: 200% 50%; }
       }
 
       ha-card.flow-active .accent-bar {
-        background: linear-gradient(90deg,
-          var(--card-accent),
-          color-mix(in srgb, var(--card-accent) 60%, white),
-          var(--card-accent)
-        );
+        background: linear-gradient(90deg, var(--card-accent), color-mix(in srgb, var(--card-accent) 60%, white), var(--card-accent));
         background-size: 200% 100%;
-        animation: flow-gradient 3s ease-in-out infinite;
+        animation: flow-gradient 2.5s linear infinite;
+      }
+
+      /* ============================================
+         ERROR STATE
+         ============================================ */
+      .error-state {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 20px;
+      }
+
+      .error-icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: color-mix(in srgb, var(--vpc-danger, #FF3B30) 10%, transparent);
+        flex-shrink: 0;
+      }
+
+      .error-icon ha-icon {
+        --mdc-icon-size: 24px;
+        color: var(--vpc-danger, #FF3B30);
+      }
+
+      .error-info {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+      }
+
+      .error-title {
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--vpc-danger, #FF3B30);
+        letter-spacing: -0.2px;
+      }
+
+      .error-entity {
+        font-size: 12px;
+        color: var(--vpc-text-secondary);
+        font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', ui-monospace, monospace;
+        opacity: 0.7;
+      }
+
+      /* ============================================
+         SYSTEM GRID
+         ============================================ */
+      .system-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 16px;
       }
 
       /* ============================================
@@ -2085,11 +2822,11 @@ export class VioletPoolCard extends LitElement {
         }
 
         .chemistry-card {
-          padding: 10px 6px;
+          padding: 11px 6px 10px;
         }
 
         .chemistry-val {
-          font-size: 14px;
+          font-size: 16px;
         }
 
         .system-grid {
@@ -2097,11 +2834,29 @@ export class VioletPoolCard extends LitElement {
         }
 
         .temp-hero-value {
-          font-size: 36px;
+          font-size: 38px;
+          letter-spacing: -1.5px;
         }
 
         .dosing-current-value {
           font-size: 28px;
+        }
+
+        .speed-segment {
+          font-size: 11px;
+          padding: 8px 4px;
+        }
+      }
+
+      /* ============================================
+         TOUCH DEVICES
+         ============================================ */
+      @media (pointer: coarse) {
+        .speed-segment,
+        .speed-off-btn,
+        .device-row,
+        .chemistry-card {
+          min-height: 44px;
         }
       }
     `;
@@ -2154,7 +2909,7 @@ window.customCards.push({
 });
 
 console.info(
-  '%c VIOLET-POOL-CARD %c 0.2.0 ',
-  'color: white; background: linear-gradient(135deg, #667eea, #764ba2); font-weight: 700; padding: 2px 6px; border-radius: 4px 0 0 4px;',
-  'color: #667eea; background: white; font-weight: 700; padding: 2px 6px; border-radius: 0 4px 4px 0;'
+  '%c VIOLET-POOL-CARD %c 0.3.0 ',
+  'color: white; background: #007AFF; font-weight: 700; font-family: -apple-system, system-ui, sans-serif; padding: 3px 8px; border-radius: 6px 0 0 6px;',
+  'color: #007AFF; background: #F2F2F7; font-weight: 700; font-family: -apple-system, system-ui, sans-serif; padding: 3px 8px; border-radius: 0 6px 6px 0;'
 );
