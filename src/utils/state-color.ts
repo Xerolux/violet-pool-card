@@ -1,7 +1,3 @@
-/**
- * State-based Auto-Coloring Utility
- * Automatically determines colors based on entity state and values
- */
 
 export interface ColorConfig {
   color: string;
@@ -9,9 +5,6 @@ export interface ColorConfig {
 }
 
 export class StateColorHelper {
-  /**
-   * Get color for temperature
-   */
   public static getTemperatureColor(temp: number): ColorConfig {
     if (temp < 15) {
       return { color: '#2196F3', intensity: 'high' }; // Cold - Blue
@@ -26,9 +19,6 @@ export class StateColorHelper {
     }
   }
 
-  /**
-   * Get color for pH value
-   */
   public static getPhColor(ph: number, targetPh: number = 7.2): ColorConfig {
     const diff = Math.abs(ph - targetPh);
 
@@ -43,9 +33,6 @@ export class StateColorHelper {
     }
   }
 
-  /**
-   * Get color for ORP (chlorine) value
-   */
   public static getOrpColor(orp: number, targetOrp: number = 700): ColorConfig {
     if (orp < targetOrp - 100) {
       return { color: '#F44336', intensity: 'high' }; // Too low - Red
@@ -60,9 +47,6 @@ export class StateColorHelper {
     }
   }
 
-  /**
-   * Get color for pump speed
-   */
   public static getPumpSpeedColor(speed: number): ColorConfig {
     switch (speed) {
       case 0:
@@ -78,9 +62,6 @@ export class StateColorHelper {
     }
   }
 
-  /**
-   * Get color for entity state
-   */
   public static getEntityStateColor(state: string): ColorConfig {
     const stateLower = state.toLowerCase();
 
@@ -101,9 +82,6 @@ export class StateColorHelper {
     }
   }
 
-  /**
-   * Get color for percentage value
-   */
   public static getPercentageColor(percentage: number, ideal: number = 100): ColorConfig {
     const diff = Math.abs(percentage - ideal);
 
@@ -118,9 +96,6 @@ export class StateColorHelper {
     }
   }
 
-  /**
-   * Get intensity opacity
-   */
   public static getIntensityOpacity(intensity: ColorConfig['intensity']): number {
     switch (intensity) {
       case 'low':
@@ -134,9 +109,6 @@ export class StateColorHelper {
     }
   }
 
-  /**
-   * Apply color to element with auto-calculated background
-   */
   public static applyColorToElement(
     element: HTMLElement,
     colorConfig: ColorConfig,
@@ -153,9 +125,6 @@ export class StateColorHelper {
     }
   }
 
-  /**
-   * Convert hex color to RGB
-   */
   private static hexToRgb(hex: string): { r: number; g: number; b: number } | null {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return result

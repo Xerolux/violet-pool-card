@@ -46,9 +46,6 @@ export class WarningChips extends LitElement {
   @property({ type: Boolean }) public dismissable = false;
   @state() private dismissedWarnings: Set<string> = new Set();
 
-  /**
-   * Normalize warnings to Warning objects
-   */
   private normalizeWarnings(): Warning[] {
     return this.warnings.map((warning) => {
       if (typeof warning === 'string') {
@@ -67,9 +64,6 @@ export class WarningChips extends LitElement {
     });
   }
 
-  /**
-   * Format warning text from SNAKE_CASE to readable format
-   */
   private formatWarningText(text: string): string {
     if (!text) return '';
 
@@ -79,9 +73,6 @@ export class WarningChips extends LitElement {
       .join(' ');
   }
 
-  /**
-   * Auto-detect warning type from text
-   */
   private getWarningType(text: string): ChipType {
     const lowerText = text.toLowerCase();
 
@@ -98,9 +89,6 @@ export class WarningChips extends LitElement {
     return 'info';
   }
 
-  /**
-   * Handle chip dismissal
-   */
   private handleDismiss(warning: Warning) {
     this.dismissedWarnings.add(warning.text);
     this.requestUpdate();
@@ -115,9 +103,6 @@ export class WarningChips extends LitElement {
     );
   }
 
-  /**
-   * Check if warning is dismissed
-   */
   private isDismissed(warning: Warning): boolean {
     return this.dismissedWarnings.has(warning.text);
   }
@@ -129,11 +114,7 @@ export class WarningChips extends LitElement {
       return html``;
     }
 
-    return html`
-      <div class="warning-chips">
-        ${normalizedWarnings.map((warning) => this.renderChip(warning))}
-      </div>
-    `;
+    return html` <div class="warning-chips"> ${normalizedWarnings.map((warning) => this.renderChip(warning))} </div> `;
   }
 
   private renderChip(warning: Warning): TemplateResult {
@@ -141,18 +122,7 @@ export class WarningChips extends LitElement {
     const config = CHIP_CONFIG[type];
     const icon = warning.icon || config.icon;
 
-    return html`
-      <div
-        class="chip ${type}"
-        style="
-          --chip-color: ${config.color};
-          --chip-bg: ${config.backgroundColor};
-        "
-      >
-        <ha-icon icon="${icon}"></ha-icon>
-        <span class="chip-text">${warning.text}</span>
-        ${warning.dismissable
-          ? html`
+    return html` <div class="chip ${type}" style=" --chip-color: ${config.color}; --chip-bg: ${config.backgroundColor}; " ><ha-icon icon="${icon}"></ha-icon><span class="chip-text">${warning.text}</span> ${warning.dismissable ? html`
               <button
                 class="dismiss-button"
                 @click="${() => this.handleDismiss(warning)}"
@@ -167,20 +137,7 @@ export class WarningChips extends LitElement {
   }
 
   static get styles(): CSSResultGroup {
-    return css`
-      :host{display:block}
-      .warning-chips{display:flex;flex-wrap:wrap;gap:8px}
-      .chip{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:16px;background:var(--chip-bg);color:var(--chip-color);font-size:13px;font-weight:500;line-height:1.2;border:1px solid var(--chip-color);transition:all 0.2s ease}
-      .chip:hover{transform:translateY(-1px);box-shadow:0 2px 4px rgba(0,0,0,0.1)}
-      .chip ha-icon{--mdc-icon-size:16px;flex-shrink:0}
-      .chip-text{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-      .dismiss-button{display:flex;align-items:center;justify-content:center;padding:0;margin:0;border:none;background:none;color:var(--chip-color);cursor:pointer;opacity:0.7;transition:opacity 0.2s ease}
-      .dismiss-button:hover{opacity:1}
-      .dismiss-button ha-icon{--mdc-icon-size:14px}
-      .chip.error{animation:pulse-error 2s ease-in-out infinite}
-      @keyframes pulse-error{0%,100%{opacity:1}50%{opacity:0.85}}
-      @media(max-width:600px){.warning-chips{flex-direction:column}.chip{width:100%;box-sizing:border-box}.chip-text{white-space:normal;overflow:visible}}
-    `;
+    return css`:host{display:block}.warning-chips{display:flex;flex-wrap:wrap;gap:8px}.chip{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:16px;background:var(--chip-bg);color:var(--chip-color);font-size:13px;font-weight:500;line-height:1.2;border:1px solid var(--chip-color);transition:all 0.2s ease}.chip:hover{transform:translateY(-1px);box-shadow:0 2px 4px rgba(0,0,0,0.1)}.chip ha-icon{--mdc-icon-size:16px;flex-shrink:0}.chip-text{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dismiss-button{display:flex;align-items:center;justify-content:center;padding:0;margin:0;border:none;background:none;color:var(--chip-color);cursor:pointer;opacity:0.7;transition:opacity 0.2s ease}.dismiss-button:hover{opacity:1}.dismiss-button ha-icon{--mdc-icon-size:14px}.chip.error{animation:pulse-error 2s ease-in-out infinite}@keyframes pulse-error{0%,100%{opacity:1}50%{opacity:0.85}}@media(max-width:600px){.warning-chips{flex-direction:column}.chip{width:100%;box-sizing:border-box}.chip-text{white-space:normal;overflow:visible}}`;
   }
 }
 

@@ -38,9 +38,6 @@ export class SliderControl extends LitElement {
     }
   }
 
-  /**
-   * Handle slider input (during drag)
-   */
   private handleInput(e: Event) {
     const value = Number((e.target as HTMLInputElement).value);
     this.localValue = value;
@@ -56,9 +53,6 @@ export class SliderControl extends LitElement {
     );
   }
 
-  /**
-   * Handle slider change (after drag or click)
-   */
   private handleChange(e: Event) {
     const value = Number((e.target as HTMLInputElement).value);
     this.localValue = value;
@@ -81,23 +75,14 @@ export class SliderControl extends LitElement {
     }, this.debounceDelay);
   }
 
-  /**
-   * Handle mouse/touch start
-   */
   private handleStart() {
     this.isDragging = true;
   }
 
-  /**
-   * Handle mouse/touch end
-   */
   private handleEnd() {
     this.isDragging = false;
   }
 
-  /**
-   * Get label for a specific value
-   */
   private getLabelForValue(value: number): string {
     if (!this.labels || this.labels.length === 0) {
       return '';
@@ -115,9 +100,6 @@ export class SliderControl extends LitElement {
     return label ? label.label : '';
   }
 
-  /**
-   * Get all labels for display
-   */
   private getAllLabels(): Array<{ value: number; label: string; position: number }> {
     if (!this.labels || this.labels.length === 0) {
       return [];
@@ -141,9 +123,6 @@ export class SliderControl extends LitElement {
     });
   }
 
-  /**
-   * Format value for display
-   */
   private formatValue(value: number): string {
     // Check if we have a label for this value
     const label = this.getLabelForValue(value);
@@ -160,16 +139,10 @@ export class SliderControl extends LitElement {
     const percentage = ((this.localValue - this.min) / (this.max - this.min)) * 100;
     const allLabels = this.getAllLabels();
 
-    return html`
-      <div class="slider-container ${this.vertical ? 'vertical' : ''} ${this.disabled ? 'disabled' : ''}">
-        ${this.label ? html`<div class="slider-label">${this.label}</div>` : ''}
+    return html` <div class="slider-container ${this.vertical ? 'vertical' : ''} ${this.disabled ? 'disabled' : ''}"> ${this.label ? html`<div class="slider-label">${this.label}</div>` : ''}
 
         ${this.showValue
-          ? html`
-              <div class="value-display ${this.isDragging ? 'dragging' : ''}">
-                ${this.formatValue(this.localValue)}
-              </div>
-            `
+          ? html` <div class="value-display ${this.isDragging ? 'dragging' : ''}"> ${this.formatValue(this.localValue)} </div> `
           : ''}
 
         <div class="slider-wrapper">
@@ -202,10 +175,7 @@ export class SliderControl extends LitElement {
         </div>
 
         ${allLabels.length > 0
-          ? html`
-              <div class="labels">
-                ${allLabels.map(
-                  (item) => html`
+          ? html` <div class="labels"> ${allLabels.map( (item) => html`
                     <span
                       class="label-item ${this.localValue === item.value ? 'active' : ''}"
                       style="left: ${item.position}%"
@@ -223,33 +193,7 @@ export class SliderControl extends LitElement {
   }
 
   static get styles(): CSSResultGroup {
-    return css`
-      :host{display:block}
-      .slider-container{width:100%;user-select:none}
-      .slider-container.disabled{opacity:0.5;pointer-events:none}
-      .slider-label{font-size:12px;font-weight:500;color:var(--secondary-text-color);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
-      .value-display{text-align:center;font-size:28px;font-weight:700;margin-bottom:12px;color:var(--primary-text-color);transition:all 0.2s ease}
-      .value-display.dragging{color:var(--primary-color);transform:scale(1.05)}
-      .slider-wrapper{display:flex;align-items:center;gap:12px;padding:8px 0}
-      .min-max-label{font-size:11px;color:var(--secondary-text-color);min-width:40px;text-align:center}
-      .slider-track-wrapper{flex:1;position:relative}
-      .slider{width:100%;height:8px;-webkit-appearance:none;appearance:none;background:linear-gradient(to right,var(--primary-color) 0%,var(--primary-color) var(--percentage),var(--disabled-color,#e0e0e0) var(--percentage),var(--disabled-color,#e0e0e0) 100%);border-radius:4px;outline:none;cursor:pointer;transition:opacity 0.2s}
-      .slider:hover{opacity:0.9}
-      .slider:disabled{cursor:not-allowed}
-      .slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:24px;height:24px;border-radius:50%;background:var(--primary-color);cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.2);transition:all 0.2s ease;border:3px solid white}
-      .slider::-webkit-slider-thumb:hover{transform:scale(1.1);box-shadow:0 3px 8px rgba(0,0,0,0.3)}
-      .slider:active::-webkit-slider-thumb{transform:scale(1.15);box-shadow:0 4px 12px rgba(0,0,0,0.4)}
-      .slider::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:var(--primary-color);cursor:pointer;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.2);transition:all 0.2s ease}
-      .slider::-moz-range-thumb:hover{transform:scale(1.1);box-shadow:0 3px 8px rgba(0,0,0,0.3)}
-      .slider:active::-moz-range-thumb{transform:scale(1.15);box-shadow:0 4px 12px rgba(0,0,0,0.4)}
-      .slider::-moz-range-track{background:transparent;border:none}
-      .labels{position:relative;display:flex;justify-content:space-between;margin-top:12px;font-size:11px;color:var(--secondary-text-color)}
-      .label-item{position:absolute;transform:translateX(-50%);cursor:pointer;padding:4px 8px;border-radius:4px;transition:all 0.2s ease;white-space:nowrap}
-      .label-item:hover{background:var(--divider-color,rgba(0,0,0,0.05));color:var(--primary-text-color)}
-      .label-item.active{font-weight:600;color:var(--primary-color)}
-      .slider-container.vertical .slider{transform:rotate(-90deg);transform-origin:left center}
-      @media(pointer:coarse){.slider::-webkit-slider-thumb{width:28px;height:28px}.slider::-moz-range-thumb{width:28px;height:28px}}
-    `;
+    return css`:host{display:block}.slider-container{width:100%;user-select:none}.slider-container.disabled{opacity:0.5;pointer-events:none}.slider-label{font-size:12px;font-weight:500;color:var(--secondary-text-color);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}.value-display{text-align:center;font-size:28px;font-weight:700;margin-bottom:12px;color:var(--primary-text-color);transition:all 0.2s ease}.value-display.dragging{color:var(--primary-color);transform:scale(1.05)}.slider-wrapper{display:flex;align-items:center;gap:12px;padding:8px 0}.min-max-label{font-size:11px;color:var(--secondary-text-color);min-width:40px;text-align:center}.slider-track-wrapper{flex:1;position:relative}.slider{width:100%;height:8px;-webkit-appearance:none;appearance:none;background:linear-gradient(to right,var(--primary-color) 0%,var(--primary-color) var(--percentage),var(--disabled-color,#e0e0e0) var(--percentage),var(--disabled-color,#e0e0e0) 100%);border-radius:4px;outline:none;cursor:pointer;transition:opacity 0.2s}.slider:hover{opacity:0.9}.slider:disabled{cursor:not-allowed}.slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:24px;height:24px;border-radius:50%;background:var(--primary-color);cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.2);transition:all 0.2s ease;border:3px solid white}.slider::-webkit-slider-thumb:hover{transform:scale(1.1);box-shadow:0 3px 8px rgba(0,0,0,0.3)}.slider:active::-webkit-slider-thumb{transform:scale(1.15);box-shadow:0 4px 12px rgba(0,0,0,0.4)}.slider::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:var(--primary-color);cursor:pointer;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.2);transition:all 0.2s ease}.slider::-moz-range-thumb:hover{transform:scale(1.1);box-shadow:0 3px 8px rgba(0,0,0,0.3)}.slider:active::-moz-range-thumb{transform:scale(1.15);box-shadow:0 4px 12px rgba(0,0,0,0.4)}.slider::-moz-range-track{background:transparent;border:none}.labels{position:relative;display:flex;justify-content:space-between;margin-top:12px;font-size:11px;color:var(--secondary-text-color)}.label-item{position:absolute;transform:translateX(-50%);cursor:pointer;padding:4px 8px;border-radius:4px;transition:all 0.2s ease;white-space:nowrap}.label-item:hover{background:var(--divider-color,rgba(0,0,0,0.05));color:var(--primary-text-color)}.label-item.active{font-weight:600;color:var(--primary-color)}.slider-container.vertical .slider{transform:rotate(-90deg);transform-origin:left center}@media(pointer:coarse){.slider::-webkit-slider-thumb{width:28px;height:28px}.slider::-moz-range-thumb{width:28px;height:28px}}`;
   }
 }
 
