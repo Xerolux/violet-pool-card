@@ -76,6 +76,9 @@ export class QuickActions extends LitElement {
 
     return html` <button class="quick-action ${action.active ? 'active' : ''} ${isDisabled ? 'disabled' : ''} ${isLoading ? 'loading' : ''}" @click="${() => this.handleActionClick(action, index)}" ?disabled="${isDisabled}" style="${action.color ? `--action-color: ${action.color}` : ''}"
         title="${action.label}"
+        aria-label="${action.label}"
+        aria-busy="${isLoading ? 'true' : 'false'}"
+        aria-disabled="${isDisabled ? 'true' : 'false'}"
       >
         <div class="action-content">
           ${isLoading
