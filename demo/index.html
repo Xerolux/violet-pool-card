@@ -59,6 +59,13 @@
     <!-- Premium Theme Gallery -->
     <h2>Premium Theme Gallery</h2>
 
+    <h3>Details Card (List View)</h3>
+    <div class="card-container">
+      <div class="card-wrapper" style="flex-basis: 100%; max-width: 600px;">
+        <violet-pool-card id="details-card-demo"></violet-pool-card>
+      </div>
+    </div>
+
     <h3>Luxury Theme (Default) - Large Pump</h3>
     <div class="card-container">
       <div class="card-wrapper" style="flex-basis: 100%; max-width: 600px;">
@@ -272,6 +279,26 @@
       };
 
       // --- Premium Theme Gallery ---
+
+      // Details Card Demo
+      configureCard('details-card-demo', {
+        card_type: 'details',
+        name: 'Water Chemistry Details',
+        icon: 'mdi:water',
+        size: 'medium',
+        theme: 'luxury',
+        entities: [
+          { entity: 'sensor.violet_pool_ph_value', name: 'pH Value', icon: 'mdi:ph' },
+          { entity: 'sensor.violet_pool_orp_value', name: 'Redox (ORP)' },
+          { entity: 'sensor.violet_pool_temperature', name: 'Pool Temp', icon: 'mdi:thermometer-water' },
+          'switch.violet_pool_pump'
+        ]
+      }, {
+        'sensor.violet_pool_ph_value': { entity_id: 'sensor.violet_pool_ph_value', state: '7.2', attributes: { friendly_name: 'pH', unit_of_measurement: '' } },
+        'sensor.violet_pool_orp_value': { entity_id: 'sensor.violet_pool_orp_value', state: '740', attributes: { friendly_name: 'ORP', unit_of_measurement: 'mV' } },
+        'sensor.violet_pool_temperature': { entity_id: 'sensor.violet_pool_temperature', state: '28.5', attributes: { friendly_name: 'Temperature', unit_of_measurement: '°C' } },
+        'switch.violet_pool_pump': { entity_id: 'switch.violet_pool_pump', state: 'on', attributes: { friendly_name: 'Filter Pump' } }
+      });
 
       // Luxury Theme (Default) - Large Pump
       // High Speed, Active
