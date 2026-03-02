@@ -979,15 +979,13 @@ export class VioletPoolCard extends LitElement {
       });
     }
 
+    const warnings: string[] = [];
+
     // Filter entity
     const filterEntityId = this._getEntityId('filter_entity' as any, 'sensor', 'filter_pressure');
     const filterEntity = this.hass.states[filterEntityId];
     if (filterEntity) {
       const pressureVal = parseFloat(filterEntity.state);
-      const pressureOk = !isNaN(pressureVal) && pressureVal <= 1.2;
-      if (!pressureOk && !isNaN(pressureVal)) {
-        warnings.push ? null : undefined; // will add below
-      }
       activeDevices.push({
         icon: 'mdi:filter',
         name: filterEntity.attributes.friendly_name || 'Filter',
@@ -997,7 +995,6 @@ export class VioletPoolCard extends LitElement {
       });
     }
 
-    const warnings: string[] = [];
     if (orpStatus === 'warning') warnings.push('ORP too low - Check chlorine dosing');
     if (orpStatus === 'high') warnings.push('ORP too high - Stop chlorine dosing');
     if (phStatus === 'warning') warnings.push('pH out of range - Check dosing');
