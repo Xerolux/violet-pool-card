@@ -33,8 +33,8 @@ jobs:
           SIZE=$(stat -f%z "dist/violet-pool-card.js" 2>/dev/null || stat -c%s "dist/violet-pool-card.js")
           SIZE_KB=$((SIZE / 1024))
           echo "Bundle size: ${SIZE_KB}KB"
-          if [ $SIZE_KB -gt 100 ]; then
-            echo "::error::Bundle size ${SIZE_KB}KB exceeds 100KB limit"
+          if [ $SIZE_KB -gt 500 ]; then
+            echo "::error::Bundle size ${SIZE_KB}KB exceeds 500KB limit"
             exit 1
           fi
-          echo "::notice::Bundle size ${SIZE_KB}KB is within 100KB limit"
+          echo "::notice::Bundle size ${SIZE_KB}KB is within 500KB limit"

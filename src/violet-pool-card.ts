@@ -14,6 +14,7 @@ import type { QuickAction } from './components/quick-actions';
 import { ServiceCaller } from './utils/service-caller';
 import { EntityHelper } from './utils/entity-helper';
 import { StateColorHelper } from './utils/state-color';
+import { pumpSVG, heaterSVG, solarSVG, coverSVG, lightSVG } from './utils/animated-icons';
 
 // HomeAssistant types
 interface HomeAssistant {
@@ -25,7 +26,7 @@ interface LovelaceCardConfig {
   type: string;
   entity?: string;
   entities?: string[];
-  card_type: 'pump' | 'heater' | 'solar' | 'dosing' | 'overview' | 'compact' | 'system' | 'details' | 'chemical' | 'sensor';
+  card_type: 'pump' | 'heater' | 'solar' | 'dosing' | 'overview' | 'compact' | 'system' | 'details' | 'chemical' | 'sensor' | 'cover' | 'light' | 'filter';
   name?: string;
   icon?: string;
 
@@ -74,6 +75,13 @@ export interface VioletPoolCardConfig extends LovelaceCardConfig {
   orp_value_entity?: string;
   target_orp_entity?: string;
   target_ph_entity?: string;
+
+  // New entity types
+  cover_entity?: string;
+  light_entity?: string;
+  filter_entity?: string;
+  filter_pressure_entity?: string;
+  backwash_entity?: string;
 }
 
 @customElement('violet-pool-card')
@@ -86,7 +94,7 @@ export class VioletPoolCard extends LitElement {
       throw new Error('You need to define a card_type');
     }
 
-    if (config.card_type !== 'overview' && config.card_type !== 'system' && config.card_type !== 'details' && config.card_type !== 'chemical' && !config.entity) {
+    if (config.card_type !== 'overview' && config.card_type !== 'system' && config.card_type !== 'details' && config.card_type !== 'chemical' && config.card_type !== 'cover' && config.card_type !== 'light' && !config.entity) {
       throw new Error('You need to define an entity');
     }
 
@@ -202,6 +210,12 @@ export class VioletPoolCard extends LitElement {
         return this.renderChemicalCard();
       case 'sensor':
         return this.renderSensorCard();
+      case 'cover':
+        return this.renderCoverCard();
+      case 'light':
+        return this.renderLightCard();
+      case 'filter':
+        return this.renderFilterCard();
       default:
         return html` <ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">Unknown Card Type</span><span class="error-entity">${this.config.card_type}</span></div></div></ha-card> `;
     }
@@ -244,6 +258,9 @@ export class VioletPoolCard extends LitElement {
       case 'solar': return '#FF9800';
       case 'dosing': return '#4CAF50';
       case 'overview': return '#7C4DFF';
+      case 'cover': return '#5AC8FA';
+      case 'light': return '#AF52DE';
+      case 'filter': return '#FF9500';
       default: return '#2196F3';
     }
   }
@@ -266,13 +283,20 @@ export class VioletPoolCard extends LitElement {
       };
     };
 
+    const coverEntitySys = this._getEntityId('cover_entity', 'cover', 'cover');
+    const lightEntitySys = this._getEntityId('light_entity', 'light', 'light');
+    const filterEntitySys = this._getEntityId('filter_entity' as any, 'sensor', 'filter_pressure');
+
     const overviewConfig = createSubConfig('overview', '', { name: 'Pool Overview' });
     const pumpConfig = createSubConfig('pump', pumpEntity, { show_runtime: true });
     const heaterConfig = createSubConfig('heater', heaterEntity);
     const solarConfig = createSubConfig('solar', solarEntity);
     const dosingConfig = createSubConfig('dosing', dosingEntity, { dosing_type: 'chlorine' });
+    const coverConfig = createSubConfig('cover', coverEntitySys);
+    const lightConfig = createSubConfig('light', lightEntitySys);
+    const filterConfig = createSubConfig('filter' as any, filterEntitySys);
 
-    return html` <div class="system-grid"> ${overviewConfig ? this.renderOverviewCard(overviewConfig) : ''} ${pumpConfig ? this.renderPumpCard(pumpConfig) : ''} ${heaterConfig ? this.renderHeaterCard(heaterConfig) : ''} ${solarConfig ? this.renderSolarCard(solarConfig) : ''} ${dosingConfig ? this.renderDosingCard(dosingConfig) : ''} </div> `;
+    return html` <div class="system-grid"> ${overviewConfig ? this.renderOverviewCard(overviewConfig) : ''} ${pumpConfig ? this.renderPumpCard(pumpConfig) : ''} ${heaterConfig ? this.renderHeaterCard(heaterConfig) : ''} ${solarConfig ? this.renderSolarCard(solarConfig) : ''} ${dosingConfig ? this.renderDosingCard(dosingConfig) : ''} ${coverConfig ? this.renderCoverCard(coverConfig) : ''} ${lightConfig ? this.renderLightCard(lightConfig) : ''} ${filterConfig ? this.renderFilterCard(filterConfig) : ''} </div> `;
   }
 
   private renderPumpCard(config: VioletPoolCardConfig = this.config): TemplateResult {
@@ -305,7 +329,7 @@ export class VioletPoolCard extends LitElement {
     const speedColors = ['#8E8E93', '#34C759', '#FF9F0A', '#FF3B30'];
     const speedIcons = ['mdi:power-off', 'mdi:speedometer-slow', 'mdi:speedometer-medium', 'mdi:speedometer'];
 
-    return html` <ha-card class="${this._getCardClasses(isRunning, config)}" style="--card-accent: ${accentColor}" @click="${() => this._showMoreInfo(config.entity!)}" ><div class="accent-bar"></div><div class="card-content"><div class="header"><div class="header-icon ${isRunning ? 'icon-active' : ''}" style="--icon-accent: ${accentColor}"><ha-icon icon="${config.icon || 'mdi:pump'}" class="${isRunning ? 'pump-running' : ''}" ></ha-icon></div><div class="header-info"><span class="name">${name}</span><span class="header-subtitle" style="${isRunning ? `color: ${speedColor.color}` : ''}">
+    return html` <ha-card class="${this._getCardClasses(isRunning, config)}" style="--card-accent: ${accentColor}" @click="${() => this._showMoreInfo(config.entity!)}" ><div class="accent-bar"></div><div class="card-content"><div class="header"><div class="header-icon ${isRunning ? 'icon-active' : ''}" style="--icon-accent: ${accentColor}">${config.icon ? html`<ha-icon icon="${config.icon}" class="${isRunning ? 'pump-running' : ''}"></ha-icon>` : pumpSVG(currentSpeed, accentColor)}</div><div class="header-info"><span class="name">${name}</span><span class="header-subtitle" style="${isRunning ? `color: ${speedColor.color}` : ''}">
                 ${isRunning
                   ? `${speedLabels[currentSpeed]}${currentRPM > 0 ? ` \u00B7 ${currentRPM} RPM` : ''}`
                   : this._getFriendlyState(state, 'pump')}
@@ -435,7 +459,7 @@ export class VioletPoolCard extends LitElement {
       ? this._getValuePercent(targetTemp, minTemp, maxTemp)
       : undefined;
 
-    return html` <ha-card class="${this._getCardClasses(isHeating, config)}" style="--card-accent: ${accentColor}" @click="${() => this._showMoreInfo(config.entity!)}" ><div class="accent-bar"></div><div class="card-content"><div class="header"><div class="header-icon ${isHeating ? 'icon-active' : ''}" style="--icon-accent: ${accentColor}"><ha-icon icon="${config.icon || 'mdi:radiator'}" class="${isHeating ? 'heater-active' : ''}" ></ha-icon></div><div class="header-info"><span class="name">${name}</span><span class="header-subtitle">${this._getFriendlyState(state)}</span></div> ${config.show_state ? html`<status-badge .state="${state}"></status-badge>`
+    return html` <ha-card class="${this._getCardClasses(isHeating, config)}" style="--card-accent: ${accentColor}" @click="${() => this._showMoreInfo(config.entity!)}" ><div class="accent-bar"></div><div class="card-content"><div class="header"><div class="header-icon ${isHeating ? 'icon-active' : ''}" style="--icon-accent: ${accentColor}">${config.icon ? html`<ha-icon icon="${config.icon}" class="${isHeating ? 'heater-active' : ''}"></ha-icon>` : heaterSVG(isHeating, accentColor)}</div><div class="header-info"><span class="name">${name}</span><span class="header-subtitle">${this._getFriendlyState(state)}</span></div> ${config.show_state ? html`<status-badge .state="${state}"></status-badge>`
               : ''}
           </div>
 
@@ -571,7 +595,7 @@ export class VioletPoolCard extends LitElement {
       ? this._getValuePercent(targetTemp, minTemp, maxTemp)
       : undefined;
 
-    return html` <ha-card class="${this._getCardClasses(isSolarActive, config)}" style="--card-accent: ${accentColor}" @click="${() => this._showMoreInfo(config.entity!)}" ><div class="accent-bar"></div><div class="card-content"><div class="header"><div class="header-icon ${isSolarActive ? 'icon-active' : ''}" style="--icon-accent: ${accentColor}"><ha-icon icon="${config.icon || 'mdi:solar-power'}" class="${isSolarActive ? 'solar-active' : ''}" ></ha-icon></div><div class="header-info"><span class="name">${name}</span><span class="header-subtitle">${this._getFriendlyState(state)}</span></div> ${config.show_state ? html`<status-badge .state="${state}"></status-badge>`
+    return html` <ha-card class="${this._getCardClasses(isSolarActive, config)}" style="--card-accent: ${accentColor}" @click="${() => this._showMoreInfo(config.entity!)}" ><div class="accent-bar"></div><div class="card-content"><div class="header"><div class="header-icon ${isSolarActive ? 'icon-active' : ''}" style="--icon-accent: ${accentColor}">${config.icon ? html`<ha-icon icon="${config.icon}" class="${isSolarActive ? 'solar-active' : ''}"></ha-icon>` : solarSVG(isSolarActive, accentColor)}</div><div class="header-info"><span class="name">${name}</span><span class="header-subtitle">${this._getFriendlyState(state)}</span></div> ${config.show_state ? html`<status-badge .state="${state}"></status-badge>`
               : ''}
           </div>
 
@@ -925,6 +949,54 @@ export class VioletPoolCard extends LitElement {
       });
     }
 
+    // Cover entity
+    const coverEntityId = this._getEntityId('cover_entity', 'cover', 'cover');
+    const coverEntity = this.hass.states[coverEntityId];
+    if (coverEntity) {
+      const pos = coverEntity.attributes?.current_position;
+      const isMoving = coverEntity.state === 'opening' || coverEntity.state === 'closing';
+      activeDevices.push({
+        icon: coverEntity.state === 'open' ? 'mdi:window-shutter-open' : isMoving ? 'mdi:window-shutter' : 'mdi:window-shutter',
+        name: coverEntity.attributes.friendly_name || 'Abdeckung',
+        status: pos !== undefined ? `${Math.round(pos)}%${isMoving ? (coverEntity.state === 'opening' ? ' ↑' : ' ↓') : ''}` : (coverEntity.state === 'open' ? 'Offen' : 'Zu'),
+        state: coverEntity.state === 'open' ? 'on' : coverEntity.state === 'closed' ? 'off' : 'auto',
+        entityId: coverEntityId,
+      });
+    }
+
+    // Light entity
+    const lightEntityId = this._getEntityId('light_entity', 'light', 'light');
+    const lightEntity = this.hass.states[lightEntityId];
+    if (lightEntity) {
+      const br = lightEntity.attributes?.brightness;
+      const brText = br !== undefined ? ` · ${Math.round(br / 255 * 100)}%` : '';
+      activeDevices.push({
+        icon: lightEntity.state === 'on' ? 'mdi:lightbulb-on' : 'mdi:lightbulb-off-outline',
+        name: lightEntity.attributes.friendly_name || 'Beleuchtung',
+        status: lightEntity.state === 'on' ? `An${brText}` : 'Aus',
+        state: lightEntity.state,
+        entityId: lightEntityId,
+      });
+    }
+
+    // Filter entity
+    const filterEntityId = this._getEntityId('filter_entity' as any, 'sensor', 'filter_pressure');
+    const filterEntity = this.hass.states[filterEntityId];
+    if (filterEntity) {
+      const pressureVal = parseFloat(filterEntity.state);
+      const pressureOk = !isNaN(pressureVal) && pressureVal <= 1.2;
+      if (!pressureOk && !isNaN(pressureVal)) {
+        warnings.push ? null : undefined; // will add below
+      }
+      activeDevices.push({
+        icon: 'mdi:filter',
+        name: filterEntity.attributes.friendly_name || 'Filter',
+        status: !isNaN(pressureVal) ? `${pressureVal.toFixed(2)} bar` : filterEntity.state,
+        state: !isNaN(pressureVal) && pressureVal > 1.2 ? 'auto' : 'on',
+        entityId: filterEntityId,
+      });
+    }
+
     const warnings: string[] = [];
     if (orpStatus === 'warning') warnings.push('ORP too low - Check chlorine dosing');
     if (orpStatus === 'high') warnings.push('ORP too high - Stop chlorine dosing');
@@ -1175,6 +1247,12 @@ export class VioletPoolCard extends LitElement {
         icon = 'mdi:solar-power';
       } else if (domain === 'switch' && config.entity!.includes('dos')) {
         icon = 'mdi:flask-outline';
+      } else if (domain === 'cover') {
+        icon = entity.state === 'open' ? 'mdi:window-shutter-open' : 'mdi:window-shutter';
+      } else if (domain === 'light') {
+        icon = entity.state === 'on' ? 'mdi:lightbulb-on' : 'mdi:lightbulb-off-outline';
+      } else if (domain === 'sensor' && config.entity!.includes('filter')) {
+        icon = 'mdi:filter';
       } else {
         icon = 'mdi:circle';
       }
@@ -1226,9 +1304,22 @@ export class VioletPoolCard extends LitElement {
           currentValue = `pH ${parseFloat(phSensor.state).toFixed(1)}`;
         }
       }
+    } else if (domain === 'cover') {
+      const pos = entity.attributes?.current_position;
+      if (pos !== undefined) currentValue = `${Math.round(pos)}%`;
+      detailStatus = entity.state === 'open' ? 'Geöffnet' : entity.state === 'closed' ? 'Geschlossen' : entity.state === 'opening' ? 'Öffnet…' : entity.state === 'closing' ? 'Schließt…' : entity.state;
+    } else if (domain === 'light') {
+      const br = entity.attributes?.brightness;
+      if (br !== undefined) currentValue = `${Math.round(br / 255 * 100)}%`;
+      detailStatus = entity.state === 'on' ? 'An' : 'Aus';
+    } else if (domain === 'sensor') {
+      const unit = entity.attributes?.unit_of_measurement || '';
+      const num = parseFloat(entity.state);
+      if (!isNaN(num)) currentValue = `${num % 1 === 0 ? num.toFixed(0) : num.toFixed(1)}${unit}`;
+      detailStatus = entity.attributes.device_class || '';
     }
 
-    const isActive = state === 'on' || state === 'auto' || state === 'heat' || state === 'heating';
+    const isActive = state === 'on' || state === 'auto' || state === 'heat' || state === 'heating' || state === 'open' || state === 'opening';
 
     return html` <ha-card class="compact-card ${this._getCardClasses(isActive, config)}" @click="${() => this._showMoreInfo(config.entity!)}" ><div class="card-content compact"><div class="compact-icon ${isActive ? 'compact-icon-active' : ''}"><ha-icon icon="${icon}" class="${isActive ? 'active' : 'inactive'}" ></ha-icon></div><div class="compact-info"><span class="name">${name}</span><div class="compact-details"> ${currentValue ? html`<span class="compact-value">${currentValue}</span>` : ''}
               ${detailStatus ? html`<span class="compact-detail">${detailStatus}</span>` : ''}
@@ -1495,6 +1586,339 @@ export class VioletPoolCard extends LitElement {
     `;
   }
 
+  private renderCoverCard(config: VioletPoolCardConfig = this.config): TemplateResult {
+    const entityId = config.cover_entity || config.entity || this._buildEntityId('cover', 'cover');
+    const entity = this.hass.states[entityId];
+    if (!entity) {
+      return html`<ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">Cover nicht gefunden</span><span class="error-entity">${entityId}</span></div></div></ha-card>`;
+    }
+
+    const state = entity.state;
+    const name = config.name || entity.attributes.friendly_name || 'Pool Abdeckung';
+    const position: number = entity.attributes.current_position ?? (state === 'open' ? 100 : 0);
+    const isMoving = state === 'opening' || state === 'closing';
+    const accentColor = this._getAccentColor('cover', config);
+
+    const stateLabels: Record<string, string> = {
+      open: 'Geöffnet', closed: 'Geschlossen',
+      opening: 'Öffnet…', closing: 'Schließt…', stopped: 'Gestoppt',
+    };
+    const coverStatusColor = state === 'open' ? 'var(--vpc-success,#34C759)'
+      : state === 'closed' ? accentColor
+      : isMoving ? 'var(--vpc-warning,#FF9F0A)'
+      : 'var(--vpc-text-secondary)';
+
+    const badgeState = state === 'open' ? 'on' : state === 'closed' ? 'off' : 'auto';
+
+    return html`
+      <ha-card class="${this._getCardClasses(state === 'open' || isMoving, config)}"
+               style="--card-accent: ${accentColor}"
+               @click="${() => this._showMoreInfo(entityId)}">
+        <div class="accent-bar"></div>
+        <div class="card-content">
+          <div class="header">
+            <div class="header-icon ${state !== 'closed' ? 'icon-active' : ''}" style="--icon-accent: ${accentColor}">
+              ${config.icon
+                ? html`<ha-icon icon="${config.icon}"></ha-icon>`
+                : html`<ha-icon icon="${state === 'open' ? 'mdi:window-shutter-open' : isMoving ? 'mdi:window-shutter' : 'mdi:window-shutter'}"></ha-icon>`}
+            </div>
+            <div class="header-info">
+              <span class="name">${name}</span>
+              <span class="header-subtitle" style="color:${coverStatusColor}">${stateLabels[state] || state}</span>
+            </div>
+            ${config.show_state !== false ? html`<status-badge .state="${badgeState}" .pulse="${isMoving}"></status-badge>` : ''}
+          </div>
+
+          <!-- Animated pool visualization -->
+          <div class="cover-visual">
+            ${coverSVG(position, isMoving, accentColor)}
+          </div>
+
+          <!-- Position row -->
+          <div class="info-row">
+            <ha-icon icon="${isMoving ? 'mdi:rotate-3d-variant' : 'mdi:percent'}" style="--mdc-icon-size:17px"></ha-icon>
+            <span class="info-label">Position</span>
+            <span class="info-value" style="color:${coverStatusColor}">${Math.round(position)}%</span>
+            ${isMoving ? html`<span class="cover-moving-pill">${state === 'opening' ? '▲ Öffnet' : '▼ Schließt'}</span>` : ''}
+          </div>
+
+          <!-- Position bar -->
+          <div class="cover-pos-bar">
+            <div class="cover-pos-fill" style="width:${position}%;background:${accentColor}"></div>
+          </div>
+
+          <!-- Position slider -->
+          ${config.show_controls !== false ? html`
+            <slider-control
+              label="Position"
+              min="0" max="100" step="5"
+              .value="${Math.round(position)}" unit="%"
+              @value-changed="${(e: CustomEvent) => { e.stopPropagation(); this.hass.callService('cover', 'set_cover_position', { entity_id: entityId, position: e.detail.value }); }}"
+            ></slider-control>
+          ` : ''}
+
+          <!-- Open / Stop / Close buttons -->
+          ${config.show_controls !== false ? html`
+            <div class="cover-controls">
+              <button class="cover-btn cover-btn-open ${state === 'open' ? 'cvr-active' : ''}"
+                      @click="${(e: Event) => { e.stopPropagation(); this.hass.callService('cover', 'open_cover', { entity_id: entityId }); }}">
+                <ha-icon icon="mdi:arrow-up" style="--mdc-icon-size:17px"></ha-icon>
+                <span>Öffnen</span>
+              </button>
+              <button class="cover-btn cover-btn-stop ${state === 'stopped' ? 'cvr-active' : ''}"
+                      @click="${(e: Event) => { e.stopPropagation(); this.hass.callService('cover', 'stop_cover', { entity_id: entityId }); }}">
+                <ha-icon icon="mdi:stop" style="--mdc-icon-size:17px"></ha-icon>
+                <span>Stop</span>
+              </button>
+              <button class="cover-btn cover-btn-close ${state === 'closed' ? 'cvr-active' : ''}"
+                      @click="${(e: Event) => { e.stopPropagation(); this.hass.callService('cover', 'close_cover', { entity_id: entityId }); }}">
+                <ha-icon icon="mdi:arrow-down" style="--mdc-icon-size:17px"></ha-icon>
+                <span>Schließen</span>
+              </button>
+            </div>
+          ` : ''}
+        </div>
+      </ha-card>`;
+  }
+
+  private renderLightCard(config: VioletPoolCardConfig = this.config): TemplateResult {
+    const entityId = config.light_entity || config.entity || this._buildEntityId('light', 'light');
+    const entity = this.hass.states[entityId];
+    if (!entity) {
+      return html`<ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">Licht nicht gefunden</span><span class="error-entity">${entityId}</span></div></div></ha-card>`;
+    }
+
+    const state = entity.state;
+    const isOn = state === 'on';
+    const name = config.name || entity.attributes.friendly_name || 'Pool Licht';
+    const brightness: number = entity.attributes.brightness ?? 128;
+    const brightnessPercent = Math.round((brightness / 255) * 100);
+    const rgb: [number, number, number] | null = entity.attributes.rgb_color ?? null;
+    const rgbStr = rgb ? `rgb(${rgb[0]},${rgb[1]},${rgb[2]})` : null;
+    const accentColor = rgbStr || config.accent_color || this._getAccentColor('light', config);
+    const colorTemp = entity.attributes.color_temp;
+    const effect = entity.attributes.effect;
+
+    return html`
+      <ha-card class="${this._getCardClasses(isOn, config)}"
+               style="--card-accent: ${accentColor}"
+               @click="${() => this._showMoreInfo(entityId)}">
+        <div class="accent-bar" style="${isOn && rgb ? `background:${rgbStr};opacity:1` : ''}"></div>
+        <div class="card-content">
+          <div class="header">
+            <div class="header-icon ${isOn ? 'icon-active' : ''}" style="--icon-accent: ${accentColor}">
+              ${config.icon
+                ? html`<ha-icon icon="${config.icon}"></ha-icon>`
+                : lightSVG(isOn, rgb, brightness, accentColor)}
+            </div>
+            <div class="header-info">
+              <span class="name">${name}</span>
+              <span class="header-subtitle" style="${isOn ? `color:${accentColor}` : ''}">
+                ${isOn ? (effect ? effect : brightnessPercent + '%') : 'Aus'}
+              </span>
+            </div>
+            ${config.show_state !== false ? html`<status-badge .state="${state}" .pulse="${isOn}"></status-badge>` : ''}
+          </div>
+
+          ${isOn ? html`
+            <!-- Color swatch with interactive color picker -->
+            ${rgb ? html`
+              <div class="light-color-swatch" style="background:${rgbStr};box-shadow:0 6px 24px ${rgbStr}50">
+                <span class="light-color-label">RGB ${rgb[0]}, ${rgb[1]}, ${rgb[2]}</span>
+                <span class="light-color-hint">Farbe wählen</span>
+                <input type="color"
+                       .value="${'#' + rgb.map((v: number) => v.toString(16).padStart(2, '0')).join('')}"
+                       @click="${(e: Event) => e.stopPropagation()}"
+                       @change="${(e: Event) => {
+                         e.stopPropagation();
+                         const hex = (e.target as HTMLInputElement).value;
+                         const r = parseInt(hex.slice(1, 3), 16);
+                         const g = parseInt(hex.slice(3, 5), 16);
+                         const b = parseInt(hex.slice(5, 7), 16);
+                         this.hass.callService('light', 'turn_on', { entity_id: entityId, rgb_color: [r, g, b] });
+                       }}"/>
+              </div>
+            ` : colorTemp ? html`
+              <div class="light-color-swatch" style="background:linear-gradient(135deg,#ffe8a0,#fff3d4);box-shadow:0 6px 24px rgba(255,220,100,0.4)">
+                <span class="light-color-label" style="color:#8B6914">Warmweiß · ${colorTemp} Mirek</span>
+              </div>
+            ` : ''}
+
+            <!-- Brightness -->
+            <div class="info-row">
+              <ha-icon icon="mdi:brightness-6" style="--mdc-icon-size:17px"></ha-icon>
+              <span class="info-label">Helligkeit</span>
+              <span class="info-value">${brightnessPercent}%</span>
+            </div>
+            <div class="cover-pos-bar">
+              <div class="cover-pos-fill" style="width:${brightnessPercent}%;background:${accentColor}"></div>
+            </div>
+
+            ${config.show_controls !== false ? html`
+              <div class="light-brightness-row">
+                <slider-control
+                  label="Helligkeit"
+                  min="1" max="100" step="5"
+                  .value="${brightnessPercent}" unit="%"
+                  @value-changed="${(e: CustomEvent) => {
+                    e.stopPropagation();
+                    this.hass.callService('light', 'turn_on', { entity_id: entityId, brightness_pct: e.detail.value });
+                  }}"
+                ></slider-control>
+              </div>
+            ` : ''}
+          ` : ''}
+
+          ${config.show_controls !== false ? html`
+            <div class="cover-controls">
+              <button class="cover-btn cover-btn-open ${isOn ? 'cvr-active' : ''}"
+                      style="--cvr-btn-color:${accentColor}"
+                      @click="${(e: Event) => { e.stopPropagation(); this.hass.callService('light', 'turn_on', { entity_id: entityId }); }}">
+                <ha-icon icon="mdi:lightbulb-on" style="--mdc-icon-size:17px"></ha-icon>
+                <span>An</span>
+              </button>
+              <button class="cover-btn cover-btn-close ${!isOn ? 'cvr-active' : ''}"
+                      @click="${(e: Event) => { e.stopPropagation(); this.hass.callService('light', 'turn_off', { entity_id: entityId }); }}">
+                <ha-icon icon="mdi:lightbulb-off" style="--mdc-icon-size:17px"></ha-icon>
+                <span>Aus</span>
+              </button>
+            </div>
+          ` : ''}
+        </div>
+      </ha-card>`;
+  }
+
+  private renderFilterCard(config: VioletPoolCardConfig = this.config): TemplateResult {
+    const pressureEntityId = (config as any).filter_pressure_entity || config.entity || this._buildEntityId('sensor', 'filter_pressure');
+    const filterEntityId = (config as any).filter_entity;
+    const backwashEntityId = (config as any).backwash_entity;
+
+    const pressureEntity = this.hass.states[pressureEntityId];
+    if (!pressureEntity) {
+      return html`<ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">Filter nicht gefunden</span><span class="error-entity">${pressureEntityId}</span></div></div></ha-card>`;
+    }
+
+    const pressure: number = parseFloat(pressureEntity.state) || 0;
+    const unit = pressureEntity.attributes.unit_of_measurement || 'bar';
+    const name = config.name || pressureEntity.attributes.friendly_name || 'Filter';
+    const accentColor = this._getAccentColor('filter', config);
+
+    const filterEntity = filterEntityId ? this.hass.states[filterEntityId] : undefined;
+    const backwashEntity = backwashEntityId ? this.hass.states[backwashEntityId] : undefined;
+    const isFilterOn = filterEntity ? filterEntity.state === 'on' : true;
+    const isBackwashing = backwashEntity ? backwashEntity.state === 'on' : false;
+
+    // Pressure zones: 0-0.5 low, 0.5-1.2 normal, 1.2-1.6 elevated, >1.6 critical
+    const pressureColor = pressure < 0.5 ? 'var(--vpc-text-secondary)'
+      : pressure < 1.2 ? 'var(--vpc-success,#34C759)'
+      : pressure < 1.6 ? 'var(--vpc-warning,#FF9F0A)'
+      : 'var(--vpc-danger,#FF3B30)';
+    const pressureLabel = pressure < 0.5 ? 'Niedrig'
+      : pressure < 1.2 ? 'Normal'
+      : pressure < 1.6 ? 'Erhöht – bald rückspülen'
+      : 'Kritisch – sofort rückspülen!';
+
+    // Arc gauge: semicircle, 0-3 bar range
+    const maxBar = 3;
+    const pct = Math.min(100, (pressure / maxBar) * 100);
+    const ang = Math.PI - (pct / 100) * Math.PI;
+    const gx = pct >= 99.5 ? '109.9' : (60 + 50 * Math.cos(ang)).toFixed(1);
+    const gy = pct >= 99.5 ? '60.0' : (60 - 50 * Math.sin(ang)).toFixed(1);
+    const lArc = pct > 50 ? 1 : 0;
+
+    // Zone arc endpoints (precomputed for 3-bar gauge)
+    const z1x = (60 + 50 * Math.cos(Math.PI - 0.167 * Math.PI)).toFixed(1); // 0.5 bar
+    const z1y = (60 - 50 * Math.sin(Math.PI - 0.167 * Math.PI)).toFixed(1);
+    const z2x = (60 + 50 * Math.cos(Math.PI - 0.4 * Math.PI)).toFixed(1);   // 1.2 bar
+    const z2y = (60 - 50 * Math.sin(Math.PI - 0.4 * Math.PI)).toFixed(1);
+    const z3x = (60 + 50 * Math.cos(Math.PI - 0.533 * Math.PI)).toFixed(1); // 1.6 bar
+    const z3y = (60 - 50 * Math.sin(Math.PI - 0.533 * Math.PI)).toFixed(1);
+
+    return html`
+      <ha-card class="${this._getCardClasses(isFilterOn, config)}"
+               style="--card-accent: ${accentColor}"
+               @click="${() => this._showMoreInfo(pressureEntityId)}">
+        <div class="accent-bar"></div>
+        <div class="card-content">
+          <div class="header">
+            <div class="header-icon ${isFilterOn ? 'icon-active' : ''}" style="--icon-accent: ${accentColor}">
+              ${config.icon
+                ? html`<ha-icon icon="${config.icon}"></ha-icon>`
+                : html`<ha-icon icon="${isBackwashing ? 'mdi:rotate-right' : 'mdi:filter'}" class="${isBackwashing ? 'pump-running' : ''}"></ha-icon>`}
+            </div>
+            <div class="header-info">
+              <span class="name">${name}</span>
+              <span class="header-subtitle" style="${isBackwashing ? 'color:var(--vpc-warning,#FF9F0A)' : ''}">
+                ${isBackwashing ? 'Rückspülung läuft…' : isFilterOn ? 'Aktiv' : 'Aus'}
+              </span>
+            </div>
+            ${config.show_state !== false ? html`<status-badge .state="${isFilterOn ? 'on' : 'off'}" .pulse="${isBackwashing}"></status-badge>` : ''}
+          </div>
+
+          <!-- Pressure arc gauge -->
+          <div class="filter-gauge-wrap">
+            <svg viewBox="0 0 120 68" style="width:100%;max-height:90px;display:block;overflow:visible">
+              <!-- Background arc -->
+              <path d="M 10,60 A 50,50 0 0,1 110,60" fill="none" stroke="rgba(120,120,128,0.12)" stroke-width="10" stroke-linecap="round"/>
+              <!-- Normal zone (0.5–1.2 bar) -->
+              <path d="M ${z1x},${z1y} A 50,50 0 0,1 ${z2x},${z2y}" fill="none" stroke="rgba(52,199,89,0.22)" stroke-width="10"/>
+              <!-- Elevated zone (1.2–1.6 bar) -->
+              <path d="M ${z2x},${z2y} A 50,50 0 0,1 ${z3x},${z3y}" fill="none" stroke="rgba(255,159,10,0.22)" stroke-width="10"/>
+              <!-- Critical zone (>1.6 bar) -->
+              <path d="M ${z3x},${z3y} A 50,50 0 0,1 109.9,60" fill="none" stroke="rgba(255,59,48,0.22)" stroke-width="10"/>
+              <!-- Value arc -->
+              ${pct > 1 ? html`
+                <path d="M 10,60 A 50,50 0 ${lArc},1 ${gx},${gy}" fill="none"
+                      stroke="${pressureColor}" stroke-width="10" stroke-linecap="round"/>
+              ` : ''}
+              <!-- Tick marks at 0, 1, 2, 3 bar -->
+              <line x1="10" y1="58" x2="10" y2="62" stroke="rgba(120,120,128,0.4)" stroke-width="1.5"/>
+              <line x1="${(60 + 50 * Math.cos(Math.PI * 2 / 3)).toFixed(1)}" y1="${(60 - 50 * Math.sin(Math.PI * 2 / 3)).toFixed(1)}" x2="${(60 + 46 * Math.cos(Math.PI * 2 / 3)).toFixed(1)}" y2="${(60 - 46 * Math.sin(Math.PI * 2 / 3)).toFixed(1)}" stroke="rgba(120,120,128,0.4)" stroke-width="1.5"/>
+              <line x1="60" y1="10" x2="60" y2="14" stroke="rgba(120,120,128,0.4)" stroke-width="1.5"/>
+              <line x1="${(60 + 50 * Math.cos(Math.PI / 3)).toFixed(1)}" y1="${(60 - 50 * Math.sin(Math.PI / 3)).toFixed(1)}" x2="${(60 + 46 * Math.cos(Math.PI / 3)).toFixed(1)}" y2="${(60 - 46 * Math.sin(Math.PI / 3)).toFixed(1)}" stroke="rgba(120,120,128,0.4)" stroke-width="1.5"/>
+              <line x1="110" y1="58" x2="110" y2="62" stroke="rgba(120,120,128,0.4)" stroke-width="1.5"/>
+              <!-- Pressure value text -->
+              <text x="60" y="52" text-anchor="middle" font-size="20" font-weight="700"
+                    style="fill:${pressureColor};letter-spacing:-0.5px">${pressure.toFixed(1)}</text>
+              <text x="60" y="63" text-anchor="middle" font-size="9" font-weight="500"
+                    style="fill:rgba(110,110,120,0.8)">${unit}</text>
+              <!-- Scale labels -->
+              <text x="7" y="68" text-anchor="middle" font-size="7.5" style="fill:rgba(110,110,120,0.55)">0</text>
+              <text x="60" y="8" text-anchor="middle" font-size="7.5" style="fill:rgba(110,110,120,0.55)">1.5</text>
+              <text x="113" y="68" text-anchor="middle" font-size="7.5" style="fill:rgba(110,110,120,0.55)">3</text>
+            </svg>
+          </div>
+
+          <!-- Status row -->
+          <div class="info-row ${pressure >= 1.6 ? 'info-row-warning' : ''}">
+            <ha-icon icon="mdi:gauge" style="--mdc-icon-size:17px;color:${pressureColor}"></ha-icon>
+            <span class="info-label">Filterdruck</span>
+            <span class="info-value" style="color:${pressureColor}">${pressureLabel}</span>
+          </div>
+
+          ${filterEntity ? html`
+            <div class="info-row">
+              <ha-icon icon="${isFilterOn ? 'mdi:check-circle-outline' : 'mdi:close-circle-outline'}"
+                       style="--mdc-icon-size:17px;color:${isFilterOn ? 'var(--vpc-success,#34C759)' : 'var(--vpc-text-secondary)'}"></ha-icon>
+              <span class="info-label">Filterpumpe</span>
+              <span class="info-value">${isFilterOn ? 'An' : 'Aus'}</span>
+            </div>
+          ` : ''}
+
+          ${config.show_controls !== false && backwashEntity ? html`
+            <div class="cover-controls">
+              <button class="cover-btn ${isBackwashing ? 'cover-btn-close cvr-active' : 'cover-btn-open'}"
+                      style="--cvr-btn-color:${accentColor}"
+                      @click="${(e: Event) => { e.stopPropagation(); this.hass.callService('switch', isBackwashing ? 'turn_off' : 'turn_on', { entity_id: backwashEntityId }); }}">
+                <ha-icon icon="${isBackwashing ? 'mdi:stop' : 'mdi:rotate-right'}" style="--mdc-icon-size:17px"></ha-icon>
+                <span>${isBackwashing ? 'Rückspülung stoppen' : 'Rückspülen starten'}</span>
+              </button>
+            </div>
+          ` : ''}
+        </div>
+      </ha-card>`;
+  }
+
   static get styles(): CSSResultGroup {
     return css`:host{--vpc-font:-apple-system, 'SF Pro Display', 'SF Pro Text', system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;--vpc-spacing:18px;--vpc-radius:20px;--vpc-inner-radius:12px;--vpc-bg:var(--ha-card-background, var(--card-background-color, #ffffff));--vpc-surface:rgba(120,120,128,0.06);--vpc-border:none;--vpc-shadow:0 2px 20px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.04);--vpc-backdrop:none;--vpc-primary:var(--primary-color, #007AFF);--vpc-success:#34C759;--vpc-warning:#FF9F0A;--vpc-danger:#FF3B30;--vpc-purple:#AF52DE;--vpc-teal:#5AC8FA;--vpc-orange:#FF9500;--vpc-indigo:#5856D6;--vpc-text:var(--primary-text-color, #1C1C1E);--vpc-text-secondary:var(--secondary-text-color, #6D6D72);--vpc-text-tertiary:rgba(60,60,67,0.45);--vpc-icon-size:22px;--vpc-transition:all 0.28s cubic-bezier(0.34, 1.4, 0.64, 1);--vpc-transition-fast:all 0.18s ease;--card-accent:var(--primary-color, #007AFF);--icon-accent:var(--card-accent);display:block;font-family:var(--vpc-font);}ha-card.theme-apple{--vpc-bg:#ffffff;--vpc-shadow:0 2px 20px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04);--vpc-radius:22px;--vpc-inner-radius:13px;--vpc-surface:rgba(120,120,128,0.06);--vpc-primary:#007AFF;}ha-card.theme-dark{--vpc-bg:#1C1C1E;--vpc-surface:rgba(255,255,255,0.06);--vpc-border:1px solid rgba(255,255,255,0.08);--vpc-shadow:0 4px 30px rgba(0,0,0,0.4);--vpc-radius:22px;--vpc-text:#FFFFFF;--vpc-text-secondary:#8E8E93;--vpc-text-tertiary:rgba(255,255,255,0.25);--vpc-primary:#0A84FF;--vpc-success:#30D158;--vpc-warning:#FFD60A;--vpc-danger:#FF453A;}ha-card.theme-luxury, ha-card.theme-glass{--vpc-bg:rgba(255,255,255,0.72);--vpc-backdrop:blur(24px) saturate(180%);--vpc-radius:26px;--vpc-border:1px solid rgba(255,255,255,0.4);--vpc-shadow:0 8px 40px rgba(31,38,135,0.12), 0 2px 8px rgba(0,0,0,0.06);}ha-card.theme-modern{--vpc-radius:18px;--vpc-spacing:20px;--vpc-shadow:0 1px 3px rgba(0,0,0,0.05), 0 0 0 1px rgba(0,0,0,0.04);}ha-card.theme-minimalist{--vpc-radius:14px;--vpc-shadow:none;--vpc-border:1px solid rgba(0,0,0,0.07);--vpc-surface:transparent;}ha-card.theme-neon{--vpc-bg:#0D0D14;--vpc-border:1px solid rgba(0,212,255,0.2);--vpc-shadow:0 0 30px rgba(0,212,255,0.07);--vpc-radius:14px;--vpc-primary:#00D4FF;--vpc-text:#E8E8F0;--vpc-text-secondary:#6E6E80;--vpc-surface:rgba(0,212,255,0.04);--vpc-success:#00E676;--vpc-warning:#FFEA00;--vpc-danger:#FF1744;}ha-card.theme-premium{--vpc-bg:linear-gradient(145deg, rgba(255,255,255,0.96) 0%, rgba(248,248,255,0.96) 100%);--vpc-radius:24px;--vpc-shadow:0 12px 50px -8px rgba(80,80,160,0.15), 0 0 0 1px rgba(255,255,255,0.9);--vpc-border:1px solid rgba(255,255,255,0.7);}@media (prefers-color-scheme:dark){ha-card.theme-apple{--vpc-bg:#1C1C1E;--vpc-surface:rgba(255,255,255,0.06);--vpc-border:1px solid rgba(255,255,255,0.08);--vpc-text:#FFFFFF;--vpc-text-secondary:#8E8E93;--vpc-primary:#0A84FF;--vpc-success:#30D158;--vpc-warning:#FFD60A;--vpc-danger:#FF453A;}ha-card.theme-luxury, ha-card.theme-glass{--vpc-bg:rgba(18,18,30,0.80);--vpc-border:1px solid rgba(255,255,255,0.09);--vpc-shadow:0 8px 40px rgba(0,0,0,0.45);}ha-card.theme-premium{--vpc-bg:linear-gradient(145deg, rgba(28,28,38,0.97) 0%, rgba(20,20,32,0.97) 100%);--vpc-border:1px solid rgba(255,255,255,0.07);}ha-card.theme-minimalist{--vpc-border:1px solid rgba(255,255,255,0.07);}ha-card.theme-modern{--vpc-shadow:0 1px 3px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.04);}}ha-card{font-family:var(--vpc-font);padding:var(--vpc-spacing);background:var(--vpc-bg);border-radius:var(--vpc-radius);box-shadow:var(--vpc-shadow);border:var(--vpc-border);backdrop-filter:var(--vpc-backdrop);-webkit-backdrop-filter:var(--vpc-backdrop);transition:transform 0.22s cubic-bezier(0.34,1.4,0.64,1), box-shadow 0.22s ease;overflow:visible;position:relative;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;}ha-card:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,0,0,0.11), 0 2px 6px rgba(0,0,0,0.05);}ha-card:active{transform:scale(0.985);box-shadow:0 2px 8px rgba(0,0,0,0.07);transition:transform 0.1s ease, box-shadow 0.1s ease;}ha-card.theme-dark:hover{box-shadow:0 8px 30px rgba(0,0,0,0.5);}ha-card.theme-neon:hover{box-shadow:0 0 40px rgba(0,212,255,0.12), 0 4px 20px rgba(0,0,0,0.3);}ha-card.theme-neon.is-active{box-shadow:0 0 50px rgba(0,212,255,0.2), inset 0 0 20px rgba(0,212,255,0.04);border-color:rgba(0,212,255,0.35);}.accent-bar{position:absolute;top:0;left:0;right:0;height:3px;background:var(--card-accent);opacity:0.65;transition:opacity 0.3s ease, height 0.3s ease;}ha-card.is-active .accent-bar{height:4px;opacity:1;}ha-card.theme-neon .accent-bar{background:linear-gradient(90deg, #00D4FF, #7C4DFF, #00D4FF);box-shadow:0 0 12px rgba(0,212,255,0.5);height:2px;animation:neon-flow 3s linear infinite;}ha-card.theme-minimalist .accent-bar{height:2px;opacity:0.45;}@keyframes neon-flow{0%{background-position:0% 50%;}100%{background-position:200% 50%;}}.card-content{display:flex;flex-direction:column;gap:14px;}.card-content.compact{flex-direction:row;align-items:center;gap:14px;}.header{display:flex;align-items:center;gap:14px;}.header-icon{width:46px;height:46px;border-radius:15px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb, var(--icon-accent, var(--vpc-primary)) 12%, transparent);transition:background 0.25s ease, box-shadow 0.25s ease;flex-shrink:0;}.header-icon.icon-active{background:color-mix(in srgb, var(--icon-accent, var(--vpc-primary)) 18%, transparent);box-shadow:0 0 0 5px color-mix(in srgb, var(--icon-accent, var(--vpc-primary)) 8%, transparent);}ha-card.theme-neon .header-icon{background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.18);}ha-card.theme-neon .header-icon.icon-active{box-shadow:0 0 16px rgba(0,212,255,0.25);}.header-icon ha-icon{--mdc-icon-size:24px;color:var(--icon-accent, var(--vpc-primary));}.header-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}.name{font-family:var(--vpc-font);font-size:16px;font-weight:600;letter-spacing:-0.3px;color:var(--vpc-text);line-height:1.25;}.header-subtitle{font-family:var(--vpc-font);font-size:13px;font-weight:400;color:var(--vpc-text-secondary);line-height:1.2;}ha-icon{--mdc-icon-size:var(--vpc-icon-size);color:var(--vpc-primary);transition:color 0.2s ease;}@keyframes rotate{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}@keyframes pulse-glow{0%, 100%{opacity:1;transform:scale(1);}50%{opacity:0.65;transform:scale(0.95);}}@keyframes breathe{0%, 100%{transform:scale(1);opacity:1;}50%{transform:scale(1.08);opacity:0.85;}}@keyframes spin-slow{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}.pump-running{animation:rotate 1.8s linear infinite;}.heater-active{animation:breathe 2.5s ease-in-out infinite;color:var(--vpc-danger, #FF3B30);}.solar-active{animation:breathe 3s ease-in-out infinite;color:var(--vpc-warning, #FF9F0A);}.dosing-active{animation:pulse-glow 2s ease-in-out infinite;color:var(--vpc-success, #34C759);}.speed-segments-container{display:flex;align-items:center;gap:8px;}.speed-segments{display:flex;flex:1;gap:6px;}.speed-segment{flex:1;display:flex;align-items:center;justify-content:center;gap:4px;padding:9px 6px;border-radius:var(--vpc-inner-radius, 12px);border:none;background:var(--vpc-surface, rgba(120,120,128,0.06));color:var(--vpc-text-secondary);font-family:var(--vpc-font);font-size:12px;font-weight:500;cursor:pointer;transition:all 0.18s ease;-webkit-tap-highlight-color:transparent;letter-spacing:-0.2px;position:relative;overflow:visible;}.speed-segment:hover{background:color-mix(in srgb, var(--seg-color) 10%, transparent);color:var(--seg-color);}.speed-segment.seg-active{background:color-mix(in srgb, var(--seg-color) 15%, transparent);color:var(--seg-color);font-weight:600;box-shadow:inset 0 0 0 1.5px color-mix(in srgb, var(--seg-color) 40%, transparent);}.speed-segment.seg-past{background:color-mix(in srgb, var(--seg-color) 08%, transparent);color:color-mix(in srgb, var(--seg-color) 70%, var(--vpc-text-secondary));}.speed-off-btn{width:38px;height:38px;border-radius:12px;border:none;background:var(--vpc-surface);color:var(--vpc-text-secondary);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.18s ease;flex-shrink:0;-webkit-tap-highlight-color:transparent;}.speed-off-btn:hover{background:rgba(255,59,48,0.1);color:var(--vpc-danger, #FF3B30);}.speed-off-btn.seg-active{background:rgba(255,59,48,0.12);color:var(--vpc-danger, #FF3B30);box-shadow:inset 0 0 0 1.5px rgba(255,59,48,0.3);}ha-card.theme-neon .speed-segment{border:1px solid rgba(0,212,255,0.1);}ha-card.theme-neon .speed-segment.seg-active{box-shadow:0 0 12px color-mix(in srgb, var(--seg-color) 50%, transparent);}.temp-hero{display:flex;align-items:center;gap:12px;padding:6px 0 4px;}.temp-hero-main{display:flex;align-items:baseline;gap:4px;}.temp-hero-value{font-family:var(--vpc-font);font-size:44px;font-weight:700;line-height:1;letter-spacing:-2px;color:var(--temp-color, var(--vpc-text));}.temp-hero-unit{font-size:22px;font-weight:400;color:var(--temp-color, var(--vpc-text));opacity:0.65;letter-spacing:-0.5px;}.temp-hero-target-pill{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:100px;background:var(--vpc-surface);font-size:13px;font-weight:500;color:var(--vpc-text-secondary);white-space:nowrap;}.temp-range-bar, .chem-range-bar{display:flex;flex-direction:column;gap:5px;}.temp-range-track, .chem-range-track{height:6px;background:var(--vpc-surface);border-radius:100px;position:relative;overflow:visible;}.temp-range-fill, .chem-range-fill{height:100%;border-radius:100px;transition:width 0.5s cubic-bezier(0.34,1.4,0.64,1);}.temp-range-target{position:absolute;top:50%;transform:translate(-50%, -50%);width:3px;height:14px;background:var(--vpc-text-secondary);border-radius:2px;opacity:0.7;}.temp-range-labels, .chem-range-labels{display:flex;justify-content:space-between;font-size:11px;font-weight:400;color:var(--vpc-text-tertiary, rgba(60,60,67,0.45));letter-spacing:0px;}.dosing-value-block{display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:var(--vpc-inner-radius, 12px);background:var(--vpc-surface);}ha-card.theme-neon .dosing-value-block{background:rgba(0,212,255,0.04);border:1px solid rgba(0,212,255,0.08);}.dosing-value-row{display:flex;align-items:center;justify-content:space-between;gap:10px;}.dosing-value-main{display:flex;align-items:baseline;gap:6px;}.dosing-label-tag{font-size:12px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;color:var(--vpc-text-secondary);}.dosing-current-value{font-family:var(--vpc-font);font-size:32px;font-weight:700;line-height:1;letter-spacing:-1px;}.dosing-current-unit{font-size:15px;font-weight:400;opacity:0.65;}.dosing-status-pill{padding:4px 10px;border-radius:100px;font-size:12px;font-weight:600;white-space:nowrap;}.chem-range-target{position:absolute;top:50%;transform:translate(-50%, -50%);display:flex;flex-direction:column;align-items:center;gap:2px;}.chem-target-line{width:2px;height:14px;background:var(--vpc-text);border-radius:2px;opacity:0.5;}.chem-target-label{position:absolute;top:16px;font-size:9px;font-weight:600;color:var(--vpc-text-secondary);white-space:nowrap;transform:translateX(-50%);}.chem-mini-bar{width:100%;height:4px;background:var(--vpc-surface, rgba(120,120,128,0.1));border-radius:100px;overflow:hidden;position:relative;margin-top:4px;}.chem-mini-fill{height:100%;border-radius:100px;transition:width 0.5s cubic-bezier(0.34,1.4,0.64,1);}.chem-mini-ideal{position:absolute;top:0;height:100%;background:rgba(52,199,89,0.18);border-radius:2px;}.solar-temp-comparison{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px;background:var(--vpc-surface);border-radius:var(--vpc-inner-radius, 12px);}ha-card.theme-neon .solar-temp-comparison{background:rgba(0,212,255,0.04);border:1px solid rgba(0,212,255,0.08);}.solar-temp-tile{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;}.solar-temp-tile ha-icon{--mdc-icon-size:18px;color:var(--vpc-text-secondary);}.solar-temp-tile-val{font-size:20px;font-weight:700;letter-spacing:-0.5px;color:var(--vpc-text);line-height:1;}.solar-temp-tile-label{font-size:11px;font-weight:500;color:var(--vpc-text-secondary);text-transform:uppercase;letter-spacing:0.3px;}.solar-delta-badge{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 12px;border-radius:100px;font-size:12px;font-weight:700;}.delta-great{background:rgba(52,199,89,0.12);color:var(--vpc-success, #34C759);}.delta-ok{background:rgba(255,159,10,0.12);color:var(--vpc-warning, #FF9F0A);}.delta-low{background:rgba(255,59,48,0.10);color:var(--vpc-danger, #FF3B30);}.delta-hint-text{font-size:12px;font-weight:400;color:var(--vpc-text-secondary);padding:2px 0;}.chemistry-grid{display:grid;grid-template-columns:repeat(3, 1fr);gap:8px;}.chemistry-card{display:flex;flex-direction:column;align-items:center;gap:2px;padding:14px 8px 12px;border-radius:var(--vpc-inner-radius, 12px);background:var(--vpc-surface);cursor:pointer;transition:transform 0.18s ease, background 0.18s ease;position:relative;overflow:visible;}.chemistry-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--chem-color, var(--vpc-primary));opacity:0.6;border-radius:100px;}.chemistry-card:hover{transform:scale(1.02);background:color-mix(in srgb, var(--chem-color) 8%, var(--vpc-surface));}ha-card.theme-neon .chemistry-card{background:rgba(0,212,255,0.04);border:1px solid rgba(0,212,255,0.08);}.chem-icon-wrap{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb, var(--chem-color, var(--vpc-primary)) 12%, transparent);margin-bottom:4px;}.chem-icon-wrap ha-icon{--mdc-icon-size:16px;color:var(--chem-color, var(--vpc-primary));}.chemistry-val{font-family:var(--vpc-font);font-size:18px;font-weight:700;letter-spacing:-0.5px;color:var(--chem-color, var(--vpc-text));line-height:1;}.chemistry-unit{font-size:11px;font-weight:500;color:var(--vpc-text-secondary);letter-spacing:0.2px;}.chemistry-label{font-size:10px;font-weight:500;color:var(--vpc-text-secondary);text-transform:uppercase;letter-spacing:0.4px;}.overview-warning-badge{width:22px;height:22px;border-radius:50%;background:var(--vpc-danger, #FF3B30);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}.overview-active-dot{width:10px;height:10px;border-radius:50%;background:var(--vpc-success, #34C759);box-shadow:0 0 8px rgba(52,199,89,0.5);flex-shrink:0;animation:pulse-glow 2s ease-in-out infinite;}.overview-section{display:flex;flex-direction:column;gap:6px;}.section-title{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--vpc-text-secondary);text-transform:uppercase;letter-spacing:0.6px;padding:0 2px;}.section-count{margin-left:auto;font-size:11px;font-weight:500;color:var(--vpc-text-tertiary);}.warning-title ha-icon{color:var(--vpc-warning, #FF9F0A);}.warning-title{color:var(--vpc-warning, #FF9F0A);}.temp-hero{display:flex;align-items:baseline;gap:4px;padding:8px 0;}.temp-hero-value{font-size:42px;font-weight:800;line-height:1;color:var(--temp-color, var(--vpc-text));letter-spacing:-1px;}.temp-hero-unit{font-size:22px;font-weight:500;color:var(--temp-color, var(--vpc-text));opacity:0.7;}.temp-hero-target{font-size:16px;font-weight:500;color:var(--vpc-text-secondary);margin-left:12px;}.info-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:var(--vpc-inner-radius, 12px);background:var(--vpc-surface);font-size:14px;color:var(--vpc-text);font-family:var(--vpc-font);}ha-card.theme-neon .info-row{background:rgba(0,212,255,0.04);border:1px solid rgba(0,212,255,0.08);}.info-row ha-icon{--mdc-icon-size:17px;color:var(--vpc-text-secondary);flex-shrink:0;}.info-label{flex:1;font-weight:400;color:var(--vpc-text-secondary);}.info-value{font-weight:600;color:var(--vpc-text);letter-spacing:-0.2px;}.info-badge{padding:3px 9px;border-radius:100px;font-size:11px;font-weight:600;}.info-badge.warning{background:color-mix(in srgb, var(--vpc-warning, #FF9F0A) 12%, transparent);color:var(--vpc-warning, #FF9F0A);}.info-row-warning{background:color-mix(in srgb, var(--vpc-warning, #FF9F0A) 06%, transparent);border:1px solid color-mix(in srgb, var(--vpc-warning, #FF9F0A) 18%, transparent);}.solar-temps{display:flex;flex-direction:column;gap:8px;}.chemistry-grid{display:grid;grid-template-columns:repeat(3, 1fr);gap:10px;}.chemistry-card{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px;border-radius:14px;background:rgba(var(--rgb-primary-text-color, 0,0,0), 0.03);cursor:pointer;transition:var(--vpc-transition);border:1px solid transparent;}.chemistry-card:hover{background:rgba(var(--rgb-primary-text-color, 0,0,0), 0.06);transform:translateY(-1px);}ha-card.theme-neon .chemistry-card{background:rgba(0, 255, 255, 0.04);border:1px solid rgba(0, 255, 255, 0.08);}.chemistry-card ha-icon{--mdc-icon-size:20px;color:var(--chem-color, var(--vpc-primary));}.chemistry-val{font-size:16px;font-weight:700;color:var(--chem-color, var(--vpc-text));line-height:1;}.chemistry-label{font-size:11px;font-weight:500;color:var(--vpc-text-secondary);text-transform:uppercase;letter-spacing:0.3px;}.overview-section{display:flex;flex-direction:column;gap:8px;}.section-title{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--vpc-text-secondary);text-transform:uppercase;letter-spacing:0.5px;padding:0 2px;}.section-title ha-icon{--mdc-icon-size:16px;color:var(--vpc-text-secondary);}.warning-title ha-icon{color:#ef6c00;}.warning-title{color:#ef6c00;}.device-list{display:flex;flex-direction:column;gap:3px;}.device-row{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:var(--vpc-inner-radius, 12px);background:var(--vpc-surface);cursor:pointer;transition:background 0.18s ease, transform 0.15s ease;}.device-row:hover{background:color-mix(in srgb, var(--vpc-primary) 6%, var(--vpc-surface));transform:scale(1.005);}ha-card.theme-neon .device-row{background:rgba(0,212,255,0.04);border:1px solid rgba(0,212,255,0.06);}.device-icon-wrap{width:32px;height:32px;border-radius:9px;background:var(--vpc-surface);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background 0.2s ease;}.device-icon-wrap ha-icon{--mdc-icon-size:18px;color:var(--vpc-text-secondary);}.device-icon-active{background:color-mix(in srgb, var(--vpc-primary) 12%, transparent);}.device-icon-active ha-icon{color:var(--vpc-primary) !important;}.device-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;}.device-name{font-weight:500;font-size:14px;letter-spacing:-0.1px;color:var(--vpc-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.device-status{color:var(--vpc-text-secondary);font-size:12px;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.device-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}.dot-active{background:var(--vpc-success, #34C759);box-shadow:0 0 6px rgba(52,199,89,0.5);}.dot-inactive{background:var(--vpc-text-secondary);opacity:0.25;}.warning-list{display:flex;flex-direction:column;gap:5px;}.warning-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--vpc-inner-radius, 12px);background:color-mix(in srgb, var(--vpc-warning, #FF9F0A) 8%, transparent);border:1px solid color-mix(in srgb, var(--vpc-warning, #FF9F0A) 20%, transparent);font-size:13px;font-weight:500;color:var(--vpc-warning, #FF9F0A);}.warning-row ha-icon{color:var(--vpc-warning, #FF9F0A);flex-shrink:0;}.all-ok-display{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;border-radius:var(--vpc-inner-radius, 12px);background:color-mix(in srgb, var(--vpc-success, #34C759) 8%, transparent);border:1px solid color-mix(in srgb, var(--vpc-success, #34C759) 18%, transparent);color:var(--vpc-success, #34C759);font-weight:500;font-size:14px;}.all-ok-display ha-icon{color:var(--vpc-success, #34C759);}ha-card.compact-card{padding:12px 14px;}.compact-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:var(--vpc-surface);flex-shrink:0;transition:background 0.2s ease;}.compact-icon-active{background:color-mix(in srgb, var(--vpc-primary) 12%, transparent);}.compact-icon ha-icon{--mdc-icon-size:20px;}.compact-icon ha-icon.active{color:var(--vpc-primary);}.compact-icon ha-icon.inactive{color:var(--vpc-text-secondary);opacity:0.45;}.compact-info{flex:1;min-width:0;}.compact-details{display:flex;gap:8px;font-size:12px;margin-top:2px;align-items:center;}.compact-value{font-weight:600;color:var(--vpc-text);letter-spacing:-0.2px;}.compact-detail{color:var(--vpc-text-secondary);font-size:11px;}.system-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));gap:20px;}.error-state{display:flex;align-items:center;gap:14px;padding:20px;}.error-icon{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:rgba(244, 67, 54, 0.1);}.error-icon ha-icon{--mdc-icon-size:24px;color:#d32f2f;}.error-info{display:flex;flex-direction:column;gap:2px;}.error-title{font-size:14px;font-weight:600;color:#d32f2f;}.error-entity{font-size:12px;color:var(--vpc-text-secondary);font-family:monospace;}ha-card.size-small{--vpc-spacing:12px;--vpc-icon-size:20px;--vpc-radius:16px;}ha-card.size-small .header-icon{width:38px;height:38px;border-radius:11px;}ha-card.size-small .name{font-size:14px;}ha-card.size-small .temp-hero-value{font-size:34px;letter-spacing:-1.5px;}ha-card.size-large{--vpc-spacing:22px;--vpc-icon-size:28px;--vpc-radius:26px;}ha-card.size-large .header-icon{width:54px;height:54px;border-radius:17px;}ha-card.size-large .name{font-size:18px;}ha-card.size-large .temp-hero-value{font-size:56px;letter-spacing:-3px;}ha-card.size-fullscreen{--vpc-spacing:28px;--vpc-icon-size:32px;--vpc-radius:28px;height:100%;min-height:80vh;}ha-card.size-fullscreen .header-icon{width:60px;height:60px;border-radius:19px;}ha-card.size-fullscreen .name{font-size:20px;}ha-card.size-fullscreen .temp-hero-value{font-size:68px;letter-spacing:-4px;}ha-card.animation-none{transition:none !important;}ha-card.animation-none:hover, ha-card.animation-none:active{transform:none !important;}ha-card.animation-subtle{transition:transform 0.15s ease, box-shadow 0.15s ease;}ha-card.animation-subtle:hover{transform:translateY(-1px);}ha-card.animation-smooth{transition:transform 0.25s cubic-bezier(0.34,1.4,0.64,1), box-shadow 0.25s ease;}ha-card.animation-energetic{transition:transform 0.2s cubic-bezier(0.34,1.6,0.64,1), box-shadow 0.2s ease;}ha-card.animation-energetic:hover{transform:translateY(-4px) scale(1.008);}@keyframes flow-gradient{0%{background-position:0% 50%;}100%{background-position:200% 50%;}}ha-card.flow-active .accent-bar{background:linear-gradient(90deg, var(--card-accent), color-mix(in srgb, var(--card-accent) 60%, white), var(--card-accent));background-size:200% 100%;animation:flow-gradient 2.5s linear infinite;}.error-state{display:flex;align-items:center;gap:14px;padding:20px;}.error-icon{width:46px;height:46px;border-radius:15px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb, var(--vpc-danger, #FF3B30) 10%, transparent);flex-shrink:0;}.error-icon ha-icon{--mdc-icon-size:24px;color:var(--vpc-danger, #FF3B30);}.error-info{display:flex;flex-direction:column;gap:3px;}.error-title{font-size:15px;font-weight:600;color:var(--vpc-danger, #FF3B30);letter-spacing:-0.2px;}.error-entity{font-size:12px;color:var(--vpc-text-secondary);font-family:'SF Mono', 'Fira Code', 'Cascadia Code', ui-monospace, monospace;opacity:0.7;}.system-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));gap:16px;}@media (max-width:600px){.chemistry-grid{grid-template-columns:repeat(3, 1fr);gap:6px;}.chemistry-card{padding:11px 6px 10px;}.chemistry-val{font-size:16px;}.system-grid{grid-template-columns:1fr;}.temp-hero-value{font-size:38px;letter-spacing:-1.5px;}.dosing-current-value{font-size:28px;}.speed-segment{font-size:11px;padding:8px 4px;}}@media (pointer:coarse){.speed-segment, .speed-off-btn, .device-row, .chemistry-card{min-height:44px;}}.speed-segment{min-width:0;}.speed-segment span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
 /* === TOOLTIP SYSTEM === */
@@ -1551,7 +1975,33 @@ ha-card.theme-dark .chem-metric-track{background:rgba(255,255,255,0.08);}
 .sensor-state-text{font-size:28px;font-weight:600;color:var(--vpc-text);}
 /* === DETAIL CARD TOOLTIP FIX === */
 .device-row{overflow:visible;}
+/* === ANIMATED SVG ICONS === */
+@keyframes flicker{0%,100%{transform:scaleX(1) skewX(0deg);opacity:1;}25%{transform:scaleX(1.06) skewX(-2deg);opacity:0.88;}50%{transform:scaleX(0.96) skewX(1.5deg);opacity:0.82;}75%{transform:scaleX(1.04) skewX(-1deg);opacity:0.94;}}
+@keyframes light-glow{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.65;transform:scale(1.07);}}
+@keyframes flow-dot{0%,100%{opacity:0.7;transform:scale(1);}50%{opacity:0.3;transform:scale(0.6);}}
+.header-icon svg{display:block;width:100%;height:100%;}
+/* === COVER CARD === */
+.cover-visual{padding:2px 0;}
+.cover-pos-bar{height:5px;background:var(--vpc-surface);border-radius:100px;overflow:hidden;margin-top:-4px;}
+.cover-pos-fill{height:100%;border-radius:100px;transition:width 0.55s cubic-bezier(0.34,1.4,0.64,1);}
+.cover-moving-pill{padding:2px 8px;border-radius:100px;font-size:11px;font-weight:600;background:rgba(255,159,10,0.14);color:var(--vpc-warning,#FF9F0A);white-space:nowrap;}
+.cover-controls{display:flex;gap:7px;}
+.cover-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px;border:none;border-radius:var(--vpc-inner-radius,12px);background:var(--vpc-surface);color:var(--vpc-text-secondary);font-family:var(--vpc-font);font-size:11.5px;font-weight:500;cursor:pointer;transition:all 0.18s ease;-webkit-tap-highlight-color:transparent;}
+.cover-btn:hover{background:color-mix(in srgb,var(--card-accent) 12%,transparent);color:var(--card-accent);}
+.cover-btn-open.cvr-active{background:rgba(52,199,89,0.13);color:var(--vpc-success,#34C759);box-shadow:inset 0 0 0 1.5px rgba(52,199,89,0.32);}
+.cover-btn-stop.cvr-active{background:rgba(255,159,10,0.13);color:var(--vpc-warning,#FF9F0A);box-shadow:inset 0 0 0 1.5px rgba(255,159,10,0.32);}
+.cover-btn-close.cvr-active{background:rgba(255,59,48,0.12);color:var(--vpc-danger,#FF3B30);box-shadow:inset 0 0 0 1.5px rgba(255,59,48,0.3);}
+/* === LIGHT CARD === */
+.light-color-swatch{height:54px;border-radius:var(--vpc-inner-radius,12px);display:flex;align-items:center;justify-content:center;transition:background 0.4s ease,box-shadow 0.4s ease;}
+.light-color-label{font-size:11.5px;font-weight:600;color:white;text-shadow:0 1px 4px rgba(0,0,0,0.45);letter-spacing:0.1px;}
+.light-brightness-row{margin-top:-4px;}
+.light-color-swatch{position:relative;overflow:hidden;}
+.light-color-swatch input[type=color]{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;border:none;padding:0;}
+.light-color-hint{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:10.5px;font-weight:600;color:rgba(255,255,255,0.65);pointer-events:none;}
+/* === FILTER CARD === */
+.filter-gauge-wrap{display:flex;justify-content:center;padding:4px 0 0;}
 `;
+
   }
 
   public getCardSize(): number {
@@ -1566,6 +2016,10 @@ ha-card.theme-dark .chem-metric-track{background:rgba(255,255,255,0.08);}
         return 6;
       case 'sensor':
         return 2;
+      case 'cover':
+        return 4;
+      case 'light':
+        return 3;
       default:
         return 3;
     }
