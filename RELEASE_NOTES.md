@@ -1,46 +1,47 @@
-## v0.1.0 – Violet Pool Card
+## v0.1.1 – Violet Pool Card
 
-✅ **STABLE RELEASE**
+🟡 **BETA RELEASE** - Testing phase, may contain bugs
+
+---
 
 ### ✨ New Features | Neue Funktionen
 
-- fix: Add dist/ folder for HACS repository compliance (83f05de)
-- add-bundle-size-reporting (fdd0189)
-- feat: Add dynamic entity prefix support for multiple controllers (dd1f9aa)
-- feat: add advanced release workflow (461bf61)
+- fix-layout-add-details-card (4ade113)
+- feat: fix layout overlaps and add new 'details' card type (6025132)
+- feat: fix layout overlaps and add new 'details' card type (c5f71c1)
+- feat: fix layout overlaps and add new 'details' card type (fecc595)
+- fix: Optimize bundle size <100KB and add preview screenshots (f191732)
+- feat: Add preview images and enhance demo page (73c4876)
+- feat: v0.3.0 — Apple/Samsung design overhaul, new themes, bug fixes (d337d68)
 
 ### 🚀 Improvements | Verbesserungen
 
-- 📝 Release v0.1.0-alpha.3 - Update changelog and version (a6f7879)
-- chore: Update package-lock.json (d1e8ba2)
-- 📝 Release v0.1.0-alpha.2 - Update changelog and version (9b28e69)
-- Resolve conflicts and optimize bundle size (1add116)
-- Resolve PR #15 merge conflicts and optimize bundle size (d8f138f)
-- Implement Premium UI themes (iOS/OneUI style) and optimize bundle size (2fcb805)
-- Update README.md (ca4d34d)
-- 📝 Release v0.1.0-alpha.1 - Update changelog and version (068a4c8)
-- update-to-violet-pool-card-and-screenshots (e49433b)
-- Update project to 'Violet Pool Card' and refresh documentation screenshots (01fd7d6)
-- Update package-lock.json (eaae0be)
+- 🎨 Palette: Improve accessibility of quick actions buttons (c5d2c94)
+- fix: Optimize bundle size <100KB and add preview screenshots (f191732)
+- feat: Add preview images and enhance demo page (73c4876)
+- improve-pool-card-addon (90ea32f)
+- Update links to violet-pool-card repository (b96e851)
+- Update README.md (4740156)
+- update-readme-setup (a51ebc0)
+- optimize-ui-design (fcacd4c)
+- chore: update package-lock.json after npm install (0482b5d)
+- 📝 Release v0.1.0 - Update changelog and version (f09bec8)
 
 ### 🔧 Bug Fixes | Fehlerbehebungen
 
-- fix: Trim whitespace from tag input in release workflow (d973a5b)
-- fix: Reduce bundle to 93KB, rewrite README, fix version mismatch (5b9d69e)
-- fix-repo-structure (3d5322b)
-- fix: Add dist/ folder for HACS repository compliance (83f05de)
-- fix: Reduce bundle size to under 100KB limit (9bff871)
-- fix-pr-15-comments (18c4bcb)
-- Fix PR 15 issues: Configurable entities, CSS fixes, and Docs refactoring (6403ada)
+- fix-layout-add-details-card (4ade113)
+- feat: fix layout overlaps and add new 'details' card type (6025132)
+- feat: fix layout overlaps and add new 'details' card type (c5f71c1)
+- feat: fix layout overlaps and add new 'details' card type (fecc595)
+- fix: Optimize bundle size <100KB and add preview screenshots (f191732)
+- feat: v0.3.0 — Apple/Samsung design overhaul, new themes, bug fixes (d337d68)
+- fix: repair broken themes, fix crashes, redesign UI for premium look (f72e3a8)
 
 ### 📚 Documentation | Dokumentation
 
-- fix: Reduce bundle to 93KB, rewrite README, fix version mismatch (5b9d69e)
-- revert-readme (11ee510)
-- Revert README.md to previous version (f0787c8)
-- Fix PR 15 issues: Configurable entities, CSS fixes, and Docs refactoring (6403ada)
-- Update README.md (ca4d34d)
-- Update project to 'Violet Pool Card' and refresh documentation screenshots (01fd7d6)
+- Update README.md (4740156)
+- update-readme-setup (a51ebc0)
+- README komplett überarbeitet: Bilder, Features, Installation und Dashboard-Anleitung (798844d)
 
 ---
 
@@ -63,7 +64,7 @@
 
 ---
 
-📋 Full changelog: Initial release
+📋 [Full changelog: v0.1.0...v0.1.1](https://github.com/Xerolux/violet-pool-card/compare/v0.1.0...v0.1.1)
 
 ---
 
@@ -88,4 +89,4 @@ Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
 
 ---
 
-_Generated automatically by GitHub Actions on 2026-02-06 13:26:25 UTC_
+_Generated automatically by GitHub Actions on 2026-03-02 15:56:51 UTC_
