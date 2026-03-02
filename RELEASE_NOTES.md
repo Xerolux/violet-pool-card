@@ -1,4 +1,4 @@
-## v0.1.2 – Violet Pool Card
+## v0.1.3 – Violet Pool Card
 
 🟡 **BETA RELEASE** - Testing phase, may contain bugs
 
@@ -6,16 +6,20 @@
 
 ### ✨ New Features | Neue Funktionen
 
-- feat: v0.2.0 - cover/light/filter cards, animated SVG icons, RGB picker (b5890ff)
-- feat: add tooltip system, chemical card, sensor card + design improvements (f2a1afd)
+- docs: update README with v0.2.0 features (6 new card types, animated SVG icons, RGB picker, tooltips) (aa06296)
 
 ### 🚀 Improvements | Verbesserungen
 
-- 📝 Release v0.1.1 - Update changelog and version (e8e7a23)
+- docs: update README with v0.2.0 features (6 new card types, animated SVG icons, RGB picker, tooltips) (aa06296)
+- 📝 Release v0.1.2 - Update changelog and version (6b93afd)
 
 ### 🔧 Bug Fixes | Fehlerbehebungen
 
 - Minor bug fixes and stability improvements
+
+### 📚 Documentation | Dokumentation
+
+- docs: update README with v0.2.0 features (6 new card types, animated SVG icons, RGB picker, tooltips) (aa06296)
 
 ---
 
@@ -38,7 +42,7 @@
 
 ---
 
-📋 [Full changelog: v0.1.1...v0.1.2](https://github.com/Xerolux/violet-pool-card/compare/v0.1.1...v0.1.2)
+📋 [Full changelog: v0.1.2...v0.1.3](https://github.com/Xerolux/violet-pool-card/compare/v0.1.2...v0.1.3)
 
 ---
 
@@ -63,4 +67,4 @@ Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
 
 ---
 
-_Generated automatically by GitHub Actions on 2026-03-02 18:05:24 UTC_
+_Generated automatically by GitHub Actions on 2026-03-02 18:31:34 UTC_
