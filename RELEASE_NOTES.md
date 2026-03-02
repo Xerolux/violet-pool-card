@@ -1,4 +1,4 @@
-## v0.1.1 – Violet Pool Card
+## v0.1.2 – Violet Pool Card
 
 🟡 **BETA RELEASE** - Testing phase, may contain bugs
 
@@ -6,42 +6,16 @@
 
 ### ✨ New Features | Neue Funktionen
 
-- fix-layout-add-details-card (4ade113)
-- feat: fix layout overlaps and add new 'details' card type (6025132)
-- feat: fix layout overlaps and add new 'details' card type (c5f71c1)
-- feat: fix layout overlaps and add new 'details' card type (fecc595)
-- fix: Optimize bundle size <100KB and add preview screenshots (f191732)
-- feat: Add preview images and enhance demo page (73c4876)
-- feat: v0.3.0 — Apple/Samsung design overhaul, new themes, bug fixes (d337d68)
+- feat: v0.2.0 - cover/light/filter cards, animated SVG icons, RGB picker (b5890ff)
+- feat: add tooltip system, chemical card, sensor card + design improvements (f2a1afd)
 
 ### 🚀 Improvements | Verbesserungen
 
-- 🎨 Palette: Improve accessibility of quick actions buttons (c5d2c94)
-- fix: Optimize bundle size <100KB and add preview screenshots (f191732)
-- feat: Add preview images and enhance demo page (73c4876)
-- improve-pool-card-addon (90ea32f)
-- Update links to violet-pool-card repository (b96e851)
-- Update README.md (4740156)
-- update-readme-setup (a51ebc0)
-- optimize-ui-design (fcacd4c)
-- chore: update package-lock.json after npm install (0482b5d)
-- 📝 Release v0.1.0 - Update changelog and version (f09bec8)
+- 📝 Release v0.1.1 - Update changelog and version (e8e7a23)
 
 ### 🔧 Bug Fixes | Fehlerbehebungen
 
-- fix-layout-add-details-card (4ade113)
-- feat: fix layout overlaps and add new 'details' card type (6025132)
-- feat: fix layout overlaps and add new 'details' card type (c5f71c1)
-- feat: fix layout overlaps and add new 'details' card type (fecc595)
-- fix: Optimize bundle size <100KB and add preview screenshots (f191732)
-- feat: v0.3.0 — Apple/Samsung design overhaul, new themes, bug fixes (d337d68)
-- fix: repair broken themes, fix crashes, redesign UI for premium look (f72e3a8)
-
-### 📚 Documentation | Dokumentation
-
-- Update README.md (4740156)
-- update-readme-setup (a51ebc0)
-- README komplett überarbeitet: Bilder, Features, Installation und Dashboard-Anleitung (798844d)
+- Minor bug fixes and stability improvements
 
 ---
 
@@ -64,7 +38,7 @@
 
 ---
 
-📋 [Full changelog: v0.1.0...v0.1.1](https://github.com/Xerolux/violet-pool-card/compare/v0.1.0...v0.1.1)
+📋 [Full changelog: v0.1.1...v0.1.2](https://github.com/Xerolux/violet-pool-card/compare/v0.1.1...v0.1.2)
 
 ---
 
@@ -89,4 +63,4 @@ Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
 
 ---
 
-_Generated automatically by GitHub Actions on 2026-03-02 15:56:51 UTC_
+_Generated automatically by GitHub Actions on 2026-03-02 18:05:24 UTC_
