@@ -23,9 +23,13 @@ Eine Premium-Lovelace-Karte für die [Violet Pool Controller](https://github.com
 |:-----:|:-------:|:-----:|:---------:|
 | <img src="screenshots/pump_card.png" width="200"> | <img src="screenshots/heater_card.png" width="200"> | <img src="screenshots/solar_card.png" width="200"> | <img src="screenshots/dosing_card.png" width="200"> |
 
-| Übersicht | Kompakt | System (Vollbild) |
-|:---------:|:-------:|:-----------------:|
-| <img src="screenshots/overview_card.png" width="250"> | <img src="screenshots/compact_card.png" width="250"> | <img src="screenshots/example_system_fullscreen.png" width="300"> |
+| Abdeckung | Licht | Filter | Chemie |
+|:---------:|:-----:|:------:|:------:|
+| <img src="screenshots/cover_card.png" width="200"> | <img src="screenshots/light_card.png" width="200"> | <img src="screenshots/filter_card.png" width="200"> | <img src="screenshots/chemical_card.png" width="200"> |
+
+| Übersicht | Details | Kompakt | System (Vollbild) |
+|:---------:|:-------:|:------:|:------------------:|
+| <img src="screenshots/overview_card.png" width="220"> | <img src="screenshots/details_card.png" width="220"> | <img src="screenshots/compact_card.png" width="220"> | <img src="screenshots/example_system_fullscreen.png" width="300"> |
 
 </div>
 
@@ -59,8 +63,10 @@ Eine Premium-Lovelace-Karte für die [Violet Pool Controller](https://github.com
 
 ## Funktionen
 
-- **7 Kartentypen** — Pumpe, Heizung, Solar, Dosierung, Übersicht, Kompakt, System
-- **Animierte Icons** — rotierende Pumpe, pulsierende Heizung/Dosierung
+- **13 Kartentypen** — Pumpe, Heizung, Solar, Dosierung, Abdeckung, Licht, Filter, Chemie, Sensor, Übersicht, Details, Kompakt, System
+- **Animierte SVG-Icons** — rotierende Pumpe, pulsierende Heizung, animierte Abdeckung, Leuchteffekte
+- **Tooltip-System** — deutsche Erklärungen für alle wichtigen Werte (pH, ORP, Temp, Pumpenstufen, etc.)
+- **RGB-Farbwähler** — integrierte Farbauswahl für Poollichter
 - **Automatische Erkennung** — Entities, Dosierchemikalien und Sensorwerte werden automatisch erkannt
 - **Visueller Editor** — vollständige GUI-Konfiguration, kein YAML nötig
 - **Touch-optimiert** — Slider und Quick-Action-Buttons für mobile Bedienung
@@ -176,6 +182,69 @@ dosing_type: chlorine
 show_history: true
 ```
 
+### Abdeckung (`cover`)
+
+Poolabdeckung mit animiertem SVG-Icon, Positionsschieberegler und Open/Stop/Close-Steuerung.
+
+```yaml
+type: custom:violet-pool-card
+entity: cover.violet_pool_cover
+card_type: cover
+```
+
+### Licht (`light`)
+
+Poolbeleuchtung mit animiertem Leuchteffekt, RGB-Farbwähler und Helligkeitsregler.
+
+```yaml
+type: custom:violet-pool-card
+entity: light.violet_pool_light
+card_type: light
+```
+
+### Filter (`filter`)
+
+Filtersteuerung mit halbkreisförmiger Druckbogenanzeige (0–3 bar, farbcodierte Zonen) und Rückspül-Funktion.
+
+```yaml
+type: custom:violet-pool-card
+entity: switch.violet_pool_filter
+card_type: filter
+```
+
+### Chemie (`chemical`)
+
+Umfassendes Wasserchemie-Dashboard mit Temperaturanzeige, pH/ORP-Doppelkarten, Idealzonen und Empfehlungen.
+
+```yaml
+type: custom:violet-pool-card
+card_type: chemical
+name: Wasserchemie
+```
+
+### Sensor (`sensor`)
+
+Universelle Sensoranzeige mit großem Wertefeld und automatischer Einheitenerkennung.
+
+```yaml
+type: custom:violet-pool-card
+entity: sensor.violet_pool_temperature
+card_type: sensor
+```
+
+### Details (`details`)
+
+Erweiterte Übersichtskarte für mehrere Entities in einem responsiven Grid-Layout.
+
+```yaml
+type: custom:violet-pool-card
+card_type: details
+entities:
+  - sensor.violet_pool_temperature
+  - sensor.violet_pool_ph_value
+  - sensor.violet_pool_orp_value
+```
+
 ### Übersicht (`overview`)
 
 Wasserchemie-Dashboard mit Ampelsystem für Temperatur, pH (7,0–7,4) und ORP (650–750 mV). Zeigt aktive Geräte und Warnungen.
@@ -215,7 +284,7 @@ size: fullscreen
 | Option | Typ | Beschreibung |
 |--------|-----|-------------|
 | `type` | string | `custom:violet-pool-card` |
-| `card_type` | string | `pump` · `heater` · `solar` · `dosing` · `overview` · `compact` · `system` |
+| `card_type` | string | `pump` · `heater` · `solar` · `dosing` · `cover` · `light` · `filter` · `chemical` · `sensor` · `overview` · `details` · `compact` · `system` |
 | `entity` | string | Entity-ID (nicht nötig bei `overview` und `system`) |
 
 ### Darstellung
@@ -319,6 +388,9 @@ Die Karte arbeitet mit folgenden Entity-Typen der Violet Pool Controller Integra
 | pH-Minus-Dosierung | `switch` | `switch.violet_pool_dos_2_phm` |
 | pH-Plus-Dosierung | `switch` | `switch.violet_pool_dos_5_php` |
 | Flockungsmittel | `switch` | `switch.violet_pool_dos_6_floc` |
+| Abdeckung | `cover` | `cover.violet_pool_cover` |
+| Licht | `light` | `light.violet_pool_light` |
+| Filter | `switch` | `switch.violet_pool_filter` |
 | Pool-Temperatur | `sensor` | `sensor.violet_pool_temperature` |
 | pH-Wert | `sensor` | `sensor.violet_pool_ph_value` |
 | ORP-Wert | `sensor` | `sensor.violet_pool_orp_value` |
@@ -444,7 +516,13 @@ card_type: pump
 | `heater` | Temperature slider (18–35 °C, 0.5° steps), current vs. target, frost warnings |
 | `solar` | Pool vs. absorber temperature, color-coded delta hints, target temp control |
 | `dosing` | Auto-detects chemical type, current/target values (ORP: mV, pH: decimal), warning chips |
+| `cover` | Animated pool cover SVG, position slider, Open/Stop/Close controls |
+| `light` | Animated light effect, RGB color picker, brightness slider |
+| `filter` | Semicircle pressure gauge (0-3 bar, color zones), backwash control |
+| `chemical` | Water chemistry dashboard with temp gauge, pH/ORP dual-metric cards |
+| `sensor` | Universal sensor display with big value and automatic unit detection |
 | `overview` | Water chemistry dashboard with traffic-light indicators for temp/pH/ORP |
+| `details` | Extended overview card for multiple entities in responsive grid |
 | `compact` | Single-line display per entity, auto-detected icons, status badge |
 | `system` | Full-screen responsive grid combining all controls |
 
