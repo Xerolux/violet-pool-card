@@ -289,39 +289,6 @@ export class VioletPoolCard extends LitElement {
   }
 
   /**
-   * Get minutes since last entity update
-   */
-  private _getMinutesSinceUpdate(entity: HassEntity | undefined): number {
-    if (!entity?.last_updated) return 0;
-    const lastUpdate = new Date(entity.last_updated);
-    const now = new Date();
-    return Math.floor((now.getTime() - lastUpdate.getTime()) / 60000);
-  }
-
-  /**
-   * Render timeout indicator if data is stale
-   */
-  private _renderTimeoutIndicator(entity: HassEntity | undefined): TemplateResult {
-    const minutesStale = this._getMinutesSinceUpdate(entity);
-    if (minutesStale < 1) return html``;
-
-    const isError = minutesStale > 30;
-    const bgColor = isError ? 'rgba(255,59,48,0.08)' : 'rgba(255,159,10,0.08)';
-    const borderColor = isError ? 'rgba(255,59,48,0.2)' : 'rgba(255,159,10,0.2)';
-    const textColor = isError ? '#FF3B30' : '#FF9F0A';
-
-    return html`
-      <div style="padding: 8px 12px; border-radius: 8px; background: ${bgColor}; border: 1px solid ${borderColor}; font-size: 12px; color: ${textColor}; margin-top: 8px; display: flex; align-items: center; justify-content: space-between;">
-        <span>⚠️ Daten ${minutesStale} Minute${minutesStale > 1 ? 'n' : ''} alt</span>
-        <button style="margin-left: 8px; padding: 4px 8px; background: ${textColor}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600;"
-                @click="${() => this.requestUpdate()}">
-          ↻
-        </button>
-      </div>
-    `;
-  }
-
-  /**
    * Render Quick-Settings Panel with common pool actions
    */
   private _renderQuickSettingsPanel(): TemplateResult {
