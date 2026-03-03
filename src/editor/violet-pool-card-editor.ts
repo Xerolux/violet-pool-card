@@ -422,6 +422,10 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
   }
 }
 
+if (!customElements.get('violet-pool-card-editor')) {
+  customElements.define('violet-pool-card-editor', VioletPoolCardEditor);
+}
+
 declare global {
   interface HTMLElementTagNameMap {
     'violet-pool-card-editor': VioletPoolCardEditor;

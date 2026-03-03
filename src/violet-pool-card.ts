@@ -2037,6 +2037,11 @@ ha-card.theme-dark .chem-metric-track{background:rgba(255,255,255,0.08);}
   }
 }
 
+// Ensure the custom element is registered
+if (!customElements.get('violet-pool-card')) {
+  customElements.define('violet-pool-card', VioletPoolCard);
+}
+
 // Register card for card picker
 declare global {
   interface Window {
