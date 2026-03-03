@@ -51,7 +51,7 @@ export class PerformanceMonitor {
         if (measure) {
           return measure.duration;
         }
-      } catch (e) {
+      } catch {
         // Measurement failed, return 0
       }
     }
