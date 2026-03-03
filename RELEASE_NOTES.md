@@ -10,11 +10,14 @@
 
 ### 🚀 Improvements | Verbesserungen
 
+- 📝 Release v0.1.1 - Update changelog and version (60e2ad7)
 - fix: remove dead code causing TS warning and optimize compilation (36bb7ec)
 - 📝 Release v0.1.3 - Update changelog and version (bb8738d)
 
 ### 🔧 Bug Fixes | Fehlerbehebungen
 
+- fix-lit-bundling (703cac5)
+- Fix module resolution errors by bundling Lit (af499d7)
 - fix-violet-pool-card- (a560d4c)
 - fix: remove dead code causing TS warning and optimize compilation (36bb7ec)
 
@@ -64,4 +67,4 @@ Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
 
 ---
 
-_Generated automatically by GitHub Actions on 2026-03-03 04:37:39 UTC_
+_Generated automatically by GitHub Actions on 2026-03-03 05:48:41 UTC_
