@@ -14,10 +14,8 @@ import type { QuickAction } from './components/quick-actions';
 import { ServiceCaller } from './utils/service-caller';
 import { EntityHelper } from './utils/entity-helper';
 import { StateColorHelper } from './utils/state-color';
-import { pumpSVG, heaterSVG, solarSVG, coverSVG, lightSVG, dosingDropletSVG, gaugeNeedleSVG, filterGaugeSVG, chartSVG, alertPulseSVG } from './utils/animated-icons';
+import { pumpSVG, heaterSVG, solarSVG, coverSVG, lightSVG, dosingDropletSVG, gaugeNeedleSVG, filterGaugeSVG, chartSVG } from './utils/animated-icons';
 
-// Import animation styles
-import { advancedAnimationStyles, SVG_ANIMATIONS } from './styles/animation-keyframes';
 
 // HomeAssistant types
 interface HassEntity {
@@ -326,10 +324,9 @@ export class VioletPoolCard extends LitElement {
   /**
    * Render Quick-Settings Panel with common pool actions
    */
-  private _renderQuickSettingsPanel(config: VioletPoolCardConfig): TemplateResult {
+  private _renderQuickSettingsPanel(): TemplateResult {
     const pumpEntityId = this._getEntityId('pump_entity', 'switch', 'pump', 0);
     const heaterEntityId = this._getEntityId('heater_entity', 'climate', 'heater', 1);
-    const dosingEntityId = this._getEntityId('chlorine_entity', 'switch', 'dos_1_cl', 3);
 
     return html`
       <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 12px; background: var(--vpc-surface); border-radius: 12px; margin-top: 12px;">
@@ -1204,7 +1201,7 @@ export class VioletPoolCard extends LitElement {
           </div>
 
           <!-- Quick Settings Panel -->
-          ${config.show_controls !== false ? this._renderQuickSettingsPanel(config) : ''}
+          ${config.show_controls !== false ? this._renderQuickSettingsPanel() : ''}
 
           <!-- Device List - clean rows -->
           ${activeDevices.length > 0
@@ -1516,14 +1513,6 @@ export class VioletPoolCard extends LitElement {
     const overallIcon = issuesCount === 0 ? 'mdi:water-check' : issuesCount === 1 ? 'mdi:alert' : 'mdi:alert-circle';
 
     const tempPct = poolTemp !== undefined ? this._getValuePercent(poolTemp, 18, 35) : undefined;
-    const phPct = phValue !== undefined ? this._getValuePercent(phValue, 6.5, 8.0) : undefined;
-    const orpPct = orpValue !== undefined ? this._getValuePercent(orpValue, 500, 900) : undefined;
-    const targetPhPct = this._getValuePercent(targetPh, 6.5, 8.0);
-    const targetOrpPct = this._getValuePercent(targetOrp, 500, 900);
-    const phIdealStart = this._getValuePercent(7.0, 6.5, 8.0);
-    const phIdealEnd = this._getValuePercent(7.4, 6.5, 8.0);
-    const orpIdealStart = this._getValuePercent(650, 500, 900);
-    const orpIdealEnd = this._getValuePercent(750, 500, 900);
 
     return html`
       <ha-card class="${this._getCardClasses(issuesCount === 0 && (phValue !== undefined || orpValue !== undefined), config)}" style="--card-accent: ${accentColor}">
@@ -1951,7 +1940,6 @@ export class VioletPoolCard extends LitElement {
     }
 
     const pressure: number = parseFloat(pressureEntity.state) || 0;
-    const unit = pressureEntity.attributes.unit_of_measurement || 'bar';
     const name = config.name || pressureEntity.attributes.friendly_name || 'Filter';
     const accentColor = this._getAccentColor('filter', config);
 
@@ -1970,21 +1958,6 @@ export class VioletPoolCard extends LitElement {
       : pressure < 1.6 ? 'Erhöht – bald rückspülen'
       : 'Kritisch – sofort rückspülen!';
 
-    // Arc gauge: semicircle, 0-3 bar range
-    const maxBar = 3;
-    const pct = Math.min(100, (pressure / maxBar) * 100);
-    const ang = Math.PI - (pct / 100) * Math.PI;
-    const gx = pct >= 99.5 ? '109.9' : (60 + 50 * Math.cos(ang)).toFixed(1);
-    const gy = pct >= 99.5 ? '60.0' : (60 - 50 * Math.sin(ang)).toFixed(1);
-    const lArc = pct > 50 ? 1 : 0;
-
-    // Zone arc endpoints (precomputed for 3-bar gauge)
-    const z1x = (60 + 50 * Math.cos(Math.PI - 0.167 * Math.PI)).toFixed(1); // 0.5 bar
-    const z1y = (60 - 50 * Math.sin(Math.PI - 0.167 * Math.PI)).toFixed(1);
-    const z2x = (60 + 50 * Math.cos(Math.PI - 0.4 * Math.PI)).toFixed(1);   // 1.2 bar
-    const z2y = (60 - 50 * Math.sin(Math.PI - 0.4 * Math.PI)).toFixed(1);
-    const z3x = (60 + 50 * Math.cos(Math.PI - 0.533 * Math.PI)).toFixed(1); // 1.6 bar
-    const z3y = (60 - 50 * Math.sin(Math.PI - 0.533 * Math.PI)).toFixed(1);
 
     return html`
       <ha-card class="${this._getCardClasses(isFilterOn, config)}"
@@ -2009,7 +1982,7 @@ export class VioletPoolCard extends LitElement {
 
           <!-- Pressure gauge with animated needle -->
           <div class="filter-gauge-wrap" style="padding: 12px 0;">
-            ${filterGaugeSVG(pressure, 3, accentColor)}
+            ${filterGaugeSVG(pressure, 3)}
           </div>
 
           <!-- Status row -->
