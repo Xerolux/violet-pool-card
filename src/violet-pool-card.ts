@@ -1740,6 +1740,23 @@ export class VioletPoolCard extends LitElement {
           </div>
 
           ${isOn ? html`
+            <!-- Color presets -->
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 12px;">
+              ${[
+                { label: '🔴 Rot', rgb: [255, 0, 0] },
+                { label: '🟢 Grün', rgb: [0, 255, 0] },
+                { label: '🔵 Blau', rgb: [0, 0, 255] },
+                { label: '🟡 Gelb', rgb: [255, 255, 0] },
+              ].map(preset => html`
+                <button style="padding: 8px; border: none; border-radius: 8px; background: rgb(${preset.rgb[0]}, ${preset.rgb[1]}, ${preset.rgb[2]}); color: white; font-weight: 600; cursor: pointer; transition: transform 0.2s; font-size: 11px;"
+                        @click="${(e: Event) => { e.stopPropagation(); this.hass.callService('light', 'turn_on', { entity_id: entityId, rgb_color: preset.rgb }); }}"
+                        @mouseover="${(e: Event) => (e.target as HTMLElement).style.transform = 'scale(1.05)'}"
+                        @mouseout="${(e: Event) => (e.target as HTMLElement).style.transform = 'scale(1)'}">
+                  ${preset.label}
+                </button>
+              `)}
+            </div>
+
             <!-- Color swatch with interactive color picker -->
             ${rgb ? html`
               <div class="light-color-swatch" style="background:${rgbStr};box-shadow:0 6px 24px ${rgbStr}50">
