@@ -89,19 +89,33 @@ export type CardType =
   | 'sensor'
   | 'cover'
   | 'light'
-  | 'filter';
+  | 'filter'
+  | 'backwash'
+  | 'refill'
+  | 'solar_surplus'
+  | 'flow_rate'
+  | 'inlet'
+  | 'counter_current'
+  | 'chlorine_canister'
+  | 'ph_plus_canister'
+  | 'ph_minus_canister'
+  | 'flocculant_canister';
 
 export type CardSize = 'small' | 'medium' | 'large' | 'fullscreen';
 
 export type Theme =
-  | 'apple'
-  | 'dark'
-  | 'luxury'
-  | 'modern'
-  | 'minimalist'
-  | 'glass'
-  | 'neon'
-  | 'premium';
+  | 'classic'
+  | 'midnight'
+  | 'elegance'
+  | 'vibrant'
+  | 'pure'
+  | 'frost'
+  | 'glow'
+  | 'metallic'
+  | 'ocean'
+  | 'sunset'
+  | 'forest'
+  | 'aurora';
 
 export type Animation = 'none' | 'subtle' | 'smooth' | 'energetic';
 
@@ -143,6 +157,25 @@ export interface VioletPoolCardConfig {
   filter_entity?: string;
   filter_pressure_entity?: string;
   backwash_entity?: string;
+  inlet_entity?: string;
+  chlorine_level_entity?: string; // For chlorine canister
+  salt_level_entity?: string; // For salt water pools
+  cyanuric_acid_entity?: string; // For stabilizer
+  alkalinity_entity?: string; // For total alkalinity
+  flow_rate_entity?: string;
+  level_entity?: string; // Generic canister level
+  max_level?: number; // Max level for canisters
+
+  // Chemistry card display options
+  chemistry_type?: 'chlorine' | 'salt' | 'bromine' | 'ozone';
+  show_chlorine?: boolean;
+  show_salt?: boolean;
+  show_cyanuric_acid?: boolean;
+  show_alkalinity?: boolean;
+  show_temperature?: boolean;
+  show_ph?: boolean;
+  show_orp?: boolean;
+  show_inlet?: boolean;
 
   // Display options
   name?: string;
@@ -161,6 +194,13 @@ export interface VioletPoolCardConfig {
   icon_color?: string;
   gradient?: string;
   blur_intensity?: number;
+
+  // Advanced design options
+  custom_width?: number;
+  custom_height?: number;
+  custom_padding?: number;
+  border_radius?: number;
+  shadow_intensity?: 'none' | 'low' | 'medium' | 'high';
 
   // Dosing options
   dosing_type?: DosingType;
@@ -392,14 +432,18 @@ export function isValidCardType(value: unknown): value is CardType {
 
 export function isValidTheme(value: unknown): value is Theme {
   const validThemes: Theme[] = [
-    'apple',
-    'dark',
-    'luxury',
-    'modern',
-    'minimalist',
-    'glass',
-    'neon',
-    'premium',
+    'classic',
+    'midnight',
+    'elegance',
+    'vibrant',
+    'pure',
+    'frost',
+    'glow',
+    'metallic',
+    'ocean',
+    'sunset',
+    'forest',
+    'aurora',
   ];
   return typeof value === 'string' && validThemes.includes(value as Theme);
 }

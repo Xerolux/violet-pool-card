@@ -44,7 +44,7 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
     };
     const includeDomains = domainFilter[this._config.card_type] || [];
 
-    return html` <div class="card-config"><!-- Card Type Selection --><div class="config-section"><div class="section-header"><ha-icon icon="mdi:card-outline"></ha-icon><span>Card Type</span></div><ha-select label="Card Type" .value="${this._config.card_type}" @selected="${this._cardTypeChanged}" @closed="${(e: Event) => e.stopPropagation()}" ><mwc-list-item value="pump">🔵 Pump</mwc-list-item><mwc-list-item value="heater">🔥 Heater</mwc-list-item><mwc-list-item value="solar">☀️ Solar</mwc-list-item><mwc-list-item value="dosing">💧 Dosing</mwc-list-item><mwc-list-item value="cover">🪟 Cover</mwc-list-item><mwc-list-item value="light">💡 Light</mwc-list-item><mwc-list-item value="overview">📊 Overview</mwc-list-item><mwc-list-item value="compact">📋 Compact</mwc-list-item><mwc-list-item value="system">🖥️ System Dashboard</mwc-list-item><mwc-list-item value="details">📝 Details</mwc-list-item><mwc-list-item value="chemical">🧪 Chemistry</mwc-list-item><mwc-list-item value="sensor">📡 Sensor</mwc-list-item></ha-select></div><!-- Controller Configuration --><div class="config-section"><div class="section-header"><ha-icon icon="mdi:chip"></ha-icon><span>Controller Configuration</span></div><ha-textfield label="Entity Prefix" .value="${this._config.entity_prefix || 'violet_pool'}" @input="${this._entityPrefixChanged}" helper="Name of your pool controller (e.g., 'violet_pool', 'pool_1', 'garden_pool')" ></ha-textfield><div class="prefix-info"><ha-icon icon="mdi:information-outline"></ha-icon><span> The entity prefix should match your Violet Pool Controller name in Home Assistant. All entities will be automatically discovered based on this prefix. </span></div></div><!-- Entity Selection -->
+    return html` <div class="card-config"><!-- Card Type Selection --><div class="config-section"><div class="section-header"><ha-icon icon="mdi:card-outline"></ha-icon><span>Card Type</span></div><ha-select label="Card Type" .value="${this._config.card_type}" @selected="${this._cardTypeChanged}" @closed="${(e: Event) => e.stopPropagation()}" ><mwc-list-item value="pump">🔵 Pump</mwc-list-item><mwc-list-item value="heater">🔥 Heater</mwc-list-item><mwc-list-item value="solar">☀️ Solar</mwc-list-item><mwc-list-item value="dosing">💧 Dosing</mwc-list-item><mwc-list-item value="cover">🪟 Cover</mwc-list-item><mwc-list-item value="light">💡 Light</mwc-list-item><mwc-list-item value="filter">⏰ Filter</mwc-list-item><mwc-list-item value="backwash">🔄 Backwash</mwc-list-item><mwc-list-item value="refill">💧 Refill</mwc-list-item><mwc-list-item value="solar_surplus">☀️ PV Surplus</mwc-list-item><mwc-list-item value="flow_rate">💨 Flow Rate</mwc-list-item><mwc-list-item value="inlet">➡️ Inlet</mwc-list-item><mwc-list-item value="counter_current">🏊 Counter Current</mwc-list-item><mwc-list-item value="chlorine_canister">🧪 Chlorine Canister</mwc-list-item><mwc-list-item value="ph_plus_canister">➕ pH Plus Canister</mwc-list-item><mwc-list-item value="ph_minus_canister">➖ pH Minus Canister</mwc-list-item><mwc-list-item value="flocculant_canister">✨ Flocculant Canister</mwc-list-item><mwc-list-item value="overview">📊 Overview</mwc-list-item><mwc-list-item value="compact">📋 Compact</mwc-list-item><mwc-list-item value="system">🖥️ System Dashboard</mwc-list-item><mwc-list-item value="details">📝 Details</mwc-list-item><mwc-list-item value="chemical">🧪 Chemistry</mwc-list-item><mwc-list-item value="sensor">📡 Sensor</mwc-list-item></ha-select></div><!-- Controller Configuration --><div class="config-section"><div class="section-header"><ha-icon icon="mdi:chip"></ha-icon><span>Controller Configuration</span></div><ha-textfield label="Entity Prefix" .value="${this._config.entity_prefix || 'violet_pool'}" @input="${this._entityPrefixChanged}" helper="Name of your pool controller (e.g., 'violet_pool', 'pool_1', 'garden_pool')" ></ha-textfield><div class="prefix-info"><ha-icon icon="mdi:information-outline"></ha-icon><span> The entity prefix should match your Violet Pool Controller name in Home Assistant. All entities will be automatically discovered based on this prefix. </span></div></div><!-- Entity Selection -->
         ${needsEntity || coverOrLight ? html`
           <div class="config-section">
             <div class="section-header">
@@ -84,16 +84,75 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
             <label>Theme Style</label>
             <div class="theme-picker">
               ${[
-                { value: 'apple', icon: '', label: 'Apple', desc: 'Clean & Light', preview: '#fff' },
-                { value: 'dark', icon: '', label: 'Dark', desc: 'Deep Dark', preview: '#1C1C1E' },
-                { value: 'glass', icon: '', label: 'Glass', desc: 'Frosted Glass', preview: 'rgba(255,255,255,0.7)' },
-                { value: 'modern', icon: '', label: 'Modern', desc: 'Minimal Flat', preview: '#f8f8fa' },
-                { value: 'minimalist', icon: '', label: 'Minimal', desc: 'Ultra Clean', preview: '#fff' },
-                { value: 'neon', icon: '', label: 'Neon', desc: 'Dark Glow', preview: '#0D0D14' },
+                { value: 'classic', icon: '', label: 'Classic', desc: 'Clean & Timeless', preview: '#fff' },
+                { value: 'midnight', icon: '', label: 'Midnight', desc: 'Deep Dark', preview: '#1C1C1E' },
+                { value: 'elegance', icon: '', label: 'Elegance', desc: 'Luxury Gold', preview: '#FFD700' },
+                { value: 'vibrant', icon: '', label: 'Vibrant', desc: 'Bold Colors', preview: '#FF6B6B' },
+                { value: 'pure', icon: '', label: 'Pure', desc: 'Ultra Minimal', preview: '#fff' },
+                { value: 'frost', icon: '', label: 'Frost', desc: 'Frosted Glass', preview: 'rgba(255,255,255,0.7)' },
+                { value: 'glow', icon: '', label: 'Glow', desc: 'Neon Nights', preview: '#0D0D14' },
+                { value: 'metallic', icon: '', label: 'Metallic', desc: 'Chrome Shine', preview: '#C0C0C0' },
+                { value: 'ocean', icon: '', label: 'Ocean', desc: 'Sea Blue', preview: '#0077BE' },
+                { value: 'sunset', icon: '', label: 'Sunset', desc: 'Warm Orange', preview: '#FF6B35' },
+                { value: 'forest', icon: '', label: 'Forest', desc: 'Natural Green', preview: '#228B22' },
+                { value: 'aurora', icon: '', label: 'Aurora', desc: 'Northern Lights', preview: 'linear-gradient(45deg, #00C9FF 0%, #92FE9D 100%)' },
               ].map(
-                (theme) => html` <button class="theme-button ${this._config.theme === theme.value || (!this._config.theme && theme.value === 'apple') ? 'active' : ''}" @click="${() => this._themeChanged(theme.value)}" ><div class="theme-preview theme-${theme.value}"><div class="theme-dot" style="background:${(theme as any).preview}"></div></div><div class="theme-info"><span class="theme-label">${theme.label}</span><span class="theme-desc">${theme.desc}</span></div></button> `
+                (theme) => html` <button class="theme-button ${this._config.theme === theme.value || (!this._config.theme && theme.value === 'classic') ? 'active' : ''}" @click="${() => this._themeChanged(theme.value)}" ><div class="theme-preview theme-${theme.value}"><div class="theme-dot" style="background:${(theme as any).preview}"></div></div><div class="theme-info"><span class="theme-label">${theme.label}</span><span class="theme-desc">${theme.desc}</span></div></button> `
               )}
             </div>
+          </div>
+
+          <!-- Advanced Customization -->
+          <div class="config-section">
+            <div class="section-header">
+              <ha-icon icon="mdi:tune"></ha-icon>
+              <span>Advanced Customization</span>
+            </div>
+
+            <ha-textfield
+              label="Custom Width (px)"
+              type="number"
+              .value="${this._config.custom_width || ''}"
+              placeholder="Auto"
+              @input="${this._customWidthChanged}"
+            ></ha-textfield>
+
+            <ha-textfield
+              label="Custom Height (px)"
+              type="number"
+              .value="${this._config.custom_height || ''}"
+              placeholder="Auto"
+              @input="${this._customHeightChanged}"
+            ></ha-textfield>
+
+            <ha-textfield
+              label="Custom Padding (px)"
+              type="number"
+              .value="${this._config.custom_padding || ''}"
+              placeholder="Auto"
+              @input="${this._customPaddingChanged}"
+            ></ha-textfield>
+
+            <ha-textfield
+              label="Border Radius (px)"
+              type="number"
+              .value="${this._config.border_radius || ''}"
+              placeholder="Auto"
+              @input="${this._borderRadiusChanged}"
+            ></ha-textfield>
+
+            <ha-select
+              label="Shadow Intensity"
+              .value="${this._config.shadow_intensity || ''}"
+              @selected="${this._shadowIntensityChanged}"
+              @closed="${(e: Event) => e.stopPropagation()}"
+            >
+              <mwc-list-item value="">Default</mwc-list-item>
+              <mwc-list-item value="none">None</mwc-list-item>
+              <mwc-list-item value="low">Low</mwc-list-item>
+              <mwc-list-item value="medium">Medium</mwc-list-item>
+              <mwc-list-item value="high">High</mwc-list-item>
+            </ha-select>
           </div>
 
           <!-- Animation Picker -->
@@ -174,6 +233,83 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
         ${this._config.card_type === 'dosing'
           ? html` <div class="config-section"><div class="section-header"><ha-icon icon="mdi:flask"></ha-icon><span>Dosing Type</span></div><ha-select label="Dosing Type" .value="${this._config.dosing_type || 'chlorine'}" @selected="${this._dosingTypeChanged}" @closed="${(e: Event) => e.stopPropagation()}" ><mwc-list-item value="chlorine">💧 Chlorine (ORP)</mwc-list-item><mwc-list-item value="ph_minus">➖ pH Minus</mwc-list-item><mwc-list-item value="ph_plus">➕ pH Plus</mwc-list-item><mwc-list-item value="flocculant">🌊 Flocculant</mwc-list-item></ha-select></div> `
           : ''}
+
+        <!-- Chemistry Card Configuration -->
+        ${this._config.card_type === 'chemical'
+          ? html`
+            <div class="config-section">
+              <div class="section-header">
+                <ha-icon icon="mdi:flask"></ha-icon>
+                <span>Chemistry Type</span>
+              </div>
+              <ha-select
+                label="Pool Treatment Type"
+                .value="${this._config.chemistry_type || 'chlorine'}"
+                @selected="${this._chemistryTypeChanged}"
+                @closed="${(e: Event) => e.stopPropagation()}"
+              >
+                <mwc-list-item value="chlorine">🧪 Chlorine Pool</mwc-list-item>
+                <mwc-list-item value="salt">🧂 Salt Water Pool</mwc-list-item>
+                <mwc-list-item value="bromine">🔄 Bromine Pool</mwc-list-item>
+                <mwc-list-item value="ozone">🌊 Ozone Pool</mwc-list-item>
+              </ha-select>
+            </div>
+
+            <div class="config-section">
+              <div class="section-header">
+                <ha-icon icon="mdi:eye"></ha-icon>
+                <span>Display Options</span>
+              </div>
+
+              <ha-formfield label="Show Temperature">
+                <ha-switch
+                  .checked="${this._config.show_temperature !== false}"
+                  @change="${this._showTemperatureChanged}"
+                ></ha-switch>
+              </ha-formfield>
+
+              <ha-formfield label="Show pH Value">
+                <ha-switch
+                  .checked="${this._config.show_ph !== false}"
+                  @change="${this._showPhChanged}"
+                ></ha-switch>
+              </ha-formfield>
+
+              ${this._config.chemistry_type === 'chlorine' ? html`
+                <ha-formfield label="Show ORP (Redox)">
+                  <ha-switch
+                    .checked="${this._config.show_orp !== false}"
+                    @change="${this._showOrpChanged}"
+                  ></ha-switch>
+                </ha-formfield>
+
+                <ha-formfield label="Show Chlorine Level">
+                  <ha-switch
+                    .checked="${this._config.show_chlorine !== false}"
+                    @change="${this._showChlorineChanged}"
+                  ></ha-switch>
+                </ha-formfield>
+              ` : ''}
+
+              ${this._config.chemistry_type === 'salt' ? html`
+                <ha-formfield label="Show Salt Level">
+                  <ha-switch
+                    .checked="${this._config.show_salt === true}"
+                    @change="${this._showSaltChanged}"
+                  ></ha-switch>
+                </ha-formfield>
+              ` : ''}
+
+              <ha-formfield label="Show Inlet Status">
+                <ha-switch
+                  .checked="${this._config.show_inlet === true}"
+                  @change="${this._showInletChanged}"
+                ></ha-switch>
+              </ha-formfield>
+            </div>
+          `
+          : ''}
+
 
         <!-- Entity Overrides (card-type specific) -->
         ${['pump','heater','solar','dosing','overview','system','chemical'].includes(this._config.card_type) ? html`
@@ -381,6 +517,69 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
     this._fireConfigChanged();
   }
 
+  private _chemistryTypeChanged(ev: Event): void {
+    const target = ev.target as any;
+    this._config = {
+      ...this._config,
+      chemistry_type: target.value,
+    };
+    this._fireConfigChanged();
+  }
+
+  private _showTemperatureChanged(ev: Event): void {
+    const target = ev.target as any;
+    this._config = {
+      ...this._config,
+      show_temperature: target.checked,
+    };
+    this._fireConfigChanged();
+  }
+
+  private _showPhChanged(ev: Event): void {
+    const target = ev.target as any;
+    this._config = {
+      ...this._config,
+      show_ph: target.checked,
+    };
+    this._fireConfigChanged();
+  }
+
+  private _showOrpChanged(ev: Event): void {
+    const target = ev.target as any;
+    this._config = {
+      ...this._config,
+      show_orp: target.checked,
+    };
+    this._fireConfigChanged();
+  }
+
+  private _showChlorineChanged(ev: Event): void {
+    const target = ev.target as any;
+    this._config = {
+      ...this._config,
+      show_chlorine: target.checked,
+    };
+    this._fireConfigChanged();
+  }
+
+  private _showSaltChanged(ev: Event): void {
+    const target = ev.target as any;
+    this._config = {
+      ...this._config,
+      show_salt: target.checked,
+    };
+    this._fireConfigChanged();
+  }
+
+  private _showInletChanged(ev: Event): void {
+    const target = ev.target as any;
+    this._config = {
+      ...this._config,
+      show_inlet: target.checked,
+    };
+    this._fireConfigChanged();
+  }
+
   private _accentColorChanged(ev: Event): void {
     const target = ev.target as HTMLInputElement;
     this._config = {
@@ -408,6 +607,55 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
     this._fireConfigChanged();
   }
 
+  private _customWidthChanged(ev: Event): void {
+    const target = ev.target as HTMLInputElement;
+    const value = target.value ? parseInt(target.value) : undefined;
+    this._config = {
+      ...this._config,
+      custom_width: value,
+    };
+    this._fireConfigChanged();
+  }
+
+  private _customHeightChanged(ev: Event): void {
+    const target = ev.target as HTMLInputElement;
+    const value = target.value ? parseInt(target.value) : undefined;
+    this._config = {
+      ...this._config,
+      custom_height: value,
+    };
+    this._fireConfigChanged();
+  }
+
+  private _customPaddingChanged(ev: Event): void {
+    const target = ev.target as HTMLInputElement;
+    const value = target.value ? parseInt(target.value) : undefined;
+    this._config = {
+      ...this._config,
+      custom_padding: value,
+    };
+    this._fireConfigChanged();
+  }
+
+  private _borderRadiusChanged(ev: Event): void {
+    const target = ev.target as HTMLInputElement;
+    const value = target.value ? parseInt(target.value) : undefined;
+    this._config = {
+      ...this._config,
+      border_radius: value,
+    };
+    this._fireConfigChanged();
+  }
+
+  private _shadowIntensityChanged(ev: Event): void {
+    const target = ev.target as any;
+    this._config = {
+      ...this._config,
+      shadow_intensity: target.value || undefined,
+    };
+    this._fireConfigChanged();
+  }
+
   private _overrideChanged(key: string, value: string): void {
     this._config = {
       ...this._config,
@@ -426,7 +674,7 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
   }
 
   static get styles(): CSSResultGroup {
-    return css`:host{font-family:-apple-system, system-ui, 'Segoe UI', sans-serif;}.card-config{display:flex;flex-direction:column;gap:14px;padding:16px;}.config-section{background:var(--card-background-color, #fff);border:1px solid var(--divider-color, rgba(0,0,0,0.08));border-radius:14px;padding:16px;}.section-header{display:flex;align-items:center;gap:8px;margin-bottom:14px;font-weight:600;font-size:14px;letter-spacing:-0.2px;color:var(--primary-text-color);}.section-header ha-icon{--mdc-icon-size:18px;color:var(--primary-color);}.prefix-info{display:flex;align-items:flex-start;gap:8px;padding:10px 12px;margin-top:10px;background:rgba(0,122,255,0.07);border-radius:10px;font-size:12px;color:var(--secondary-text-color);line-height:1.4;}.prefix-info ha-icon{--mdc-icon-size:16px;color:#007AFF;flex-shrink:0;margin-top:2px;}.premium-section{background:var(--card-background-color, #fff);border:2px solid rgba(0,122,255,0.15);}.premium-header{color:#007AFF;}.picker-container{margin-bottom:20px;}.picker-container:last-child{margin-bottom:0;}.picker-container > label{display:block;font-weight:500;font-size:13px;margin-bottom:10px;color:var(--secondary-text-color);text-transform:uppercase;letter-spacing:0.5px;}.size-picker{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}.theme-picker{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}.animation-picker{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;}.size-button, .theme-button, .animation-button{display:flex;align-items:center;gap:10px;padding:10px;background:var(--secondary-background-color, rgba(120,120,128,0.06));border:1.5px solid transparent;border-radius:10px;cursor:pointer;transition:all 0.16s ease;font-family:inherit;}.size-button{flex-direction:column;gap:6px;align-items:center;}.theme-button{flex-direction:column;gap:6px;align-items:center;padding:10px 8px;}.size-button:hover, .theme-button:hover, .animation-button:hover{border-color:rgba(0,122,255,0.3);background:rgba(0,122,255,0.05);}.size-button.active, .animation-button.active{border-color:#007AFF;background:rgba(0,122,255,0.1);color:#007AFF;}.theme-button.active{border-color:#007AFF;background:rgba(0,122,255,0.08);box-shadow:0 0 0 3px rgba(0,122,255,0.15);}.size-preview{width:36px;height:26px;border-radius:6px;border:2px solid currentColor;opacity:0.3;}.size-preview.size-small{width:22px;height:18px;}.size-preview.size-medium{width:30px;height:22px;}.size-preview.size-large{width:40px;height:28px;}.size-preview.size-fullscreen{width:46px;height:34px;}.size-button.active .size-preview{opacity:1;}.size-button span{font-size:11px;font-weight:500;}.theme-preview{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;border:1px solid rgba(0,0,0,0.08);}.theme-preview.theme-apple{background:#F2F2F7;}.theme-preview.theme-dark{background:#1C1C1E;}.theme-preview.theme-glass{background:rgba(255,255,255,0.6);backdrop-filter:blur(8px);}.theme-preview.theme-modern{background:#f8f8fa;border:1px solid #eee;}.theme-preview.theme-minimalist{background:#fff;}.theme-preview.theme-neon{background:#0D0D14;border:1px solid rgba(0,212,255,0.3);}.theme-preview.theme-luxury{background:linear-gradient(135deg,rgba(255,255,255,0.9),rgba(240,240,255,0.9));}.theme-dot{width:20px;height:20px;border-radius:50%;border:2px solid rgba(0,0,0,0.1);}.theme-info, .anim-info{display:flex;flex-direction:column;gap:1px;}.theme-label, .anim-label{font-weight:600;color:var(--primary-text-color);font-size:12px;}.theme-desc, .anim-desc{color:var(--secondary-text-color);font-size:10px;}.anim-icon{font-size:18px;}.advanced-section{background:var(--card-background-color);border:1px solid var(--divider-color);border-radius:14px;padding:14px;}.advanced-section summary{display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;font-size:14px;color:var(--primary-text-color);list-style:none;}.advanced-section summary::-webkit-details-marker{display:none;}.advanced-section summary ha-icon{--mdc-icon-size:18px;color:var(--primary-color);}.advanced-content{display:flex;flex-direction:column;gap:12px;margin-top:14px;}ha-select, ha-textfield, ha-entity-picker, ha-icon-picker{width:100%;}ha-formfield{display:flex;align-items:center;margin-bottom:10px;}`;
+    return css`:host{font-family:-apple-system, system-ui, 'Segoe UI', sans-serif;}.card-config{display:flex;flex-direction:column;gap:14px;padding:16px;}.config-section{background:var(--card-background-color, #fff);border:1px solid var(--divider-color, rgba(0,0,0,0.08));border-radius:14px;padding:16px;}.section-header{display:flex;align-items:center;gap:8px;margin-bottom:14px;font-weight:600;font-size:14px;letter-spacing:-0.2px;color:var(--primary-text-color);}.section-header ha-icon{--mdc-icon-size:18px;color:var(--primary-color);}.prefix-info{display:flex;align-items:flex-start;gap:8px;padding:10px 12px;margin-top:10px;background:rgba(0,122,255,0.07);border-radius:10px;font-size:12px;color:var(--secondary-text-color);line-height:1.4;}.prefix-info ha-icon{--mdc-icon-size:16px;color:#007AFF;flex-shrink:0;margin-top:2px;}.premium-section{background:var(--card-background-color, #fff);border:2px solid rgba(0,122,255,0.15);}.premium-header{color:#007AFF;}.picker-container{margin-bottom:20px;}.picker-container:last-child{margin-bottom:0;}.picker-container > label{display:block;font-weight:500;font-size:13px;margin-bottom:10px;color:var(--secondary-text-color);text-transform:uppercase;letter-spacing:0.5px;}.size-picker{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}.theme-picker{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}.animation-picker{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;}.size-button, .theme-button, .animation-button{display:flex;align-items:center;gap:10px;padding:10px;background:var(--secondary-background-color, rgba(120,120,128,0.06));border:1.5px solid transparent;border-radius:10px;cursor:pointer;transition:all 0.16s ease;font-family:inherit;}.size-button{flex-direction:column;gap:6px;align-items:center;}.theme-button{flex-direction:column;gap:6px;align-items:center;padding:10px 8px;}.size-button:hover, .theme-button:hover, .animation-button:hover{border-color:rgba(0,122,255,0.3);background:rgba(0,122,255,0.05);}.size-button.active, .animation-button.active{border-color:#007AFF;background:rgba(0,122,255,0.1);color:#007AFF;}.theme-button.active{border-color:#007AFF;background:rgba(0,122,255,0.08);box-shadow:0 0 0 3px rgba(0,122,255,0.15);}.size-preview{width:36px;height:26px;border-radius:6px;border:2px solid currentColor;opacity:0.3;}.size-preview.size-small{width:22px;height:18px;}.size-preview.size-medium{width:30px;height:22px;}.size-preview.size-large{width:40px;height:28px;}.size-preview.size-fullscreen{width:46px;height:34px;}.size-button.active .size-preview{opacity:1;}.size-button span{font-size:11px;font-weight:500;}.theme-preview{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;border:1px solid rgba(0,0,0,0.08);}.theme-preview.theme-classic{background:#F2F2F7;}.theme-preview.theme-midnight{background:#0D1117;}.theme-preview.theme-elegance{background:linear-gradient(135deg,#FFD700 0%,#F0E6FA 50%,#DDA0DD 100%);}.theme-preview.theme-vibrant{background:linear-gradient(135deg,#FF6B6B 0%,#4ECDC4 100%);}.theme-preview.theme-pure{background:#fff;border:2px solid #e5e5e5;}.theme-preview.theme-frost{background:rgba(200,220,255,0.4);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.3);}.theme-preview.theme-glow{background:#0D0D14;border:2px solid #00D4FF;box-shadow:0 0 8px rgba(0,212,255,0.5);}.theme-preview.theme-metallic{background:linear-gradient(135deg,#C0C0C0 0%,#E8E8E8 50%,#A8A8A8 100%);border:2px solid #999;}.theme-preview.theme-ocean{background:#0077BE;}.theme-preview.theme-sunset{background:#FF6B35;}.theme-preview.theme-forest{background:#228B22;}.theme-preview.theme-aurora{background:linear-gradient(45deg, #00C9FF 0%, #92FE9D 100%);}.theme-dot{width:20px;height:20px;border-radius:50%;border:2px solid rgba(0,0,0,0.1);}.theme-info, .anim-info{display:flex;flex-direction:column;gap:1px;}.theme-label, .anim-label{font-weight:600;color:var(--primary-text-color);font-size:12px;}.theme-desc, .anim-desc{color:var(--secondary-text-color);font-size:10px;}.anim-icon{font-size:18px;}.advanced-section{background:var(--card-background-color);border:1px solid var(--divider-color);border-radius:14px;padding:14px;}.advanced-section summary{display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;font-size:14px;color:var(--primary-text-color);list-style:none;}.advanced-section summary::-webkit-details-marker{display:none;}.advanced-section summary ha-icon{--mdc-icon-size:18px;color:var(--primary-color);}.advanced-content{display:flex;flex-direction:column;gap:12px;margin-top:14px;}ha-select, ha-textfield, ha-entity-picker, ha-icon-picker{width:100%;}ha-formfield{display:flex;align-items:center;margin-bottom:10px;}`;
   }
 }
 
