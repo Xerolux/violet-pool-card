@@ -31,6 +31,14 @@ export class SliderControl extends LitElement {
     this.localValue = this.value;
   }
 
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    // Clean up debounce timer to prevent memory leaks
+    if (this.debounceTimer) {
+      clearTimeout(this.debounceTimer);
+    }
+  }
+
   updated(changedProperties: Map<string, any>) {
     if (changedProperties.has('value') && !this.isDragging) {
       this.localValue = this.value;

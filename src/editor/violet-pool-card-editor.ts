@@ -3,9 +3,18 @@ import { property, state } from 'lit/decorators.js';
 import type { VioletPoolCardConfig } from '../violet-pool-card';
 
 // HomeAssistant types
+interface HassEntity {
+  entity_id: string;
+  state: string;
+  attributes: Record<string, unknown>;
+  last_changed: string;
+  last_updated: string;
+  context: { id: string; parent_id: unknown; user_id: unknown };
+}
+
 interface HomeAssistant {
-  states: { [entity_id: string]: any };
-  callService: (domain: string, service: string, serviceData?: any) => Promise<any>;
+  states: { [entity_id: string]: HassEntity };
+  callService: (domain: string, service: string, serviceData?: Record<string, unknown>) => Promise<unknown>;
 }
 
 interface LovelaceCardEditor extends HTMLElement {
@@ -35,15 +44,15 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
     };
     const includeDomains = domainFilter[this._config.card_type] || [];
 
-    return html` <div class="card-config"><!-- Card Type Selection --><div class="config-section"><div class="section-header"><ha-icon icon="mdi:card-outline"></ha-icon><span>Kartentyp</span></div><ha-select label="Kartentyp" .value="${this._config.card_type}" @selected="${this._cardTypeChanged}" @closed="${(e: Event) => e.stopPropagation()}" ><mwc-list-item value="pump">🔵 Pumpe</mwc-list-item><mwc-list-item value="heater">🔥 Heizung</mwc-list-item><mwc-list-item value="solar">☀️ Solar</mwc-list-item><mwc-list-item value="dosing">💧 Dosierung</mwc-list-item><mwc-list-item value="cover">🪟 Abdeckung</mwc-list-item><mwc-list-item value="light">💡 Beleuchtung</mwc-list-item><mwc-list-item value="overview">📊 Übersicht</mwc-list-item><mwc-list-item value="compact">📋 Kompakt</mwc-list-item><mwc-list-item value="system">🖥️ System Dashboard</mwc-list-item><mwc-list-item value="details">📝 Details Liste</mwc-list-item><mwc-list-item value="chemical">🧪 Wasserchemie</mwc-list-item><mwc-list-item value="sensor">📡 Sensor Anzeige</mwc-list-item></ha-select></div><!-- Controller Configuration --><div class="config-section"><div class="section-header"><ha-icon icon="mdi:chip"></ha-icon><span>Controller Configuration</span></div><ha-textfield label="Entity Prefix" .value="${this._config.entity_prefix || 'violet_pool'}" @input="${this._entityPrefixChanged}" helper="Name of your pool controller (e.g., 'violet_pool', 'pool_1', 'garden_pool')" ></ha-textfield><div class="prefix-info"><ha-icon icon="mdi:information-outline"></ha-icon><span> The entity prefix should match your Violet Pool Controller name in Home Assistant. All entities will be automatically discovered based on this prefix. </span></div></div><!-- Entity Selection -->
+    return html` <div class="card-config"><!-- Card Type Selection --><div class="config-section"><div class="section-header"><ha-icon icon="mdi:card-outline"></ha-icon><span>Card Type</span></div><ha-select label="Card Type" .value="${this._config.card_type}" @selected="${this._cardTypeChanged}" @closed="${(e: Event) => e.stopPropagation()}" ><mwc-list-item value="pump">🔵 Pump</mwc-list-item><mwc-list-item value="heater">🔥 Heater</mwc-list-item><mwc-list-item value="solar">☀️ Solar</mwc-list-item><mwc-list-item value="dosing">💧 Dosing</mwc-list-item><mwc-list-item value="cover">🪟 Cover</mwc-list-item><mwc-list-item value="light">💡 Light</mwc-list-item><mwc-list-item value="overview">📊 Overview</mwc-list-item><mwc-list-item value="compact">📋 Compact</mwc-list-item><mwc-list-item value="system">🖥️ System Dashboard</mwc-list-item><mwc-list-item value="details">📝 Details</mwc-list-item><mwc-list-item value="chemical">🧪 Chemistry</mwc-list-item><mwc-list-item value="sensor">📡 Sensor</mwc-list-item></ha-select></div><!-- Controller Configuration --><div class="config-section"><div class="section-header"><ha-icon icon="mdi:chip"></ha-icon><span>Controller Configuration</span></div><ha-textfield label="Entity Prefix" .value="${this._config.entity_prefix || 'violet_pool'}" @input="${this._entityPrefixChanged}" helper="Name of your pool controller (e.g., 'violet_pool', 'pool_1', 'garden_pool')" ></ha-textfield><div class="prefix-info"><ha-icon icon="mdi:information-outline"></ha-icon><span> The entity prefix should match your Violet Pool Controller name in Home Assistant. All entities will be automatically discovered based on this prefix. </span></div></div><!-- Entity Selection -->
         ${needsEntity || coverOrLight ? html`
           <div class="config-section">
             <div class="section-header">
               <ha-icon icon="mdi:lightning-bolt"></ha-icon>
-              <span>Entität</span>
+              <span>Entity</span>
             </div>
             <ha-entity-picker
-              label="${coverOrLight ? (this._config.card_type === 'cover' ? 'Cover Entität' : 'Licht Entität') : 'Entität'}"
+              label="${coverOrLight ? (this._config.card_type === 'cover' ? 'Cover Entity' : 'Licht Entity') : 'Entity'}"
               .hass="${this.hass}"
               .value="${this._config.entity}"
               .includeDomains="${includeDomains.length ? includeDomains : undefined}"
@@ -171,20 +180,20 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
           <details class="advanced-section">
             <summary>
               <ha-icon icon="mdi:swap-horizontal"></ha-icon>
-              <span>Entitäten überschreiben</span>
+              <span>Entityen überschreiben</span>
             </summary>
             <div class="advanced-content">
               ${this._config.card_type === 'pump' || this._config.card_type === 'overview' || this._config.card_type === 'system' ? html`
                 <ha-entity-picker label="Pumpe (override)" .hass="${this.hass}" .value="${(this._config as any).pump_entity || ''}" .includeDomains="${['switch']}" @value-changed="${(e: CustomEvent) => this._overrideChanged('pump_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker>
               ` : ''}
               ${this._config.card_type === 'heater' || this._config.card_type === 'overview' || this._config.card_type === 'system' ? html`
-                <ha-entity-picker label="Heizung (override)" .hass="${this.hass}" .value="${(this._config as any).heater_entity || ''}" .includeDomains="${['climate']}" @value-changed="${(e: CustomEvent) => this._overrideChanged('heater_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker>
+                <ha-entity-picker label="Heater (override)" .hass="${this.hass}" .value="${(this._config as any).heater_entity || ''}" .includeDomains="${['climate']}" @value-changed="${(e: CustomEvent) => this._overrideChanged('heater_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker>
               ` : ''}
               ${this._config.card_type === 'solar' || this._config.card_type === 'overview' || this._config.card_type === 'system' ? html`
                 <ha-entity-picker label="Solar (override)" .hass="${this.hass}" .value="${(this._config as any).solar_entity || ''}" .includeDomains="${['climate']}" @value-changed="${(e: CustomEvent) => this._overrideChanged('solar_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker>
               ` : ''}
               ${this._config.card_type === 'dosing' || this._config.card_type === 'overview' || this._config.card_type === 'system' ? html`
-                <ha-entity-picker label="Chlor-Dosierung (override)" .hass="${this.hass}" .value="${(this._config as any).chlorine_entity || ''}" .includeDomains="${['switch']}" @value-changed="${(e: CustomEvent) => this._overrideChanged('chlorine_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker>
+                <ha-entity-picker label="Chlorine Dosing (override)" .hass="${this.hass}" .value="${(this._config as any).chlorine_entity || ''}" .includeDomains="${['switch']}" @value-changed="${(e: CustomEvent) => this._overrideChanged('chlorine_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker>
               ` : ''}
               ${['dosing','overview','system','chemical'].includes(this._config.card_type) ? html`
                 <ha-entity-picker label="pH-Sensor (override)" .hass="${this.hass}" .value="${(this._config as any).ph_value_entity || ''}" .includeDomains="${['sensor']}" @value-changed="${(e: CustomEvent) => this._overrideChanged('ph_value_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker>

@@ -17,9 +17,18 @@ import { StateColorHelper } from './utils/state-color';
 import { pumpSVG, heaterSVG, solarSVG, coverSVG, lightSVG } from './utils/animated-icons';
 
 // HomeAssistant types
+interface HassEntity {
+  entity_id: string;
+  state: string;
+  attributes: Record<string, unknown>;
+  last_changed: string;
+  last_updated: string;
+  context: { id: string; parent_id: unknown; user_id: unknown };
+}
+
 interface HomeAssistant {
-  states: { [entity_id: string]: any };
-  callService: (domain: string, service: string, serviceData?: any) => Promise<any>;
+  states: { [entity_id: string]: HassEntity };
+  callService: (domain: string, service: string, serviceData?: Record<string, unknown>) => Promise<unknown>;
 }
 
 interface LovelaceCardConfig {
@@ -54,9 +63,9 @@ interface LovelaceCardConfig {
   blur_intensity?: number;
 
   // Actions
-  tap_action?: any;
-  hold_action?: any;
-  double_tap_action?: any;
+  tap_action?: Record<string, unknown>;
+  hold_action?: Record<string, unknown>;
+  double_tap_action?: Record<string, unknown>;
 }
 
 export interface VioletPoolCardConfig extends LovelaceCardConfig {
@@ -2037,6 +2046,93 @@ ha-card.theme-dark .chem-metric-track{background:rgba(255,255,255,0.08);}
 }
 
 if (!customElements.get('violet-pool-card')) {
+  // Inject modal styles globally
+  const modalStyles = `
+    .confirmation-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      animation: fadeIn 0.2s ease;
+      backdrop-filter: blur(4px);
+      padding: 16px;
+    }
+    .confirmation-dialog {
+      background: var(--card-background-color, #fff);
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      max-width: 90%;
+      width: 400px;
+      animation: slideUp 0.3s cubic-bezier(0.34, 1.4, 0.64, 1);
+    }
+    .confirmation-content {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .confirmation-message {
+      font-size: 14px;
+      color: var(--primary-text-color);
+      margin: 0;
+      line-height: 1.5;
+    }
+    .confirmation-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+    .confirmation-buttons button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      min-height: 44px;
+      min-width: 44px;
+    }
+    .btn-cancel {
+      background: var(--divider-color, rgba(0, 0, 0, 0.12));
+      color: var(--primary-text-color);
+    }
+    .btn-cancel:hover {
+      background: var(--divider-color, rgba(0, 0, 0, 0.2));
+    }
+    .btn-confirm {
+      background: var(--primary-color, #007aff);
+      color: white;
+    }
+    .btn-confirm:hover {
+      opacity: 0.9;
+      box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    @media (max-width: 600px) {
+      .confirmation-dialog { width: 90%; }
+      .confirmation-buttons { flex-direction: column-reverse; }
+      .confirmation-buttons button { width: 100%; }
+    }
+  `;
+
+  const styleElement = document.createElement('style');
+  styleElement.textContent = modalStyles;
+  document.head.appendChild(styleElement);
+
   customElements.define('violet-pool-card', VioletPoolCard);
 }
 
