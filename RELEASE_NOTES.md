@@ -6,10 +6,21 @@
 
 ### ✨ New Features | Neue Funktionen
 
-- Enhanced Violet Pool Card functionality
+- add-hacs-icon-and-logo (2fc8bcb)
+- Add Kelvin Slider to Light Card and Loading Skeleton infrastructure (94856b5)
+- Add 10 comprehensive enhancements to Violet Pool Card (3c894ed)
+- Update README with comprehensive feature documentation (d66166f)
+- Add 5 new card types and integrate advanced animations (6da6cce)
+- Add icon.png and logo.png to repository root for HACS display (41d9dd4)
+- Add design system, memoization utilities, and performance optimizations (Fixes 10-15) (22d57b1)
 
 ### 🚀 Improvements | Verbesserungen
 
+- Update README with comprehensive feature documentation (d66166f)
+- Enhance Dosing card with animated SVG droplet visualization (75914fc)
+- Optimize animations and extend TypeScript types (Final improvements) (207dc55)
+- Refactor: Improve type safety, accessibility, and UX (Fixes 1-9) (ab76637)
+- 📝 Release v0.1.1 - Update changelog and version (40fde92)
 - 📝 Release v0.1.1 - Update changelog and version (eebb8ae)
 - 📝 Release v0.1.1 - Update changelog and version (60e2ad7)
 - fix: remove dead code causing TS warning and optimize compilation (36bb7ec)
@@ -17,12 +28,22 @@
 
 ### 🔧 Bug Fixes | Fehlerbehebungen
 
+- fix-unused-color-variable (c8a633a)
+- fix: remove unused variables and imports (e580139)
+- fix-violet-pool-card-mQNV5 (c938d53)
+- Fix: Preserve customElements.define in compiled output (17540a5)
+- fix-component-registration-conflict (d58dbe5)
+- fix: prefix sub-components and explicit registration (1fcf7a9)
 - fix-custom-elements (66d54c6)
 - fix: use customElements.define directly instead of Lit decorator (d4c6651)
 - fix-lit-bundling (703cac5)
 - Fix module resolution errors by bundling Lit (af499d7)
 - fix-violet-pool-card- (a560d4c)
 - fix: remove dead code causing TS warning and optimize compilation (36bb7ec)
+
+### 📚 Documentation | Dokumentation
+
+- Update README with comprehensive feature documentation (d66166f)
 
 ---
 
@@ -70,4 +91,4 @@ Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
 
 ---
 
-_Generated automatically by GitHub Actions on 2026-03-03 07:00:28 UTC_
+_Generated automatically by GitHub Actions on 2026-03-03 10:43:40 UTC_
