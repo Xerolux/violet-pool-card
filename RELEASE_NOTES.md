@@ -6,6 +6,7 @@
 
 ### ✨ New Features | Neue Funktionen
 
+- ci: add auto-build workflow to rebuild dist on src changes [skip ci] (745d669)
 - add-hacs-icon-and-logo (2fc8bcb)
 - Add Kelvin Slider to Light Card and Loading Skeleton infrastructure (94856b5)
 - Add 10 comprehensive enhancements to Violet Pool Card (3c894ed)
@@ -16,6 +17,7 @@
 
 ### 🚀 Improvements | Verbesserungen
 
+- 📝 Release v0.1.1 - Update changelog and version (8954bc5)
 - Update README with comprehensive feature documentation (d66166f)
 - Enhance Dosing card with animated SVG droplet visualization (75914fc)
 - Optimize animations and extend TypeScript types (Final improvements) (207dc55)
@@ -28,6 +30,8 @@
 
 ### 🔧 Bug Fixes | Fehlerbehebungen
 
+- fix-pool-dashboard-cards (4b6dfe8)
+- fix: resolve TypeScript errors and rebuild dist to fix card registration (aa302e1)
 - fix-unused-color-variable (c8a633a)
 - fix: remove unused variables and imports (e580139)
 - fix-violet-pool-card-mQNV5 (c938d53)
@@ -91,4 +95,4 @@ Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
 
 ---
 
-_Generated automatically by GitHub Actions on 2026-03-03 10:43:40 UTC_
+_Generated automatically by GitHub Actions on 2026-03-03 11:14:37 UTC_
