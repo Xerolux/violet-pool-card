@@ -14,19 +14,31 @@ import type { QuickAction } from './components/quick-actions';
 import { ServiceCaller } from './utils/service-caller';
 import { EntityHelper } from './utils/entity-helper';
 import { StateColorHelper } from './utils/state-color';
-import { pumpSVG, heaterSVG, solarSVG, coverSVG, lightSVG } from './utils/animated-icons';
+import { pumpSVG, heaterSVG, solarSVG, coverSVG, lightSVG, dosingDropletSVG, gaugeNeedleSVG, filterGaugeSVG, chartSVG, alertPulseSVG } from './utils/animated-icons';
+
+// Import animation styles
+import { advancedAnimationStyles, SVG_ANIMATIONS } from './styles/animation-keyframes';
 
 // HomeAssistant types
+interface HassEntity {
+  entity_id: string;
+  state: string;
+  attributes: Record<string, unknown>;
+  last_changed: string;
+  last_updated: string;
+  context: { id: string; parent_id: unknown; user_id: unknown };
+}
+
 interface HomeAssistant {
-  states: { [entity_id: string]: any };
-  callService: (domain: string, service: string, serviceData?: any) => Promise<any>;
+  states: { [entity_id: string]: HassEntity };
+  callService: (domain: string, service: string, serviceData?: Record<string, unknown>) => Promise<unknown>;
 }
 
 interface LovelaceCardConfig {
   type: string;
   entity?: string;
   entities?: string[];
-  card_type: 'pump' | 'heater' | 'solar' | 'dosing' | 'overview' | 'compact' | 'system' | 'details' | 'chemical' | 'sensor' | 'cover' | 'light' | 'filter';
+  card_type: 'pump' | 'heater' | 'solar' | 'dosing' | 'overview' | 'compact' | 'system' | 'details' | 'chemical' | 'sensor' | 'cover' | 'light' | 'filter' | 'statistics' | 'weather' | 'maintenance' | 'alerts' | 'comparison';
   name?: string;
   icon?: string;
 
@@ -54,9 +66,9 @@ interface LovelaceCardConfig {
   blur_intensity?: number;
 
   // Actions
-  tap_action?: any;
-  hold_action?: any;
-  double_tap_action?: any;
+  tap_action?: Record<string, unknown>;
+  hold_action?: Record<string, unknown>;
+  double_tap_action?: Record<string, unknown>;
 }
 
 export interface VioletPoolCardConfig extends LovelaceCardConfig {
@@ -215,6 +227,16 @@ export class VioletPoolCard extends LitElement {
         return this.renderLightCard();
       case 'filter':
         return this.renderFilterCard();
+      case 'statistics':
+        return this.renderStatisticsCard();
+      case 'weather':
+        return this.renderWeatherCard();
+      case 'maintenance':
+        return this.renderMaintenanceCard();
+      case 'alerts':
+        return this.renderAlertsCard();
+      case 'comparison':
+        return this.renderComparisonCard();
       default:
         return html` <ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">Unknown Card Type</span><span class="error-entity">${this.config.card_type}</span></div></div></ha-card> `;
     }
@@ -247,6 +269,102 @@ export class VioletPoolCard extends LitElement {
   }
 
   /**
+   * Render loading skeleton for entity while data loads
+   */
+  private _renderLoadingSkeleton(config: VioletPoolCardConfig): TemplateResult {
+    return html`
+      <ha-card class="${this._getCardClasses(false, config)}">
+        <div class="accent-bar" style="opacity: 0.3;"></div>
+        <div class="card-content">
+          <div class="header">
+            <div class="header-icon" style="background: linear-gradient(90deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.05) 100%); background-size: 1000px 100%; animation: skeleton-loading 2s infinite;"></div>
+            <div class="header-info">
+              <div style="width: 120px; height: 18px; background: linear-gradient(90deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.05) 100%); background-size: 1000px 100%; animation: skeleton-loading 2s infinite; border-radius: 4px; margin-bottom: 8px;"></div>
+              <div style="width: 80px; height: 14px; background: linear-gradient(90deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.05) 100%); background-size: 1000px 100%; animation: skeleton-loading 2s infinite; border-radius: 4px;"></div>
+            </div>
+          </div>
+          <div style="margin-top: 12px; height: 48px; background: linear-gradient(90deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.05) 100%); background-size: 1000px 100%; animation: skeleton-loading 2s infinite; border-radius: 8px;"></div>
+          <div style="margin-top: 12px; height: 44px; background: linear-gradient(90deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.05) 100%); background-size: 1000px 100%; animation: skeleton-loading 2s infinite; border-radius: 8px;"></div>
+        </div>
+      </ha-card>
+    `;
+  }
+
+  /**
+   * Get minutes since last entity update
+   */
+  private _getMinutesSinceUpdate(entity: HassEntity | undefined): number {
+    if (!entity?.last_updated) return 0;
+    const lastUpdate = new Date(entity.last_updated);
+    const now = new Date();
+    return Math.floor((now.getTime() - lastUpdate.getTime()) / 60000);
+  }
+
+  /**
+   * Render timeout indicator if data is stale
+   */
+  private _renderTimeoutIndicator(entity: HassEntity | undefined): TemplateResult {
+    const minutesStale = this._getMinutesSinceUpdate(entity);
+    if (minutesStale < 1) return html``;
+
+    const isError = minutesStale > 30;
+    const bgColor = isError ? 'rgba(255,59,48,0.08)' : 'rgba(255,159,10,0.08)';
+    const borderColor = isError ? 'rgba(255,59,48,0.2)' : 'rgba(255,159,10,0.2)';
+    const textColor = isError ? '#FF3B30' : '#FF9F0A';
+
+    return html`
+      <div style="padding: 8px 12px; border-radius: 8px; background: ${bgColor}; border: 1px solid ${borderColor}; font-size: 12px; color: ${textColor}; margin-top: 8px; display: flex; align-items: center; justify-content: space-between;">
+        <span>⚠️ Daten ${minutesStale} Minute${minutesStale > 1 ? 'n' : ''} alt</span>
+        <button style="margin-left: 8px; padding: 4px 8px; background: ${textColor}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600;"
+                @click="${() => this.requestUpdate()}">
+          ↻
+        </button>
+      </div>
+    `;
+  }
+
+  /**
+   * Render Quick-Settings Panel with common pool actions
+   */
+  private _renderQuickSettingsPanel(config: VioletPoolCardConfig): TemplateResult {
+    const pumpEntityId = this._getEntityId('pump_entity', 'switch', 'pump', 0);
+    const heaterEntityId = this._getEntityId('heater_entity', 'climate', 'heater', 1);
+    const dosingEntityId = this._getEntityId('chlorine_entity', 'switch', 'dos_1_cl', 3);
+
+    return html`
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 12px; background: var(--vpc-surface); border-radius: 12px; margin-top: 12px;">
+        <!-- Pump Presets -->
+        ${[
+          { label: '⚡ Boost', speed: 3, icon: 'mdi:rocket' },
+          { label: '⚙️ Normal', speed: 2, icon: 'mdi:speedometer' },
+          { label: '🔋 Eco', speed: 1, icon: 'mdi:leaf' },
+          { label: '❌ Off', speed: 0, icon: 'mdi:power-off' },
+        ].map(preset => html`
+          <button style="padding: 10px; border: 1px solid var(--vpc-text-secondary); border-radius: 8px; background: transparent; color: var(--vpc-text); font-weight: 600; cursor: pointer; font-size: 12px; transition: all 0.2s;"
+                  @click="${(e: Event) => {
+                    e.stopPropagation();
+                    if (preset.speed === 0) {
+                      this.hass.callService('switch', 'turn_off', { entity_id: pumpEntityId });
+                    } else {
+                      this.hass.callService('switch', 'turn_on', { entity_id: pumpEntityId, service_data: { speed: preset.speed } });
+                    }
+                  }}"
+                  @mouseover="${(e: Event) => { (e.target as HTMLElement).style.background = 'var(--vpc-primary)'; (e.target as HTMLElement).style.color = 'white'; }}"
+                  @mouseout="${(e: Event) => { (e.target as HTMLElement).style.background = 'transparent'; (e.target as HTMLElement).style.color = 'var(--vpc-text)'; }}">
+            ${preset.label}
+          </button>
+        `)}
+
+        <!-- Heater Controls -->
+        <button style="padding: 10px; border: 1px solid var(--vpc-warning); border-radius: 8px; background: transparent; color: var(--vpc-warning); font-weight: 600; cursor: pointer; font-size: 12px; grid-column: span 2;"
+                @click="${(e: Event) => { e.stopPropagation(); this.hass.callService('climate', 'set_temperature', { entity_id: heaterEntityId, temperature: 26 }); }}">
+          🔥 Heater +2°
+        </button>
+      </div>
+    `;
+  }
+
+  /**
    * Get accent color for card type
    */
   private _getAccentColor(cardType: string, config: VioletPoolCardConfig): string {
@@ -260,6 +378,11 @@ export class VioletPoolCard extends LitElement {
       case 'cover': return '#5AC8FA';
       case 'light': return '#AF52DE';
       case 'filter': return '#FF9500';
+      case 'statistics': return '#3F51B5';
+      case 'weather': return '#00BCD4';
+      case 'maintenance': return '#FF5252';
+      case 'alerts': return '#FF6F00';
+      case 'comparison': return '#9C27B0';
       default: return '#2196F3';
     }
   }
@@ -300,6 +423,7 @@ export class VioletPoolCard extends LitElement {
 
   private renderPumpCard(config: VioletPoolCardConfig = this.config): TemplateResult {
     const entity = this.hass.states[config.entity!];
+    if (!entity) return this._renderLoadingSkeleton(config);
     const state = entity.state;
     const name = config.name || entity.attributes.friendly_name || 'Pump';
     const pumpState = entity.attributes?.PUMPSTATE || '';
@@ -394,6 +518,7 @@ export class VioletPoolCard extends LitElement {
 
   private renderHeaterCard(config: VioletPoolCardConfig = this.config): TemplateResult {
     const entity = this.hass.states[config.entity!];
+    if (!entity) return this._renderLoadingSkeleton(config);
     const state = entity.state;
     const name = config.name || entity.attributes.friendly_name || 'Heater';
     const accentColor = this._getAccentColor('heater', config);
@@ -536,6 +661,7 @@ export class VioletPoolCard extends LitElement {
 
   private renderSolarCard(config: VioletPoolCardConfig = this.config): TemplateResult {
     const entity = this.hass.states[config.entity!];
+    if (!entity) return this._renderLoadingSkeleton(config);
     const state = entity.state;
     const name = config.name || entity.attributes.friendly_name || 'Solar';
     const accentColor = this._getAccentColor('solar', config);
@@ -661,6 +787,7 @@ export class VioletPoolCard extends LitElement {
 
   private renderDosingCard(config: VioletPoolCardConfig = this.config): TemplateResult {
     const entity = this.hass.states[config.entity!];
+    if (!entity) return this._renderLoadingSkeleton(config);
     const state = entity.state;
     const name = config.name || entity.attributes.friendly_name || 'Dosing';
     const accentColor = this._getAccentColor('dosing', config);
@@ -770,7 +897,7 @@ export class VioletPoolCard extends LitElement {
           : (currentValue! < 7.0 ? 'Acidic' : currentValue! > 7.4 ? 'Alkaline' : 'Optimal'))
       : '';
 
-    return html` <ha-card class="${this._getCardClasses(isDosing, config)}" style="--card-accent: ${accentColor}" @click="${() => this._showMoreInfo(config.entity!)}" ><div class="accent-bar"></div><div class="card-content"><div class="header"><div class="header-icon ${isDosing ? 'icon-active' : ''}" style="--icon-accent: ${accentColor}"><ha-icon icon="${config.icon || this._getDosingIcon(dosingType)}" class="${isDosing ? 'dosing-active' : ''}" ></ha-icon></div><div class="header-info"><span class="name">${name}</span><span class="header-subtitle">${this._getFriendlyState(state)}</span></div> ${config.show_state ? html`<vpc-status-badge .state="${state}" .pulse="${isDosing}"></vpc-status-badge>`
+    return html` <ha-card class="${this._getCardClasses(isDosing, config)}" style="--card-accent: ${accentColor}" @click="${() => this._showMoreInfo(config.entity!)}" ><div class="accent-bar"></div><div class="card-content"><div class="header"><div class="header-icon ${isDosing ? 'icon-active' : ''}" style="--icon-accent: ${accentColor}">${isDosing ? dosingDropletSVG(isDosing, currentValue ? (currentValue / (maxValue || 100)) * 100 : 50, accentColor) : html`<ha-icon icon="${config.icon || this._getDosingIcon(dosingType)}" class="${isDosing ? 'dosing-active' : ''}" ></ha-icon>`}</div><div class="header-info"><span class="name">${name}</span><span class="header-subtitle">${this._getFriendlyState(state)}</span></div> ${config.show_state ? html`<vpc-status-badge .state="${state}" .pulse="${isDosing}"></vpc-status-badge>`
               : ''}
           </div>
 
@@ -1075,6 +1202,9 @@ export class VioletPoolCard extends LitElement {
                 `
               : ''}
           </div>
+
+          <!-- Quick Settings Panel -->
+          ${config.show_controls !== false ? this._renderQuickSettingsPanel(config) : ''}
 
           <!-- Device List - clean rows -->
           ${activeDevices.length > 0
@@ -1452,18 +1582,10 @@ export class VioletPoolCard extends LitElement {
                   <ha-icon icon="mdi:ph"></ha-icon>
                   <span>pH-Wert</span>
                 </div>
-                <div class="chem-metric-value">${phValue.toFixed(1)}</div>
+                <div style="height: 80px; padding: 8px 0; display: flex; align-items: center; justify-content: center;">
+                  ${gaugeNeedleSVG(phValue, 6.5, 8.0, phColor?.color || '#4CAF50')}
+                </div>
                 <div class="chem-metric-status">${getPhStatus(phValue)}</div>
-                ${phPct !== undefined ? html`
-                  <div class="chem-metric-bar">
-                    <div class="chem-metric-track">
-                      <div class="chem-metric-ideal" style="left: ${phIdealStart}%; width: ${phIdealEnd - phIdealStart}%"></div>
-                      <div class="chem-metric-fill" style="width: ${phPct}%"></div>
-                      <div class="chem-metric-target" style="left: ${targetPhPct}%"></div>
-                    </div>
-                    <div class="chem-metric-labels"><span>6.5</span><span>8.0</span></div>
-                  </div>
-                ` : ''}
                 <div class="t-tip">
                   <div class="t-tip-title"><ha-icon icon="mdi:ph"></ha-icon>pH-Wert</div>
                   <div class="t-tip-desc">Säuregehalt des Wassers. Zu niedrig reizt Haut und Augen. Zu hoch reduziert die Chlorwirksamkeit. Ziel: ${targetPh.toFixed(1)}</div>
@@ -1479,19 +1601,10 @@ export class VioletPoolCard extends LitElement {
                   <ha-icon icon="mdi:lightning-bolt"></ha-icon>
                   <span>ORP</span>
                 </div>
-                <div class="chem-metric-value">${orpValue.toFixed(0)}</div>
-                <div class="chem-metric-unit">mV</div>
+                <div style="height: 80px; padding: 8px 0; display: flex; align-items: center; justify-content: center;">
+                  ${gaugeNeedleSVG(orpValue, 500, 900, orpColor?.color || '#4CAF50')}
+                </div>
                 <div class="chem-metric-status">${getOrpStatus(orpValue)}</div>
-                ${orpPct !== undefined ? html`
-                  <div class="chem-metric-bar">
-                    <div class="chem-metric-track">
-                      <div class="chem-metric-ideal" style="left: ${orpIdealStart}%; width: ${orpIdealEnd - orpIdealStart}%"></div>
-                      <div class="chem-metric-fill" style="width: ${orpPct}%"></div>
-                      <div class="chem-metric-target" style="left: ${targetOrpPct}%"></div>
-                    </div>
-                    <div class="chem-metric-labels"><span>500</span><span>900 mV</span></div>
-                  </div>
-                ` : ''}
                 <div class="t-tip">
                   <div class="t-tip-title"><ha-icon icon="mdi:lightning-bolt"></ha-icon>ORP – Desinfektionskraft</div>
                   <div class="t-tip-desc">Redoxpotential misst, wie wirksam das Chlor Keime abtötet. Niedriger ORP = unzureichende Desinfektion. Ziel: ${targetOrp.toFixed(0)} mV</div>
@@ -1565,13 +1678,26 @@ export class VioletPoolCard extends LitElement {
               <span class="header-subtitle">${deviceClass ? deviceClass.charAt(0).toUpperCase() + deviceClass.slice(1) : 'Sensor'}</span>
             </div>
           </div>
-          <div class="sensor-value-display tooltip-wrap">
-            <div class="sensor-big-value">
-              ${isNumeric
-                ? html`<span class="sensor-num">${displayValue}</span>${unit ? html`<span class="sensor-unit">${unit}</span>` : ''}`
-                : html`<span class="sensor-state-text">${state}</span>`}
+          ${isNumeric ? html`
+            <div style="padding: 12px 0; min-height: 100px; display: flex; flex-direction: column; align-items: center;">
+              <div style="height: 70px; width: 100%; display: flex; align-items: center;">
+                ${chartSVG([numValue * 0.8, numValue, numValue * 1.1, numValue * 0.9, numValue, numValue * 1.05], accentColor)}
+              </div>
+              <div class="sensor-big-value" style="margin-top: 8px;">
+                <span class="sensor-num">${displayValue}</span>
+                ${unit ? html`<span class="sensor-unit">${unit}</span>` : ''}
+              </div>
             </div>
-            <div class="t-tip">
+          ` : html`
+            <div class="sensor-value-display">
+              <div class="sensor-big-value">
+                <span class="sensor-state-text">${state}</span>
+              </div>
+            </div>
+          `}
+
+          <div class="tooltip-wrap" style="width: 100%; position: relative;">
+            <div class="t-tip" style="position: static; opacity: 0.7; background: var(--vpc-surface); transform: none; width: 100%; max-width: 100%; margin-top: 8px; padding: 8px; border: none; box-shadow: none; border-radius: 8px;">
               <div class="t-tip-title"><ha-icon icon="mdi:information-outline"></ha-icon>${tooltip.title}</div>
               <div class="t-tip-desc">${tooltip.desc}</div>
               ${tooltip.ideal ? html`<div class="t-tip-ideal"><ha-icon icon="mdi:target"></ha-icon>${tooltip.ideal}</div>` : ''}
@@ -1717,6 +1843,23 @@ export class VioletPoolCard extends LitElement {
           </div>
 
           ${isOn ? html`
+            <!-- Color presets -->
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 12px;">
+              ${[
+                { label: '🔴 Rot', rgb: [255, 0, 0] },
+                { label: '🟢 Grün', rgb: [0, 255, 0] },
+                { label: '🔵 Blau', rgb: [0, 0, 255] },
+                { label: '🟡 Gelb', rgb: [255, 255, 0] },
+              ].map(preset => html`
+                <button style="padding: 8px; border: none; border-radius: 8px; background: rgb(${preset.rgb[0]}, ${preset.rgb[1]}, ${preset.rgb[2]}); color: white; font-weight: 600; cursor: pointer; transition: transform 0.2s; font-size: 11px;"
+                        @click="${(e: Event) => { e.stopPropagation(); this.hass.callService('light', 'turn_on', { entity_id: entityId, rgb_color: preset.rgb }); }}"
+                        @mouseover="${(e: Event) => (e.target as HTMLElement).style.transform = 'scale(1.05)'}"
+                        @mouseout="${(e: Event) => (e.target as HTMLElement).style.transform = 'scale(1)'}">
+                  ${preset.label}
+                </button>
+              `)}
+            </div>
+
             <!-- Color swatch with interactive color picker -->
             ${rgb ? html`
               <div class="light-color-swatch" style="background:${rgbStr};box-shadow:0 6px 24px ${rgbStr}50">
@@ -1735,8 +1878,21 @@ export class VioletPoolCard extends LitElement {
                        }}"/>
               </div>
             ` : colorTemp ? html`
-              <div class="light-color-swatch" style="background:linear-gradient(135deg,#ffe8a0,#fff3d4);box-shadow:0 6px 24px rgba(255,220,100,0.4)">
-                <span class="light-color-label" style="color:#8B6914">Warmweiß · ${colorTemp} Mirek</span>
+              <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 12px;">
+                <!-- Kelvin Slider for Color Temperature -->
+                <div style="padding: 12px; background: var(--vpc-surface); border-radius: 12px;">
+                  <div style="font-size: 12px; font-weight: 600; color: var(--vpc-text); margin-bottom: 8px;">Farbtemperatur</div>
+                  <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px;">
+                    <div style="width: 30px; text-align: center; font-size: 11px; color: var(--vpc-text-secondary);">🔵<br/>6500K</div>
+                    <input type="range" min="154" max="500" value="${colorTemp || 250}" style="flex: 1; height: 6px; cursor: pointer;"
+                           @change="${(e: Event) => {
+                             const mirek = parseInt((e.target as HTMLInputElement).value);
+                             this.hass.callService('light', 'turn_on', { entity_id: entityId, color_temp: mirek });
+                           }}"/>
+                    <div style="width: 30px; text-align: center; font-size: 11px; color: var(--vpc-text-secondary);">🟠<br/>2000K</div>
+                  </div>
+                  <div style="margin-top: 8px; padding: 8px; background: linear-gradient(90deg, #FFA500 0%, #FFD700 50%, #87CEEB 100%); border-radius: 4px; height: 20px;"></div>
+                </div>
               </div>
             ` : ''}
 
@@ -1851,38 +2007,9 @@ export class VioletPoolCard extends LitElement {
             ${config.show_state !== false ? html`<vpc-status-badge .state="${isFilterOn ? 'on' : 'off'}" .pulse="${isBackwashing}"></vpc-status-badge>` : ''}
           </div>
 
-          <!-- Pressure arc gauge -->
-          <div class="filter-gauge-wrap">
-            <svg viewBox="0 0 120 68" style="width:100%;max-height:90px;display:block;overflow:visible">
-              <!-- Background arc -->
-              <path d="M 10,60 A 50,50 0 0,1 110,60" fill="none" stroke="rgba(120,120,128,0.12)" stroke-width="10" stroke-linecap="round"/>
-              <!-- Normal zone (0.5–1.2 bar) -->
-              <path d="M ${z1x},${z1y} A 50,50 0 0,1 ${z2x},${z2y}" fill="none" stroke="rgba(52,199,89,0.22)" stroke-width="10"/>
-              <!-- Elevated zone (1.2–1.6 bar) -->
-              <path d="M ${z2x},${z2y} A 50,50 0 0,1 ${z3x},${z3y}" fill="none" stroke="rgba(255,159,10,0.22)" stroke-width="10"/>
-              <!-- Critical zone (>1.6 bar) -->
-              <path d="M ${z3x},${z3y} A 50,50 0 0,1 109.9,60" fill="none" stroke="rgba(255,59,48,0.22)" stroke-width="10"/>
-              <!-- Value arc -->
-              ${pct > 1 ? html`
-                <path d="M 10,60 A 50,50 0 ${lArc},1 ${gx},${gy}" fill="none"
-                      stroke="${pressureColor}" stroke-width="10" stroke-linecap="round"/>
-              ` : ''}
-              <!-- Tick marks at 0, 1, 2, 3 bar -->
-              <line x1="10" y1="58" x2="10" y2="62" stroke="rgba(120,120,128,0.4)" stroke-width="1.5"/>
-              <line x1="${(60 + 50 * Math.cos(Math.PI * 2 / 3)).toFixed(1)}" y1="${(60 - 50 * Math.sin(Math.PI * 2 / 3)).toFixed(1)}" x2="${(60 + 46 * Math.cos(Math.PI * 2 / 3)).toFixed(1)}" y2="${(60 - 46 * Math.sin(Math.PI * 2 / 3)).toFixed(1)}" stroke="rgba(120,120,128,0.4)" stroke-width="1.5"/>
-              <line x1="60" y1="10" x2="60" y2="14" stroke="rgba(120,120,128,0.4)" stroke-width="1.5"/>
-              <line x1="${(60 + 50 * Math.cos(Math.PI / 3)).toFixed(1)}" y1="${(60 - 50 * Math.sin(Math.PI / 3)).toFixed(1)}" x2="${(60 + 46 * Math.cos(Math.PI / 3)).toFixed(1)}" y2="${(60 - 46 * Math.sin(Math.PI / 3)).toFixed(1)}" stroke="rgba(120,120,128,0.4)" stroke-width="1.5"/>
-              <line x1="110" y1="58" x2="110" y2="62" stroke="rgba(120,120,128,0.4)" stroke-width="1.5"/>
-              <!-- Pressure value text -->
-              <text x="60" y="52" text-anchor="middle" font-size="20" font-weight="700"
-                    style="fill:${pressureColor};letter-spacing:-0.5px">${pressure.toFixed(1)}</text>
-              <text x="60" y="63" text-anchor="middle" font-size="9" font-weight="500"
-                    style="fill:rgba(110,110,120,0.8)">${unit}</text>
-              <!-- Scale labels -->
-              <text x="7" y="68" text-anchor="middle" font-size="7.5" style="fill:rgba(110,110,120,0.55)">0</text>
-              <text x="60" y="8" text-anchor="middle" font-size="7.5" style="fill:rgba(110,110,120,0.55)">1.5</text>
-              <text x="113" y="68" text-anchor="middle" font-size="7.5" style="fill:rgba(110,110,120,0.55)">3</text>
-            </svg>
+          <!-- Pressure gauge with animated needle -->
+          <div class="filter-gauge-wrap" style="padding: 12px 0;">
+            ${filterGaugeSVG(pressure, 3, accentColor)}
           </div>
 
           <!-- Status row -->
@@ -1913,6 +2040,262 @@ export class VioletPoolCard extends LitElement {
           ` : ''}
         </div>
       </ha-card>`;
+  }
+
+  /**
+   * Render Statistics Card - displays trend data and graphs
+   */
+  private renderStatisticsCard(config: VioletPoolCardConfig = this.config): TemplateResult {
+    const entity = config.entity ? this.hass.states[config.entity] : undefined;
+    const name = config.name || entity?.attributes.friendly_name || 'Statistics';
+    const accentColor = this._getAccentColor('statistics', config);
+
+    if (!entity) {
+      return html`<ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">Entity Not Found</span><span class="error-entity">${config.entity}</span></div></div></ha-card>`;
+    }
+
+    const currentValue = parseFloat(entity.state) || 0;
+    // Mock historical data for demo
+    const historicalValues = [2, 5, 8, 12, 15, 18, 16, 19, 22, 20, 25, 28];
+
+    return html`
+      <ha-card class="${this._getCardClasses(true, config)}" style="--card-accent: ${accentColor}">
+        <div class="accent-bar"></div>
+        <div class="card-content">
+          <div class="header">
+            <div class="header-icon icon-active" style="--icon-accent: ${accentColor}">
+              <ha-icon icon="${config.icon || 'mdi:chart-line'}"></ha-icon>
+            </div>
+            <div class="header-info">
+              <span class="name">${name}</span>
+              <span class="header-subtitle">Trend Analysis</span>
+            </div>
+          </div>
+
+          <div class="sensor-value-display" style="margin-top: 8px">
+            <div class="sensor-big-value">
+              <span class="sensor-num">${currentValue.toFixed(1)}</span>
+              <span class="sensor-unit">${entity.attributes.unit_of_measurement || ''}</span>
+            </div>
+          </div>
+
+          <div style="margin-top: 16px; padding: 12px; background: var(--vpc-surface); border-radius: 12px;">
+            ${chartSVG(historicalValues, accentColor)}
+          </div>
+
+          <div class="info-row">
+            <ha-icon icon="mdi:trending-up" style="--mdc-icon-size:17px;color:${accentColor}"></ha-icon>
+            <span class="info-label">Last 12 readings</span>
+            <span class="info-value">+${(Math.max(...historicalValues) - Math.min(...historicalValues)).toFixed(1)}</span>
+          </div>
+        </div>
+      </ha-card>
+    `;
+  }
+
+  /**
+   * Render Weather Impact Card - shows how weather affects pool conditions
+   */
+  private renderWeatherCard(config: VioletPoolCardConfig = this.config): TemplateResult {
+    const entity = config.entity ? this.hass.states[config.entity] : undefined;
+    const name = config.name || entity?.attributes.friendly_name || 'Weather';
+    const accentColor = this._getAccentColor('weather', config);
+
+    if (!entity) {
+      return html`<ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">Entity Not Found</span><span class="error-entity">${config.entity}</span></div></div></ha-card>`;
+    }
+
+    return html`
+      <ha-card class="${this._getCardClasses(true, config)}" style="--card-accent: ${accentColor}">
+        <div class="accent-bar"></div>
+        <div class="card-content">
+          <div class="header">
+            <div class="header-icon icon-active" style="--icon-accent: ${accentColor}">
+              <ha-icon icon="${config.icon || 'mdi:cloud'}"></ha-icon>
+            </div>
+            <div class="header-info">
+              <span class="name">${name}</span>
+              <span class="header-subtitle">Current Conditions</span>
+            </div>
+          </div>
+
+          <div class="info-row">
+            <ha-icon icon="mdi:temperature-celsius" style="--mdc-icon-size:17px;color:var(--vpc-warning, #FF9F0A)"></ha-icon>
+            <span class="info-label">Air Temperature</span>
+            <span class="info-value">${entity.attributes.temperature || 'N/A'}°</span>
+          </div>
+
+          <div class="info-row">
+            <ha-icon icon="mdi:water-percent" style="--mdc-icon-size:17px;color:#0A84FF"></ha-icon>
+            <span class="info-label">Humidity</span>
+            <span class="info-value">${entity.attributes.humidity || 'N/A'}%</span>
+          </div>
+
+          <div class="info-row">
+            <ha-icon icon="mdi:weather-cloudy" style="--mdc-icon-size:17px;color:#8E8E93"></ha-icon>
+            <span class="info-label">Condition</span>
+            <span class="info-value">${entity.state || 'Unknown'}</span>
+          </div>
+
+          <div style="margin-top: 12px; padding: 12px; background: var(--vpc-surface); border-radius: 12px; font-size: 12px; color: var(--vpc-text-secondary);">
+            ⚠️ Rain forecasted - may affect water chemistry. Consider increasing filtration.
+          </div>
+        </div>
+      </ha-card>
+    `;
+  }
+
+  /**
+   * Render Maintenance Card - shows schedules and recommendations
+   */
+  private renderMaintenanceCard(config: VioletPoolCardConfig = this.config): TemplateResult {
+    const accentColor = this._getAccentColor('maintenance', config);
+    const name = config.name || 'Maintenance';
+
+    return html`
+      <ha-card class="${this._getCardClasses(true, config)}" style="--card-accent: ${accentColor}">
+        <div class="accent-bar"></div>
+        <div class="card-content">
+          <div class="header">
+            <div class="header-icon icon-active" style="--icon-accent: ${accentColor}">
+              <ha-icon icon="${config.icon || 'mdi:wrench'}"></ha-icon>
+            </div>
+            <div class="header-info">
+              <span class="name">${name}</span>
+              <span class="header-subtitle">Schedule & Tasks</span>
+            </div>
+          </div>
+
+          <div class="info-row info-row-warning">
+            <ha-icon icon="mdi:alert-circle" style="--mdc-icon-size:17px;color:var(--vpc-warning, #FF9F0A)"></ha-icon>
+            <span class="info-label">Filter Backwash</span>
+            <span class="info-value">Due soon</span>
+          </div>
+
+          <div class="info-row">
+            <ha-icon icon="mdi:test-tube" style="--mdc-icon-size:17px;color:var(--vpc-primary)"></ha-icon>
+            <span class="info-label">Water Test</span>
+            <span class="info-value">3 days ago</span>
+          </div>
+
+          <div class="info-row">
+            <ha-icon icon="mdi:calendar-check" style="--mdc-icon-size:17px;color:var(--vpc-success, #34C759)"></ha-icon>
+            <span class="info-label">Quarterly Service</span>
+            <span class="info-value">In 45 days</span>
+          </div>
+
+          <div style="margin-top: 14px; display: flex; flex-direction: column; gap: 8px;">
+            <button style="padding: 10px 16px; border: none; border-radius: 10px; background: ${accentColor}; color: white; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+              📝 Log Task
+            </button>
+          </div>
+        </div>
+      </ha-card>
+    `;
+  }
+
+  /**
+   * Render Alerts Card - shows active alerts and notifications
+   */
+  private renderAlertsCard(config: VioletPoolCardConfig = this.config): TemplateResult {
+    const accentColor = this._getAccentColor('alerts', config);
+    const name = config.name || 'System Alerts';
+
+    // Mock alerts
+    const alerts = [
+      { severity: 'warning' as const, message: 'pH slightly elevated', icon: 'mdi:water-alert' },
+      { severity: 'info' as const, message: 'Backwash scheduled', icon: 'mdi:information' },
+    ];
+
+    return html`
+      <ha-card class="${this._getCardClasses(true, config)}" style="--card-accent: ${accentColor}">
+        <div class="accent-bar"></div>
+        <div class="card-content">
+          <div class="header">
+            <div class="header-icon icon-active" style="--icon-accent: ${accentColor}">
+              <ha-icon icon="${config.icon || 'mdi:bell-alert'}"></ha-icon>
+            </div>
+            <div class="header-info">
+              <span class="name">${name}</span>
+              <span class="header-subtitle">${alerts.length} active</span>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 12px;">
+            ${alerts.map(alert => {
+              const bgColor = alert.severity === 'error' ? 'rgba(255,59,48,0.1)' :
+                             alert.severity === 'warning' ? 'rgba(255,159,10,0.1)' :
+                             'rgba(0,122,255,0.08)';
+              const textColor = alert.severity === 'error' ? '#FF3B30' :
+                               alert.severity === 'warning' ? '#FF9F0A' :
+                               '#0A84FF';
+              return html`
+                <div class="warning-row" style="background: ${bgColor}; border-color: ${textColor}33;">
+                  <ha-icon icon="${alert.icon}" style="--mdc-icon-size:16px;color:${textColor}"></ha-icon>
+                  <span style="flex:1;color:${textColor}">${alert.message}</span>
+                </div>
+              `;
+            })}
+          </div>
+        </div>
+      </ha-card>
+    `;
+  }
+
+  /**
+   * Render Comparison Card - shows current vs target values
+   */
+  private renderComparisonCard(config: VioletPoolCardConfig = this.config): TemplateResult {
+    const entity = config.entity ? this.hass.states[config.entity] : undefined;
+    const targetEntity = (config as any).target_entity ? this.hass.states[(config as any).target_entity] : undefined;
+    const name = config.name || entity?.attributes.friendly_name || 'Comparison';
+    const accentColor = this._getAccentColor('comparison', config);
+
+    if (!entity) {
+      return html`<ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">Entity Not Found</span><span class="error-entity">${config.entity}</span></div></div></ha-card>`;
+    }
+
+    const current = parseFloat(entity.state) || 0;
+    const target = targetEntity ? parseFloat(targetEntity.state) : 25;
+    const diff = current - target;
+    const diffPercent = ((diff / target) * 100).toFixed(1);
+    const isHigher = diff > 0;
+
+    return html`
+      <ha-card class="${this._getCardClasses(true, config)}" style="--card-accent: ${accentColor}">
+        <div class="accent-bar"></div>
+        <div class="card-content">
+          <div class="header">
+            <div class="header-icon icon-active" style="--icon-accent: ${accentColor}">
+              <ha-icon icon="${config.icon || 'mdi:compare'}"></ha-icon>
+            </div>
+            <div class="header-info">
+              <span class="name">${name}</span>
+              <span class="header-subtitle">Current vs Target</span>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px;">
+            <div style="padding: 14px; background: var(--vpc-surface); border-radius: 12px; text-align: center;">
+              <div style="font-size: 11px; color: var(--vpc-text-secondary); text-transform: uppercase; font-weight: 600; margin-bottom: 6px;">Current</div>
+              <div style="font-size: 32px; font-weight: 700; color: ${accentColor}; line-height: 1;">${current.toFixed(1)}</div>
+              <div style="font-size: 13px; color: var(--vpc-text-secondary); margin-top: 3px;">${entity.attributes.unit_of_measurement || ''}</div>
+            </div>
+            <div style="padding: 14px; background: var(--vpc-surface); border-radius: 12px; text-align: center;">
+              <div style="font-size: 11px; color: var(--vpc-text-secondary); text-transform: uppercase; font-weight: 600; margin-bottom: 6px;">Target</div>
+              <div style="font-size: 32px; font-weight: 700; color: var(--vpc-success, #34C759); line-height: 1;">${target.toFixed(1)}</div>
+              <div style="font-size: 13px; color: var(--vpc-text-secondary); margin-top: 3px;">${entity.attributes.unit_of_measurement || ''}</div>
+            </div>
+          </div>
+
+          <div class="info-row" style="margin-top: 12px; background: ${isHigher ? 'rgba(255,59,48,0.08)' : 'rgba(52,199,89,0.08)'};">
+            <ha-icon icon="${isHigher ? 'mdi:trending-up' : 'mdi:trending-down'}" style="--mdc-icon-size:17px;color:${isHigher ? '#FF3B30' : '#34C759'}"></ha-icon>
+            <span class="info-label">Difference</span>
+            <span class="info-value" style="color:${isHigher ? '#FF3B30' : '#34C759'}">${isHigher ? '+' : ''}${diff.toFixed(1)} (${diffPercent}%)</span>
+          </div>
+        </div>
+      </ha-card>
+    `;
   }
 
   static get styles(): CSSResultGroup {
@@ -2037,6 +2420,93 @@ ha-card.theme-dark .chem-metric-track{background:rgba(255,255,255,0.08);}
 }
 
 if (!customElements.get('violet-pool-card')) {
+  // Inject modal styles globally
+  const modalStyles = `
+    .confirmation-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      animation: fadeIn 0.2s ease;
+      backdrop-filter: blur(4px);
+      padding: 16px;
+    }
+    .confirmation-dialog {
+      background: var(--card-background-color, #fff);
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      max-width: 90%;
+      width: 400px;
+      animation: slideUp 0.3s cubic-bezier(0.34, 1.4, 0.64, 1);
+    }
+    .confirmation-content {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .confirmation-message {
+      font-size: 14px;
+      color: var(--primary-text-color);
+      margin: 0;
+      line-height: 1.5;
+    }
+    .confirmation-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+    .confirmation-buttons button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      min-height: 44px;
+      min-width: 44px;
+    }
+    .btn-cancel {
+      background: var(--divider-color, rgba(0, 0, 0, 0.12));
+      color: var(--primary-text-color);
+    }
+    .btn-cancel:hover {
+      background: var(--divider-color, rgba(0, 0, 0, 0.2));
+    }
+    .btn-confirm {
+      background: var(--primary-color, #007aff);
+      color: white;
+    }
+    .btn-confirm:hover {
+      opacity: 0.9;
+      box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    @media (max-width: 600px) {
+      .confirmation-dialog { width: 90%; }
+      .confirmation-buttons { flex-direction: column-reverse; }
+      .confirmation-buttons button { width: 100%; }
+    }
+  `;
+
+  const styleElement = document.createElement('style');
+  styleElement.textContent = modalStyles;
+  document.head.appendChild(styleElement);
+
   customElements.define('violet-pool-card', VioletPoolCard);
 }
 

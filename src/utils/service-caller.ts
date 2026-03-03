@@ -1,7 +1,6 @@
 
 interface HomeAssistant {
-  callService: (domain: string, service: string, serviceData?: any) => Promise<any>;
-  // Add more as needed
+  callService: (domain: string, service: string, serviceData?: Record<string, unknown>) => Promise<unknown>;
 }
 
 export interface ServiceCallResult {
@@ -25,7 +24,7 @@ export class ServiceCaller {
   private async callService(
     domain: string,
     service: string,
-    serviceData?: any
+    serviceData?: Record<string, unknown>
   ): Promise<ServiceCallResult> {
     try {
       await this.hass.callService(domain, service, serviceData);
@@ -44,7 +43,7 @@ export class ServiceCaller {
     speed?: number,
     duration?: number
   ): Promise<ServiceCallResult> {
-    const serviceData: any = {
+    const serviceData: Record<string, unknown> = {
       entity_id: entity,
       action,
     };
