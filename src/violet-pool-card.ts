@@ -14,7 +14,10 @@ import type { QuickAction } from './components/quick-actions';
 import { ServiceCaller } from './utils/service-caller';
 import { EntityHelper } from './utils/entity-helper';
 import { StateColorHelper } from './utils/state-color';
-import { pumpSVG, heaterSVG, solarSVG, coverSVG, lightSVG } from './utils/animated-icons';
+import { pumpSVG, heaterSVG, solarSVG, coverSVG, lightSVG, dosingDropletSVG, gaugeNeedleSVG, filterGaugeSVG, chartSVG, alertPulseSVG } from './utils/animated-icons';
+
+// Import animation styles
+import { advancedAnimationStyles, SVG_ANIMATIONS } from './styles/animation-keyframes';
 
 // HomeAssistant types
 interface HassEntity {
@@ -35,7 +38,7 @@ interface LovelaceCardConfig {
   type: string;
   entity?: string;
   entities?: string[];
-  card_type: 'pump' | 'heater' | 'solar' | 'dosing' | 'overview' | 'compact' | 'system' | 'details' | 'chemical' | 'sensor' | 'cover' | 'light' | 'filter';
+  card_type: 'pump' | 'heater' | 'solar' | 'dosing' | 'overview' | 'compact' | 'system' | 'details' | 'chemical' | 'sensor' | 'cover' | 'light' | 'filter' | 'statistics' | 'weather' | 'maintenance' | 'alerts' | 'comparison';
   name?: string;
   icon?: string;
 
@@ -224,6 +227,16 @@ export class VioletPoolCard extends LitElement {
         return this.renderLightCard();
       case 'filter':
         return this.renderFilterCard();
+      case 'statistics':
+        return this.renderStatisticsCard();
+      case 'weather':
+        return this.renderWeatherCard();
+      case 'maintenance':
+        return this.renderMaintenanceCard();
+      case 'alerts':
+        return this.renderAlertsCard();
+      case 'comparison':
+        return this.renderComparisonCard();
       default:
         return html` <ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">Unknown Card Type</span><span class="error-entity">${this.config.card_type}</span></div></div></ha-card> `;
     }
@@ -269,6 +282,11 @@ export class VioletPoolCard extends LitElement {
       case 'cover': return '#5AC8FA';
       case 'light': return '#AF52DE';
       case 'filter': return '#FF9500';
+      case 'statistics': return '#3F51B5';
+      case 'weather': return '#00BCD4';
+      case 'maintenance': return '#FF5252';
+      case 'alerts': return '#FF6F00';
+      case 'comparison': return '#9C27B0';
       default: return '#2196F3';
     }
   }
@@ -1922,6 +1940,262 @@ export class VioletPoolCard extends LitElement {
           ` : ''}
         </div>
       </ha-card>`;
+  }
+
+  /**
+   * Render Statistics Card - displays trend data and graphs
+   */
+  private renderStatisticsCard(config: VioletPoolCardConfig = this.config): TemplateResult {
+    const entity = config.entity ? this.hass.states[config.entity] : undefined;
+    const name = config.name || entity?.attributes.friendly_name || 'Statistics';
+    const accentColor = this._getAccentColor('statistics', config);
+
+    if (!entity) {
+      return html`<ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">Entity Not Found</span><span class="error-entity">${config.entity}</span></div></div></ha-card>`;
+    }
+
+    const currentValue = parseFloat(entity.state) || 0;
+    // Mock historical data for demo
+    const historicalValues = [2, 5, 8, 12, 15, 18, 16, 19, 22, 20, 25, 28];
+
+    return html`
+      <ha-card class="${this._getCardClasses(true, config)}" style="--card-accent: ${accentColor}">
+        <div class="accent-bar"></div>
+        <div class="card-content">
+          <div class="header">
+            <div class="header-icon icon-active" style="--icon-accent: ${accentColor}">
+              <ha-icon icon="${config.icon || 'mdi:chart-line'}"></ha-icon>
+            </div>
+            <div class="header-info">
+              <span class="name">${name}</span>
+              <span class="header-subtitle">Trend Analysis</span>
+            </div>
+          </div>
+
+          <div class="sensor-value-display" style="margin-top: 8px">
+            <div class="sensor-big-value">
+              <span class="sensor-num">${currentValue.toFixed(1)}</span>
+              <span class="sensor-unit">${entity.attributes.unit_of_measurement || ''}</span>
+            </div>
+          </div>
+
+          <div style="margin-top: 16px; padding: 12px; background: var(--vpc-surface); border-radius: 12px;">
+            ${chartSVG(historicalValues, accentColor)}
+          </div>
+
+          <div class="info-row">
+            <ha-icon icon="mdi:trending-up" style="--mdc-icon-size:17px;color:${accentColor}"></ha-icon>
+            <span class="info-label">Last 12 readings</span>
+            <span class="info-value">+${(Math.max(...historicalValues) - Math.min(...historicalValues)).toFixed(1)}</span>
+          </div>
+        </div>
+      </ha-card>
+    `;
+  }
+
+  /**
+   * Render Weather Impact Card - shows how weather affects pool conditions
+   */
+  private renderWeatherCard(config: VioletPoolCardConfig = this.config): TemplateResult {
+    const entity = config.entity ? this.hass.states[config.entity] : undefined;
+    const name = config.name || entity?.attributes.friendly_name || 'Weather';
+    const accentColor = this._getAccentColor('weather', config);
+
+    if (!entity) {
+      return html`<ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">Entity Not Found</span><span class="error-entity">${config.entity}</span></div></div></ha-card>`;
+    }
+
+    return html`
+      <ha-card class="${this._getCardClasses(true, config)}" style="--card-accent: ${accentColor}">
+        <div class="accent-bar"></div>
+        <div class="card-content">
+          <div class="header">
+            <div class="header-icon icon-active" style="--icon-accent: ${accentColor}">
+              <ha-icon icon="${config.icon || 'mdi:cloud'}"></ha-icon>
+            </div>
+            <div class="header-info">
+              <span class="name">${name}</span>
+              <span class="header-subtitle">Current Conditions</span>
+            </div>
+          </div>
+
+          <div class="info-row">
+            <ha-icon icon="mdi:temperature-celsius" style="--mdc-icon-size:17px;color:var(--vpc-warning, #FF9F0A)"></ha-icon>
+            <span class="info-label">Air Temperature</span>
+            <span class="info-value">${entity.attributes.temperature || 'N/A'}°</span>
+          </div>
+
+          <div class="info-row">
+            <ha-icon icon="mdi:water-percent" style="--mdc-icon-size:17px;color:#0A84FF"></ha-icon>
+            <span class="info-label">Humidity</span>
+            <span class="info-value">${entity.attributes.humidity || 'N/A'}%</span>
+          </div>
+
+          <div class="info-row">
+            <ha-icon icon="mdi:weather-cloudy" style="--mdc-icon-size:17px;color:#8E8E93"></ha-icon>
+            <span class="info-label">Condition</span>
+            <span class="info-value">${entity.state || 'Unknown'}</span>
+          </div>
+
+          <div style="margin-top: 12px; padding: 12px; background: var(--vpc-surface); border-radius: 12px; font-size: 12px; color: var(--vpc-text-secondary);">
+            ⚠️ Rain forecasted - may affect water chemistry. Consider increasing filtration.
+          </div>
+        </div>
+      </ha-card>
+    `;
+  }
+
+  /**
+   * Render Maintenance Card - shows schedules and recommendations
+   */
+  private renderMaintenanceCard(config: VioletPoolCardConfig = this.config): TemplateResult {
+    const accentColor = this._getAccentColor('maintenance', config);
+    const name = config.name || 'Maintenance';
+
+    return html`
+      <ha-card class="${this._getCardClasses(true, config)}" style="--card-accent: ${accentColor}">
+        <div class="accent-bar"></div>
+        <div class="card-content">
+          <div class="header">
+            <div class="header-icon icon-active" style="--icon-accent: ${accentColor}">
+              <ha-icon icon="${config.icon || 'mdi:wrench'}"></ha-icon>
+            </div>
+            <div class="header-info">
+              <span class="name">${name}</span>
+              <span class="header-subtitle">Schedule & Tasks</span>
+            </div>
+          </div>
+
+          <div class="info-row info-row-warning">
+            <ha-icon icon="mdi:alert-circle" style="--mdc-icon-size:17px;color:var(--vpc-warning, #FF9F0A)"></ha-icon>
+            <span class="info-label">Filter Backwash</span>
+            <span class="info-value">Due soon</span>
+          </div>
+
+          <div class="info-row">
+            <ha-icon icon="mdi:test-tube" style="--mdc-icon-size:17px;color:var(--vpc-primary)"></ha-icon>
+            <span class="info-label">Water Test</span>
+            <span class="info-value">3 days ago</span>
+          </div>
+
+          <div class="info-row">
+            <ha-icon icon="mdi:calendar-check" style="--mdc-icon-size:17px;color:var(--vpc-success, #34C759)"></ha-icon>
+            <span class="info-label">Quarterly Service</span>
+            <span class="info-value">In 45 days</span>
+          </div>
+
+          <div style="margin-top: 14px; display: flex; flex-direction: column; gap: 8px;">
+            <button style="padding: 10px 16px; border: none; border-radius: 10px; background: ${accentColor}; color: white; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+              📝 Log Task
+            </button>
+          </div>
+        </div>
+      </ha-card>
+    `;
+  }
+
+  /**
+   * Render Alerts Card - shows active alerts and notifications
+   */
+  private renderAlertsCard(config: VioletPoolCardConfig = this.config): TemplateResult {
+    const accentColor = this._getAccentColor('alerts', config);
+    const name = config.name || 'System Alerts';
+
+    // Mock alerts
+    const alerts = [
+      { severity: 'warning' as const, message: 'pH slightly elevated', icon: 'mdi:water-alert' },
+      { severity: 'info' as const, message: 'Backwash scheduled', icon: 'mdi:information' },
+    ];
+
+    return html`
+      <ha-card class="${this._getCardClasses(true, config)}" style="--card-accent: ${accentColor}">
+        <div class="accent-bar"></div>
+        <div class="card-content">
+          <div class="header">
+            <div class="header-icon icon-active" style="--icon-accent: ${accentColor}">
+              <ha-icon icon="${config.icon || 'mdi:bell-alert'}"></ha-icon>
+            </div>
+            <div class="header-info">
+              <span class="name">${name}</span>
+              <span class="header-subtitle">${alerts.length} active</span>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 12px;">
+            ${alerts.map(alert => {
+              const bgColor = alert.severity === 'error' ? 'rgba(255,59,48,0.1)' :
+                             alert.severity === 'warning' ? 'rgba(255,159,10,0.1)' :
+                             'rgba(0,122,255,0.08)';
+              const textColor = alert.severity === 'error' ? '#FF3B30' :
+                               alert.severity === 'warning' ? '#FF9F0A' :
+                               '#0A84FF';
+              return html`
+                <div class="warning-row" style="background: ${bgColor}; border-color: ${textColor}33;">
+                  <ha-icon icon="${alert.icon}" style="--mdc-icon-size:16px;color:${textColor}"></ha-icon>
+                  <span style="flex:1;color:${textColor}">${alert.message}</span>
+                </div>
+              `;
+            })}
+          </div>
+        </div>
+      </ha-card>
+    `;
+  }
+
+  /**
+   * Render Comparison Card - shows current vs target values
+   */
+  private renderComparisonCard(config: VioletPoolCardConfig = this.config): TemplateResult {
+    const entity = config.entity ? this.hass.states[config.entity] : undefined;
+    const targetEntity = (config as any).target_entity ? this.hass.states[(config as any).target_entity] : undefined;
+    const name = config.name || entity?.attributes.friendly_name || 'Comparison';
+    const accentColor = this._getAccentColor('comparison', config);
+
+    if (!entity) {
+      return html`<ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">Entity Not Found</span><span class="error-entity">${config.entity}</span></div></div></ha-card>`;
+    }
+
+    const current = parseFloat(entity.state) || 0;
+    const target = targetEntity ? parseFloat(targetEntity.state) : 25;
+    const diff = current - target;
+    const diffPercent = ((diff / target) * 100).toFixed(1);
+    const isHigher = diff > 0;
+
+    return html`
+      <ha-card class="${this._getCardClasses(true, config)}" style="--card-accent: ${accentColor}">
+        <div class="accent-bar"></div>
+        <div class="card-content">
+          <div class="header">
+            <div class="header-icon icon-active" style="--icon-accent: ${accentColor}">
+              <ha-icon icon="${config.icon || 'mdi:compare'}"></ha-icon>
+            </div>
+            <div class="header-info">
+              <span class="name">${name}</span>
+              <span class="header-subtitle">Current vs Target</span>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px;">
+            <div style="padding: 14px; background: var(--vpc-surface); border-radius: 12px; text-align: center;">
+              <div style="font-size: 11px; color: var(--vpc-text-secondary); text-transform: uppercase; font-weight: 600; margin-bottom: 6px;">Current</div>
+              <div style="font-size: 32px; font-weight: 700; color: ${accentColor}; line-height: 1;">${current.toFixed(1)}</div>
+              <div style="font-size: 13px; color: var(--vpc-text-secondary); margin-top: 3px;">${entity.attributes.unit_of_measurement || ''}</div>
+            </div>
+            <div style="padding: 14px; background: var(--vpc-surface); border-radius: 12px; text-align: center;">
+              <div style="font-size: 11px; color: var(--vpc-text-secondary); text-transform: uppercase; font-weight: 600; margin-bottom: 6px;">Target</div>
+              <div style="font-size: 32px; font-weight: 700; color: var(--vpc-success, #34C759); line-height: 1;">${target.toFixed(1)}</div>
+              <div style="font-size: 13px; color: var(--vpc-text-secondary); margin-top: 3px;">${entity.attributes.unit_of_measurement || ''}</div>
+            </div>
+          </div>
+
+          <div class="info-row" style="margin-top: 12px; background: ${isHigher ? 'rgba(255,59,48,0.08)' : 'rgba(52,199,89,0.08)'};">
+            <ha-icon icon="${isHigher ? 'mdi:trending-up' : 'mdi:trending-down'}" style="--mdc-icon-size:17px;color:${isHigher ? '#FF3B30' : '#34C759'}"></ha-icon>
+            <span class="info-label">Difference</span>
+            <span class="info-value" style="color:${isHigher ? '#FF3B30' : '#34C759'}">${isHigher ? '+' : ''}${diff.toFixed(1)} (${diffPercent}%)</span>
+          </div>
+        </div>
+      </ha-card>
+    `;
   }
 
   static get styles(): CSSResultGroup {
