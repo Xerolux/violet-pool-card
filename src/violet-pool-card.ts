@@ -324,6 +324,47 @@ export class VioletPoolCard extends LitElement {
   }
 
   /**
+   * Render Quick-Settings Panel with common pool actions
+   */
+  private _renderQuickSettingsPanel(config: VioletPoolCardConfig): TemplateResult {
+    const pumpEntityId = this._getEntityId('pump_entity', 'switch', 'pump', 0);
+    const heaterEntityId = this._getEntityId('heater_entity', 'climate', 'heater', 1);
+    const dosingEntityId = this._getEntityId('chlorine_entity', 'switch', 'dos_1_cl', 3);
+
+    return html`
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 12px; background: var(--vpc-surface); border-radius: 12px; margin-top: 12px;">
+        <!-- Pump Presets -->
+        ${[
+          { label: '⚡ Boost', speed: 3, icon: 'mdi:rocket' },
+          { label: '⚙️ Normal', speed: 2, icon: 'mdi:speedometer' },
+          { label: '🔋 Eco', speed: 1, icon: 'mdi:leaf' },
+          { label: '❌ Off', speed: 0, icon: 'mdi:power-off' },
+        ].map(preset => html`
+          <button style="padding: 10px; border: 1px solid var(--vpc-text-secondary); border-radius: 8px; background: transparent; color: var(--vpc-text); font-weight: 600; cursor: pointer; font-size: 12px; transition: all 0.2s;"
+                  @click="${(e: Event) => {
+                    e.stopPropagation();
+                    if (preset.speed === 0) {
+                      this.hass.callService('switch', 'turn_off', { entity_id: pumpEntityId });
+                    } else {
+                      this.hass.callService('switch', 'turn_on', { entity_id: pumpEntityId, service_data: { speed: preset.speed } });
+                    }
+                  }}"
+                  @mouseover="${(e: Event) => { (e.target as HTMLElement).style.background = 'var(--vpc-primary)'; (e.target as HTMLElement).style.color = 'white'; }}"
+                  @mouseout="${(e: Event) => { (e.target as HTMLElement).style.background = 'transparent'; (e.target as HTMLElement).style.color = 'var(--vpc-text)'; }}">
+            ${preset.label}
+          </button>
+        `)}
+
+        <!-- Heater Controls -->
+        <button style="padding: 10px; border: 1px solid var(--vpc-warning); border-radius: 8px; background: transparent; color: var(--vpc-warning); font-weight: 600; cursor: pointer; font-size: 12px; grid-column: span 2;"
+                @click="${(e: Event) => { e.stopPropagation(); this.hass.callService('climate', 'set_temperature', { entity_id: heaterEntityId, temperature: 26 }); }}">
+          🔥 Heater +2°
+        </button>
+      </div>
+    `;
+  }
+
+  /**
    * Get accent color for card type
    */
   private _getAccentColor(cardType: string, config: VioletPoolCardConfig): string {
@@ -1157,6 +1198,9 @@ export class VioletPoolCard extends LitElement {
                 `
               : ''}
           </div>
+
+          <!-- Quick Settings Panel -->
+          ${config.show_controls !== false ? this._renderQuickSettingsPanel(config) : ''}
 
           <!-- Device List - clean rows -->
           ${activeDevices.length > 0
