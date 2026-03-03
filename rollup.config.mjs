@@ -44,10 +44,6 @@ export default {
   },
   external: (id) => {
     return (
-      id === 'lit' ||
-      id.startsWith('lit/') ||
-      id.startsWith('@lit/') ||
-      id.startsWith('lit-') ||
       id.startsWith('home-assistant-') ||
       id === 'custom-card-helpers'
     );
