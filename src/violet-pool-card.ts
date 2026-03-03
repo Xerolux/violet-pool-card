@@ -1,5 +1,5 @@
 import { LitElement, html, css, TemplateResult, CSSResultGroup } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 
 // Import components
 import './components/status-badge';
@@ -84,7 +84,6 @@ export interface VioletPoolCardConfig extends LovelaceCardConfig {
   backwash_entity?: string;
 }
 
-@customElement('violet-pool-card')
 export class VioletPoolCard extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
   @state() private config!: VioletPoolCardConfig;
@@ -2035,6 +2034,10 @@ ha-card.theme-dark .chem-metric-track{background:rgba(255,255,255,0.08);}
     await import('./editor/violet-pool-card-editor');
     return document.createElement('violet-pool-card-editor');
   }
+}
+
+if (!customElements.get('violet-pool-card')) {
+  customElements.define('violet-pool-card', VioletPoolCard);
 }
 
 // Register card for card picker
