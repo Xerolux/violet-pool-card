@@ -5,7 +5,7 @@
   "main": "dist/violet-pool-card.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Xerolux/VIOLET_CARD_QUICK.git"
+    "url": "https://github.com/Xerolux/violet-pool-card.git"
   },
   "keywords": [
     "home-assistant",
