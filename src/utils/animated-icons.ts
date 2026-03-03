@@ -200,7 +200,7 @@ export function gaugeNeedleSVG(value: number, min: number, max: number, color: s
 /**
  * Animated filter pressure gauge with warning colors
  */
-export function filterGaugeSVG(pressure: number, maxPressure: number, color: string): TemplateResult {
+export function filterGaugeSVG(pressure: number, maxPressure: number): TemplateResult {
   const percent = Math.min(pressure / maxPressure, 1);
   const statusColor = percent > 0.8 ? '#FF5722' : percent > 0.6 ? '#FF9F0A' : '#34C759';
 
