@@ -1,6 +1,8 @@
 # Violet Pool Card
 
 <div align="center">
+<img src="logo.png" width="300" alt="Violet Pool Card Logo">
+<br><br>
 
 [![GitHub Release](https://img.shields.io/github/release/Xerolux/VIOLET_CARD_QUICK.svg?style=flat-square)](https://github.com/Xerolux/VIOLET_CARD_QUICK/releases)
 [![HACS](https://img.shields.io/badge/HACS-Custom-orange.svg?style=flat-square)](https://github.com/hacs/integration)

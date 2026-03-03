@@ -2055,5 +2055,6 @@ window.customCards.push({
   name: 'Violet Pool Card',
   description: 'Premium card for Violet Pool Controller with glassmorphism design',
   preview: true,
+  // Add icon for Card Picker if missing. This is ignored by HACS list but useful for HA Add Card UI.
 });
 
