@@ -1,5 +1,5 @@
 import { LitElement, html, css, TemplateResult, CSSResultGroup } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 
 export type BadgeState = 'off' | 'on' | 'auto' | 'manual' | 'blocked' | 'error' | 'idle' | 'heat' | 'heating' | 'cool' | 'cooling';
 
@@ -23,7 +23,6 @@ const STATE_CONFIG: Record<BadgeState, StateConfig> = {
   cooling: { color: '#00BCD4', icon: 'mdi:snowflake', label: 'COOLING' },
 };
 
-@customElement('status-badge')
 export class StatusBadge extends LitElement {
   @property() public state!: BadgeState;
   @property() public label?: string;
@@ -49,6 +48,11 @@ export class StatusBadge extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'status-badge': StatusBadge;
+    'vpc-status-badge': StatusBadge;
   }
+}
+
+
+if (!customElements.get('vpc-status-badge')) {
+  customElements.define('vpc-status-badge', StatusBadge);
 }

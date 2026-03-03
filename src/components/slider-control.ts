@@ -1,12 +1,11 @@
 import { LitElement, html, css, TemplateResult, CSSResultGroup } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 
 export interface SliderLabel {
   value: number;
   label: string;
 }
 
-@customElement('slider-control')
 export class SliderControl extends LitElement {
   @property({ type: Number }) public min = 0;
   @property({ type: Number }) public max = 100;
@@ -200,6 +199,11 @@ export class SliderControl extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'slider-control': SliderControl;
+    'vpc-slider-control': SliderControl;
   }
+}
+
+
+if (!customElements.get('vpc-slider-control')) {
+  customElements.define('vpc-slider-control', SliderControl);
 }

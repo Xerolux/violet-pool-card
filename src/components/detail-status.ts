@@ -1,7 +1,6 @@
 import { LitElement, html, css, TemplateResult, CSSResultGroup } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 
-@customElement('detail-status')
 export class DetailStatus extends LitElement {
   @property() public raw?: string | string[];
   @property() public icon?: string;
@@ -120,6 +119,11 @@ export class DetailStatus extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'detail-status': DetailStatus;
+    'vpc-detail-status': DetailStatus;
   }
+}
+
+
+if (!customElements.get('vpc-detail-status')) {
+  customElements.define('vpc-detail-status', DetailStatus);
 }
