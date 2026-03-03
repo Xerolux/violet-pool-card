@@ -1,595 +1,51 @@
-/******************************************************************************
-Copyright (c) Microsoft Corporation.
-
-Permission to use, copy, modify, and/or distribute this software for any
-purpose with or without fee is hereby granted.
-
-THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
-REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
-AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
-INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
-LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
-OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
-PERFORMANCE OF THIS SOFTWARE.
-***************************************************************************** */
-/* global Reflect, Promise, SuppressedError, Symbol, Iterator */
-
-
-function __decorate(decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-}
-
-typeof SuppressedError === "function" ? SuppressedError : function (error, suppressed, message) {
-    var e = new Error(message);
-    return e.name = "SuppressedError", e.error = error, e.suppressed = suppressed, e;
-};
-
-/**
- * @license
- * Copyright 2019 Google LLC
- * SPDX-License-Identifier: BSD-3-Clause
- */
-const t$2=globalThis,e$2=t$2.ShadowRoot&&(void 0===t$2.ShadyCSS||t$2.ShadyCSS.nativeShadow)&&"adoptedStyleSheets"in Document.prototype&&"replace"in CSSStyleSheet.prototype,s$2=Symbol(),o$4=new WeakMap;let n$3 = class n{constructor(t,e,o){if(this._$cssResult$=true,o!==s$2)throw Error("CSSResult is not constructable. Use `unsafeCSS` or `css` instead.");this.cssText=t,this.t=e;}get styleSheet(){let t=this.o;const s=this.t;if(e$2&&void 0===t){const e=void 0!==s&&1===s.length;e&&(t=o$4.get(s)),void 0===t&&((this.o=t=new CSSStyleSheet).replaceSync(this.cssText),e&&o$4.set(s,t));}return t}toString(){return this.cssText}};const r$4=t=>new n$3("string"==typeof t?t:t+"",void 0,s$2),i$3=(t,...e)=>{const o=1===t.length?t[0]:e.reduce((e,s,o)=>e+(t=>{if(true===t._$cssResult$)return t.cssText;if("number"==typeof t)return t;throw Error("Value passed to 'css' function must be a 'css' function result: "+t+". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.")})(s)+t[o+1],t[0]);return new n$3(o,t,s$2)},S$1=(s,o)=>{if(e$2)s.adoptedStyleSheets=o.map(t=>t instanceof CSSStyleSheet?t:t.styleSheet);else for(const e of o){const o=document.createElement("style"),n=t$2.litNonce;void 0!==n&&o.setAttribute("nonce",n),o.textContent=e.cssText,s.appendChild(o);}},c$2=e$2?t=>t:t=>t instanceof CSSStyleSheet?(t=>{let e="";for(const s of t.cssRules)e+=s.cssText;return r$4(e)})(t):t;
-
-/**
- * @license
- * Copyright 2017 Google LLC
- * SPDX-License-Identifier: BSD-3-Clause
- */const{is:i$2,defineProperty:e$1,getOwnPropertyDescriptor:h$1,getOwnPropertyNames:r$3,getOwnPropertySymbols:o$3,getPrototypeOf:n$2}=Object,a$1=globalThis,c$1=a$1.trustedTypes,l$1=c$1?c$1.emptyScript:"",p$1=a$1.reactiveElementPolyfillSupport,d$1=(t,s)=>t,u$1={toAttribute(t,s){switch(s){case Boolean:t=t?l$1:null;break;case Object:case Array:t=null==t?t:JSON.stringify(t);}return t},fromAttribute(t,s){let i=t;switch(s){case Boolean:i=null!==t;break;case Number:i=null===t?null:Number(t);break;case Object:case Array:try{i=JSON.parse(t);}catch(t){i=null;}}return i}},f$1=(t,s)=>!i$2(t,s),b$1={attribute:true,type:String,converter:u$1,reflect:false,useDefault:false,hasChanged:f$1};Symbol.metadata??=Symbol("metadata"),a$1.litPropertyMetadata??=new WeakMap;let y$1 = class y extends HTMLElement{static addInitializer(t){this._$Ei(),(this.l??=[]).push(t);}static get observedAttributes(){return this.finalize(),this._$Eh&&[...this._$Eh.keys()]}static createProperty(t,s=b$1){if(s.state&&(s.attribute=false),this._$Ei(),this.prototype.hasOwnProperty(t)&&((s=Object.create(s)).wrapped=true),this.elementProperties.set(t,s),!s.noAccessor){const i=Symbol(),h=this.getPropertyDescriptor(t,i,s);void 0!==h&&e$1(this.prototype,t,h);}}static getPropertyDescriptor(t,s,i){const{get:e,set:r}=h$1(this.prototype,t)??{get(){return this[s]},set(t){this[s]=t;}};return {get:e,set(s){const h=e?.call(this);r?.call(this,s),this.requestUpdate(t,h,i);},configurable:true,enumerable:true}}static getPropertyOptions(t){return this.elementProperties.get(t)??b$1}static _$Ei(){if(this.hasOwnProperty(d$1("elementProperties")))return;const t=n$2(this);t.finalize(),void 0!==t.l&&(this.l=[...t.l]),this.elementProperties=new Map(t.elementProperties);}static finalize(){if(this.hasOwnProperty(d$1("finalized")))return;if(this.finalized=true,this._$Ei(),this.hasOwnProperty(d$1("properties"))){const t=this.properties,s=[...r$3(t),...o$3(t)];for(const i of s)this.createProperty(i,t[i]);}const t=this[Symbol.metadata];if(null!==t){const s=litPropertyMetadata.get(t);if(void 0!==s)for(const[t,i]of s)this.elementProperties.set(t,i);}this._$Eh=new Map;for(const[t,s]of this.elementProperties){const i=this._$Eu(t,s);void 0!==i&&this._$Eh.set(i,t);}this.elementStyles=this.finalizeStyles(this.styles);}static finalizeStyles(s){const i=[];if(Array.isArray(s)){const e=new Set(s.flat(1/0).reverse());for(const s of e)i.unshift(c$2(s));}else void 0!==s&&i.push(c$2(s));return i}static _$Eu(t,s){const i=s.attribute;return  false===i?void 0:"string"==typeof i?i:"string"==typeof t?t.toLowerCase():void 0}constructor(){super(),this._$Ep=void 0,this.isUpdatePending=false,this.hasUpdated=false,this._$Em=null,this._$Ev();}_$Ev(){this._$ES=new Promise(t=>this.enableUpdating=t),this._$AL=new Map,this._$E_(),this.requestUpdate(),this.constructor.l?.forEach(t=>t(this));}addController(t){(this._$EO??=new Set).add(t),void 0!==this.renderRoot&&this.isConnected&&t.hostConnected?.();}removeController(t){this._$EO?.delete(t);}_$E_(){const t=new Map,s=this.constructor.elementProperties;for(const i of s.keys())this.hasOwnProperty(i)&&(t.set(i,this[i]),delete this[i]);t.size>0&&(this._$Ep=t);}createRenderRoot(){const t=this.shadowRoot??this.attachShadow(this.constructor.shadowRootOptions);return S$1(t,this.constructor.elementStyles),t}connectedCallback(){this.renderRoot??=this.createRenderRoot(),this.enableUpdating(true),this._$EO?.forEach(t=>t.hostConnected?.());}enableUpdating(t){}disconnectedCallback(){this._$EO?.forEach(t=>t.hostDisconnected?.());}attributeChangedCallback(t,s,i){this._$AK(t,i);}_$ET(t,s){const i=this.constructor.elementProperties.get(t),e=this.constructor._$Eu(t,i);if(void 0!==e&&true===i.reflect){const h=(void 0!==i.converter?.toAttribute?i.converter:u$1).toAttribute(s,i.type);this._$Em=t,null==h?this.removeAttribute(e):this.setAttribute(e,h),this._$Em=null;}}_$AK(t,s){const i=this.constructor,e=i._$Eh.get(t);if(void 0!==e&&this._$Em!==e){const t=i.getPropertyOptions(e),h="function"==typeof t.converter?{fromAttribute:t.converter}:void 0!==t.converter?.fromAttribute?t.converter:u$1;this._$Em=e;const r=h.fromAttribute(s,t.type);this[e]=r??this._$Ej?.get(e)??r,this._$Em=null;}}requestUpdate(t,s,i,e=false,h){if(void 0!==t){const r=this.constructor;if(false===e&&(h=this[t]),i??=r.getPropertyOptions(t),!((i.hasChanged??f$1)(h,s)||i.useDefault&&i.reflect&&h===this._$Ej?.get(t)&&!this.hasAttribute(r._$Eu(t,i))))return;this.C(t,s,i);} false===this.isUpdatePending&&(this._$ES=this._$EP());}C(t,s,{useDefault:i,reflect:e,wrapped:h},r){i&&!(this._$Ej??=new Map).has(t)&&(this._$Ej.set(t,r??s??this[t]),true!==h||void 0!==r)||(this._$AL.has(t)||(this.hasUpdated||i||(s=void 0),this._$AL.set(t,s)),true===e&&this._$Em!==t&&(this._$Eq??=new Set).add(t));}async _$EP(){this.isUpdatePending=true;try{await this._$ES;}catch(t){Promise.reject(t);}const t=this.scheduleUpdate();return null!=t&&await t,!this.isUpdatePending}scheduleUpdate(){return this.performUpdate()}performUpdate(){if(!this.isUpdatePending)return;if(!this.hasUpdated){if(this.renderRoot??=this.createRenderRoot(),this._$Ep){for(const[t,s]of this._$Ep)this[t]=s;this._$Ep=void 0;}const t=this.constructor.elementProperties;if(t.size>0)for(const[s,i]of t){const{wrapped:t}=i,e=this[s];true!==t||this._$AL.has(s)||void 0===e||this.C(s,void 0,i,e);}}let t=false;const s=this._$AL;try{t=this.shouldUpdate(s),t?(this.willUpdate(s),this._$EO?.forEach(t=>t.hostUpdate?.()),this.update(s)):this._$EM();}catch(s){throw t=false,this._$EM(),s}t&&this._$AE(s);}willUpdate(t){}_$AE(t){this._$EO?.forEach(t=>t.hostUpdated?.()),this.hasUpdated||(this.hasUpdated=true,this.firstUpdated(t)),this.updated(t);}_$EM(){this._$AL=new Map,this.isUpdatePending=false;}get updateComplete(){return this.getUpdateComplete()}getUpdateComplete(){return this._$ES}shouldUpdate(t){return  true}update(t){this._$Eq&&=this._$Eq.forEach(t=>this._$ET(t,this[t])),this._$EM();}updated(t){}firstUpdated(t){}};y$1.elementStyles=[],y$1.shadowRootOptions={mode:"open"},y$1[d$1("elementProperties")]=new Map,y$1[d$1("finalized")]=new Map,p$1?.({ReactiveElement:y$1}),(a$1.reactiveElementVersions??=[]).push("2.1.2");
-
-/**
- * @license
- * Copyright 2017 Google LLC
- * SPDX-License-Identifier: BSD-3-Clause
- */
-const t$1=globalThis,i$1=t=>t,s$1=t$1.trustedTypes,e=s$1?s$1.createPolicy("lit-html",{createHTML:t=>t}):void 0,h="$lit$",o$2=`lit$${Math.random().toFixed(9).slice(2)}$`,n$1="?"+o$2,r$2=`<${n$1}>`,l=document,c=()=>l.createComment(""),a=t=>null===t||"object"!=typeof t&&"function"!=typeof t,u=Array.isArray,d=t=>u(t)||"function"==typeof t?.[Symbol.iterator],f="[ \t\n\f\r]",v=/<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g,_=/-->/g,m=/>/g,p=RegExp(`>|${f}(?:([^\\s"'>=/]+)(${f}*=${f}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`,"g"),g=/'/g,$=/"/g,y=/^(?:script|style|textarea|title)$/i,x=t=>(i,...s)=>({_$litType$:t,strings:i,values:s}),b=x(1),E=Symbol.for("lit-noChange"),A=Symbol.for("lit-nothing"),C=new WeakMap,P=l.createTreeWalker(l,129);function V(t,i){if(!u(t)||!t.hasOwnProperty("raw"))throw Error("invalid template strings array");return void 0!==e?e.createHTML(i):i}const N=(t,i)=>{const s=t.length-1,e=[];let n,l=2===i?"<svg>":3===i?"<math>":"",c=v;for(let i=0;i<s;i++){const s=t[i];let a,u,d=-1,f=0;for(;f<s.length&&(c.lastIndex=f,u=c.exec(s),null!==u);)f=c.lastIndex,c===v?"!--"===u[1]?c=_:void 0!==u[1]?c=m:void 0!==u[2]?(y.test(u[2])&&(n=RegExp("</"+u[2],"g")),c=p):void 0!==u[3]&&(c=p):c===p?">"===u[0]?(c=n??v,d=-1):void 0===u[1]?d=-2:(d=c.lastIndex-u[2].length,a=u[1],c=void 0===u[3]?p:'"'===u[3]?$:g):c===$||c===g?c=p:c===_||c===m?c=v:(c=p,n=void 0);const x=c===p&&t[i+1].startsWith("/>")?" ":"";l+=c===v?s+r$2:d>=0?(e.push(a),s.slice(0,d)+h+s.slice(d)+o$2+x):s+o$2+(-2===d?i:x);}return [V(t,l+(t[s]||"<?>")+(2===i?"</svg>":3===i?"</math>":"")),e]};class S{constructor({strings:t,_$litType$:i},e){let r;this.parts=[];let l=0,a=0;const u=t.length-1,d=this.parts,[f,v]=N(t,i);if(this.el=S.createElement(f,e),P.currentNode=this.el.content,2===i||3===i){const t=this.el.content.firstChild;t.replaceWith(...t.childNodes);}for(;null!==(r=P.nextNode())&&d.length<u;){if(1===r.nodeType){if(r.hasAttributes())for(const t of r.getAttributeNames())if(t.endsWith(h)){const i=v[a++],s=r.getAttribute(t).split(o$2),e=/([.?@])?(.*)/.exec(i);d.push({type:1,index:l,name:e[2],strings:s,ctor:"."===e[1]?I:"?"===e[1]?L:"@"===e[1]?z:H}),r.removeAttribute(t);}else t.startsWith(o$2)&&(d.push({type:6,index:l}),r.removeAttribute(t));if(y.test(r.tagName)){const t=r.textContent.split(o$2),i=t.length-1;if(i>0){r.textContent=s$1?s$1.emptyScript:"";for(let s=0;s<i;s++)r.append(t[s],c()),P.nextNode(),d.push({type:2,index:++l});r.append(t[i],c());}}}else if(8===r.nodeType)if(r.data===n$1)d.push({type:2,index:l});else {let t=-1;for(;-1!==(t=r.data.indexOf(o$2,t+1));)d.push({type:7,index:l}),t+=o$2.length-1;}l++;}}static createElement(t,i){const s=l.createElement("template");return s.innerHTML=t,s}}function M(t,i,s=t,e){if(i===E)return i;let h=void 0!==e?s._$Co?.[e]:s._$Cl;const o=a(i)?void 0:i._$litDirective$;return h?.constructor!==o&&(h?._$AO?.(false),void 0===o?h=void 0:(h=new o(t),h._$AT(t,s,e)),void 0!==e?(s._$Co??=[])[e]=h:s._$Cl=h),void 0!==h&&(i=M(t,h._$AS(t,i.values),h,e)),i}class R{constructor(t,i){this._$AV=[],this._$AN=void 0,this._$AD=t,this._$AM=i;}get parentNode(){return this._$AM.parentNode}get _$AU(){return this._$AM._$AU}u(t){const{el:{content:i},parts:s}=this._$AD,e=(t?.creationScope??l).importNode(i,true);P.currentNode=e;let h=P.nextNode(),o=0,n=0,r=s[0];for(;void 0!==r;){if(o===r.index){let i;2===r.type?i=new k(h,h.nextSibling,this,t):1===r.type?i=new r.ctor(h,r.name,r.strings,this,t):6===r.type&&(i=new Z(h,this,t)),this._$AV.push(i),r=s[++n];}o!==r?.index&&(h=P.nextNode(),o++);}return P.currentNode=l,e}p(t){let i=0;for(const s of this._$AV) void 0!==s&&(void 0!==s.strings?(s._$AI(t,s,i),i+=s.strings.length-2):s._$AI(t[i])),i++;}}class k{get _$AU(){return this._$AM?._$AU??this._$Cv}constructor(t,i,s,e){this.type=2,this._$AH=A,this._$AN=void 0,this._$AA=t,this._$AB=i,this._$AM=s,this.options=e,this._$Cv=e?.isConnected??true;}get parentNode(){let t=this._$AA.parentNode;const i=this._$AM;return void 0!==i&&11===t?.nodeType&&(t=i.parentNode),t}get startNode(){return this._$AA}get endNode(){return this._$AB}_$AI(t,i=this){t=M(this,t,i),a(t)?t===A||null==t||""===t?(this._$AH!==A&&this._$AR(),this._$AH=A):t!==this._$AH&&t!==E&&this._(t):void 0!==t._$litType$?this.$(t):void 0!==t.nodeType?this.T(t):d(t)?this.k(t):this._(t);}O(t){return this._$AA.parentNode.insertBefore(t,this._$AB)}T(t){this._$AH!==t&&(this._$AR(),this._$AH=this.O(t));}_(t){this._$AH!==A&&a(this._$AH)?this._$AA.nextSibling.data=t:this.T(l.createTextNode(t)),this._$AH=t;}$(t){const{values:i,_$litType$:s}=t,e="number"==typeof s?this._$AC(t):(void 0===s.el&&(s.el=S.createElement(V(s.h,s.h[0]),this.options)),s);if(this._$AH?._$AD===e)this._$AH.p(i);else {const t=new R(e,this),s=t.u(this.options);t.p(i),this.T(s),this._$AH=t;}}_$AC(t){let i=C.get(t.strings);return void 0===i&&C.set(t.strings,i=new S(t)),i}k(t){u(this._$AH)||(this._$AH=[],this._$AR());const i=this._$AH;let s,e=0;for(const h of t)e===i.length?i.push(s=new k(this.O(c()),this.O(c()),this,this.options)):s=i[e],s._$AI(h),e++;e<i.length&&(this._$AR(s&&s._$AB.nextSibling,e),i.length=e);}_$AR(t=this._$AA.nextSibling,s){for(this._$AP?.(false,true,s);t!==this._$AB;){const s=i$1(t).nextSibling;i$1(t).remove(),t=s;}}setConnected(t){ void 0===this._$AM&&(this._$Cv=t,this._$AP?.(t));}}class H{get tagName(){return this.element.tagName}get _$AU(){return this._$AM._$AU}constructor(t,i,s,e,h){this.type=1,this._$AH=A,this._$AN=void 0,this.element=t,this.name=i,this._$AM=e,this.options=h,s.length>2||""!==s[0]||""!==s[1]?(this._$AH=Array(s.length-1).fill(new String),this.strings=s):this._$AH=A;}_$AI(t,i=this,s,e){const h=this.strings;let o=false;if(void 0===h)t=M(this,t,i,0),o=!a(t)||t!==this._$AH&&t!==E,o&&(this._$AH=t);else {const e=t;let n,r;for(t=h[0],n=0;n<h.length-1;n++)r=M(this,e[s+n],i,n),r===E&&(r=this._$AH[n]),o||=!a(r)||r!==this._$AH[n],r===A?t=A:t!==A&&(t+=(r??"")+h[n+1]),this._$AH[n]=r;}o&&!e&&this.j(t);}j(t){t===A?this.element.removeAttribute(this.name):this.element.setAttribute(this.name,t??"");}}class I extends H{constructor(){super(...arguments),this.type=3;}j(t){this.element[this.name]=t===A?void 0:t;}}class L extends H{constructor(){super(...arguments),this.type=4;}j(t){this.element.toggleAttribute(this.name,!!t&&t!==A);}}class z extends H{constructor(t,i,s,e,h){super(t,i,s,e,h),this.type=5;}_$AI(t,i=this){if((t=M(this,t,i,0)??A)===E)return;const s=this._$AH,e=t===A&&s!==A||t.capture!==s.capture||t.once!==s.once||t.passive!==s.passive,h=t!==A&&(s===A||e);e&&this.element.removeEventListener(this.name,this,s),h&&this.element.addEventListener(this.name,this,t),this._$AH=t;}handleEvent(t){"function"==typeof this._$AH?this._$AH.call(this.options?.host??this.element,t):this._$AH.handleEvent(t);}}class Z{constructor(t,i,s){this.element=t,this.type=6,this._$AN=void 0,this._$AM=i,this.options=s;}get _$AU(){return this._$AM._$AU}_$AI(t){M(this,t);}}const B=t$1.litHtmlPolyfillSupport;B?.(S,k),(t$1.litHtmlVersions??=[]).push("3.3.2");const D=(t,i,s)=>{const e=s?.renderBefore??i;let h=e._$litPart$;if(void 0===h){const t=s?.renderBefore??null;e._$litPart$=h=new k(i.insertBefore(c(),t),t,void 0,s??{});}return h._$AI(t),h};
-
-/**
- * @license
- * Copyright 2017 Google LLC
- * SPDX-License-Identifier: BSD-3-Clause
- */const s=globalThis;class i extends y$1{constructor(){super(...arguments),this.renderOptions={host:this},this._$Do=void 0;}createRenderRoot(){const t=super.createRenderRoot();return this.renderOptions.renderBefore??=t.firstChild,t}update(t){const r=this.render();this.hasUpdated||(this.renderOptions.isConnected=this.isConnected),super.update(t),this._$Do=D(r,this.renderRoot,this.renderOptions);}connectedCallback(){super.connectedCallback(),this._$Do?.setConnected(true);}disconnectedCallback(){super.disconnectedCallback(),this._$Do?.setConnected(false);}render(){return E}}i._$litElement$=true,i["finalized"]=true,s.litElementHydrateSupport?.({LitElement:i});const o$1=s.litElementPolyfillSupport;o$1?.({LitElement:i});(s.litElementVersions??=[]).push("4.2.2");
-
-/**
- * @license
- * Copyright 2017 Google LLC
- * SPDX-License-Identifier: BSD-3-Clause
- */
-const t=t=>(e,o)=>{ void 0!==o?o.addInitializer(()=>{customElements.define(t,e);}):customElements.define(t,e);};
-
-/**
- * @license
- * Copyright 2017 Google LLC
- * SPDX-License-Identifier: BSD-3-Clause
- */const o={attribute:true,type:String,converter:u$1,reflect:false,hasChanged:f$1},r$1=(t=o,e,r)=>{const{kind:n,metadata:i}=r;let s=globalThis.litPropertyMetadata.get(i);if(void 0===s&&globalThis.litPropertyMetadata.set(i,s=new Map),"setter"===n&&((t=Object.create(t)).wrapped=true),s.set(r.name,t),"accessor"===n){const{name:o}=r;return {set(r){const n=e.get.call(this);e.set.call(this,r),this.requestUpdate(o,n,t,true,r);},init(e){return void 0!==e&&this.C(o,void 0,t,e),e}}}if("setter"===n){const{name:o}=r;return function(r){const n=this[o];e.call(this,r),this.requestUpdate(o,n,t,true,r);}}throw Error("Unsupported decorator location: "+n)};function n(t){return (e,o)=>"object"==typeof o?r$1(t,e,o):((t,e,o)=>{const r=e.hasOwnProperty(o);return e.constructor.createProperty(o,t),r?Object.getOwnPropertyDescriptor(e,o):void 0})(t,e,o)}
-
-/**
- * @license
- * Copyright 2017 Google LLC
- * SPDX-License-Identifier: BSD-3-Clause
- */function r(r){return n({...r,state:true,attribute:false})}
-
-const STATE_CONFIG = {
-    off: { color: '#757575', icon: 'mdi:power-off', label: 'OFF' },
-    on: { color: '#4CAF50', icon: 'mdi:power-on', label: 'ON' },
-    auto: { color: '#2196F3', icon: 'mdi:autorenew', label: 'AUTO' },
-    manual: { color: '#FF9800', icon: 'mdi:hand-back-right', label: 'MANUAL' },
-    blocked: { color: '#FFC107', icon: 'mdi:block-helper', label: 'BLOCKED' },
-    error: { color: '#F44336', icon: 'mdi:alert-circle', label: 'ERROR' },
-    idle: { color: '#9E9E9E', icon: 'mdi:sleep', label: 'IDLE' },
-    heat: { color: '#FF5722', icon: 'mdi:fire', label: 'HEAT' },
-    heating: { color: '#FF5722', icon: 'mdi:fire', label: 'HEATING' },
-    cool: { color: '#00BCD4', icon: 'mdi:snowflake', label: 'COOL' },
-    cooling: { color: '#00BCD4', icon: 'mdi:snowflake', label: 'COOLING' },
-};
-let StatusBadge = class StatusBadge extends i {
-    constructor() {
-        super(...arguments);
-        this.pulse = false;
-        this.showIcon = true;
-    }
-    render() {
-        const config = STATE_CONFIG[this.state] || STATE_CONFIG.off;
-        const displayLabel = this.label || config.label;
-        const displayIcon = this.icon || config.icon;
-        return b` <div class="badge ${this.state} ${this.pulse ? 'pulse' : ''}" style="--badge-color: ${config.color}" > ${this.showIcon ? b `<ha-icon icon="${displayIcon}"></ha-icon>` : ''}
-        <span class="label">${displayLabel}</span>
+function e(e,t,i,a){var s,o=arguments.length,r=o<3?t:null===a?a=Object.getOwnPropertyDescriptor(t,i):a;if("object"==typeof Reflect&&"function"==typeof Reflect.decorate)r=Reflect.decorate(e,t,i,a);else for(var n=e.length-1;n>=0;n--)(s=e[n])&&(r=(o<3?s(r):o>3?s(t,i,r):s(t,i))||r);return o>3&&r&&Object.defineProperty(t,i,r),r}"function"==typeof SuppressedError&&SuppressedError;const t=globalThis,i=t.ShadowRoot&&(void 0===t.ShadyCSS||t.ShadyCSS.nativeShadow)&&"adoptedStyleSheets"in Document.prototype&&"replace"in CSSStyleSheet.prototype,a=Symbol(),s=new WeakMap;let o=class{constructor(e,t,i){if(this._$cssResult$=!0,i!==a)throw Error("CSSResult is not constructable. Use `unsafeCSS` or `css` instead.");this.cssText=e,this.t=t}get styleSheet(){let e=this.o;const t=this.t;if(i&&void 0===e){const i=void 0!==t&&1===t.length;i&&(e=s.get(t)),void 0===e&&((this.o=e=new CSSStyleSheet).replaceSync(this.cssText),i&&s.set(t,e))}return e}toString(){return this.cssText}};const r=(e,...t)=>{const i=1===e.length?e[0]:t.reduce((t,i,a)=>t+(e=>{if(!0===e._$cssResult$)return e.cssText;if("number"==typeof e)return e;throw Error("Value passed to 'css' function must be a 'css' function result: "+e+". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.")})(i)+e[a+1],e[0]);return new o(i,e,a)},n=i?e=>e:e=>e instanceof CSSStyleSheet?(e=>{let t="";for(const i of e.cssRules)t+=i.cssText;return(e=>new o("string"==typeof e?e:e+"",void 0,a))(t)})(e):e,{is:c,defineProperty:l,getOwnPropertyDescriptor:d,getOwnPropertyNames:p,getOwnPropertySymbols:h,getPrototypeOf:v}=Object,g=globalThis,u=g.trustedTypes,m=u?u.emptyScript:"",f=g.reactiveElementPolyfillSupport,x=(e,t)=>e,b={toAttribute(e,t){switch(t){case Boolean:e=e?m:null;break;case Object:case Array:e=null==e?e:JSON.stringify(e)}return e},fromAttribute(e,t){let i=e;switch(t){case Boolean:i=null!==e;break;case Number:i=null===e?null:Number(e);break;case Object:case Array:try{i=JSON.parse(e)}catch(e){i=null}}return i}},y=(e,t)=>!c(e,t),w={attribute:!0,type:String,converter:b,reflect:!1,useDefault:!1,hasChanged:y};Symbol.metadata??=Symbol("metadata"),g.litPropertyMetadata??=new WeakMap;let $=class extends HTMLElement{static addInitializer(e){this._$Ei(),(this.l??=[]).push(e)}static get observedAttributes(){return this.finalize(),this._$Eh&&[...this._$Eh.keys()]}static createProperty(e,t=w){if(t.state&&(t.attribute=!1),this._$Ei(),this.prototype.hasOwnProperty(e)&&((t=Object.create(t)).wrapped=!0),this.elementProperties.set(e,t),!t.noAccessor){const i=Symbol(),a=this.getPropertyDescriptor(e,i,t);void 0!==a&&l(this.prototype,e,a)}}static getPropertyDescriptor(e,t,i){const{get:a,set:s}=d(this.prototype,e)??{get(){return this[t]},set(e){this[t]=e}};return{get:a,set(t){const o=a?.call(this);s?.call(this,t),this.requestUpdate(e,o,i)},configurable:!0,enumerable:!0}}static getPropertyOptions(e){return this.elementProperties.get(e)??w}static _$Ei(){if(this.hasOwnProperty(x("elementProperties")))return;const e=v(this);e.finalize(),void 0!==e.l&&(this.l=[...e.l]),this.elementProperties=new Map(e.elementProperties)}static finalize(){if(this.hasOwnProperty(x("finalized")))return;if(this.finalized=!0,this._$Ei(),this.hasOwnProperty(x("properties"))){const e=this.properties,t=[...p(e),...h(e)];for(const i of t)this.createProperty(i,e[i])}const e=this[Symbol.metadata];if(null!==e){const t=litPropertyMetadata.get(e);if(void 0!==t)for(const[e,i]of t)this.elementProperties.set(e,i)}this._$Eh=new Map;for(const[e,t]of this.elementProperties){const i=this._$Eu(e,t);void 0!==i&&this._$Eh.set(i,e)}this.elementStyles=this.finalizeStyles(this.styles)}static finalizeStyles(e){const t=[];if(Array.isArray(e)){const i=new Set(e.flat(1/0).reverse());for(const e of i)t.unshift(n(e))}else void 0!==e&&t.push(n(e));return t}static _$Eu(e,t){const i=t.attribute;return!1===i?void 0:"string"==typeof i?i:"string"==typeof e?e.toLowerCase():void 0}constructor(){super(),this._$Ep=void 0,this.isUpdatePending=!1,this.hasUpdated=!1,this._$Em=null,this._$Ev()}_$Ev(){this._$ES=new Promise(e=>this.enableUpdating=e),this._$AL=new Map,this._$E_(),this.requestUpdate(),this.constructor.l?.forEach(e=>e(this))}addController(e){(this._$EO??=new Set).add(e),void 0!==this.renderRoot&&this.isConnected&&e.hostConnected?.()}removeController(e){this._$EO?.delete(e)}_$E_(){const e=new Map,t=this.constructor.elementProperties;for(const i of t.keys())this.hasOwnProperty(i)&&(e.set(i,this[i]),delete this[i]);e.size>0&&(this._$Ep=e)}createRenderRoot(){const e=this.shadowRoot??this.attachShadow(this.constructor.shadowRootOptions);return((e,a)=>{if(i)e.adoptedStyleSheets=a.map(e=>e instanceof CSSStyleSheet?e:e.styleSheet);else for(const i of a){const a=document.createElement("style"),s=t.litNonce;void 0!==s&&a.setAttribute("nonce",s),a.textContent=i.cssText,e.appendChild(a)}})(e,this.constructor.elementStyles),e}connectedCallback(){this.renderRoot??=this.createRenderRoot(),this.enableUpdating(!0),this._$EO?.forEach(e=>e.hostConnected?.())}enableUpdating(e){}disconnectedCallback(){this._$EO?.forEach(e=>e.hostDisconnected?.())}attributeChangedCallback(e,t,i){this._$AK(e,i)}_$ET(e,t){const i=this.constructor.elementProperties.get(e),a=this.constructor._$Eu(e,i);if(void 0!==a&&!0===i.reflect){const s=(void 0!==i.converter?.toAttribute?i.converter:b).toAttribute(t,i.type);this._$Em=e,null==s?this.removeAttribute(a):this.setAttribute(a,s),this._$Em=null}}_$AK(e,t){const i=this.constructor,a=i._$Eh.get(e);if(void 0!==a&&this._$Em!==a){const e=i.getPropertyOptions(a),s="function"==typeof e.converter?{fromAttribute:e.converter}:void 0!==e.converter?.fromAttribute?e.converter:b;this._$Em=a;const o=s.fromAttribute(t,e.type);this[a]=o??this._$Ej?.get(a)??o,this._$Em=null}}requestUpdate(e,t,i,a=!1,s){if(void 0!==e){const o=this.constructor;if(!1===a&&(s=this[e]),i??=o.getPropertyOptions(e),!((i.hasChanged??y)(s,t)||i.useDefault&&i.reflect&&s===this._$Ej?.get(e)&&!this.hasAttribute(o._$Eu(e,i))))return;this.C(e,t,i)}!1===this.isUpdatePending&&(this._$ES=this._$EP())}C(e,t,{useDefault:i,reflect:a,wrapped:s},o){i&&!(this._$Ej??=new Map).has(e)&&(this._$Ej.set(e,o??t??this[e]),!0!==s||void 0!==o)||(this._$AL.has(e)||(this.hasUpdated||i||(t=void 0),this._$AL.set(e,t)),!0===a&&this._$Em!==e&&(this._$Eq??=new Set).add(e))}async _$EP(){this.isUpdatePending=!0;try{await this._$ES}catch(e){Promise.reject(e)}const e=this.scheduleUpdate();return null!=e&&await e,!this.isUpdatePending}scheduleUpdate(){return this.performUpdate()}performUpdate(){if(!this.isUpdatePending)return;if(!this.hasUpdated){if(this.renderRoot??=this.createRenderRoot(),this._$Ep){for(const[e,t]of this._$Ep)this[e]=t;this._$Ep=void 0}const e=this.constructor.elementProperties;if(e.size>0)for(const[t,i]of e){const{wrapped:e}=i,a=this[t];!0!==e||this._$AL.has(t)||void 0===a||this.C(t,void 0,i,a)}}let e=!1;const t=this._$AL;try{e=this.shouldUpdate(t),e?(this.willUpdate(t),this._$EO?.forEach(e=>e.hostUpdate?.()),this.update(t)):this._$EM()}catch(t){throw e=!1,this._$EM(),t}e&&this._$AE(t)}willUpdate(e){}_$AE(e){this._$EO?.forEach(e=>e.hostUpdated?.()),this.hasUpdated||(this.hasUpdated=!0,this.firstUpdated(e)),this.updated(e)}_$EM(){this._$AL=new Map,this.isUpdatePending=!1}get updateComplete(){return this.getUpdateComplete()}getUpdateComplete(){return this._$ES}shouldUpdate(e){return!0}update(e){this._$Eq&&=this._$Eq.forEach(e=>this._$ET(e,this[e])),this._$EM()}updated(e){}firstUpdated(e){}};$.elementStyles=[],$.shadowRootOptions={mode:"open"},$[x("elementProperties")]=new Map,$[x("finalized")]=new Map,f?.({ReactiveElement:$}),(g.reactiveElementVersions??=[]).push("2.1.2");const _=globalThis,k=e=>e,C=_.trustedTypes,F=C?C.createPolicy("lit-html",{createHTML:e=>e}):void 0,A="$lit$",z=`lit$${Math.random().toFixed(9).slice(2)}$`,S="?"+z,E=`<${S}>`,P=document,T=()=>P.createComment(""),M=e=>null===e||"object"!=typeof e&&"function"!=typeof e,O=Array.isArray,D="[ \t\n\f\r]",I=/<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g,H=/-->/g,N=/>/g,V=RegExp(`>|${D}(?:([^\\s"'>=/]+)(${D}*=${D}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`,"g"),R=/'/g,U=/"/g,B=/^(?:script|style|textarea|title)$/i,L=(e,...t)=>({_$litType$:1,strings:e,values:t}),j=Symbol.for("lit-noChange"),q=Symbol.for("lit-nothing"),W=new WeakMap,Z=P.createTreeWalker(P,129);function K(e,t){if(!O(e)||!e.hasOwnProperty("raw"))throw Error("invalid template strings array");return void 0!==F?F.createHTML(t):t}const Y=(e,t)=>{const i=e.length-1,a=[];let s,o=2===t?"<svg>":3===t?"<math>":"",r=I;for(let t=0;t<i;t++){const i=e[t];let n,c,l=-1,d=0;for(;d<i.length&&(r.lastIndex=d,c=r.exec(i),null!==c);)d=r.lastIndex,r===I?"!--"===c[1]?r=H:void 0!==c[1]?r=N:void 0!==c[2]?(B.test(c[2])&&(s=RegExp("</"+c[2],"g")),r=V):void 0!==c[3]&&(r=V):r===V?">"===c[0]?(r=s??I,l=-1):void 0===c[1]?l=-2:(l=r.lastIndex-c[2].length,n=c[1],r=void 0===c[3]?V:'"'===c[3]?U:R):r===U||r===R?r=V:r===H||r===N?r=I:(r=V,s=void 0);const p=r===V&&e[t+1].startsWith("/>")?" ":"";o+=r===I?i+E:l>=0?(a.push(n),i.slice(0,l)+A+i.slice(l)+z+p):i+z+(-2===l?t:p)}return[K(e,o+(e[i]||"<?>")+(2===t?"</svg>":3===t?"</math>":"")),a]};class X{constructor({strings:e,_$litType$:t},i){let a;this.parts=[];let s=0,o=0;const r=e.length-1,n=this.parts,[c,l]=Y(e,t);if(this.el=X.createElement(c,i),Z.currentNode=this.el.content,2===t||3===t){const e=this.el.content.firstChild;e.replaceWith(...e.childNodes)}for(;null!==(a=Z.nextNode())&&n.length<r;){if(1===a.nodeType){if(a.hasAttributes())for(const e of a.getAttributeNames())if(e.endsWith(A)){const t=l[o++],i=a.getAttribute(e).split(z),r=/([.?@])?(.*)/.exec(t);n.push({type:1,index:s,name:r[2],strings:i,ctor:"."===r[1]?te:"?"===r[1]?ie:"@"===r[1]?ae:ee}),a.removeAttribute(e)}else e.startsWith(z)&&(n.push({type:6,index:s}),a.removeAttribute(e));if(B.test(a.tagName)){const e=a.textContent.split(z),t=e.length-1;if(t>0){a.textContent=C?C.emptyScript:"";for(let i=0;i<t;i++)a.append(e[i],T()),Z.nextNode(),n.push({type:2,index:++s});a.append(e[t],T())}}}else if(8===a.nodeType)if(a.data===S)n.push({type:2,index:s});else{let e=-1;for(;-1!==(e=a.data.indexOf(z,e+1));)n.push({type:7,index:s}),e+=z.length-1}s++}}static createElement(e,t){const i=P.createElement("template");return i.innerHTML=e,i}}function G(e,t,i=e,a){if(t===j)return t;let s=void 0!==a?i._$Co?.[a]:i._$Cl;const o=M(t)?void 0:t._$litDirective$;return s?.constructor!==o&&(s?._$AO?.(!1),void 0===o?s=void 0:(s=new o(e),s._$AT(e,i,a)),void 0!==a?(i._$Co??=[])[a]=s:i._$Cl=s),void 0!==s&&(t=G(e,s._$AS(e,t.values),s,a)),t}class J{constructor(e,t){this._$AV=[],this._$AN=void 0,this._$AD=e,this._$AM=t}get parentNode(){return this._$AM.parentNode}get _$AU(){return this._$AM._$AU}u(e){const{el:{content:t},parts:i}=this._$AD,a=(e?.creationScope??P).importNode(t,!0);Z.currentNode=a;let s=Z.nextNode(),o=0,r=0,n=i[0];for(;void 0!==n;){if(o===n.index){let t;2===n.type?t=new Q(s,s.nextSibling,this,e):1===n.type?t=new n.ctor(s,n.name,n.strings,this,e):6===n.type&&(t=new se(s,this,e)),this._$AV.push(t),n=i[++r]}o!==n?.index&&(s=Z.nextNode(),o++)}return Z.currentNode=P,a}p(e){let t=0;for(const i of this._$AV)void 0!==i&&(void 0!==i.strings?(i._$AI(e,i,t),t+=i.strings.length-2):i._$AI(e[t])),t++}}class Q{get _$AU(){return this._$AM?._$AU??this._$Cv}constructor(e,t,i,a){this.type=2,this._$AH=q,this._$AN=void 0,this._$AA=e,this._$AB=t,this._$AM=i,this.options=a,this._$Cv=a?.isConnected??!0}get parentNode(){let e=this._$AA.parentNode;const t=this._$AM;return void 0!==t&&11===e?.nodeType&&(e=t.parentNode),e}get startNode(){return this._$AA}get endNode(){return this._$AB}_$AI(e,t=this){e=G(this,e,t),M(e)?e===q||null==e||""===e?(this._$AH!==q&&this._$AR(),this._$AH=q):e!==this._$AH&&e!==j&&this._(e):void 0!==e._$litType$?this.$(e):void 0!==e.nodeType?this.T(e):(e=>O(e)||"function"==typeof e?.[Symbol.iterator])(e)?this.k(e):this._(e)}O(e){return this._$AA.parentNode.insertBefore(e,this._$AB)}T(e){this._$AH!==e&&(this._$AR(),this._$AH=this.O(e))}_(e){this._$AH!==q&&M(this._$AH)?this._$AA.nextSibling.data=e:this.T(P.createTextNode(e)),this._$AH=e}$(e){const{values:t,_$litType$:i}=e,a="number"==typeof i?this._$AC(e):(void 0===i.el&&(i.el=X.createElement(K(i.h,i.h[0]),this.options)),i);if(this._$AH?._$AD===a)this._$AH.p(t);else{const e=new J(a,this),i=e.u(this.options);e.p(t),this.T(i),this._$AH=e}}_$AC(e){let t=W.get(e.strings);return void 0===t&&W.set(e.strings,t=new X(e)),t}k(e){O(this._$AH)||(this._$AH=[],this._$AR());const t=this._$AH;let i,a=0;for(const s of e)a===t.length?t.push(i=new Q(this.O(T()),this.O(T()),this,this.options)):i=t[a],i._$AI(s),a++;a<t.length&&(this._$AR(i&&i._$AB.nextSibling,a),t.length=a)}_$AR(e=this._$AA.nextSibling,t){for(this._$AP?.(!1,!0,t);e!==this._$AB;){const t=k(e).nextSibling;k(e).remove(),e=t}}setConnected(e){void 0===this._$AM&&(this._$Cv=e,this._$AP?.(e))}}class ee{get tagName(){return this.element.tagName}get _$AU(){return this._$AM._$AU}constructor(e,t,i,a,s){this.type=1,this._$AH=q,this._$AN=void 0,this.element=e,this.name=t,this._$AM=a,this.options=s,i.length>2||""!==i[0]||""!==i[1]?(this._$AH=Array(i.length-1).fill(new String),this.strings=i):this._$AH=q}_$AI(e,t=this,i,a){const s=this.strings;let o=!1;if(void 0===s)e=G(this,e,t,0),o=!M(e)||e!==this._$AH&&e!==j,o&&(this._$AH=e);else{const a=e;let r,n;for(e=s[0],r=0;r<s.length-1;r++)n=G(this,a[i+r],t,r),n===j&&(n=this._$AH[r]),o||=!M(n)||n!==this._$AH[r],n===q?e=q:e!==q&&(e+=(n??"")+s[r+1]),this._$AH[r]=n}o&&!a&&this.j(e)}j(e){e===q?this.element.removeAttribute(this.name):this.element.setAttribute(this.name,e??"")}}class te extends ee{constructor(){super(...arguments),this.type=3}j(e){this.element[this.name]=e===q?void 0:e}}class ie extends ee{constructor(){super(...arguments),this.type=4}j(e){this.element.toggleAttribute(this.name,!!e&&e!==q)}}class ae extends ee{constructor(e,t,i,a,s){super(e,t,i,a,s),this.type=5}_$AI(e,t=this){if((e=G(this,e,t,0)??q)===j)return;const i=this._$AH,a=e===q&&i!==q||e.capture!==i.capture||e.once!==i.once||e.passive!==i.passive,s=e!==q&&(i===q||a);a&&this.element.removeEventListener(this.name,this,i),s&&this.element.addEventListener(this.name,this,e),this._$AH=e}handleEvent(e){"function"==typeof this._$AH?this._$AH.call(this.options?.host??this.element,e):this._$AH.handleEvent(e)}}class se{constructor(e,t,i){this.element=e,this.type=6,this._$AN=void 0,this._$AM=t,this.options=i}get _$AU(){return this._$AM._$AU}_$AI(e){G(this,e)}}const oe=_.litHtmlPolyfillSupport;oe?.(X,Q),(_.litHtmlVersions??=[]).push("3.3.2");const re=globalThis;class ne extends ${constructor(){super(...arguments),this.renderOptions={host:this},this._$Do=void 0}createRenderRoot(){const e=super.createRenderRoot();return this.renderOptions.renderBefore??=e.firstChild,e}update(e){const t=this.render();this.hasUpdated||(this.renderOptions.isConnected=this.isConnected),super.update(e),this._$Do=((e,t,i)=>{const a=i?.renderBefore??t;let s=a._$litPart$;if(void 0===s){const e=i?.renderBefore??null;a._$litPart$=s=new Q(t.insertBefore(T(),e),e,void 0,i??{})}return s._$AI(e),s})(t,this.renderRoot,this.renderOptions)}connectedCallback(){super.connectedCallback(),this._$Do?.setConnected(!0)}disconnectedCallback(){super.disconnectedCallback(),this._$Do?.setConnected(!1)}render(){return j}}ne._$litElement$=!0,ne.finalized=!0,re.litElementHydrateSupport?.({LitElement:ne});const ce=re.litElementPolyfillSupport;ce?.({LitElement:ne}),(re.litElementVersions??=[]).push("4.2.2");const le={attribute:!0,type:String,converter:b,reflect:!1,hasChanged:y},de=(e=le,t,i)=>{const{kind:a,metadata:s}=i;let o=globalThis.litPropertyMetadata.get(s);if(void 0===o&&globalThis.litPropertyMetadata.set(s,o=new Map),"setter"===a&&((e=Object.create(e)).wrapped=!0),o.set(i.name,e),"accessor"===a){const{name:a}=i;return{set(i){const s=t.get.call(this);t.set.call(this,i),this.requestUpdate(a,s,e,!0,i)},init(t){return void 0!==t&&this.C(a,void 0,e,t),t}}}if("setter"===a){const{name:a}=i;return function(i){const s=this[a];t.call(this,i),this.requestUpdate(a,s,e,!0,i)}}throw Error("Unsupported decorator location: "+a)};function pe(e){return(t,i)=>"object"==typeof i?de(e,t,i):((e,t,i)=>{const a=t.hasOwnProperty(i);return t.constructor.createProperty(i,e),a?Object.getOwnPropertyDescriptor(t,i):void 0})(e,t,i)}function he(e){return pe({...e,state:!0,attribute:!1})}const ve={off:{color:"#757575",icon:"mdi:power-off",label:"OFF"},on:{color:"#4CAF50",icon:"mdi:power-on",label:"ON"},auto:{color:"#2196F3",icon:"mdi:autorenew",label:"AUTO"},manual:{color:"#FF9800",icon:"mdi:hand-back-right",label:"MANUAL"},blocked:{color:"#FFC107",icon:"mdi:block-helper",label:"BLOCKED"},error:{color:"#F44336",icon:"mdi:alert-circle",label:"ERROR"},idle:{color:"#9E9E9E",icon:"mdi:sleep",label:"IDLE"},heat:{color:"#FF5722",icon:"mdi:fire",label:"HEAT"},heating:{color:"#FF5722",icon:"mdi:fire",label:"HEATING"},cool:{color:"#00BCD4",icon:"mdi:snowflake",label:"COOL"},cooling:{color:"#00BCD4",icon:"mdi:snowflake",label:"COOLING"}};class ge extends ne{constructor(){super(...arguments),this.pulse=!1,this.showIcon=!0}render(){const e=ve[this.state]||ve.off;return L` <div class="badge ${this.state} ${this.pulse?"pulse":""}" style="--badge-color: ${e.color}" > ${this.showIcon?L`<ha-icon icon="${this.icon||e.icon}"></ha-icon>`:""}
+        <span class="label">${this.label||e.label}</span>
       </div>
-    `;
-    }
-    static get styles() {
-        return i$3`:host{display:inline-block}.badge{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:6px 14px;border-radius:16px;background:var(--badge-color);color:white;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap;box-shadow:0 2px 4px rgba(0,0,0,0.1);transition:all 0.2s ease}.badge:hover{transform:translateY(-1px);box-shadow:0 3px 6px rgba(0,0,0,0.15)}.badge ha-icon{--mdc-icon-size:16px;display:flex;align-items:center}.label{line-height:1}.badge.pulse{animation:pulse 2s ease-in-out infinite}@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.85;transform:scale(1.02)}}.badge.auto ha-icon{animation:rotate 3s linear infinite}@keyframes rotate{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}.badge.heating,.badge.cooling{animation:breathe 2s ease-in-out infinite}@keyframes breathe{0%,100%{opacity:1}50%{opacity:0.7}}`;
-    }
-};
-__decorate([
-    n()
-], StatusBadge.prototype, "state", void 0);
-__decorate([
-    n()
-], StatusBadge.prototype, "label", void 0);
-__decorate([
-    n()
-], StatusBadge.prototype, "icon", void 0);
-__decorate([
-    n({ type: Boolean })
-], StatusBadge.prototype, "pulse", void 0);
-__decorate([
-    n({ type: Boolean })
-], StatusBadge.prototype, "showIcon", void 0);
-StatusBadge = __decorate([
-    t('status-badge')
-], StatusBadge);
-
-const STATUS_CONFIG = {
-    normal: { color: '#4CAF50', icon: 'mdi:check-circle' },
-    ok: { color: '#4CAF50', icon: 'mdi:check-circle' },
-    low: { color: '#2196F3', icon: 'mdi:arrow-down-circle' },
-    high: { color: '#FF9800', icon: 'mdi:arrow-up-circle' },
-    critical: { color: '#F44336', icon: 'mdi:alert-circle' },
-    warning: { color: '#FF9800', icon: 'mdi:alert' },
-    error: { color: '#F44336', icon: 'mdi:close-circle' },
-};
-let ValueDisplay = class ValueDisplay extends i {
-    constructor() {
-        super(...arguments);
-        this.unit = '';
-        this.label = '';
-        this.status = 'normal';
-        this.decimals = 1;
-        this.showStatus = true;
-        this.showRange = false;
-        this.large = false;
-    }
-    formatValue(val) {
-        if (val === undefined || val === null)
-            return '--';
-        return val.toFixed(this.decimals);
-    }
-    getStatusFromValue() {
-        if (this.value === undefined || this.value === null)
-            return 'normal';
-        // If explicit status is set, use it
-        if (this.status !== 'normal')
-            return this.status;
-        // Auto-calculate status based on min/max
-        if (this.min !== undefined && this.value < this.min) {
-            return this.value < this.min * 0.9 ? 'critical' : 'low';
-        }
-        if (this.max !== undefined && this.value > this.max) {
-            return this.value > this.max * 1.1 ? 'critical' : 'high';
-        }
-        return 'normal';
-    }
-    render() {
-        const currentStatus = this.getStatusFromValue();
-        const statusConfig = STATUS_CONFIG[currentStatus];
-        return b` <div class="value-display ${this.large ? 'large' : ''}"> ${this.label ? b `<div class="label">${this.label}</div>` : ''}
+    `}static get styles(){return r`:host{display:inline-block}.badge{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:6px 14px;border-radius:16px;background:var(--badge-color);color:white;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap;box-shadow:0 2px 4px rgba(0,0,0,0.1);transition:all 0.2s ease}.badge:hover{transform:translateY(-1px);box-shadow:0 3px 6px rgba(0,0,0,0.15)}.badge ha-icon{--mdc-icon-size:16px;display:flex;align-items:center}.label{line-height:1}.badge.pulse{animation:pulse 2s ease-in-out infinite}@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.85;transform:scale(1.02)}}.badge.auto ha-icon{animation:rotate 3s linear infinite}@keyframes rotate{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}.badge.heating,.badge.cooling{animation:breathe 2s ease-in-out infinite}@keyframes breathe{0%,100%{opacity:1}50%{opacity:0.7}}`}}e([pe()],ge.prototype,"state",void 0),e([pe()],ge.prototype,"label",void 0),e([pe()],ge.prototype,"icon",void 0),e([pe({type:Boolean})],ge.prototype,"pulse",void 0),e([pe({type:Boolean})],ge.prototype,"showIcon",void 0),customElements.get("vpc-status-badge")||customElements.define("vpc-status-badge",ge);const ue={normal:{color:"#4CAF50",icon:"mdi:check-circle"},ok:{color:"#4CAF50",icon:"mdi:check-circle"},low:{color:"#2196F3",icon:"mdi:arrow-down-circle"},high:{color:"#FF9800",icon:"mdi:arrow-up-circle"},critical:{color:"#F44336",icon:"mdi:alert-circle"},warning:{color:"#FF9800",icon:"mdi:alert"},error:{color:"#F44336",icon:"mdi:close-circle"}};class me extends ne{constructor(){super(...arguments),this.unit="",this.label="",this.status="normal",this.decimals=1,this.showStatus=!0,this.showRange=!1,this.large=!1}formatValue(e){return null==e?"--":e.toFixed(this.decimals)}getStatusFromValue(){return null==this.value?"normal":"normal"!==this.status?this.status:void 0!==this.min&&this.value<this.min?this.value<.9*this.min?"critical":"low":void 0!==this.max&&this.value>this.max?this.value>1.1*this.max?"critical":"high":"normal"}render(){const e=this.getStatusFromValue(),t=ue[e];return L` <div class="value-display ${this.large?"large":""}"> ${this.label?L`<div class="label">${this.label}</div>`:""}
 
         <div class="value-container">
-          <div class="value" style="color: ${statusConfig.color}">
+          <div class="value" style="color: ${t.color}">
             ${this.formatValue(this.value)}
-            ${this.unit ? b`<span class="unit">${this.unit}</span>` : ''}
+            ${this.unit?L`<span class="unit">${this.unit}</span>`:""}
           </div>
 
-          ${this.showStatus
-            ? b` <ha-icon icon="${statusConfig.icon}" style="color: ${statusConfig.color}" ></ha-icon> `
-            : ''}
+          ${this.showStatus?L` <ha-icon icon="${t.icon}" style="color: ${t.color}" ></ha-icon> `:""}
         </div>
 
-        ${this.target !== undefined
-            ? b` <div class="target"> → ${this.formatValue(this.target)}${this.unit} </div> `
-            : ''}
+        ${void 0!==this.target?L` <div class="target"> → ${this.formatValue(this.target)}${this.unit} </div> `:""}
 
-        ${this.showRange && (this.min !== undefined || this.max !== undefined)
-            ? b` <div class="range"> ${this.min !== undefined ? b `<span class="range-min">Min: ${this.formatValue(this.min)}${this.unit}</span>`
-                : ''}
-                ${this.max !== undefined
-                ? b`<span class="range-max">Max: ${this.formatValue(this.max)}${this.unit}</span>`
-                : ''}
+        ${!this.showRange||void 0===this.min&&void 0===this.max?"":L` <div class="range"> ${void 0!==this.min?L`<span class="range-min">Min: ${this.formatValue(this.min)}${this.unit}</span>`:""}
+                ${void 0!==this.max?L`<span class="range-max">Max: ${this.formatValue(this.max)}${this.unit}</span>`:""}
               </div>
-            `
-            : ''}
+            `}
       </div>
-    `;
-    }
-    static get styles() {
-        return i$3`:host{display:block}.value-display{display:flex;flex-direction:column;gap:4px}.label{font-size:12px;font-weight:500;color:var(--secondary-text-color);text-transform:uppercase;letter-spacing:0.5px}.value-container{display:flex;align-items:center;gap:8px}.value{font-size:24px;font-weight:700;line-height:1;color:var(--primary-text-color);display:flex;align-items:baseline;gap:4px}.value-display.large .value{font-size:32px;font-weight:800}.unit{font-size:16px;font-weight:500;opacity:0.8}.value-display.large .unit{font-size:20px}ha-icon{--mdc-icon-size:20px;flex-shrink:0}.target{font-size:14px;color:var(--secondary-text-color);display:flex;align-items:center;gap:4px}.range{display:flex;gap:12px;font-size:11px;color:var(--disabled-text-color);margin-top:4px}.range-min::before{content:'\\25BC ';color:var(--info-color,#2196F3)}.range-max::before{content:'\\25B2 ';color:var(--warning-color,#FF9800)}`;
-    }
-};
-__decorate([
-    n({ type: Number })
-], ValueDisplay.prototype, "value", void 0);
-__decorate([
-    n()
-], ValueDisplay.prototype, "unit", void 0);
-__decorate([
-    n()
-], ValueDisplay.prototype, "label", void 0);
-__decorate([
-    n()
-], ValueDisplay.prototype, "status", void 0);
-__decorate([
-    n({ type: Number })
-], ValueDisplay.prototype, "min", void 0);
-__decorate([
-    n({ type: Number })
-], ValueDisplay.prototype, "max", void 0);
-__decorate([
-    n({ type: Number })
-], ValueDisplay.prototype, "target", void 0);
-__decorate([
-    n({ type: Number })
-], ValueDisplay.prototype, "decimals", void 0);
-__decorate([
-    n({ type: Boolean })
-], ValueDisplay.prototype, "showStatus", void 0);
-__decorate([
-    n({ type: Boolean })
-], ValueDisplay.prototype, "showRange", void 0);
-__decorate([
-    n({ type: Boolean })
-], ValueDisplay.prototype, "large", void 0);
-ValueDisplay = __decorate([
-    t('value-display')
-], ValueDisplay);
-
-let DetailStatus = class DetailStatus extends i {
-    constructor() {
-        super(...arguments);
-        this.compact = false;
-    }
-    parsePipeSeparated(raw) {
-        if (!raw || typeof raw !== 'string') {
-            return { status: '' };
-        }
-        const parts = raw.split('|');
-        if (parts.length === 2) {
-            const level = parseInt(parts[0], 10);
-            const status = this.formatStatusText(parts[1]);
-            return { level: isNaN(level) ? undefined : level, status };
-        }
-        return { status: this.formatStatusText(raw) };
-    }
-    formatStatusText(text) {
-        if (!text)
-            return '';
-        return text
-            .split('_')
-            .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-            .join(' ');
-    }
-    parseArray(raw) {
-        if (!Array.isArray(raw))
-            return [];
-        return raw.map((item) => this.formatStatusText(item)).filter((item) => item);
-    }
-    getIconForStatus(status) {
-        const lowerStatus = status.toLowerCase();
-        if (lowerStatus.includes('freeze') || lowerStatus.includes('frost')) {
-            return 'mdi:snowflake-alert';
-        }
-        if (lowerStatus.includes('blocked') || lowerStatus.includes('block')) {
-            return 'mdi:block-helper';
-        }
-        if (lowerStatus.includes('threshold') || lowerStatus.includes('limit')) {
-            return 'mdi:speedometer';
-        }
-        if (lowerStatus.includes('temp')) {
-            return 'mdi:thermometer-alert';
-        }
-        if (lowerStatus.includes('error')) {
-            return 'mdi:alert-circle';
-        }
-        if (lowerStatus.includes('ok') || lowerStatus.includes('normal')) {
-            return 'mdi:check-circle';
-        }
-        return 'mdi:information';
-    }
-    getColorForStatus(status) {
-        const lowerStatus = status.toLowerCase();
-        if (lowerStatus.includes('error') || lowerStatus.includes('critical')) {
-            return 'var(--error-color, #F44336)';
-        }
-        if (lowerStatus.includes('blocked') || lowerStatus.includes('freeze')) {
-            return 'var(--warning-color, #FF9800)';
-        }
-        if (lowerStatus.includes('ok') || lowerStatus.includes('normal')) {
-            return 'var(--success-color, #4CAF50)';
-        }
-        return 'var(--info-color, #2196F3)';
-    }
-    render() {
-        if (!this.raw) {
-            return b``;
-        }
-        // Handle array input
-        if (Array.isArray(this.raw)) {
-            const statuses = this.parseArray(this.raw);
-            if (statuses.length === 0)
-                return b``;
-            return b` <div class="detail-status-list ${this.compact ? 'compact' : ''}"> ${statuses.map((status) => b `
-              <div class="status-item" style="color: ${this.getColorForStatus(status)}">
-                <ha-icon icon="${this.icon || this.getIconForStatus(status)}"></ha-icon>
-                <span class="status-text">${status}</span>
+    `}static get styles(){return r`:host{display:block}.value-display{display:flex;flex-direction:column;gap:4px}.label{font-size:12px;font-weight:500;color:var(--secondary-text-color);text-transform:uppercase;letter-spacing:0.5px}.value-container{display:flex;align-items:center;gap:8px}.value{font-size:24px;font-weight:700;line-height:1;color:var(--primary-text-color);display:flex;align-items:baseline;gap:4px}.value-display.large .value{font-size:32px;font-weight:800}.unit{font-size:16px;font-weight:500;opacity:0.8}.value-display.large .unit{font-size:20px}ha-icon{--mdc-icon-size:20px;flex-shrink:0}.target{font-size:14px;color:var(--secondary-text-color);display:flex;align-items:center;gap:4px}.range{display:flex;gap:12px;font-size:11px;color:var(--disabled-text-color);margin-top:4px}.range-min::before{content:'\\25BC ';color:var(--info-color,#2196F3)}.range-max::before{content:'\\25B2 ';color:var(--warning-color,#FF9800)}`}}e([pe({type:Number})],me.prototype,"value",void 0),e([pe()],me.prototype,"unit",void 0),e([pe()],me.prototype,"label",void 0),e([pe()],me.prototype,"status",void 0),e([pe({type:Number})],me.prototype,"min",void 0),e([pe({type:Number})],me.prototype,"max",void 0),e([pe({type:Number})],me.prototype,"target",void 0),e([pe({type:Number})],me.prototype,"decimals",void 0),e([pe({type:Boolean})],me.prototype,"showStatus",void 0),e([pe({type:Boolean})],me.prototype,"showRange",void 0),e([pe({type:Boolean})],me.prototype,"large",void 0),customElements.get("vpc-value-display")||customElements.define("vpc-value-display",me);class fe extends ne{constructor(){super(...arguments),this.compact=!1}parsePipeSeparated(e){if(!e||"string"!=typeof e)return{status:""};const t=e.split("|");if(2===t.length){const e=parseInt(t[0],10),i=this.formatStatusText(t[1]);return{level:isNaN(e)?void 0:e,status:i}}return{status:this.formatStatusText(e)}}formatStatusText(e){return e?e.split("_").map(e=>e.charAt(0).toUpperCase()+e.slice(1).toLowerCase()).join(" "):""}parseArray(e){return Array.isArray(e)?e.map(e=>this.formatStatusText(e)).filter(e=>e):[]}getIconForStatus(e){const t=e.toLowerCase();return t.includes("freeze")||t.includes("frost")?"mdi:snowflake-alert":t.includes("blocked")||t.includes("block")?"mdi:block-helper":t.includes("threshold")||t.includes("limit")?"mdi:speedometer":t.includes("temp")?"mdi:thermometer-alert":t.includes("error")?"mdi:alert-circle":t.includes("ok")||t.includes("normal")?"mdi:check-circle":"mdi:information"}getColorForStatus(e){const t=e.toLowerCase();return t.includes("error")||t.includes("critical")?"var(--error-color, #F44336)":t.includes("blocked")||t.includes("freeze")?"var(--warning-color, #FF9800)":t.includes("ok")||t.includes("normal")?"var(--success-color, #4CAF50)":"var(--info-color, #2196F3)"}render(){if(!this.raw)return L``;if(Array.isArray(this.raw)){const e=this.parseArray(this.raw);return 0===e.length?L``:L` <div class="detail-status-list ${this.compact?"compact":""}"> ${e.map(e=>L`
+              <div class="status-item" style="color: ${this.getColorForStatus(e)}">
+                <ha-icon icon="${this.icon||this.getIconForStatus(e)}"></ha-icon>
+                <span class="status-text">${e}</span>
               </div>
             `)}
         </div>
-      `;
-        }
-        // Handle pipe-separated string
-        const parsed = this.parsePipeSeparated(this.raw);
-        if (!parsed.status)
-            return b``;
-        const statusColor = this.getColorForStatus(parsed.status);
-        const statusIcon = this.icon || this.getIconForStatus(parsed.status);
-        return b` <div class="detail-status ${this.compact ? 'compact' : ''}" style="color: ${statusColor}"><ha-icon icon="${statusIcon}"></ha-icon><div class="status-content"> ${parsed.level !== undefined ? b `<span class="level">Level ${parsed.level}:</span>`
-            : ''}
-          <span class="status-text">${parsed.status}</span>
+      `}const e=this.parsePipeSeparated(this.raw);if(!e.status)return L``;const t=this.getColorForStatus(e.status),i=this.icon||this.getIconForStatus(e.status);return L` <div class="detail-status ${this.compact?"compact":""}" style="color: ${t}"><ha-icon icon="${i}"></ha-icon><div class="status-content"> ${void 0!==e.level?L`<span class="level">Level ${e.level}:</span>`:""}
+          <span class="status-text">${e.status}</span>
         </div>
       </div>
-    `;
-    }
-    static get styles() {
-        return i$3`:host{display:block}.detail-status{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--card-background-color);border-radius:8px;border-left:3px solid currentColor;font-size:14px;line-height:1.4}.detail-status.compact{padding:4px 8px;font-size:12px}.detail-status ha-icon{--mdc-icon-size:20px;flex-shrink:0}.detail-status.compact ha-icon{--mdc-icon-size:16px}.status-content{display:flex;flex-wrap:wrap;align-items:center;gap:4px;flex:1}.level{font-weight:600;opacity:0.9}.status-text{font-weight:500}.detail-status-list{display:flex;flex-direction:column;gap:6px}.detail-status-list.compact{gap:4px}.status-item{display:flex;align-items:center;gap:6px;padding:6px 10px;background:var(--card-background-color);border-radius:6px;border-left:2px solid currentColor;font-size:13px}.detail-status-list.compact .status-item{padding:4px 8px;font-size:11px}.status-item ha-icon{--mdc-icon-size:16px;flex-shrink:0}.detail-status-list.compact .status-item ha-icon{--mdc-icon-size:14px}.status-item .status-text{font-weight:500}`;
-    }
-};
-__decorate([
-    n()
-], DetailStatus.prototype, "raw", void 0);
-__decorate([
-    n()
-], DetailStatus.prototype, "icon", void 0);
-__decorate([
-    n({ type: Boolean })
-], DetailStatus.prototype, "compact", void 0);
-DetailStatus = __decorate([
-    t('detail-status')
-], DetailStatus);
-
-const CHIP_CONFIG = {
-    info: {
-        color: '#2196F3',
-        backgroundColor: 'rgba(33, 150, 243, 0.1)',
-        icon: 'mdi:information',
-    },
-    warning: {
-        color: '#FF9800',
-        backgroundColor: 'rgba(255, 152, 0, 0.1)',
-        icon: 'mdi:alert',
-    },
-    error: {
-        color: '#F44336',
-        backgroundColor: 'rgba(244, 67, 54, 0.1)',
-        icon: 'mdi:alert-circle',
-    },
-    success: {
-        color: '#4CAF50',
-        backgroundColor: 'rgba(76, 175, 80, 0.1)',
-        icon: 'mdi:check-circle',
-    },
-};
-let WarningChips = class WarningChips extends i {
-    constructor() {
-        super(...arguments);
-        this.warnings = [];
-        this.defaultType = 'warning';
-        this.dismissable = false;
-        this.dismissedWarnings = new Set();
-    }
-    normalizeWarnings() {
-        return this.warnings.map((warning) => {
-            if (typeof warning === 'string') {
-                return {
-                    text: this.formatWarningText(warning),
-                    type: this.getWarningType(warning),
-                    dismissable: this.dismissable,
-                };
-            }
-            return {
-                ...warning,
-                text: this.formatWarningText(warning.text),
-                type: warning.type || this.defaultType,
-                dismissable: warning.dismissable !== undefined ? warning.dismissable : this.dismissable,
-            };
-        });
-    }
-    formatWarningText(text) {
-        if (!text)
-            return '';
-        return text
-            .split('_')
-            .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-            .join(' ');
-    }
-    getWarningType(text) {
-        const lowerText = text.toLowerCase();
-        if (lowerText.includes('error') || lowerText.includes('critical') || lowerText.includes('failed')) {
-            return 'error';
-        }
-        if (lowerText.includes('blocked') || lowerText.includes('threshold') || lowerText.includes('limit')) {
-            return 'warning';
-        }
-        if (lowerText.includes('ok') || lowerText.includes('success') || lowerText.includes('complete')) {
-            return 'success';
-        }
-        return 'info';
-    }
-    handleDismiss(warning) {
-        this.dismissedWarnings.add(warning.text);
-        this.requestUpdate();
-        // Dispatch event for parent component
-        this.dispatchEvent(new CustomEvent('warning-dismissed', {
-            detail: { warning },
-            bubbles: true,
-            composed: true,
-        }));
-    }
-    isDismissed(warning) {
-        return this.dismissedWarnings.has(warning.text);
-    }
-    render() {
-        const normalizedWarnings = this.normalizeWarnings().filter((w) => !this.isDismissed(w));
-        if (normalizedWarnings.length === 0) {
-            return b``;
-        }
-        return b` <div class="warning-chips"> ${normalizedWarnings.map((warning) => this.renderChip(warning))} </div> `;
-    }
-    renderChip(warning) {
-        const type = warning.type || this.defaultType;
-        const config = CHIP_CONFIG[type];
-        const icon = warning.icon || config.icon;
-        return b` <div class="chip ${type}" style=" --chip-color: ${config.color}; --chip-bg: ${config.backgroundColor}; " ><ha-icon icon="${icon}"></ha-icon><span class="chip-text">${warning.text}</span> ${warning.dismissable ? b `
+    `}static get styles(){return r`:host{display:block}.detail-status{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--card-background-color);border-radius:8px;border-left:3px solid currentColor;font-size:14px;line-height:1.4}.detail-status.compact{padding:4px 8px;font-size:12px}.detail-status ha-icon{--mdc-icon-size:20px;flex-shrink:0}.detail-status.compact ha-icon{--mdc-icon-size:16px}.status-content{display:flex;flex-wrap:wrap;align-items:center;gap:4px;flex:1}.level{font-weight:600;opacity:0.9}.status-text{font-weight:500}.detail-status-list{display:flex;flex-direction:column;gap:6px}.detail-status-list.compact{gap:4px}.status-item{display:flex;align-items:center;gap:6px;padding:6px 10px;background:var(--card-background-color);border-radius:6px;border-left:2px solid currentColor;font-size:13px}.detail-status-list.compact .status-item{padding:4px 8px;font-size:11px}.status-item ha-icon{--mdc-icon-size:16px;flex-shrink:0}.detail-status-list.compact .status-item ha-icon{--mdc-icon-size:14px}.status-item .status-text{font-weight:500}`}}e([pe()],fe.prototype,"raw",void 0),e([pe()],fe.prototype,"icon",void 0),e([pe({type:Boolean})],fe.prototype,"compact",void 0),customElements.get("vpc-detail-status")||customElements.define("vpc-detail-status",fe);const xe={info:{color:"#2196F3",backgroundColor:"rgba(33, 150, 243, 0.1)",icon:"mdi:information"},warning:{color:"#FF9800",backgroundColor:"rgba(255, 152, 0, 0.1)",icon:"mdi:alert"},error:{color:"#F44336",backgroundColor:"rgba(244, 67, 54, 0.1)",icon:"mdi:alert-circle"},success:{color:"#4CAF50",backgroundColor:"rgba(76, 175, 80, 0.1)",icon:"mdi:check-circle"}};class be extends ne{constructor(){super(...arguments),this.warnings=[],this.defaultType="warning",this.dismissable=!1,this.dismissedWarnings=new Set}normalizeWarnings(){return this.warnings.map(e=>"string"==typeof e?{text:this.formatWarningText(e),type:this.getWarningType(e),dismissable:this.dismissable}:{...e,text:this.formatWarningText(e.text),type:e.type||this.defaultType,dismissable:void 0!==e.dismissable?e.dismissable:this.dismissable})}formatWarningText(e){return e?e.split("_").map(e=>e.charAt(0).toUpperCase()+e.slice(1).toLowerCase()).join(" "):""}getWarningType(e){const t=e.toLowerCase();return t.includes("error")||t.includes("critical")||t.includes("failed")?"error":t.includes("blocked")||t.includes("threshold")||t.includes("limit")?"warning":t.includes("ok")||t.includes("success")||t.includes("complete")?"success":"info"}handleDismiss(e){this.dismissedWarnings.add(e.text),this.requestUpdate(),this.dispatchEvent(new CustomEvent("warning-dismissed",{detail:{warning:e},bubbles:!0,composed:!0}))}isDismissed(e){return this.dismissedWarnings.has(e.text)}render(){const e=this.normalizeWarnings().filter(e=>!this.isDismissed(e));return 0===e.length?L``:L` <div class="warning-chips"> ${e.map(e=>this.renderChip(e))} </div> `}renderChip(e){const t=e.type||this.defaultType,i=xe[t];return L` <div class="chip ${t}" style=" --chip-color: ${i.color}; --chip-bg: ${i.backgroundColor}; " ><ha-icon icon="${e.icon||i.icon}"></ha-icon><span class="chip-text">${e.text}</span> ${e.dismissable?L`
               <button
                 class="dismiss-button"
-                @click="${() => this.handleDismiss(warning)}"
+                @click="${()=>this.handleDismiss(e)}"
                 title="Dismiss"
               >
                 <ha-icon icon="mdi:close"></ha-icon>
               </button>
-            `
-            : ''}
+            `:""}
       </div>
-    `;
-    }
-    static get styles() {
-        return i$3`:host{display:block}.warning-chips{display:flex;flex-wrap:wrap;gap:8px}.chip{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:16px;background:var(--chip-bg);color:var(--chip-color);font-size:13px;font-weight:500;line-height:1.2;border:1px solid var(--chip-color);transition:all 0.2s ease}.chip:hover{transform:translateY(-1px);box-shadow:0 2px 4px rgba(0,0,0,0.1)}.chip ha-icon{--mdc-icon-size:16px;flex-shrink:0}.chip-text{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dismiss-button{display:flex;align-items:center;justify-content:center;padding:0;margin:0;border:none;background:none;color:var(--chip-color);cursor:pointer;opacity:0.7;transition:opacity 0.2s ease}.dismiss-button:hover{opacity:1}.dismiss-button ha-icon{--mdc-icon-size:14px}.chip.error{animation:pulse-error 2s ease-in-out infinite}@keyframes pulse-error{0%,100%{opacity:1}50%{opacity:0.85}}@media(max-width:600px){.warning-chips{flex-direction:column}.chip{width:100%;box-sizing:border-box}.chip-text{white-space:normal;overflow:visible}}`;
-    }
-};
-__decorate([
-    n({ type: Array })
-], WarningChips.prototype, "warnings", void 0);
-__decorate([
-    n()
-], WarningChips.prototype, "defaultType", void 0);
-__decorate([
-    n({ type: Boolean })
-], WarningChips.prototype, "dismissable", void 0);
-__decorate([
-    r()
-], WarningChips.prototype, "dismissedWarnings", void 0);
-WarningChips = __decorate([
-    t('warning-chips')
-], WarningChips);
+    `}static get styles(){return r`:host{display:block}.warning-chips{display:flex;flex-wrap:wrap;gap:8px}.chip{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:16px;background:var(--chip-bg);color:var(--chip-color);font-size:13px;font-weight:500;line-height:1.2;border:1px solid var(--chip-color);transition:all 0.2s ease}.chip:hover{transform:translateY(-1px);box-shadow:0 2px 4px rgba(0,0,0,0.1)}.chip ha-icon{--mdc-icon-size:16px;flex-shrink:0}.chip-text{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dismiss-button{display:flex;align-items:center;justify-content:center;padding:0;margin:0;border:none;background:none;color:var(--chip-color);cursor:pointer;opacity:0.7;transition:opacity 0.2s ease}.dismiss-button:hover{opacity:1}.dismiss-button ha-icon{--mdc-icon-size:14px}.chip.error{animation:pulse-error 2s ease-in-out infinite}@keyframes pulse-error{0%,100%{opacity:1}50%{opacity:0.85}}@media(max-width:600px){.warning-chips{flex-direction:column}.chip{width:100%;box-sizing:border-box}.chip-text{white-space:normal;overflow:visible}}`}}e([pe({type:Array})],be.prototype,"warnings",void 0),e([pe()],be.prototype,"defaultType",void 0),e([pe({type:Boolean})],be.prototype,"dismissable",void 0),e([he()],be.prototype,"dismissedWarnings",void 0),customElements.get("vpc-warning-chips")||customElements.define("vpc-warning-chips",be);class ye extends ne{constructor(){super(...arguments),this.min=0,this.max=100,this.step=1,this.value=0,this.unit="",this.label="",this.disabled=!1,this.vertical=!1,this.showValue=!0,this.showMinMax=!1,this.isDragging=!1,this.localValue=0,this.debounceDelay=300}connectedCallback(){super.connectedCallback(),this.localValue=this.value}updated(e){e.has("value")&&!this.isDragging&&(this.localValue=this.value)}handleInput(e){const t=Number(e.target.value);this.localValue=t,this.isDragging=!0,this.dispatchEvent(new CustomEvent("slider-input",{detail:{value:t},bubbles:!0,composed:!0}))}handleChange(e){const t=Number(e.target.value);this.localValue=t,this.isDragging=!1,this.debounceTimer&&clearTimeout(this.debounceTimer),this.debounceTimer=window.setTimeout(()=>{this.dispatchEvent(new CustomEvent("value-changed",{detail:{value:t},bubbles:!0,composed:!0}))},this.debounceDelay)}handleStart(){this.isDragging=!0}handleEnd(){this.isDragging=!1}getLabelForValue(e){if(!this.labels||0===this.labels.length)return"";if("string"==typeof this.labels[0])return this.labels[Math.round((e-this.min)/this.step)]||"";const t=this.labels.find(t=>t.value===e);return t?t.label:""}getAllLabels(){if(!this.labels||0===this.labels.length)return[];const e=this.max-this.min;return this.labels.map("string"==typeof this.labels[0]?(t,i)=>{const a=this.min+i*this.step;return{value:a,label:t,position:(a-this.min)/e*100}}:t=>({value:t.value,label:t.label,position:(t.value-this.min)/e*100}))}formatValue(e){return this.getLabelForValue(e)||`${e.toFixed(this.step<1?1:0)}${this.unit}`}render(){const e=(this.localValue-this.min)/(this.max-this.min)*100,t=this.getAllLabels();return L` <div class="slider-container ${this.vertical?"vertical":""} ${this.disabled?"disabled":""}"> ${this.label?L`<div class="slider-label">${this.label}</div>`:""}
 
-let SliderControl = class SliderControl extends i {
-    constructor() {
-        super(...arguments);
-        this.min = 0;
-        this.max = 100;
-        this.step = 1;
-        this.value = 0;
-        this.unit = '';
-        this.label = '';
-        this.disabled = false;
-        this.vertical = false;
-        this.showValue = true;
-        this.showMinMax = false;
-        this.isDragging = false;
-        this.localValue = 0;
-        this.debounceDelay = 300; // ms
-    }
-    connectedCallback() {
-        super.connectedCallback();
-        this.localValue = this.value;
-    }
-    updated(changedProperties) {
-        if (changedProperties.has('value') && !this.isDragging) {
-            this.localValue = this.value;
-        }
-    }
-    handleInput(e) {
-        const value = Number(e.target.value);
-        this.localValue = value;
-        this.isDragging = true;
-        // Dispatch input event for live updates (no debounce)
-        this.dispatchEvent(new CustomEvent('slider-input', {
-            detail: { value },
-            bubbles: true,
-            composed: true,
-        }));
-    }
-    handleChange(e) {
-        const value = Number(e.target.value);
-        this.localValue = value;
-        this.isDragging = false;
-        // Clear existing debounce timer
-        if (this.debounceTimer) {
-            clearTimeout(this.debounceTimer);
-        }
-        // Debounce the value-changed event
-        this.debounceTimer = window.setTimeout(() => {
-            this.dispatchEvent(new CustomEvent('value-changed', {
-                detail: { value },
-                bubbles: true,
-                composed: true,
-            }));
-        }, this.debounceDelay);
-    }
-    handleStart() {
-        this.isDragging = true;
-    }
-    handleEnd() {
-        this.isDragging = false;
-    }
-    getLabelForValue(value) {
-        if (!this.labels || this.labels.length === 0) {
-            return '';
-        }
-        // If labels is array of strings, map to values
-        if (typeof this.labels[0] === 'string') {
-            const index = Math.round((value - this.min) / this.step);
-            return this.labels[index] || '';
-        }
-        // If labels is array of SliderLabel objects
-        const sliderLabels = this.labels;
-        const label = sliderLabels.find((l) => l.value === value);
-        return label ? label.label : '';
-    }
-    getAllLabels() {
-        if (!this.labels || this.labels.length === 0) {
-            return [];
-        }
-        const range = this.max - this.min;
-        // If labels is array of strings
-        if (typeof this.labels[0] === 'string') {
-            return this.labels.map((label, index) => {
-                const value = this.min + index * this.step;
-                const position = ((value - this.min) / range) * 100;
-                return { value, label, position };
-            });
-        }
-        // If labels is array of SliderLabel objects
-        return this.labels.map((item) => {
-            const position = ((item.value - this.min) / range) * 100;
-            return { value: item.value, label: item.label, position };
-        });
-    }
-    formatValue(value) {
-        // Check if we have a label for this value
-        const label = this.getLabelForValue(value);
-        if (label) {
-            return label;
-        }
-        // Otherwise format as number
-        const decimals = this.step < 1 ? 1 : 0;
-        return `${value.toFixed(decimals)}${this.unit}`;
-    }
-    render() {
-        const percentage = ((this.localValue - this.min) / (this.max - this.min)) * 100;
-        const allLabels = this.getAllLabels();
-        return b` <div class="slider-container ${this.vertical ? 'vertical' : ''} ${this.disabled ? 'disabled' : ''}"> ${this.label ? b `<div class="slider-label">${this.label}</div>` : ''}
-
-        ${this.showValue
-            ? b` <div class="value-display ${this.isDragging ? 'dragging' : ''}"> ${this.formatValue(this.localValue)} </div> `
-            : ''}
+        ${this.showValue?L` <div class="value-display ${this.isDragging?"dragging":""}"> ${this.formatValue(this.localValue)} </div> `:""}
 
         <div class="slider-wrapper">
-          ${this.showMinMax
-            ? b`<span class="min-max-label">${this.formatValue(this.min)}</span>`
-            : ''}
+          ${this.showMinMax?L`<span class="min-max-label">${this.formatValue(this.min)}</span>`:""}
 
           <div class="slider-track-wrapper">
             <input
@@ -598,7 +54,7 @@ let SliderControl = class SliderControl extends i {
               min="${this.min}"
               max="${this.max}"
               step="${this.step}"
-              .value="${this.localValue.toString()}"
+              .value="${""+this.localValue}"
               ?disabled="${this.disabled}"
               @input="${this.handleInput}"
               @change="${this.handleChange}"
@@ -606,857 +62,62 @@ let SliderControl = class SliderControl extends i {
               @mouseup="${this.handleEnd}"
               @touchstart="${this.handleStart}"
               @touchend="${this.handleEnd}"
-              style="--percentage: ${percentage}%"
+              style="--percentage: ${e}%"
             />
           </div>
 
-          ${this.showMinMax
-            ? b`<span class="min-max-label">${this.formatValue(this.max)}</span>`
-            : ''}
+          ${this.showMinMax?L`<span class="min-max-label">${this.formatValue(this.max)}</span>`:""}
         </div>
 
-        ${allLabels.length > 0
-            ? b` <div class="labels"> ${allLabels.map((item) => b `
+        ${t.length>0?L` <div class="labels"> ${t.map(e=>L`
                     <span
-                      class="label-item ${this.localValue === item.value ? 'active' : ''}"
-                      style="left: ${item.position}%"
-                      title="${item.label}"
-                      @click="${() => !this.disabled && this.handleChange({ target: { value: item.value } })}"
+                      class="label-item ${this.localValue===e.value?"active":""}"
+                      style="left: ${e.position}%"
+                      title="${e.label}"
+                      @click="${()=>!this.disabled&&this.handleChange({target:{value:e.value}})}"
                     >
-                      ${item.label}
+                      ${e.label}
                     </span>
                   `)}
               </div>
-            `
-            : ''}
+            `:""}
       </div>
-    `;
-    }
-    static get styles() {
-        return i$3`:host{display:block}.slider-container{width:100%;user-select:none}.slider-container.disabled{opacity:0.5;pointer-events:none}.slider-label{font-size:12px;font-weight:500;color:var(--secondary-text-color);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}.value-display{text-align:center;font-size:28px;font-weight:700;margin-bottom:12px;color:var(--primary-text-color);transition:all 0.2s ease}.value-display.dragging{color:var(--primary-color);transform:scale(1.05)}.slider-wrapper{display:flex;align-items:center;gap:12px;padding:8px 0}.min-max-label{font-size:11px;color:var(--secondary-text-color);min-width:40px;text-align:center}.slider-track-wrapper{flex:1;position:relative}.slider{width:100%;height:8px;-webkit-appearance:none;appearance:none;background:linear-gradient(to right,var(--primary-color) 0%,var(--primary-color) var(--percentage),var(--disabled-color,#e0e0e0) var(--percentage),var(--disabled-color,#e0e0e0) 100%);border-radius:4px;outline:none;cursor:pointer;transition:opacity 0.2s}.slider:hover{opacity:0.9}.slider:disabled{cursor:not-allowed}.slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:24px;height:24px;border-radius:50%;background:var(--primary-color);cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.2);transition:all 0.2s ease;border:3px solid white}.slider::-webkit-slider-thumb:hover{transform:scale(1.1);box-shadow:0 3px 8px rgba(0,0,0,0.3)}.slider:active::-webkit-slider-thumb{transform:scale(1.15);box-shadow:0 4px 12px rgba(0,0,0,0.4)}.slider::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:var(--primary-color);cursor:pointer;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.2);transition:all 0.2s ease}.slider::-moz-range-thumb:hover{transform:scale(1.1);box-shadow:0 3px 8px rgba(0,0,0,0.3)}.slider:active::-moz-range-thumb{transform:scale(1.15);box-shadow:0 4px 12px rgba(0,0,0,0.4)}.slider::-moz-range-track{background:transparent;border:none}.labels{position:relative;display:flex;justify-content:space-between;margin-top:16px;font-size:11px;color:var(--secondary-text-color)}.label-item{position:absolute;transform:translateX(-50%);cursor:pointer;padding:4px 8px;border-radius:4px;transition:all 0.2s ease;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;text-align:center}.label-item:hover{background:var(--divider-color,rgba(0,0,0,0.05));color:var(--primary-text-color)}.label-item.active{font-weight:600;color:var(--primary-color)}.slider-container.vertical .slider{transform:rotate(-90deg);transform-origin:left center}@media(pointer:coarse){.slider::-webkit-slider-thumb{width:28px;height:28px}.slider::-moz-range-thumb{width:28px;height:28px}}`;
-    }
-};
-__decorate([
-    n({ type: Number })
-], SliderControl.prototype, "min", void 0);
-__decorate([
-    n({ type: Number })
-], SliderControl.prototype, "max", void 0);
-__decorate([
-    n({ type: Number })
-], SliderControl.prototype, "step", void 0);
-__decorate([
-    n({ type: Number })
-], SliderControl.prototype, "value", void 0);
-__decorate([
-    n()
-], SliderControl.prototype, "unit", void 0);
-__decorate([
-    n()
-], SliderControl.prototype, "label", void 0);
-__decorate([
-    n({ type: Array })
-], SliderControl.prototype, "labels", void 0);
-__decorate([
-    n({ type: Boolean })
-], SliderControl.prototype, "disabled", void 0);
-__decorate([
-    n({ type: Boolean })
-], SliderControl.prototype, "vertical", void 0);
-__decorate([
-    n({ type: Boolean })
-], SliderControl.prototype, "showValue", void 0);
-__decorate([
-    n({ type: Boolean })
-], SliderControl.prototype, "showMinMax", void 0);
-__decorate([
-    r()
-], SliderControl.prototype, "isDragging", void 0);
-__decorate([
-    r()
-], SliderControl.prototype, "localValue", void 0);
-SliderControl = __decorate([
-    t('slider-control')
-], SliderControl);
-
-let QuickActions = class QuickActions extends i {
-    constructor() {
-        super(...arguments);
-        this.actions = [];
-        this.vertical = false;
-        this.compact = false;
-        this.loadingStates = new Map();
-    }
-    async handleActionClick(action, index) {
-        if (action.disabled || this.loadingStates.get(index)) {
-            return;
-        }
-        // Show confirmation if needed
-        if (action.confirmMessage) {
-            const confirmed = await this.showConfirmation(action.confirmMessage);
-            if (!confirmed) {
-                return;
-            }
-        }
-        // Set loading state
-        this.loadingStates.set(index, true);
-        this.requestUpdate();
-        try {
-            // Execute action
-            await action.action();
-            // Dispatch event
-            this.dispatchEvent(new CustomEvent('action-executed', {
-                detail: { action, index },
-                bubbles: true,
-                composed: true,
-            }));
-        }
-        catch (error) {
-            console.error('Quick action failed:', error);
-            // Dispatch error event
-            this.dispatchEvent(new CustomEvent('action-error', {
-                detail: { action, index, error },
-                bubbles: true,
-                composed: true,
-            }));
-        }
-        finally {
-            // Clear loading state
-            this.loadingStates.set(index, false);
-            this.requestUpdate();
-        }
-    }
-    async showConfirmation(message) {
-        return confirm(message);
-    }
-    renderAction(action, index) {
-        const isLoading = this.loadingStates.get(index) || action.loading;
-        const isDisabled = action.disabled || isLoading;
-        return b` <button class="quick-action ${action.active ? 'active' : ''} ${isDisabled ? 'disabled' : ''} ${isLoading ? 'loading' : ''}" @click="${() => this.handleActionClick(action, index)}" ?disabled="${isDisabled}" style="${action.color ? `--action-color: ${action.color}` : ''}"
-        title="${action.label}"
-        aria-label="${action.label}"
-        aria-busy="${isLoading ? 'true' : 'false'}"
-        aria-disabled="${isDisabled ? 'true' : 'false'}"
+    `}static get styles(){return r`:host{display:block}.slider-container{width:100%;user-select:none}.slider-container.disabled{opacity:0.5;pointer-events:none}.slider-label{font-size:12px;font-weight:500;color:var(--secondary-text-color);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}.value-display{text-align:center;font-size:28px;font-weight:700;margin-bottom:12px;color:var(--primary-text-color);transition:all 0.2s ease}.value-display.dragging{color:var(--primary-color);transform:scale(1.05)}.slider-wrapper{display:flex;align-items:center;gap:12px;padding:8px 0}.min-max-label{font-size:11px;color:var(--secondary-text-color);min-width:40px;text-align:center}.slider-track-wrapper{flex:1;position:relative}.slider{width:100%;height:8px;-webkit-appearance:none;appearance:none;background:linear-gradient(to right,var(--primary-color) 0%,var(--primary-color) var(--percentage),var(--disabled-color,#e0e0e0) var(--percentage),var(--disabled-color,#e0e0e0) 100%);border-radius:4px;outline:none;cursor:pointer;transition:opacity 0.2s}.slider:hover{opacity:0.9}.slider:disabled{cursor:not-allowed}.slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:24px;height:24px;border-radius:50%;background:var(--primary-color);cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.2);transition:all 0.2s ease;border:3px solid white}.slider::-webkit-slider-thumb:hover{transform:scale(1.1);box-shadow:0 3px 8px rgba(0,0,0,0.3)}.slider:active::-webkit-slider-thumb{transform:scale(1.15);box-shadow:0 4px 12px rgba(0,0,0,0.4)}.slider::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:var(--primary-color);cursor:pointer;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.2);transition:all 0.2s ease}.slider::-moz-range-thumb:hover{transform:scale(1.1);box-shadow:0 3px 8px rgba(0,0,0,0.3)}.slider:active::-moz-range-thumb{transform:scale(1.15);box-shadow:0 4px 12px rgba(0,0,0,0.4)}.slider::-moz-range-track{background:transparent;border:none}.labels{position:relative;display:flex;justify-content:space-between;margin-top:16px;font-size:11px;color:var(--secondary-text-color)}.label-item{position:absolute;transform:translateX(-50%);cursor:pointer;padding:4px 8px;border-radius:4px;transition:all 0.2s ease;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;text-align:center}.label-item:hover{background:var(--divider-color,rgba(0,0,0,0.05));color:var(--primary-text-color)}.label-item.active{font-weight:600;color:var(--primary-color)}.slider-container.vertical .slider{transform:rotate(-90deg);transform-origin:left center}@media(pointer:coarse){.slider::-webkit-slider-thumb{width:28px;height:28px}.slider::-moz-range-thumb{width:28px;height:28px}}`}}e([pe({type:Number})],ye.prototype,"min",void 0),e([pe({type:Number})],ye.prototype,"max",void 0),e([pe({type:Number})],ye.prototype,"step",void 0),e([pe({type:Number})],ye.prototype,"value",void 0),e([pe()],ye.prototype,"unit",void 0),e([pe()],ye.prototype,"label",void 0),e([pe({type:Array})],ye.prototype,"labels",void 0),e([pe({type:Boolean})],ye.prototype,"disabled",void 0),e([pe({type:Boolean})],ye.prototype,"vertical",void 0),e([pe({type:Boolean})],ye.prototype,"showValue",void 0),e([pe({type:Boolean})],ye.prototype,"showMinMax",void 0),e([he()],ye.prototype,"isDragging",void 0),e([he()],ye.prototype,"localValue",void 0),customElements.get("vpc-slider-control")||customElements.define("vpc-slider-control",ye);class we extends ne{constructor(){super(...arguments),this.actions=[],this.vertical=!1,this.compact=!1,this.loadingStates=new Map}async handleActionClick(e,t){if(!e.disabled&&!this.loadingStates.get(t)){if(e.confirmMessage&&!await this.showConfirmation(e.confirmMessage))return;this.loadingStates.set(t,!0),this.requestUpdate();try{await e.action(),this.dispatchEvent(new CustomEvent("action-executed",{detail:{action:e,index:t},bubbles:!0,composed:!0}))}catch(i){this.dispatchEvent(new CustomEvent("action-error",{detail:{action:e,index:t,error:i},bubbles:!0,composed:!0}))}finally{this.loadingStates.set(t,!1),this.requestUpdate()}}}async showConfirmation(e){return confirm(e)}renderAction(e,t){const i=this.loadingStates.get(t)||e.loading,a=e.disabled||i;return L` <button class="quick-action ${e.active?"active":""} ${a?"disabled":""} ${i?"loading":""}" @click="${()=>this.handleActionClick(e,t)}" ?disabled="${a}" style="${e.color?"--action-color: "+e.color:""}"
+        title="${e.label}"
+        aria-label="${e.label}"
+        aria-busy="${i?"true":"false"}"
+        aria-disabled="${a?"true":"false"}"
       >
         <div class="action-content">
-          ${isLoading
-            ? b`<ha-icon icon="mdi:loading" class="spin"></ha-icon>`
-            : b`<ha-icon icon="${action.icon}"></ha-icon>`}
-          ${!this.compact ? b`<span class="action-label">${action.label}</span>` : ''}
+          ${i?L`<ha-icon icon="mdi:loading" class="spin"></ha-icon>`:L`<ha-icon icon="${e.icon}"></ha-icon>`}
+          ${this.compact?"":L`<span class="action-label">${e.label}</span>`}
         </div>
       </button>
-    `;
-    }
-    render() {
-        if (this.actions.length === 0) {
-            return b``;
-        }
-        return b` <div class="quick-actions ${this.vertical ? 'vertical' : ''} ${this.compact ? 'compact' : ''}"> ${this.actions.map((action, index) => this.renderAction(action, index))} </div> `;
-    }
-    static get styles() {
-        return i$3`:host{display:block}.quick-actions{display:flex;gap:6px;flex-wrap:wrap}.quick-actions.vertical{flex-direction:column}.quick-actions.compact{gap:4px}.quick-action{flex:1;min-width:0;display:flex;align-items:center;justify-content:center;padding:8px 10px;border:2px solid var(--divider-color,rgba(0,0,0,0.12));border-radius:8px;background:var(--card-background-color,#fff);color:var(--primary-text-color);cursor:pointer;font-size:12px;font-weight:500;transition:all 0.2s ease;position:relative;overflow:hidden}.quick-actions.compact .quick-action{padding:8px;min-width:48px;min-height:48px}.quick-action:hover:not(.disabled){background:var(--divider-color,rgba(0,0,0,0.05));border-color:var(--primary-color);transform:translateY(-2px);box-shadow:0 2px 8px rgba(0,0,0,0.1)}.quick-action:active:not(.disabled){transform:translateY(0);box-shadow:0 1px 4px rgba(0,0,0,0.1)}.quick-action.active{background:var(--action-color,var(--primary-color));border-color:var(--action-color,var(--primary-color));color:white}.quick-action.active:hover:not(.disabled){background:var(--action-color,var(--primary-color));opacity:0.9}.quick-action.disabled{opacity:0.5;cursor:not-allowed}.quick-action.loading{pointer-events:none}.action-content{display:flex;align-items:center;justify-content:center;gap:4px;width:100%}.quick-actions.compact .action-content{gap:0}.quick-action ha-icon{--mdc-icon-size:20px;flex-shrink:0}.quick-actions.compact .quick-action ha-icon{--mdc-icon-size:24px}.action-label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.spin{animation:spin 1s linear infinite}@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}.quick-action::before{content:'';position:absolute;top:50%;left:50%;width:0;height:0;border-radius:50%;background:rgba(255,255,255,0.3);transform:translate(-50%,-50%);transition:width 0.6s,height 0.6s}.quick-action:active:not(.disabled)::before{width:200%;height:200%}@media(pointer:coarse){.quick-action{min-height:44px}}@media(max-width:600px){.quick-actions:not(.vertical){flex-direction:column}.quick-action{width:100%}}`;
-    }
-};
-__decorate([
-    n({ type: Array })
-], QuickActions.prototype, "actions", void 0);
-__decorate([
-    n({ type: Boolean })
-], QuickActions.prototype, "vertical", void 0);
-__decorate([
-    n({ type: Boolean })
-], QuickActions.prototype, "compact", void 0);
-__decorate([
-    r()
-], QuickActions.prototype, "loadingStates", void 0);
-QuickActions = __decorate([
-    t('quick-actions')
-], QuickActions);
-
-class ServiceCaller {
-    constructor(hass) {
-        this.hass = hass;
-    }
-    showToast(message, duration = 3000) {
-        // Dispatch event for toast notification
-        const event = new CustomEvent('hass-notification', {
-            detail: { message, duration },
-            bubbles: true,
-            composed: true,
-        });
-        window.dispatchEvent(event);
-    }
-    async callService(domain, service, serviceData) {
-        try {
-            await this.hass.callService(domain, service, serviceData);
-            return { success: true };
-        }
-        catch (error) {
-            const errorMessage = error instanceof Error ? error.message : String(error);
-            console.error(`Service call failed: ${domain}.${service}`, error);
-            this.showToast(`Error: ${errorMessage}`, 5000);
-            return { success: false, error: errorMessage };
-        }
-    }
-    async controlPump(entity, action, speed, duration) {
-        const serviceData = {
-            entity_id: entity,
-            action,
-        };
-        if (speed !== undefined) {
-            serviceData.speed = speed;
-        }
-        if (duration !== undefined) {
-            serviceData.duration = duration;
-        }
-        const result = await this.callService('violet_pool_controller', 'control_pump', serviceData);
-        if (result.success) {
-            const speedLabel = speed !== undefined ? ` (Speed ${speed})` : '';
-            this.showToast(`Pump ${action.toUpperCase()}${speedLabel}`);
-        }
-        return result;
-    }
-    async setTemperature(entity, temperature) {
-        const result = await this.callService('climate', 'set_temperature', {
-            entity_id: entity,
-            temperature,
-        });
-        if (result.success) {
-            this.showToast(`Temperature set to ${temperature}°C`);
-        }
-        return result;
-    }
-    async setHvacMode(entity, mode) {
-        const result = await this.callService('climate', 'set_hvac_mode', {
-            entity_id: entity,
-            hvac_mode: mode,
-        });
-        if (result.success) {
-            this.showToast(`HVAC mode set to ${mode.toUpperCase()}`);
-        }
-        return result;
-    }
-    async setNumberValue(entity, value) {
-        const result = await this.callService('number', 'set_value', {
-            entity_id: entity,
-            value,
-        });
-        if (result.success) {
-            this.showToast(`Value set to ${value}`);
-        }
-        return result;
-    }
-    async turnOn(entity) {
-        const domain = entity.split('.')[0];
-        const result = await this.callService(domain, 'turn_on', {
-            entity_id: entity,
-        });
-        if (result.success) {
-            this.showToast(`${entity.split('.')[1]} turned ON`);
-        }
-        return result;
-    }
-    async turnOff(entity) {
-        const domain = entity.split('.')[0];
-        const result = await this.callService(domain, 'turn_off', {
-            entity_id: entity,
-        });
-        if (result.success) {
-            this.showToast(`${entity.split('.')[1]} turned OFF`);
-        }
-        return result;
-    }
-    async toggle(entity) {
-        const domain = entity.split('.')[0];
-        const result = await this.callService(domain, 'toggle', {
-            entity_id: entity,
-        });
-        if (result.success) {
-            this.showToast(`${entity.split('.')[1]} toggled`);
-        }
-        return result;
-    }
-    async smartDosing(dosingType, duration, action = 'on') {
-        const result = await this.callService('violet_pool_controller', 'smart_dosing', {
-            dosing_type: dosingType,
-            duration,
-            action,
-        });
-        if (result.success) {
-            const typeLabels = {
-                cl: 'Chlorine',
-                phm: 'pH-',
-                php: 'pH+',
-                floc: 'Flocculant',
-            };
-            this.showToast(`${typeLabels[dosingType]} dosing for ${duration}s`);
-        }
-        return result;
-    }
-    async manualDosing(entity, duration = 30) {
-        // Extract dosing type from entity name
-        const dosingTypeMatch = entity.match(/dos_\d+_(\w+)/);
-        if (!dosingTypeMatch) {
-            return {
-                success: false,
-                error: 'Could not determine dosing type from entity',
-            };
-        }
-        const dosingTypeMap = {
-            cl: 'cl',
-            phm: 'phm',
-            php: 'php',
-            floc: 'floc',
-        };
-        const dosingType = dosingTypeMap[dosingTypeMatch[1]];
-        if (!dosingType) {
-            return {
-                success: false,
-                error: `Unknown dosing type: ${dosingTypeMatch[1]}`,
-            };
-        }
-        return this.smartDosing(dosingType, duration);
-    }
-    async setPumpSpeed(entity, speed) {
-        if (speed < 0 || speed > 3) {
-            return {
-                success: false,
-                error: 'Speed must be between 0 and 3',
-            };
-        }
-        return this.controlPump(entity, 'on', speed);
-    }
-    async setControllerMode(entity, mode) {
-        if (mode === 'off') {
-            return this.turnOff(entity);
-        }
-        // For manual mode, use 'on' action
-        const action = mode === 'manual' ? 'on' : 'auto';
-        return this.controlPump(entity, action);
-    }
-}
-
-class EntityHelper {
-    static parsePumpState(pumpState) {
-        if (!pumpState || typeof pumpState !== 'string') {
-            return { status: '', rawState: '' };
-        }
-        const parts = pumpState.split('|');
-        if (parts.length === 2) {
-            const level = parseInt(parts[0], 10);
-            const status = this.formatSnakeCase(parts[1]);
-            return {
-                level: isNaN(level) ? undefined : level,
-                status,
-                rawState: pumpState,
-            };
-        }
-        return {
-            status: this.formatSnakeCase(pumpState),
-            rawState: pumpState,
-        };
-    }
-    static parseHeaterState(heaterState) {
-        return this.parsePumpState(heaterState);
-    }
-    static parseSolarState(solarState) {
-        return this.parsePumpState(solarState);
-    }
-    static formatSnakeCase(text) {
-        if (!text)
-            return '';
-        return text
-            .split('_')
-            .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-            .join(' ');
-    }
-    static getCurrentTemperature(entity) {
-        const temp = entity?.attributes?.current_temperature;
-        return temp !== undefined ? Number(temp) : undefined;
-    }
-    static getTargetTemperature(entity) {
-        const temp = entity?.attributes?.temperature;
-        return temp !== undefined ? Number(temp) : undefined;
-    }
-    static getMinTemperature(entity) {
-        const temp = entity?.attributes?.min_temp;
-        return temp !== undefined ? Number(temp) : undefined;
-    }
-    static getMaxTemperature(entity) {
-        const temp = entity?.attributes?.max_temp;
-        return temp !== undefined ? Number(temp) : undefined;
-    }
-}
-
-class StateColorHelper {
-    static getTemperatureColor(temp) {
-        if (temp < 15) {
-            return { color: '#2196F3', intensity: 'high' }; // Cold - Blue
-        }
-        else if (temp < 20) {
-            return { color: '#00BCD4', intensity: 'medium' }; // Cool - Cyan
-        }
-        else if (temp < 26) {
-            return { color: '#4CAF50', intensity: 'low' }; // Ideal - Green
-        }
-        else if (temp < 30) {
-            return { color: '#FF9800', intensity: 'medium' }; // Warm - Orange
-        }
-        else {
-            return { color: '#F44336', intensity: 'high' }; // Hot - Red
-        }
-    }
-    static getPhColor(ph, targetPh = 7.2) {
-        const diff = Math.abs(ph - targetPh);
-        if (diff < 0.1) {
-            return { color: '#4CAF50', intensity: 'low' }; // Perfect - Green
-        }
-        else if (diff < 0.3) {
-            return { color: '#8BC34A', intensity: 'low' }; // Good - Light Green
-        }
-        else if (diff < 0.5) {
-            return { color: '#FF9800', intensity: 'medium' }; // Attention - Orange
-        }
-        else {
-            return { color: '#F44336', intensity: 'high' }; // Critical - Red
-        }
-    }
-    static getOrpColor(orp, targetOrp = 700) {
-        if (orp < targetOrp - 100) {
-            return { color: '#F44336', intensity: 'high' }; // Too low - Red
-        }
-        else if (orp < targetOrp - 50) {
-            return { color: '#FF9800', intensity: 'medium' }; // Low - Orange
-        }
-        else if (orp > targetOrp + 100) {
-            return { color: '#F44336', intensity: 'high' }; // Too high - Red
-        }
-        else if (orp > targetOrp + 50) {
-            return { color: '#FF9800', intensity: 'medium' }; // High - Orange
-        }
-        else {
-            return { color: '#4CAF50', intensity: 'low' }; // Good - Green
-        }
-    }
-    static getPumpSpeedColor(speed) {
-        switch (speed) {
-            case 0:
-                return { color: '#757575', intensity: 'low' }; // OFF - Gray
-            case 1:
-                return { color: '#2196F3', intensity: 'low' }; // ECO - Blue
-            case 2:
-                return { color: '#4CAF50', intensity: 'medium' }; // Normal - Green
-            case 3:
-                return { color: '#FF9800', intensity: 'high' }; // Boost - Orange
-            default:
-                return { color: '#757575', intensity: 'low' }; // Unknown - Gray
-        }
-    }
-    static getEntityStateColor(state) {
-        const stateLower = state.toLowerCase();
-        if (stateLower === 'on' || stateLower === 'heat' || stateLower === 'active') {
-            return { color: '#4CAF50', intensity: 'medium' }; // Active - Green
-        }
-        else if (stateLower === 'off' || stateLower === 'idle') {
-            return { color: '#757575', intensity: 'low' }; // Inactive - Gray
-        }
-        else if (stateLower === 'auto') {
-            return { color: '#2196F3', intensity: 'medium' }; // Auto - Blue
-        }
-        else if (stateLower === 'manual') {
-            return { color: '#FF9800', intensity: 'medium' }; // Manual - Orange
-        }
-        else if (stateLower.includes('blocked') || stateLower.includes('error')) {
-            return { color: '#F44336', intensity: 'high' }; // Error/Blocked - Red
-        }
-        else if (stateLower.includes('warning')) {
-            return { color: '#FFC107', intensity: 'medium' }; // Warning - Amber
-        }
-        else {
-            return { color: '#9E9E9E', intensity: 'low' }; // Unknown - Gray
-        }
-    }
-    static getPercentageColor(percentage, ideal = 100) {
-        const diff = Math.abs(percentage - ideal);
-        if (diff < 10) {
-            return { color: '#4CAF50', intensity: 'low' }; // Perfect - Green
-        }
-        else if (diff < 25) {
-            return { color: '#8BC34A', intensity: 'low' }; // Good - Light Green
-        }
-        else if (diff < 50) {
-            return { color: '#FF9800', intensity: 'medium' }; // Attention - Orange
-        }
-        else {
-            return { color: '#F44336', intensity: 'high' }; // Critical - Red
-        }
-    }
-    static getIntensityOpacity(intensity) {
-        switch (intensity) {
-            case 'low':
-                return 0.15;
-            case 'medium':
-                return 0.25;
-            case 'high':
-                return 0.35;
-            default:
-                return 0.2;
-        }
-    }
-    static applyColorToElement(element, colorConfig, useBackground = true) {
-        element.style.setProperty('--state-color', colorConfig.color);
-        if (useBackground) {
-            const opacity = this.getIntensityOpacity(colorConfig.intensity);
-            const rgb = this.hexToRgb(colorConfig.color);
-            if (rgb) {
-                element.style.background = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity})`;
-            }
-        }
-    }
-    static hexToRgb(hex) {
-        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-        return result
-            ? {
-                r: parseInt(result[1], 16),
-                g: parseInt(result[2], 16),
-                b: parseInt(result[3], 16),
-            }
-            : null;
-    }
-}
-
-/**
- * Animated spinning pump impeller SVG
- * speed: 0=off, 1=ECO(slow), 2=Normal(medium), 3=Boost(fast)
- */
-function pumpSVG(speed, color) {
-    const dur = speed === 0 ? 'none' : speed === 1 ? '3.2s' : speed === 2 ? '1.5s' : '0.62s';
-    const isOn = speed > 0;
-    return b` <svg viewBox="0 0 48 48" style="width:100%;height:100%;display:block;overflow:visible" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="${color}" fill-opacity="${isOn ? 0.13 : 0.07}"/><circle cx="24" cy="24" r="21" fill="none" stroke="${color}" stroke-width="1.5" stroke-opacity="0.38"/><circle cx="24" cy="24" r="13.5" fill="none" stroke="${color}" stroke-width="0.7" stroke-opacity="0.18" stroke-dasharray="5 3"/><g style="transform-origin:24px 24px;animation:${dur !== 'none' ? `rotate ${dur} linear infinite` : 'none'}">
-        <ellipse cx="24" cy="14" rx="4" ry="8.5" fill="${color}" fill-opacity="0.9"/>
-        <ellipse cx="34" cy="24" rx="8.5" ry="4" fill="${color}" fill-opacity="0.7"/>
-        <ellipse cx="24" cy="34" rx="4" ry="8.5" fill="${color}" fill-opacity="0.9"/>
-        <ellipse cx="14" cy="24" rx="8.5" ry="4" fill="${color}" fill-opacity="0.7"/>
+    `}render(){return 0===this.actions.length?L``:L` <div class="quick-actions ${this.vertical?"vertical":""} ${this.compact?"compact":""}"> ${this.actions.map((e,t)=>this.renderAction(e,t))} </div> `}static get styles(){return r`:host{display:block}.quick-actions{display:flex;gap:6px;flex-wrap:wrap}.quick-actions.vertical{flex-direction:column}.quick-actions.compact{gap:4px}.quick-action{flex:1;min-width:0;display:flex;align-items:center;justify-content:center;padding:8px 10px;border:2px solid var(--divider-color,rgba(0,0,0,0.12));border-radius:8px;background:var(--card-background-color,#fff);color:var(--primary-text-color);cursor:pointer;font-size:12px;font-weight:500;transition:all 0.2s ease;position:relative;overflow:hidden}.quick-actions.compact .quick-action{padding:8px;min-width:48px;min-height:48px}.quick-action:hover:not(.disabled){background:var(--divider-color,rgba(0,0,0,0.05));border-color:var(--primary-color);transform:translateY(-2px);box-shadow:0 2px 8px rgba(0,0,0,0.1)}.quick-action:active:not(.disabled){transform:translateY(0);box-shadow:0 1px 4px rgba(0,0,0,0.1)}.quick-action.active{background:var(--action-color,var(--primary-color));border-color:var(--action-color,var(--primary-color));color:white}.quick-action.active:hover:not(.disabled){background:var(--action-color,var(--primary-color));opacity:0.9}.quick-action.disabled{opacity:0.5;cursor:not-allowed}.quick-action.loading{pointer-events:none}.action-content{display:flex;align-items:center;justify-content:center;gap:4px;width:100%}.quick-actions.compact .action-content{gap:0}.quick-action ha-icon{--mdc-icon-size:20px;flex-shrink:0}.quick-actions.compact .quick-action ha-icon{--mdc-icon-size:24px}.action-label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.spin{animation:spin 1s linear infinite}@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}.quick-action::before{content:'';position:absolute;top:50%;left:50%;width:0;height:0;border-radius:50%;background:rgba(255,255,255,0.3);transform:translate(-50%,-50%);transition:width 0.6s,height 0.6s}.quick-action:active:not(.disabled)::before{width:200%;height:200%}@media(pointer:coarse){.quick-action{min-height:44px}}@media(max-width:600px){.quick-actions:not(.vertical){flex-direction:column}.quick-action{width:100%}}`}}e([pe({type:Array})],we.prototype,"actions",void 0),e([pe({type:Boolean})],we.prototype,"vertical",void 0),e([pe({type:Boolean})],we.prototype,"compact",void 0),e([he()],we.prototype,"loadingStates",void 0),customElements.get("vpc-quick-actions")||customElements.define("vpc-quick-actions",we);class $e{constructor(e){this.hass=e}showToast(e,t=3e3){const i=new CustomEvent("hass-notification",{detail:{message:e,duration:t},bubbles:!0,composed:!0});window.dispatchEvent(i)}async callService(e,t,i){try{return await this.hass.callService(e,t,i),{success:!0}}catch(e){const t=e instanceof Error?e.message:e+"";return this.showToast("Error: "+t,5e3),{success:!1,error:t}}}async controlPump(e,t,i,a){const s={entity_id:e,action:t};void 0!==i&&(s.speed=i),void 0!==a&&(s.duration=a);const o=await this.callService("violet_pool_controller","control_pump",s);if(o.success){const e=void 0!==i?` (Speed ${i})`:"";this.showToast(`Pump ${t.toUpperCase()}${e}`)}return o}async setTemperature(e,t){const i=await this.callService("climate","set_temperature",{entity_id:e,temperature:t});return i.success&&this.showToast(`Temperature set to ${t}°C`),i}async setHvacMode(e,t){const i=await this.callService("climate","set_hvac_mode",{entity_id:e,hvac_mode:t});return i.success&&this.showToast("HVAC mode set to "+t.toUpperCase()),i}async setNumberValue(e,t){const i=await this.callService("number","set_value",{entity_id:e,value:t});return i.success&&this.showToast("Value set to "+t),i}async turnOn(e){const t=e.split(".")[0],i=await this.callService(t,"turn_on",{entity_id:e});return i.success&&this.showToast(e.split(".")[1]+" turned ON"),i}async turnOff(e){const t=e.split(".")[0],i=await this.callService(t,"turn_off",{entity_id:e});return i.success&&this.showToast(e.split(".")[1]+" turned OFF"),i}async toggle(e){const t=e.split(".")[0],i=await this.callService(t,"toggle",{entity_id:e});return i.success&&this.showToast(e.split(".")[1]+" toggled"),i}async smartDosing(e,t,i="on"){const a=await this.callService("violet_pool_controller","smart_dosing",{dosing_type:e,duration:t,action:i});return a.success&&this.showToast(`${{cl:"Chlorine",phm:"pH-",php:"pH+",floc:"Flocculant"}[e]} dosing for ${t}s`),a}async manualDosing(e,t=30){const i=e.match(/dos_\d+_(\w+)/);if(!i)return{success:!1,error:"Could not determine dosing type from entity"};const a={cl:"cl",phm:"phm",php:"php",floc:"floc"}[i[1]];return a?this.smartDosing(a,t):{success:!1,error:"Unknown dosing type: "+i[1]}}async setPumpSpeed(e,t){return t<0||t>3?{success:!1,error:"Speed must be between 0 and 3"}:this.controlPump(e,"on",t)}async setControllerMode(e,t){return"off"===t?this.turnOff(e):this.controlPump(e,"manual"===t?"on":"auto")}}class _e{static parsePumpState(e){if(!e||"string"!=typeof e)return{status:"",rawState:""};const t=e.split("|");if(2===t.length){const i=parseInt(t[0],10),a=this.formatSnakeCase(t[1]);return{level:isNaN(i)?void 0:i,status:a,rawState:e}}return{status:this.formatSnakeCase(e),rawState:e}}static parseHeaterState(e){return this.parsePumpState(e)}static parseSolarState(e){return this.parsePumpState(e)}static formatSnakeCase(e){return e?e.split("_").map(e=>e.charAt(0).toUpperCase()+e.slice(1).toLowerCase()).join(" "):""}static getCurrentTemperature(e){const t=e?.attributes?.current_temperature;return void 0!==t?Number(t):void 0}static getTargetTemperature(e){const t=e?.attributes?.temperature;return void 0!==t?Number(t):void 0}static getMinTemperature(e){const t=e?.attributes?.min_temp;return void 0!==t?Number(t):void 0}static getMaxTemperature(e){const t=e?.attributes?.max_temp;return void 0!==t?Number(t):void 0}}class ke{static getTemperatureColor(e){return e<15?{color:"#2196F3",intensity:"high"}:e<20?{color:"#00BCD4",intensity:"medium"}:e<26?{color:"#4CAF50",intensity:"low"}:e<30?{color:"#FF9800",intensity:"medium"}:{color:"#F44336",intensity:"high"}}static getPhColor(e,t=7.2){const i=Math.abs(e-t);return i<.1?{color:"#4CAF50",intensity:"low"}:i<.3?{color:"#8BC34A",intensity:"low"}:i<.5?{color:"#FF9800",intensity:"medium"}:{color:"#F44336",intensity:"high"}}static getOrpColor(e,t=700){return e<t-100?{color:"#F44336",intensity:"high"}:e<t-50?{color:"#FF9800",intensity:"medium"}:e>t+100?{color:"#F44336",intensity:"high"}:e>t+50?{color:"#FF9800",intensity:"medium"}:{color:"#4CAF50",intensity:"low"}}static getPumpSpeedColor(e){switch(e){case 0:default:return{color:"#757575",intensity:"low"};case 1:return{color:"#2196F3",intensity:"low"};case 2:return{color:"#4CAF50",intensity:"medium"};case 3:return{color:"#FF9800",intensity:"high"}}}static getEntityStateColor(e){const t=e.toLowerCase();return"on"===t||"heat"===t||"active"===t?{color:"#4CAF50",intensity:"medium"}:"off"===t||"idle"===t?{color:"#757575",intensity:"low"}:"auto"===t?{color:"#2196F3",intensity:"medium"}:"manual"===t?{color:"#FF9800",intensity:"medium"}:t.includes("blocked")||t.includes("error")?{color:"#F44336",intensity:"high"}:t.includes("warning")?{color:"#FFC107",intensity:"medium"}:{color:"#9E9E9E",intensity:"low"}}static getPercentageColor(e,t=100){const i=Math.abs(e-t);return i<10?{color:"#4CAF50",intensity:"low"}:i<25?{color:"#8BC34A",intensity:"low"}:i<50?{color:"#FF9800",intensity:"medium"}:{color:"#F44336",intensity:"high"}}static getIntensityOpacity(e){switch(e){case"low":return.15;case"medium":return.25;case"high":return.35;default:return.2}}static applyColorToElement(e,t,i=!0){if(e.style.setProperty("--state-color",t.color),i){const i=this.getIntensityOpacity(t.intensity),a=this.hexToRgb(t.color);a&&(e.style.background=`rgba(${a.r}, ${a.g}, ${a.b}, ${i})`)}}static hexToRgb(e){const t=/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(e);return t?{r:parseInt(t[1],16),g:parseInt(t[2],16),b:parseInt(t[3],16)}:null}}class Ce extends ne{setConfig(e){if(!e.card_type)throw Error("You need to define a card_type");if("overview"!==e.card_type&&"system"!==e.card_type&&"details"!==e.card_type&&"chemical"!==e.card_type&&"cover"!==e.card_type&&"light"!==e.card_type&&!e.entity)throw Error("You need to define an entity");this.config={show_state:!0,show_detail_status:!0,show_controls:!0,show_runtime:!1,show_history:!1,size:"medium",theme:"apple",animation:"smooth",blur_intensity:10,style:"standard",show_flow_animation:!1,entity_prefix:"violet_pool",...e}}_buildEntityId(e,t){return`${e}.${this.config.entity_prefix||"violet_pool"}_${t}`}_getEntityId(e,t,i,a){return this.config[e]||(void 0!==a&&this.config.entities&&this.config.entities[a]?this.config.entities[a]:this._buildEntityId(t,i))}_getFriendlyState(e,t){return"pump"===t&&"on"===e?"Running":{on:"Active",off:"Off",auto:"Auto",heat:"Heating",heating:"Heating",cool:"Cooling",cooling:"Cooling",idle:"Idle",unavailable:"Unavailable",unknown:"Unknown",manual:"Manual"}[e]??e.charAt(0).toUpperCase()+e.slice(1)}_getValuePercent(e,t,i){return i<=t?0:Math.min(100,Math.max(0,(e-t)/(i-t)*100))}_showMoreInfo(e){const t=new CustomEvent("hass-more-info",{detail:{entityId:e},bubbles:!0,composed:!0});this.dispatchEvent(t)}render(){if(!this.config||!this.hass)return L``;if(this.config.entity&&!this.hass.states[this.config.entity])return L` <ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">Entity Not Found</span><span class="error-entity">${this.config.entity}</span></div></div></ha-card> `;switch(this.config.card_type){case"pump":return this.renderPumpCard();case"heater":return this.renderHeaterCard();case"solar":return this.renderSolarCard();case"dosing":return this.renderDosingCard();case"overview":return this.renderOverviewCard();case"compact":return this.renderCompactCard();case"system":return this.renderSystemCard();case"details":return this.renderDetailsCard();case"chemical":return this.renderChemicalCard();case"sensor":return this.renderSensorCard();case"cover":return this.renderCoverCard();case"light":return this.renderLightCard();case"filter":return this.renderFilterCard();default:return L` <ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">Unknown Card Type</span><span class="error-entity">${this.config.card_type}</span></div></div></ha-card> `}}_getCardClasses(e,t){const i=[];return i.push("size-"+(t.size||"medium")),i.push(t.theme?"theme-"+t.theme:t.style||"standard"),t.animation&&"none"!==t.animation&&i.push("animation-"+t.animation),(t.show_flow_animation||"energetic"===t.animation)&&e&&i.push("flow-active"),e&&i.push("is-active"),i.join(" ")}_getAccentColor(e,t){if(t.accent_color)return t.accent_color;switch(e){case"pump":default:return"#2196F3";case"heater":return"#FF5722";case"solar":return"#FF9800";case"dosing":return"#4CAF50";case"overview":return"#7C4DFF";case"cover":return"#5AC8FA";case"light":return"#AF52DE";case"filter":return"#FF9500"}}renderSystemCard(){const e=this._getEntityId("pump_entity","switch","pump",0),t=this._getEntityId("heater_entity","climate","heater",1),i=this._getEntityId("solar_entity","climate","solar",2),a=this._getEntityId("chlorine_entity","switch","dos_1_cl",3),s=(e,t,i={})=>"overview"===e||this.hass.states[t]?{...this.config,card_type:e,entity:t,entity_prefix:this.config.entity_prefix||"violet_pool",...i}:null,o=this._getEntityId("cover_entity","cover","cover"),r=this._getEntityId("light_entity","light","light"),n=this._getEntityId("filter_entity","sensor","filter_pressure"),c=s("overview","",{name:"Pool Overview"}),l=s("pump",e,{show_runtime:!0}),d=s("heater",t),p=s("solar",i),h=s("dosing",a,{dosing_type:"chlorine"}),v=s("cover",o),g=s("light",r),u=s("filter",n);return L` <div class="system-grid"> ${c?this.renderOverviewCard(c):""} ${l?this.renderPumpCard(l):""} ${d?this.renderHeaterCard(d):""} ${p?this.renderSolarCard(p):""} ${h?this.renderDosingCard(h):""} ${v?this.renderCoverCard(v):""} ${g?this.renderLightCard(g):""} ${u?this.renderFilterCard(u):""} </div> `}renderPumpCard(e=this.config){const t=this.hass.states[e.entity],i=t.state,a=e.name||t.attributes.friendly_name||"Pump",s=t.attributes?.PUMPSTATE||"",o=this._getAccentColor("pump",e),r=_e.parsePumpState(s),n=void 0!==r.level?r.level:0,c=[t.attributes?.PUMP_RPM_0||0,t.attributes?.PUMP_RPM_1||0,t.attributes?.PUMP_RPM_2||0,t.attributes?.PUMP_RPM_3||0][n]||0,l=t.attributes?.runtime||0,d=Math.floor(l/3600),p=Math.floor(l%3600/60),h=d>0?`${d}h ${p}min`:p+"min",v=ke.getPumpSpeedColor(n),g="on"===i||n>0,u=["OFF","ECO","Normal","Boost"],m=["#8E8E93","#34C759","#FF9F0A","#FF3B30"],f=["mdi:power-off","mdi:speedometer-slow","mdi:speedometer-medium","mdi:speedometer"];return L` <ha-card class="${this._getCardClasses(g,e)}" style="--card-accent: ${o}" @click="${()=>this._showMoreInfo(e.entity)}" ><div class="accent-bar"></div><div class="card-content"><div class="header"><div class="header-icon ${g?"icon-active":""}" style="--icon-accent: ${o}">${e.icon?L`<ha-icon icon="${e.icon}" class="${g?"pump-running":""}"></ha-icon>`:function(e,t){const i=0===e?"none":1===e?"3.2s":2===e?"1.5s":"0.62s",a=e>0;return L` <svg viewBox="0 0 48 48" style="width:100%;height:100%;display:block;overflow:visible" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="${t}" fill-opacity="${a?.13:.07}"/><circle cx="24" cy="24" r="21" fill="none" stroke="${t}" stroke-width="1.5" stroke-opacity="0.38"/><circle cx="24" cy="24" r="13.5" fill="none" stroke="${t}" stroke-width="0.7" stroke-opacity="0.18" stroke-dasharray="5 3"/><g style="transform-origin:24px 24px;animation:${"none"!==i?`rotate ${i} linear infinite`:"none"}">
+        <ellipse cx="24" cy="14" rx="4" ry="8.5" fill="${t}" fill-opacity="0.9"/>
+        <ellipse cx="34" cy="24" rx="8.5" ry="4" fill="${t}" fill-opacity="0.7"/>
+        <ellipse cx="24" cy="34" rx="4" ry="8.5" fill="${t}" fill-opacity="0.9"/>
+        <ellipse cx="14" cy="24" rx="8.5" ry="4" fill="${t}" fill-opacity="0.7"/>
       </g>
-      <circle cx="24" cy="24" r="5" fill="${color}"/>
+      <circle cx="24" cy="24" r="5" fill="${t}"/>
       <circle cx="24" cy="24" r="2.5" fill="white" fill-opacity="0.9"/>
-      ${isOn ? b` <circle cx="24" cy="24" r="21" fill="none" stroke="${color}" stroke-width="3" stroke-dasharray="${speed * 33} 100" stroke-opacity="0.5" stroke-linecap="round" transform="rotate(-90 24 24)"/> ` : ''}
-    </svg>`;
-}
-/**
- * Flickering flame heater icon
- */
-function heaterSVG(active, color) {
-    return b` <svg viewBox="0 0 48 48" style="width:100%;height:100%;display:block;overflow:visible" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="${color}" fill-opacity="${active ? 0.14 : 0.07}"/><circle cx="24" cy="24" r="21" fill="none" stroke="${color}" stroke-width="1.5" stroke-opacity="0.38"/><path d="M24,8 C17,15 12,20 14,27 C15,33 20,38 24,40 C28,38 33,33 34,27 C36,20 31,15 24,8Z" fill="${color}" fill-opacity="${active ? 0.88 : 0.5}" style="${active ? 'animation:flicker 1.9s ease-in-out infinite;transform-origin:24px 40px' : ''}"/><path d="M24,19 C21,23 19,26 20,30 C21,34 22.5,37 24,38 C25.5,37 27,34 28,30 C29,26 27,23 24,19Z" fill="white" fill-opacity="${active ? 0.55 : 0.2}" style="${active ? 'animation:flicker 1.4s ease-in-out infinite 0.2s;transform-origin:24px 38px' : ''}"/><ellipse cx="24" cy="39" rx="8" ry="2.5" fill="${color}" fill-opacity="${active ? 0.28 : 0.1}"/></svg>`;
-}
-/**
- * Animated solar sun with rotating rays
- */
-function solarSVG(active, color) {
-    const rays = [0, 45, 90, 135, 180, 225, 270, 315];
-    return b` <svg viewBox="0 0 48 48" style="width:100%;height:100%;display:block;overflow:visible" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="${color}" fill-opacity="${active ? 0.13 : 0.07}"/><g style="transform-origin:24px 24px;animation:${active ? 'spin-slow 14s linear infinite' : 'none'}"> ${rays.map(angle => b `
-          <rect x="22.5" y="3" width="3" height="5.5" rx="1.5"
-                fill="${color}" fill-opacity="${active ? 0.75 : 0.3}"
-                style="transform:rotate(${angle}deg);transform-origin:24px 24px"/>
-        `)}
-      </g>
-      ${active ? b` <circle cx="24" cy="24" r="14" fill="none" stroke="${color}" stroke-width="1.5" stroke-opacity="0.35" style="animation:breathe 2.8s ease-in-out infinite"/> ` : ''}
-      <circle cx="24" cy="24" r="10.5" fill="${color}" fill-opacity="${active ? 0.9 : 0.45}"/>
-      <circle cx="24" cy="24" r="7" fill="white" fill-opacity="${active ? 0.5 : 0.22}"/>
-    </svg>`;
-}
-/**
- * Pool cover top-down view with sliding cover panel
- * position: 0=closed, 100=open
- */
-function coverSVG(position, isMoving, color) {
-    const coverWidth = Math.round((1 - Math.max(0, Math.min(100, position)) / 100) * 72);
-    const slatCount = Math.min(Math.floor(coverWidth / 7), 11);
-    return b` <svg viewBox="0 0 90 48" style="width:100%;height:auto;display:block" xmlns="http://www.w3.org/2000/svg"><!-- Pool shell --><rect x="2" y="4" width="76" height="40" rx="9" fill="rgba(0,160,255,0.1)" stroke="${color}" stroke-width="1.5" stroke-opacity="0.35"/><!-- Water texture --><path d="M8,19 C17,15 27,23 37,19 C47,15 57,23 67,19 C71,17 74,19 77,19" fill="none" stroke="rgba(0,150,255,0.45)" stroke-width="1.4" stroke-linecap="round"/><path d="M8,29 C17,25 27,33 37,29 C47,25 57,33 67,29 C71,27 74,29 77,29" fill="none" stroke="rgba(0,150,255,0.25)" stroke-width="1.1" stroke-linecap="round"/><!-- Cover panel --> ${coverWidth > 0 ? b `
-        <rect x="2" y="4" width="${coverWidth}" height="40" rx="9"
-              fill="${color}" fill-opacity="0.82"/>
-        ${Array.from({ length: slatCount }, (_, i) => b` <line x1="${9 + i * 7}" y1="6" x2="${9 + i * 7}" y2="42" stroke="white" stroke-width="0.6" stroke-opacity="0.22"/> `)}
-      ` : ''}
-      <!-- Motor / reel housing -->
-      <rect x="80" y="8" width="8" height="32" rx="4"
-            fill="${color}" fill-opacity="0.45"/>
-      <circle cx="84" cy="24" r="5" fill="${color}" fill-opacity="${isMoving ? 0.9 : 0.35}"
-              style="${isMoving ? 'animation:rotate 1.2s linear infinite' : ''}"/>
-      <circle cx="84" cy="24" r="2" fill="white" fill-opacity="${isMoving ? 0.8 : 0.4}"/>
-    </svg>`;
-}
-/**
- * Glowing pool light with optional RGB color
- * on: light state, rgb: [r,g,b] or null, brightness: 0-255
- */
-function lightSVG(on, rgb, brightness, fallbackColor) {
-    const rgbStr = rgb ? `rgb(${rgb[0]},${rgb[1]},${rgb[2]})` : fallbackColor;
-    const bNorm = on ? brightness / 255 : 0;
-    const glowRays = [0, 60, 120, 180, 240, 300];
-    return b` <svg viewBox="0 0 48 48" style="width:100%;height:100%;display:block;overflow:visible" xmlns="http://www.w3.org/2000/svg"> ${on ? b `
-        <circle cx="24" cy="24" r="23" fill="${rgbStr}" fill-opacity="${0.07 + bNorm * 0.18}"
-                style="animation:light-glow 2.6s ease-in-out infinite"/>
-        <circle cx="24" cy="24" r="17" fill="${rgbStr}" fill-opacity="${0.09 + bNorm * 0.12}"/>
-        <g style="transform-origin:24px 24px;animation:spin-slow 9s linear infinite">
-          ${glowRays.map(a => b` <line x1="24" y1="5" x2="24" y2="9" stroke="${rgbStr}" stroke-width="2.2" stroke-linecap="round" stroke-opacity="${0.4 + bNorm * 0.4}" style="transform:rotate(${a}deg);transform-origin:24px 24px"/> `)}
-        </g>
-      ` : b`<circle cx="24" cy="24" r="22" fill="${fallbackColor}" fill-opacity="0.07"/>`}
-      <!-- Housing ring -->
-      <circle cx="24" cy="24" r="20" fill="none" stroke="${on ? rgbStr : fallbackColor}"
-              stroke-width="1.5" stroke-opacity="${on ? 0.55 : 0.3}"/>
-      <!-- LED lens -->
-      <circle cx="24" cy="24" r="12" fill="${on ? rgbStr : fallbackColor}"
-              fill-opacity="${on ? 0.88 : 0.28}"/>
-      <!-- Lens highlight -->
-      <ellipse cx="20.5" cy="19.5" rx="4" ry="3" fill="white"
-               fill-opacity="${on ? 0.38 : 0.1}"
-               style="transform:rotate(-20deg);transform-origin:20.5px 19.5px"/>
-      <!-- Mount points -->
-      <circle cx="24" cy="6" r="2" fill="${fallbackColor}" fill-opacity="0.3"/>
-      <circle cx="24" cy="42" r="2" fill="${fallbackColor}" fill-opacity="0.3"/>
-    </svg>`;
-}
-
-class VioletPoolCard extends i {
-    setConfig(config) {
-        if (!config.card_type) {
-            throw new Error('You need to define a card_type');
-        }
-        if (config.card_type !== 'overview' && config.card_type !== 'system' && config.card_type !== 'details' && config.card_type !== 'chemical' && config.card_type !== 'cover' && config.card_type !== 'light' && !config.entity) {
-            throw new Error('You need to define an entity');
-        }
-        this.config = {
-            show_state: true,
-            show_detail_status: true,
-            show_controls: true,
-            show_runtime: false,
-            show_history: false,
-            size: 'medium',
-            theme: 'apple',
-            animation: 'smooth',
-            blur_intensity: 10,
-            style: 'standard',
-            show_flow_animation: false,
-            entity_prefix: 'violet_pool',
-            ...config,
-        };
-    }
-    _buildEntityId(domain, suffix) {
-        const prefix = this.config.entity_prefix || 'violet_pool';
-        return `${domain}.${prefix}_${suffix}`;
-    }
-    _getEntityId(configKey, domain, suffix, entitiesIndex) {
-        const configValue = this.config[configKey];
-        if (configValue) {
-            return configValue;
-        }
-        if (entitiesIndex !== undefined && this.config.entities && this.config.entities[entitiesIndex]) {
-            return this.config.entities[entitiesIndex];
-        }
-        return this._buildEntityId(domain, suffix);
-    }
-    /**
-     * Returns human-readable state label
-     */
-    _getFriendlyState(state, cardType) {
-        const map = {
-            'on': 'Active',
-            'off': 'Off',
-            'auto': 'Auto',
-            'heat': 'Heating',
-            'heating': 'Heating',
-            'cool': 'Cooling',
-            'cooling': 'Cooling',
-            'idle': 'Idle',
-            'unavailable': 'Unavailable',
-            'unknown': 'Unknown',
-            'manual': 'Manual',
-        };
-        if (cardType === 'pump' && state === 'on')
-            return 'Running';
-        return map[state] ?? state.charAt(0).toUpperCase() + state.slice(1);
-    }
-    /**
-     * Returns percentage (0-100) of value within min-max range, clamped.
-     */
-    _getValuePercent(value, min, max) {
-        if (max <= min)
-            return 0;
-        return Math.min(100, Math.max(0, ((value - min) / (max - min)) * 100));
-    }
-    /**
-     * Open more-info dialog for an entity
-     */
-    _showMoreInfo(entityId) {
-        const event = new CustomEvent('hass-more-info', {
-            detail: { entityId },
-            bubbles: true,
-            composed: true,
-        });
-        this.dispatchEvent(event);
-    }
-    render() {
-        if (!this.config || !this.hass) {
-            return b``;
-        }
-        if (this.config.entity) {
-            const entity = this.hass.states[this.config.entity];
-            if (!entity) {
-                return b` <ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">Entity Not Found</span><span class="error-entity">${this.config.entity}</span></div></div></ha-card> `;
-            }
-        }
-        switch (this.config.card_type) {
-            case 'pump':
-                return this.renderPumpCard();
-            case 'heater':
-                return this.renderHeaterCard();
-            case 'solar':
-                return this.renderSolarCard();
-            case 'dosing':
-                return this.renderDosingCard();
-            case 'overview':
-                return this.renderOverviewCard();
-            case 'compact':
-                return this.renderCompactCard();
-            case 'system':
-                return this.renderSystemCard();
-            case 'details':
-                return this.renderDetailsCard();
-            case 'chemical':
-                return this.renderChemicalCard();
-            case 'sensor':
-                return this.renderSensorCard();
-            case 'cover':
-                return this.renderCoverCard();
-            case 'light':
-                return this.renderLightCard();
-            case 'filter':
-                return this.renderFilterCard();
-            default:
-                return b` <ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">Unknown Card Type</span><span class="error-entity">${this.config.card_type}</span></div></div></ha-card> `;
-        }
-    }
-    _getCardClasses(isActive, config) {
-        const classes = [];
-        classes.push(`size-${config.size || 'medium'}`);
-        if (config.theme) {
-            classes.push(`theme-${config.theme}`);
-        }
-        else {
-            classes.push(config.style || 'standard');
-        }
-        if (config.animation && config.animation !== 'none') {
-            classes.push(`animation-${config.animation}`);
-        }
-        if ((config.show_flow_animation || config.animation === 'energetic') && isActive) {
-            classes.push('flow-active');
-        }
-        if (isActive) {
-            classes.push('is-active');
-        }
-        return classes.join(' ');
-    }
-    /**
-     * Get accent color for card type
-     */
-    _getAccentColor(cardType, config) {
-        if (config.accent_color)
-            return config.accent_color;
-        switch (cardType) {
-            case 'pump': return '#2196F3';
-            case 'heater': return '#FF5722';
-            case 'solar': return '#FF9800';
-            case 'dosing': return '#4CAF50';
-            case 'overview': return '#7C4DFF';
-            case 'cover': return '#5AC8FA';
-            case 'light': return '#AF52DE';
-            case 'filter': return '#FF9500';
-            default: return '#2196F3';
-        }
-    }
-    renderSystemCard() {
-        const pumpEntity = this._getEntityId('pump_entity', 'switch', 'pump', 0);
-        const heaterEntity = this._getEntityId('heater_entity', 'climate', 'heater', 1);
-        const solarEntity = this._getEntityId('solar_entity', 'climate', 'solar', 2);
-        const dosingEntity = this._getEntityId('chlorine_entity', 'switch', 'dos_1_cl', 3);
-        const createSubConfig = (type, entity, extra = {}) => {
-            if (type !== 'overview' && !this.hass.states[entity])
-                return null;
-            return {
-                ...this.config,
-                card_type: type,
-                entity: entity,
-                // Ensure entity_prefix is always propagated to sub-cards (bug fix)
-                entity_prefix: this.config.entity_prefix || 'violet_pool',
-                ...extra
-            };
-        };
-        const coverEntitySys = this._getEntityId('cover_entity', 'cover', 'cover');
-        const lightEntitySys = this._getEntityId('light_entity', 'light', 'light');
-        const filterEntitySys = this._getEntityId('filter_entity', 'sensor', 'filter_pressure');
-        const overviewConfig = createSubConfig('overview', '', { name: 'Pool Overview' });
-        const pumpConfig = createSubConfig('pump', pumpEntity, { show_runtime: true });
-        const heaterConfig = createSubConfig('heater', heaterEntity);
-        const solarConfig = createSubConfig('solar', solarEntity);
-        const dosingConfig = createSubConfig('dosing', dosingEntity, { dosing_type: 'chlorine' });
-        const coverConfig = createSubConfig('cover', coverEntitySys);
-        const lightConfig = createSubConfig('light', lightEntitySys);
-        const filterConfig = createSubConfig('filter', filterEntitySys);
-        return b` <div class="system-grid"> ${overviewConfig ? this.renderOverviewCard(overviewConfig) : ''} ${pumpConfig ? this.renderPumpCard(pumpConfig) : ''} ${heaterConfig ? this.renderHeaterCard(heaterConfig) : ''} ${solarConfig ? this.renderSolarCard(solarConfig) : ''} ${dosingConfig ? this.renderDosingCard(dosingConfig) : ''} ${coverConfig ? this.renderCoverCard(coverConfig) : ''} ${lightConfig ? this.renderLightCard(lightConfig) : ''} ${filterConfig ? this.renderFilterCard(filterConfig) : ''} </div> `;
-    }
-    renderPumpCard(config = this.config) {
-        const entity = this.hass.states[config.entity];
-        const state = entity.state;
-        const name = config.name || entity.attributes.friendly_name || 'Pump';
-        const pumpState = entity.attributes?.PUMPSTATE || '';
-        const accentColor = this._getAccentColor('pump', config);
-        const parsedState = EntityHelper.parsePumpState(pumpState);
-        const currentSpeed = parsedState.level !== undefined ? parsedState.level : 0;
-        const rpmLevel0 = entity.attributes?.PUMP_RPM_0 || 0;
-        const rpmLevel1 = entity.attributes?.PUMP_RPM_1 || 0;
-        const rpmLevel2 = entity.attributes?.PUMP_RPM_2 || 0;
-        const rpmLevel3 = entity.attributes?.PUMP_RPM_3 || 0;
-        const rpmValues = [rpmLevel0, rpmLevel1, rpmLevel2, rpmLevel3];
-        const currentRPM = rpmValues[currentSpeed] || 0;
-        const runtimeSeconds = entity.attributes?.runtime || 0;
-        const runtimeHours = Math.floor(runtimeSeconds / 3600);
-        const runtimeMinutes = Math.floor((runtimeSeconds % 3600) / 60);
-        const runtimeDisplay = runtimeHours > 0
-            ? `${runtimeHours}h ${runtimeMinutes}min`
-            : `${runtimeMinutes}min`;
-        const speedColor = StateColorHelper.getPumpSpeedColor(currentSpeed);
-        const isRunning = state === 'on' || currentSpeed > 0;
-        const speedLabels = ['OFF', 'ECO', 'Normal', 'Boost'];
-        const speedColors = ['#8E8E93', '#34C759', '#FF9F0A', '#FF3B30'];
-        const speedIcons = ['mdi:power-off', 'mdi:speedometer-slow', 'mdi:speedometer-medium', 'mdi:speedometer'];
-        return b` <ha-card class="${this._getCardClasses(isRunning, config)}" style="--card-accent: ${accentColor}" @click="${() => this._showMoreInfo(config.entity)}" ><div class="accent-bar"></div><div class="card-content"><div class="header"><div class="header-icon ${isRunning ? 'icon-active' : ''}" style="--icon-accent: ${accentColor}">${config.icon ? b `<ha-icon icon="${config.icon}" class="${isRunning ? 'pump-running' : ''}"></ha-icon>` : pumpSVG(currentSpeed, accentColor)}</div><div class="header-info"><span class="name">${name}</span><span class="header-subtitle" style="${isRunning ? `color: ${speedColor.color}` : ''}">
-                ${isRunning
-            ? `${speedLabels[currentSpeed]}${currentRPM > 0 ? ` \u00B7 ${currentRPM} RPM` : ''}`
-            : this._getFriendlyState(state, 'pump')}
+      ${a?L` <circle cx="24" cy="24" r="21" fill="none" stroke="${t}" stroke-width="3" stroke-dasharray="${33*e} 100" stroke-opacity="0.5" stroke-linecap="round" transform="rotate(-90 24 24)"/> `:""}
+    </svg>`}(n,o)}</div><div class="header-info"><span class="name">${a}</span><span class="header-subtitle" style="${g?"color: "+v.color:""}">
+                ${g?`${u[n]}${c>0?` · ${c} RPM`:""}`:this._getFriendlyState(i,"pump")}
               </span>
             </div>
-            ${config.show_state
-            ? b`<status-badge .state="${state}" .pulse="${isRunning}"></status-badge>`
-            : ''}
+            ${e.show_state?L`<vpc-status-badge .state="${i}" .pulse="${g}"></vpc-status-badge>`:""}
           </div>
 
           <!-- Speed Segments Visual Indicator -->
           <div class="speed-segments-container">
             <div class="speed-segments">
-              ${[1, 2, 3].map(level => {
-            const speedHelp = [
-                '',
-                'ECO-Modus – Langsame Filtration, sehr energieeffizient. Ideal für Nacht-Grundzirkulation.',
-                'Normal-Modus – Standard-Filtration für den täglichen Betrieb.',
-                'Boost-Modus – Maximale Leistung. Für Rückspülung, Staubsaugen oder schnelles Chemikalien-Mischen.'
-            ];
-            return b` <button class="speed-segment tooltip-wrap ${currentSpeed === level ? 'seg-active' : currentSpeed > level ? 'seg-past' : ''}" style="--seg-color: ${speedColors[level]}" @click="${(e) => { e.stopPropagation(); const sc = new ServiceCaller(this.hass); sc.setPumpSpeed(config.entity, level); }}" ><ha-icon icon="${speedIcons[level]}" style="--mdc-icon-size: 14px"></ha-icon><span>${speedLabels[level]}</span><div class="t-tip t-up"><div class="t-tip-title">${speedLabels[level]}-Geschwindigkeit</div><div class="t-tip-desc">${speedHelp[level]}</div></div></button> `;
-        })}
+              ${[1,2,3].map(t=>L` <button class="speed-segment tooltip-wrap ${n===t?"seg-active":n>t?"seg-past":""}" style="--seg-color: ${m[t]}" @click="${i=>{i.stopPropagation(),new $e(this.hass).setPumpSpeed(e.entity,t)}}" ><ha-icon icon="${f[t]}" style="--mdc-icon-size: 14px"></ha-icon><span>${u[t]}</span><div class="t-tip t-up"><div class="t-tip-title">${u[t]}-Geschwindigkeit</div><div class="t-tip-desc">${["","ECO-Modus – Langsame Filtration, sehr energieeffizient. Ideal für Nacht-Grundzirkulation.","Normal-Modus – Standard-Filtration für den täglichen Betrieb.","Boost-Modus – Maximale Leistung. Für Rückspülung, Staubsaugen oder schnelles Chemikalien-Mischen."][t]}</div></div></button> `)}
             </div>
             <button
-              class="speed-off-btn tooltip-wrap ${currentSpeed === 0 ? 'seg-active' : ''}"
-              style="--seg-color: ${speedColors[0]}"
-              @click="${(e) => { e.stopPropagation(); const sc = new ServiceCaller(this.hass); sc.turnOff(config.entity); }}"
+              class="speed-off-btn tooltip-wrap ${0===n?"seg-active":""}"
+              style="--seg-color: ${m[0]}"
+              @click="${t=>{t.stopPropagation(),new $e(this.hass).turnOff(e.entity)}}"
             >
               <ha-icon icon="mdi:power" style="--mdc-icon-size: 16px"></ha-icon>
               <div class="t-tip t-up">
@@ -1466,1223 +127,430 @@ class VioletPoolCard extends i {
             </button>
           </div>
 
-          ${config.show_detail_status && pumpState
-            ? b`<detail-status .raw="${pumpState}"></detail-status>`
-            : ''}
+          ${e.show_detail_status&&s?L`<vpc-detail-status .raw="${s}"></vpc-detail-status>`:""}
 
-          ${config.show_controls
-            ? b` <slider-control label="Speed Level" min="0" max="3" step="1" .value="${currentSpeed}" .labels="${['OFF', 'ECO', 'Normal', 'Boost']}" @value-changed="${(e) => this._handlePumpSpeedChange(e, config.entity)}" ></slider-control> `
-            : ''}
+          ${e.show_controls?L` <vpc-slider-control label="Speed Level" min="0" max="3" step="1" .value="${n}" .labels="${["OFF","ECO","Normal","Boost"]}" @value-changed="${t=>this._handlePumpSpeedChange(t,e.entity)}" ></vpc-slider-control> `:""}
 
-          ${config.show_runtime && runtimeSeconds > 0
-            ? b` <div class="info-row"><ha-icon icon="mdi:timer-outline"></ha-icon><span class="info-label">Runtime</span><span class="info-value">${runtimeDisplay}</span></div> `
-            : ''}
+          ${e.show_runtime&&l>0?L` <div class="info-row"><ha-icon icon="mdi:timer-outline"></ha-icon><span class="info-label">Runtime</span><span class="info-value">${h}</span></div> `:""}
         </div>
       </ha-card>
-    `;
-    }
-    async _handlePumpSpeedChange(e, entityId) {
-        const speed = e.detail.value;
-        const serviceCaller = new ServiceCaller(this.hass);
-        await serviceCaller.setPumpSpeed(entityId, speed);
-    }
-    renderHeaterCard(config = this.config) {
-        const entity = this.hass.states[config.entity];
-        const state = entity.state;
-        const name = config.name || entity.attributes.friendly_name || 'Heater';
-        const accentColor = this._getAccentColor('heater', config);
-        const currentTemp = EntityHelper.getCurrentTemperature(entity);
-        const targetTemp = EntityHelper.getTargetTemperature(entity);
-        const minTemp = EntityHelper.getMinTemperature(entity) || 18;
-        const maxTemp = EntityHelper.getMaxTemperature(entity) || 35;
-        const heaterState = entity.attributes?.HEATERSTATE || '';
-        const outsideTemp = entity.attributes?.outside_temperature;
-        const minOutsideTemp = entity.attributes?.min_outside_temperature || 14.5;
-        const isBlockedByOutsideTemp = heaterState.includes('BLOCKED_BY_OUTSIDE_TEMP') ||
-            (outsideTemp !== undefined && outsideTemp < minOutsideTemp);
-        const tempColor = currentTemp !== undefined
-            ? StateColorHelper.getTemperatureColor(currentTemp)
-            : undefined;
-        const quickActions = [
-            {
-                icon: 'mdi:power-off',
-                label: 'OFF',
-                action: async () => {
-                    const serviceCaller = new ServiceCaller(this.hass);
-                    await serviceCaller.setHvacMode(config.entity, 'off');
-                },
-                active: state === 'off',
-                color: '#757575',
-                confirmMessage: undefined,
-            },
-            {
-                icon: 'mdi:autorenew',
-                label: 'AUTO',
-                action: async () => {
-                    const serviceCaller = new ServiceCaller(this.hass);
-                    await serviceCaller.setHvacMode(config.entity, 'auto');
-                },
-                active: state === 'auto',
-                color: '#2196F3',
-            },
-            {
-                icon: 'mdi:fire',
-                label: 'HEAT',
-                action: async () => {
-                    const serviceCaller = new ServiceCaller(this.hass);
-                    await serviceCaller.setHvacMode(config.entity, 'heat');
-                },
-                active: state === 'heat' || state === 'heating',
-                color: '#FF5722',
-            },
-        ];
-        const isHeating = state === 'heating' || state === 'heat';
-        const tempPct = currentTemp !== undefined
-            ? this._getValuePercent(currentTemp, minTemp, maxTemp)
-            : undefined;
-        const targetPct = targetTemp !== undefined
-            ? this._getValuePercent(targetTemp, minTemp, maxTemp)
-            : undefined;
-        return b` <ha-card class="${this._getCardClasses(isHeating, config)}" style="--card-accent: ${accentColor}" @click="${() => this._showMoreInfo(config.entity)}" ><div class="accent-bar"></div><div class="card-content"><div class="header"><div class="header-icon ${isHeating ? 'icon-active' : ''}" style="--icon-accent: ${accentColor}">${config.icon ? b `<ha-icon icon="${config.icon}" class="${isHeating ? 'heater-active' : ''}"></ha-icon>` : heaterSVG(isHeating, accentColor)}</div><div class="header-info"><span class="name">${name}</span><span class="header-subtitle">${this._getFriendlyState(state)}</span></div> ${config.show_state ? b`<status-badge .state="${state}"></status-badge>`
-            : ''}
+    `}async _handlePumpSpeedChange(e,t){const i=e.detail.value,a=new $e(this.hass);await a.setPumpSpeed(t,i)}renderHeaterCard(e=this.config){const t=this.hass.states[e.entity],i=t.state,a=e.name||t.attributes.friendly_name||"Heater",s=this._getAccentColor("heater",e),o=_e.getCurrentTemperature(t),r=_e.getTargetTemperature(t),n=_e.getMinTemperature(t)||18,c=_e.getMaxTemperature(t)||35,l=t.attributes?.HEATERSTATE||"",d=t.attributes?.outside_temperature,p=t.attributes?.min_outside_temperature||14.5,h=l.includes("BLOCKED_BY_OUTSIDE_TEMP")||void 0!==d&&d<p,v=void 0!==o?ke.getTemperatureColor(o):void 0,g=[{icon:"mdi:power-off",label:"OFF",action:async()=>{const t=new $e(this.hass);await t.setHvacMode(e.entity,"off")},active:"off"===i,color:"#757575",confirmMessage:void 0},{icon:"mdi:autorenew",label:"AUTO",action:async()=>{const t=new $e(this.hass);await t.setHvacMode(e.entity,"auto")},active:"auto"===i,color:"#2196F3"},{icon:"mdi:fire",label:"HEAT",action:async()=>{const t=new $e(this.hass);await t.setHvacMode(e.entity,"heat")},active:"heat"===i||"heating"===i,color:"#FF5722"}],u="heating"===i||"heat"===i,m=void 0!==o?this._getValuePercent(o,n,c):void 0,f=void 0!==r?this._getValuePercent(r,n,c):void 0;return L` <ha-card class="${this._getCardClasses(u,e)}" style="--card-accent: ${s}" @click="${()=>this._showMoreInfo(e.entity)}" ><div class="accent-bar"></div><div class="card-content"><div class="header"><div class="header-icon ${u?"icon-active":""}" style="--icon-accent: ${s}">${e.icon?L`<ha-icon icon="${e.icon}" class="${u?"heater-active":""}"></ha-icon>`:(x=u,b=s,L` <svg viewBox="0 0 48 48" style="width:100%;height:100%;display:block;overflow:visible" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="${b}" fill-opacity="${x?.14:.07}"/><circle cx="24" cy="24" r="21" fill="none" stroke="${b}" stroke-width="1.5" stroke-opacity="0.38"/><path d="M24,8 C17,15 12,20 14,27 C15,33 20,38 24,40 C28,38 33,33 34,27 C36,20 31,15 24,8Z" fill="${b}" fill-opacity="${x?.88:.5}" style="${x?"animation:flicker 1.9s ease-in-out infinite;transform-origin:24px 40px":""}"/><path d="M24,19 C21,23 19,26 20,30 C21,34 22.5,37 24,38 C25.5,37 27,34 28,30 C29,26 27,23 24,19Z" fill="white" fill-opacity="${x?.55:.2}" style="${x?"animation:flicker 1.4s ease-in-out infinite 0.2s;transform-origin:24px 38px":""}"/><ellipse cx="24" cy="39" rx="8" ry="2.5" fill="${b}" fill-opacity="${x?.28:.1}"/></svg>`)}</div><div class="header-info"><span class="name">${a}</span><span class="header-subtitle">${this._getFriendlyState(i)}</span></div> ${e.show_state?L`<vpc-status-badge .state="${i}"></vpc-status-badge>`:""}
           </div>
 
-          ${currentTemp !== undefined
-            ? b` <div class="temp-hero tooltip-wrap" style="--temp-color: ${tempColor?.color || 'var(--vpc-primary)'}; position: relative;"><div class="temp-hero-main"><span class="temp-hero-value">${currentTemp.toFixed(1)}</span><span class="temp-hero-unit">°C</span></div> ${targetTemp !== undefined ? b `
+          ${void 0!==o?L` <div class="temp-hero tooltip-wrap" style="--temp-color: ${v?.color||"var(--vpc-primary)"}; position: relative;"><div class="temp-hero-main"><span class="temp-hero-value">${o.toFixed(1)}</span><span class="temp-hero-unit">°C</span></div> ${void 0!==r?L`
                         <div class="temp-hero-target-pill">
                           <ha-icon icon="mdi:target" style="--mdc-icon-size: 13px"></ha-icon>
-                          <span>${targetTemp.toFixed(1)}°C</span>
+                          <span>${r.toFixed(1)}°C</span>
                         </div>
-                      `
-                : ''}
+                      `:""}
                 <div class="t-tip">
                   <div class="t-tip-title"><ha-icon icon="mdi:thermometer-water"></ha-icon>Wassertemperatur</div>
-                  <div class="t-tip-desc">Aktuelle Pooltemperatur${targetTemp !== undefined ? `. Ziel: ${targetTemp.toFixed(1)}°C` : ''}. ${currentTemp < 24 ? 'Noch kalt zum Schwimmen.' : currentTemp <= 30 ? 'Ideale Badetemperatur.' : 'Etwas warm – Heizung prüfen.'}</div>
+                  <div class="t-tip-desc">Aktuelle Pooltemperatur${void 0!==r?`. Ziel: ${r.toFixed(1)}°C`:""}. ${o<24?"Noch kalt zum Schwimmen.":o<=30?"Ideale Badetemperatur.":"Etwas warm – Heizung prüfen."}</div>
                   <div class="t-tip-ideal"><ha-icon icon="mdi:target"></ha-icon>24°C – 30°C Komfort</div>
                 </div>
                 </div>
-                ${tempPct !== undefined
-                ? b` <div class="temp-range-bar"><div class="temp-range-track"><div class="temp-range-fill" style="width: ${tempPct}%; background: ${tempColor?.color || accentColor}"></div> ${targetPct !== undefined ? b `<div class="temp-range-target" style="left: ${targetPct}%"></div>`
-                    : ''}
+                ${void 0!==m?L` <div class="temp-range-bar"><div class="temp-range-track"><div class="temp-range-fill" style="width: ${m}%; background: ${v?.color||s}"></div> ${void 0!==f?L`<div class="temp-range-target" style="left: ${f}%"></div>`:""}
                         </div>
                         <div class="temp-range-labels">
-                          <span>${minTemp}°C</span>
-                          <span>${maxTemp}°C</span>
+                          <span>${n}°C</span>
+                          <span>${c}°C</span>
                         </div>
                       </div>
-                    `
-                : ''}
-              `
-            : ''}
+                    `:""}
+              `:""}
 
-          ${config.show_detail_status && heaterState
-            ? b`<detail-status .raw="${heaterState}"></detail-status>`
-            : ''}
+          ${e.show_detail_status&&l?L`<vpc-detail-status .raw="${l}"></vpc-detail-status>`:""}
 
-          ${outsideTemp !== undefined
-            ? b` <div class="info-row tooltip-wrap ${isBlockedByOutsideTemp ? 'info-row-warning' : ''}" style="position:relative"><ha-icon icon="mdi:thermometer"></ha-icon><span class="info-label">Außentemperatur</span><span class="info-value">${outsideTemp.toFixed(1)}°C</span> ${isBlockedByOutsideTemp ? b `<span class="info-badge warning">Min ${minOutsideTemp}°C</span>`
-                : ''}
+          ${void 0!==d?L` <div class="info-row tooltip-wrap ${h?"info-row-warning":""}" style="position:relative"><ha-icon icon="mdi:thermometer"></ha-icon><span class="info-label">Außentemperatur</span><span class="info-value">${d.toFixed(1)}°C</span> ${h?L`<span class="info-badge warning">Min ${p}°C</span>`:""}
                 <div class="t-tip">
                   <div class="t-tip-title"><ha-icon icon="mdi:thermometer-alert"></ha-icon>Außentemperatur</div>
-                  <div class="t-tip-desc">${isBlockedByOutsideTemp ? `Heizung gesperrt! Außentemperatur (${outsideTemp.toFixed(1)}°C) liegt unter dem Minimum von ${minOutsideTemp}°C. Frostschutz aktiv.` : `Aktuelle Außentemperatur. Heizung wird bei unter ${minOutsideTemp}°C Außentemperatur gesperrt (Frostschutz).`}</div>
-                  ${isBlockedByOutsideTemp ? b`<div class="t-tip-warn"><ha-icon icon="mdi:snowflake-alert"></ha-icon>Heizung gesperrt</div>` : ''}
+                  <div class="t-tip-desc">${h?`Heizung gesperrt! Außentemperatur (${d.toFixed(1)}°C) liegt unter dem Minimum von ${p}°C. Frostschutz aktiv.`:`Aktuelle Außentemperatur. Heizung wird bei unter ${p}°C Außentemperatur gesperrt (Frostschutz).`}</div>
+                  ${h?L`<div class="t-tip-warn"><ha-icon icon="mdi:snowflake-alert"></ha-icon>Heizung gesperrt</div>`:""}
                 </div>
                 </div>
-              `
-            : ''}
+              `:""}
 
-          ${config.show_controls
-            ? b` ${targetTemp !== undefined ? b `
-                      <slider-control
+          ${e.show_controls?L` ${void 0!==r?L`
+                      <vpc-slider-control
                         label="Target Temperature"
-                        .min="${minTemp}"
-                        .max="${maxTemp}"
+                        .min="${n}"
+                        .max="${c}"
                         step="0.5"
-                        .value="${targetTemp}"
+                        .value="${r}"
                         unit="°C"
                         showMinMax
-                        @value-changed="${(e) => this._handleTemperatureChange(e, config.entity)}"
-                      ></slider-control>
-                    `
-                : ''}
-                <quick-actions .actions="${quickActions}"></quick-actions>
-              `
-            : ''}
+                        @value-changed="${t=>this._handleTemperatureChange(t,e.entity)}"
+                      ></vpc-slider-control>
+                    `:""}
+                <vpc-quick-actions .actions="${g}"></vpc-quick-actions>
+              `:""}
         </div>
       </ha-card>
-    `;
-    }
-    async _handleTemperatureChange(e, entityId) {
-        const temperature = e.detail.value;
-        const serviceCaller = new ServiceCaller(this.hass);
-        await serviceCaller.setTemperature(entityId, temperature);
-    }
-    renderSolarCard(config = this.config) {
-        const entity = this.hass.states[config.entity];
-        const state = entity.state;
-        const name = config.name || entity.attributes.friendly_name || 'Solar';
-        const accentColor = this._getAccentColor('solar', config);
-        const poolTemp = EntityHelper.getCurrentTemperature(entity);
-        const targetTemp = EntityHelper.getTargetTemperature(entity);
-        const minTemp = EntityHelper.getMinTemperature(entity) || 18;
-        const maxTemp = EntityHelper.getMaxTemperature(entity) || 32;
-        const absorberTemp = entity.attributes?.absorber_temperature;
-        const tempDelta = absorberTemp !== undefined && poolTemp !== undefined
-            ? absorberTemp - poolTemp
-            : undefined;
-        const solarState = entity.attributes?.SOLARSTATE || '';
-        const quickActions = [
-            {
-                icon: 'mdi:power-off',
-                label: 'OFF',
-                action: async () => {
-                    const serviceCaller = new ServiceCaller(this.hass);
-                    await serviceCaller.setHvacMode(config.entity, 'off');
-                },
-                active: state === 'off',
-                color: '#757575',
-            },
-            {
-                icon: 'mdi:autorenew',
-                label: 'AUTO',
-                action: async () => {
-                    const serviceCaller = new ServiceCaller(this.hass);
-                    await serviceCaller.setHvacMode(config.entity, 'auto');
-                },
-                active: state === 'auto',
-                color: '#2196F3',
-            },
-            {
-                icon: 'mdi:sun-thermometer',
-                label: 'ON',
-                action: async () => {
-                    const serviceCaller = new ServiceCaller(this.hass);
-                    await serviceCaller.setHvacMode(config.entity, 'heat');
-                },
-                active: state === 'heat' || state === 'heating',
-                color: '#FF9800',
-            },
-        ];
-        const isSolarActive = state === 'heating' || state === 'heat';
-        const poolTempPct = poolTemp !== undefined
-            ? this._getValuePercent(poolTemp, minTemp, maxTemp)
-            : undefined;
-        const targetTempPct = targetTemp !== undefined
-            ? this._getValuePercent(targetTemp, minTemp, maxTemp)
-            : undefined;
-        return b` <ha-card class="${this._getCardClasses(isSolarActive, config)}" style="--card-accent: ${accentColor}" @click="${() => this._showMoreInfo(config.entity)}" ><div class="accent-bar"></div><div class="card-content"><div class="header"><div class="header-icon ${isSolarActive ? 'icon-active' : ''}" style="--icon-accent: ${accentColor}">${config.icon ? b `<ha-icon icon="${config.icon}" class="${isSolarActive ? 'solar-active' : ''}"></ha-icon>` : solarSVG(isSolarActive, accentColor)}</div><div class="header-info"><span class="name">${name}</span><span class="header-subtitle">${this._getFriendlyState(state)}</span></div> ${config.show_state ? b`<status-badge .state="${state}"></status-badge>`
-            : ''}
+    `;var x,b}async _handleTemperatureChange(e,t){const i=e.detail.value,a=new $e(this.hass);await a.setTemperature(t,i)}renderSolarCard(e=this.config){const t=this.hass.states[e.entity],i=t.state,a=e.name||t.attributes.friendly_name||"Solar",s=this._getAccentColor("solar",e),o=_e.getCurrentTemperature(t),r=_e.getTargetTemperature(t),n=_e.getMinTemperature(t)||18,c=_e.getMaxTemperature(t)||32,l=t.attributes?.absorber_temperature,d=void 0!==l&&void 0!==o?l-o:void 0,p=t.attributes?.SOLARSTATE||"",h=[{icon:"mdi:power-off",label:"OFF",action:async()=>{const t=new $e(this.hass);await t.setHvacMode(e.entity,"off")},active:"off"===i,color:"#757575"},{icon:"mdi:autorenew",label:"AUTO",action:async()=>{const t=new $e(this.hass);await t.setHvacMode(e.entity,"auto")},active:"auto"===i,color:"#2196F3"},{icon:"mdi:sun-thermometer",label:"ON",action:async()=>{const t=new $e(this.hass);await t.setHvacMode(e.entity,"heat")},active:"heat"===i||"heating"===i,color:"#FF9800"}],v="heating"===i||"heat"===i,g=void 0!==o?this._getValuePercent(o,n,c):void 0,u=void 0!==r?this._getValuePercent(r,n,c):void 0;return L` <ha-card class="${this._getCardClasses(v,e)}" style="--card-accent: ${s}" @click="${()=>this._showMoreInfo(e.entity)}" ><div class="accent-bar"></div><div class="card-content"><div class="header"><div class="header-icon ${v?"icon-active":""}" style="--icon-accent: ${s}">${e.icon?L`<ha-icon icon="${e.icon}" class="${v?"solar-active":""}"></ha-icon>`:(m=v,f=s,L` <svg viewBox="0 0 48 48" style="width:100%;height:100%;display:block;overflow:visible" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="${f}" fill-opacity="${m?.13:.07}"/><g style="transform-origin:24px 24px;animation:${m?"spin-slow 14s linear infinite":"none"}"> ${[0,45,90,135,180,225,270,315].map(e=>L`
+          <rect x="22.5" y="3" width="3" height="5.5" rx="1.5"
+                fill="${f}" fill-opacity="${m?.75:.3}"
+                style="transform:rotate(${e}deg);transform-origin:24px 24px"/>
+        `)}
+      </g>
+      ${m?L` <circle cx="24" cy="24" r="14" fill="none" stroke="${f}" stroke-width="1.5" stroke-opacity="0.35" style="animation:breathe 2.8s ease-in-out infinite"/> `:""}
+      <circle cx="24" cy="24" r="10.5" fill="${f}" fill-opacity="${m?.9:.45}"/>
+      <circle cx="24" cy="24" r="7" fill="white" fill-opacity="${m?.5:.22}"/>
+    </svg>`)}</div><div class="header-info"><span class="name">${a}</span><span class="header-subtitle">${this._getFriendlyState(i)}</span></div> ${e.show_state?L`<vpc-status-badge .state="${i}"></vpc-status-badge>`:""}
           </div>
 
-          ${config.show_detail_status && solarState
-            ? b`<detail-status .raw="${solarState}"></detail-status>`
-            : ''}
+          ${e.show_detail_status&&p?L`<vpc-detail-status .raw="${p}"></vpc-detail-status>`:""}
 
           <div class="solar-temps">
             <!-- Solar temperature comparison: pool vs absorber -->
             <div class="solar-temp-comparison">
-              ${poolTemp !== undefined
-            ? b` <div class="solar-temp-tile"><ha-icon icon="mdi:pool" style="--mdc-icon-size: 18px"></ha-icon><div class="solar-temp-tile-val">${poolTemp.toFixed(1)}°C</div><div class="solar-temp-tile-label">Pool</div></div> `
-            : ''}
-              ${tempDelta !== undefined
-            ? b` <div class="solar-delta-badge tooltip-wrap ${tempDelta >= 3 ? 'delta-great' : tempDelta > 0 ? 'delta-ok' : 'delta-low'}" style="position:relative"><ha-icon icon="${tempDelta >= 0 ? 'mdi:trending-up' : 'mdi:trending-down'}" style="--mdc-icon-size: 16px"></ha-icon><span>${tempDelta > 0 ? '+' : ''}${tempDelta.toFixed(1)}°C</span><div class="t-tip"><div class="t-tip-title"><ha-icon icon="mdi:delta"></ha-icon>Temperaturdifferenz</div><div class="t-tip-desc">Differenz zwischen Absorber (Kollektor) und Pool. ${tempDelta >= 3 ? 'Sehr gute Solarbedingungen! Heizung wird aktiv.' : tempDelta > 0 ? 'Solarbeheizung möglich, aber noch schwach.' : 'Absorber kälter als Pool – keine Solarheizung möglich.'}</div><div class="t-tip-ideal"><ha-icon icon="mdi:target"></ha-icon>&gt; 3°C für aktive Solarheizung</div></div></div> `
-            : ''}
-              ${absorberTemp !== undefined
-            ? b` <div class="solar-temp-tile"><ha-icon icon="mdi:solar-panel" style="--mdc-icon-size: 18px"></ha-icon><div class="solar-temp-tile-val">${absorberTemp.toFixed(1)}°C</div><div class="solar-temp-tile-label">Absorber</div></div> `
-            : ''}
+              ${void 0!==o?L` <div class="solar-temp-tile"><ha-icon icon="mdi:pool" style="--mdc-icon-size: 18px"></ha-icon><div class="solar-temp-tile-val">${o.toFixed(1)}°C</div><div class="solar-temp-tile-label">Pool</div></div> `:""}
+              ${void 0!==d?L` <div class="solar-delta-badge tooltip-wrap ${d>=3?"delta-great":d>0?"delta-ok":"delta-low"}" style="position:relative"><ha-icon icon="${d>=0?"mdi:trending-up":"mdi:trending-down"}" style="--mdc-icon-size: 16px"></ha-icon><span>${d>0?"+":""}${d.toFixed(1)}°C</span><div class="t-tip"><div class="t-tip-title"><ha-icon icon="mdi:delta"></ha-icon>Temperaturdifferenz</div><div class="t-tip-desc">Differenz zwischen Absorber (Kollektor) und Pool. ${d>=3?"Sehr gute Solarbedingungen! Heizung wird aktiv.":d>0?"Solarbeheizung möglich, aber noch schwach.":"Absorber kälter als Pool – keine Solarheizung möglich."}</div><div class="t-tip-ideal"><ha-icon icon="mdi:target"></ha-icon>&gt; 3°C für aktive Solarheizung</div></div></div> `:""}
+              ${void 0!==l?L` <div class="solar-temp-tile"><ha-icon icon="mdi:solar-panel" style="--mdc-icon-size: 18px"></ha-icon><div class="solar-temp-tile-val">${l.toFixed(1)}°C</div><div class="solar-temp-tile-label">Absorber</div></div> `:""}
             </div>
-            ${poolTempPct !== undefined
-            ? b` <div class="temp-range-bar"><div class="temp-range-track"><div class="temp-range-fill" style="width: ${poolTempPct}%; background: ${accentColor}"></div> ${targetTempPct !== undefined ? b `<div class="temp-range-target" style="left: ${targetTempPct}%"></div>`
-                : ''}
+            ${void 0!==g?L` <div class="temp-range-bar"><div class="temp-range-track"><div class="temp-range-fill" style="width: ${g}%; background: ${s}"></div> ${void 0!==u?L`<div class="temp-range-target" style="left: ${u}%"></div>`:""}
                     </div>
                     <div class="temp-range-labels">
-                      <span>${minTemp}°C</span>
-                      <span>${maxTemp}°C</span>
+                      <span>${n}°C</span>
+                      <span>${c}°C</span>
                     </div>
                   </div>
-                `
-            : ''}
-            ${tempDelta !== undefined
-            ? b` <div class="delta-hint-text"> ${tempDelta < 0 ? '❄ Too cold for solar heating' : tempDelta < 3 ? '⚡ Solar heating possible' : '☀ Ideal conditions for solar heating'} </div> `
-            : ''}
+                `:""}
+            ${void 0!==d?L` <div class="delta-hint-text"> ${d<0?"❄ Too cold for solar heating":d<3?"⚡ Solar heating possible":"☀ Ideal conditions for solar heating"} </div> `:""}
           </div>
 
-          ${config.show_controls
-            ? b` ${targetTemp !== undefined ? b `
-                      <slider-control
+          ${e.show_controls?L` ${void 0!==r?L`
+                      <vpc-slider-control
                         label="Target Temperature"
-                        .min="${minTemp}"
-                        .max="${maxTemp}"
+                        .min="${n}"
+                        .max="${c}"
                         step="0.5"
-                        .value="${targetTemp}"
+                        .value="${r}"
                         unit="°C"
                         showMinMax
-                        @value-changed="${(e) => this._handleTemperatureChange(e, config.entity)}"
-                      ></slider-control>
-                    `
-                : ''}
-                <quick-actions .actions="${quickActions}"></quick-actions>
-              `
-            : ''}
+                        @value-changed="${t=>this._handleTemperatureChange(t,e.entity)}"
+                      ></vpc-slider-control>
+                    `:""}
+                <vpc-quick-actions .actions="${h}"></vpc-quick-actions>
+              `:""}
         </div>
       </ha-card>
-    `;
-    }
-    renderDosingCard(config = this.config) {
-        const entity = this.hass.states[config.entity];
-        const state = entity.state;
-        const name = config.name || entity.attributes.friendly_name || 'Dosing';
-        const accentColor = this._getAccentColor('dosing', config);
-        const dosingType = config.dosing_type || this._detectDosingType(config.entity);
-        const dosingStateKey = Object.keys(entity.attributes || {}).find((key) => key.includes('DOS_') && key.includes('_STATE'));
-        const dosingState = dosingStateKey ? entity.attributes[dosingStateKey] : [];
-        let currentValue;
-        let targetValue;
-        let minValue;
-        let maxValue;
-        let unit = '';
-        if (dosingType === 'chlorine') {
-            const orpSensorId = this._getEntityId('orp_value_entity', 'sensor', 'orp_value');
-            const orpSensor = this.hass.states[orpSensorId];
-            currentValue = orpSensor ? parseFloat(orpSensor.state) : undefined;
-            const targetOrpId = this._getEntityId('target_orp_entity', 'number', 'target_orp');
-            const targetEntity = this.hass.states[targetOrpId];
-            targetValue = targetEntity ? parseFloat(targetEntity.state) : undefined;
-            minValue = targetEntity?.attributes?.min || 600;
-            maxValue = targetEntity?.attributes?.max || 800;
-            unit = 'mV';
-        }
-        else if (dosingType === 'ph_minus' || dosingType === 'ph_plus') {
-            const phSensorId = this._getEntityId('ph_value_entity', 'sensor', 'ph_value');
-            const phSensor = this.hass.states[phSensorId];
-            currentValue = phSensor ? parseFloat(phSensor.state) : undefined;
-            const targetPhId = this._getEntityId('target_ph_entity', 'number', 'target_ph');
-            const targetEntity = this.hass.states[targetPhId];
-            targetValue = targetEntity ? parseFloat(targetEntity.state) : undefined;
-            minValue = targetEntity?.attributes?.min || 6.8;
-            maxValue = targetEntity?.attributes?.max || 7.8;
-            unit = '';
-        }
-        const dosingVolume24h = entity.attributes?.dosing_volume_24h;
-        const quickActions = [
-            {
-                icon: 'mdi:power-off',
-                label: 'OFF',
-                action: async () => {
-                    const serviceCaller = new ServiceCaller(this.hass);
-                    await serviceCaller.turnOff(config.entity);
-                },
-                active: state === 'off',
-                color: '#757575',
-            },
-            {
-                icon: 'mdi:autorenew',
-                label: 'AUTO',
-                action: async () => {
-                    const serviceCaller = new ServiceCaller(this.hass);
-                    await serviceCaller.turnOn(config.entity);
-                },
-                active: state === 'on' || state === 'auto',
-                color: '#2196F3',
-            },
-            {
-                icon: 'mdi:play-circle',
-                label: 'Dose 30s',
-                action: async () => {
-                    const serviceCaller = new ServiceCaller(this.hass);
-                    await serviceCaller.manualDosing(config.entity, 30);
-                },
-                color: '#4CAF50',
-                confirmMessage: 'Start manual dosing for 30 seconds?',
-            },
-            {
-                icon: 'mdi:play-speed',
-                label: 'Dose 60s',
-                action: async () => {
-                    const serviceCaller = new ServiceCaller(this.hass);
-                    await serviceCaller.manualDosing(config.entity, 60);
-                },
-                color: '#FF9800',
-                confirmMessage: 'Start manual dosing for 60 seconds?',
-            },
-        ];
-        // Safely check dosingState is an array before calling .some()
-        const isDosing = state === 'on' && Array.isArray(dosingState) && dosingState.some((s) => s.includes('ACTIVE'));
-        // Get color and percent for current value
-        const valueColor = currentValue !== undefined
-            ? dosingType === 'chlorine'
-                ? StateColorHelper.getOrpColor(currentValue, targetValue)
-                : StateColorHelper.getPhColor(currentValue, targetValue)
-            : undefined;
-        const valuePct = currentValue !== undefined && minValue !== undefined && maxValue !== undefined
-            ? this._getValuePercent(currentValue, minValue, maxValue)
-            : undefined;
-        const targetPct = targetValue !== undefined && minValue !== undefined && maxValue !== undefined
-            ? this._getValuePercent(targetValue, minValue, maxValue)
-            : undefined;
-        const decimals = dosingType === 'chlorine' ? 0 : 1;
-        const dosingLabel = dosingType === 'chlorine' ? 'ORP' : dosingType === 'ph_minus' ? 'pH' : dosingType === 'ph_plus' ? 'pH' : 'Floc';
-        const valueStatusLabel = valueColor
-            ? (dosingType === 'chlorine'
-                ? (currentValue < (targetValue ?? 650) ? 'Low' : currentValue > (targetValue ?? 750) ? 'High' : 'Optimal')
-                : (currentValue < 7.0 ? 'Acidic' : currentValue > 7.4 ? 'Alkaline' : 'Optimal'))
-            : '';
-        return b` <ha-card class="${this._getCardClasses(isDosing, config)}" style="--card-accent: ${accentColor}" @click="${() => this._showMoreInfo(config.entity)}" ><div class="accent-bar"></div><div class="card-content"><div class="header"><div class="header-icon ${isDosing ? 'icon-active' : ''}" style="--icon-accent: ${accentColor}"><ha-icon icon="${config.icon || this._getDosingIcon(dosingType)}" class="${isDosing ? 'dosing-active' : ''}" ></ha-icon></div><div class="header-info"><span class="name">${name}</span><span class="header-subtitle">${this._getFriendlyState(state)}</span></div> ${config.show_state ? b `<status-badge .state="${state}" .pulse="${isDosing}"></status-badge>`
-            : ''}
+    `;var m,f}renderDosingCard(e=this.config){const t=this.hass.states[e.entity],i=t.state,a=e.name||t.attributes.friendly_name||"Dosing",s=this._getAccentColor("dosing",e),o=e.dosing_type||this._detectDosingType(e.entity),r=Object.keys(t.attributes||{}).find(e=>e.includes("DOS_")&&e.includes("_STATE")),n=r?t.attributes[r]:[];let c,l,d,p,h="";if("chlorine"===o){const e=this._getEntityId("orp_value_entity","sensor","orp_value"),t=this.hass.states[e];c=t?parseFloat(t.state):void 0;const i=this._getEntityId("target_orp_entity","number","target_orp"),a=this.hass.states[i];l=a?parseFloat(a.state):void 0,d=a?.attributes?.min||600,p=a?.attributes?.max||800,h="mV"}else if("ph_minus"===o||"ph_plus"===o){const e=this._getEntityId("ph_value_entity","sensor","ph_value"),t=this.hass.states[e];c=t?parseFloat(t.state):void 0;const i=this._getEntityId("target_ph_entity","number","target_ph"),a=this.hass.states[i];l=a?parseFloat(a.state):void 0,d=a?.attributes?.min||6.8,p=a?.attributes?.max||7.8,h=""}const v=t.attributes?.dosing_volume_24h,g=[{icon:"mdi:power-off",label:"OFF",action:async()=>{const t=new $e(this.hass);await t.turnOff(e.entity)},active:"off"===i,color:"#757575"},{icon:"mdi:autorenew",label:"AUTO",action:async()=>{const t=new $e(this.hass);await t.turnOn(e.entity)},active:"on"===i||"auto"===i,color:"#2196F3"},{icon:"mdi:play-circle",label:"Dose 30s",action:async()=>{const t=new $e(this.hass);await t.manualDosing(e.entity,30)},color:"#4CAF50",confirmMessage:"Start manual dosing for 30 seconds?"},{icon:"mdi:play-speed",label:"Dose 60s",action:async()=>{const t=new $e(this.hass);await t.manualDosing(e.entity,60)},color:"#FF9800",confirmMessage:"Start manual dosing for 60 seconds?"}],u="on"===i&&Array.isArray(n)&&n.some(e=>e.includes("ACTIVE")),m=void 0!==c?"chlorine"===o?ke.getOrpColor(c,l):ke.getPhColor(c,l):void 0,f=void 0!==c&&void 0!==d&&void 0!==p?this._getValuePercent(c,d,p):void 0,x=void 0!==l&&void 0!==d&&void 0!==p?this._getValuePercent(l,d,p):void 0,b="chlorine"===o?0:1,y="chlorine"===o?"ORP":"ph_minus"===o||"ph_plus"===o?"pH":"Floc",w=m?"chlorine"===o?c<(l??650)?"Low":c>(l??750)?"High":"Optimal":c<7?"Acidic":c>7.4?"Alkaline":"Optimal":"";return L` <ha-card class="${this._getCardClasses(u,e)}" style="--card-accent: ${s}" @click="${()=>this._showMoreInfo(e.entity)}" ><div class="accent-bar"></div><div class="card-content"><div class="header"><div class="header-icon ${u?"icon-active":""}" style="--icon-accent: ${s}"><ha-icon icon="${e.icon||this._getDosingIcon(o)}" class="${u?"dosing-active":""}" ></ha-icon></div><div class="header-info"><span class="name">${a}</span><span class="header-subtitle">${this._getFriendlyState(i)}</span></div> ${e.show_state?L`<vpc-status-badge .state="${i}" .pulse="${u}"></vpc-status-badge>`:""}
           </div>
 
-          ${currentValue !== undefined
-            ? b` <!-- Dosing value hero with progress bar --><div class="dosing-value-block tooltip-wrap" style="position:relative"><div class="dosing-value-row"><div class="dosing-value-main" style="color: ${valueColor?.color || 'var(--vpc-text)'}"><span class="dosing-label-tag">${dosingLabel}</span><span class="dosing-current-value">${currentValue.toFixed(decimals)}</span><span class="dosing-current-unit">${unit}</span></div><div class="dosing-status-pill" style="background: ${valueColor?.color ? valueColor.color + '18' : 'rgba(0,0,0,0.05)'}; color: ${valueColor?.color || 'var(--vpc-text-secondary)'}"> ${valueStatusLabel} </div></div><div class="t-tip t-up"><div class="t-tip-title"><ha-icon icon="${this._getDosingIcon(dosingType)}"></ha-icon>${dosingType === 'chlorine' ? 'ORP – Chlorwirksamkeit' : 'pH-Wert'}</div><div class="t-tip-desc">${dosingType === 'chlorine' ? `Redoxpotential (ORP) zeigt, wie wirksam das Chlor Keime abtötet. Aktuell: ${currentValue.toFixed(0)} mV${targetValue !== undefined ? `, Ziel: ${targetValue.toFixed(0)} mV` : ''}.` : `pH-Wert des Poolwassers. Aktuell: ${currentValue.toFixed(1)}${targetValue !== undefined ? `, Ziel: ${targetValue.toFixed(1)}` : ''}.`}</div>
-                <div class="t-tip-ideal"><ha-icon icon="mdi:target"></ha-icon>${dosingType === 'chlorine' ? '650 – 750 mV Optimal' : '7.0 – 7.4 Optimal'}</div>
-              </div> ${valuePct !== undefined ? b` <div class="chem-range-bar"><div class="chem-range-track"><div class="chem-range-fill" style="width: ${valuePct}%; background: ${valueColor?.color || accentColor}"></div> ${targetPct !== undefined ? b ` <div class="chem-range-target" style="left: ${targetPct}%"><div class="chem-target-line"></div><div class="chem-target-label">${targetValue.toFixed(decimals)}${unit}</div></div> `
-                : ''}
+          ${void 0!==c?L` <!-- Dosing value hero with progress bar --><div class="dosing-value-block tooltip-wrap" style="position:relative"><div class="dosing-value-row"><div class="dosing-value-main" style="color: ${m?.color||"var(--vpc-text)"}"><span class="dosing-label-tag">${y}</span><span class="dosing-current-value">${c.toFixed(b)}</span><span class="dosing-current-unit">${h}</span></div><div class="dosing-status-pill" style="background: ${m?.color?m.color+"18":"rgba(0,0,0,0.05)"}; color: ${m?.color||"var(--vpc-text-secondary)"}"> ${w} </div></div><div class="t-tip t-up"><div class="t-tip-title"><ha-icon icon="${this._getDosingIcon(o)}"></ha-icon>${"chlorine"===o?"ORP – Chlorwirksamkeit":"pH-Wert"}</div><div class="t-tip-desc">${"chlorine"===o?`Redoxpotential (ORP) zeigt, wie wirksam das Chlor Keime abtötet. Aktuell: ${c.toFixed(0)} mV${void 0!==l?`, Ziel: ${l.toFixed(0)} mV`:""}.`:`pH-Wert des Poolwassers. Aktuell: ${c.toFixed(1)}${void 0!==l?", Ziel: "+l.toFixed(1):""}.`}</div>
+                <div class="t-tip-ideal"><ha-icon icon="mdi:target"></ha-icon>${"chlorine"===o?"650 – 750 mV Optimal":"7.0 – 7.4 Optimal"}</div>
+              </div> ${void 0!==f?L` <div class="chem-range-bar"><div class="chem-range-track"><div class="chem-range-fill" style="width: ${f}%; background: ${m?.color||s}"></div> ${void 0!==x?L` <div class="chem-range-target" style="left: ${x}%"><div class="chem-target-line"></div><div class="chem-target-label">${l.toFixed(b)}${h}</div></div> `:""}
                           </div>
                           <div class="chem-range-labels">
-                            <span>${minValue.toFixed(decimals)}${unit}</span>
-                            <span>${maxValue.toFixed(decimals)}${unit}</span>
+                            <span>${d.toFixed(b)}${h}</span>
+                            <span>${p.toFixed(b)}${h}</span>
                           </div>
                         </div>
-                      `
-                : ''}
+                      `:""}
                 </div>
-              `
-            : ''}
+              `:""}
 
-          ${config.show_detail_status && Array.isArray(dosingState) && dosingState.length > 0
-            ? b`<warning-chips .warnings="${dosingState}" defaultType="warning"></warning-chips>`
-            : ''}
+          ${e.show_detail_status&&Array.isArray(n)&&n.length>0?L`<vpc-warning-chips .warnings="${n}" defaultType="warning"></vpc-warning-chips>`:""}
 
-          ${config.show_controls
-            ? b`<quick-actions .actions="${quickActions}"></quick-actions>`
-            : ''}
+          ${e.show_controls?L`<vpc-quick-actions .actions="${g}"></vpc-quick-actions>`:""}
 
-          ${config.show_history && dosingVolume24h !== undefined
-            ? b` <div class="info-row"><ha-icon icon="mdi:chart-line"></ha-icon><span class="info-label">Last 24h</span><span class="info-value">${dosingVolume24h}ml</span></div> `
-            : ''}
+          ${e.show_history&&void 0!==v?L` <div class="info-row"><ha-icon icon="mdi:chart-line"></ha-icon><span class="info-label">Last 24h</span><span class="info-value">${v}ml</span></div> `:""}
         </div>
       </ha-card>
-    `;
-    }
-    _detectDosingType(entity) {
-        if (entity.includes('_cl'))
-            return 'chlorine';
-        if (entity.includes('_phm'))
-            return 'ph_minus';
-        if (entity.includes('_php'))
-            return 'ph_plus';
-        if (entity.includes('_floc'))
-            return 'flocculant';
-        return 'chlorine';
-    }
-    _getDosingIcon(dosingType) {
-        switch (dosingType) {
-            case 'chlorine': return 'mdi:flask-outline';
-            case 'ph_minus': return 'mdi:flask-minus';
-            case 'ph_plus': return 'mdi:flask-plus';
-            case 'flocculant': return 'mdi:flask';
-            default: return 'mdi:flask-outline';
-        }
-    }
-    renderOverviewCard(config = this.config) {
-        const name = config.name || 'Pool Status';
-        const accentColor = this._getAccentColor('overview', config);
-        const pumpEntityId = this._getEntityId('pump_entity', 'switch', 'pump', 0);
-        const heaterEntityId = this._getEntityId('heater_entity', 'climate', 'heater', 1);
-        const solarEntityId = this._getEntityId('solar_entity', 'climate', 'solar', 2);
-        const chlorineEntityId = this._getEntityId('chlorine_entity', 'switch', 'dos_1_cl', 3);
-        const phEntityId = this._getEntityId('ph_minus_entity', 'switch', 'dos_2_phm', 4);
-        const pumpEntity = this.hass.states[pumpEntityId];
-        const heaterEntity = this.hass.states[heaterEntityId];
-        const solarEntity = this.hass.states[solarEntityId];
-        const chlorineEntity = this.hass.states[chlorineEntityId];
-        const phEntity = this.hass.states[phEntityId];
-        const poolTempSensorId = this._getEntityId('pool_temp_entity', 'sensor', 'temperature', 5);
-        const phSensorId = this._getEntityId('ph_value_entity', 'sensor', 'ph_value', 6);
-        const orpSensorId = this._getEntityId('orp_value_entity', 'sensor', 'orp_value', 7);
-        const poolTempSensor = this.hass.states[poolTempSensorId];
-        const phSensor = this.hass.states[phSensorId];
-        const orpSensor = this.hass.states[orpSensorId];
-        const poolTemp = poolTempSensor ? parseFloat(poolTempSensor.state) : undefined;
-        const phValue = phSensor ? parseFloat(phSensor.state) : undefined;
-        const orpValue = orpSensor ? parseFloat(orpSensor.state) : undefined;
-        // Color-coded values
-        const tempColor = poolTemp !== undefined ? StateColorHelper.getTemperatureColor(poolTemp) : undefined;
-        const phColor = phValue !== undefined ? StateColorHelper.getPhColor(phValue) : undefined;
-        const orpColor = orpValue !== undefined ? StateColorHelper.getOrpColor(orpValue) : undefined;
-        const getPhStatus = (ph) => {
-            if (ph === undefined || isNaN(ph))
-                return 'unknown';
-            if (ph < 7.0 || ph > 7.4)
-                return 'warning';
-            return 'ok';
-        };
-        const getOrpStatus = (orp) => {
-            if (orp === undefined || isNaN(orp))
-                return 'unknown';
-            if (orp < 650)
-                return 'warning';
-            if (orp > 750)
-                return 'high';
-            return 'ok';
-        };
-        const phStatus = getPhStatus(phValue);
-        const orpStatus = getOrpStatus(orpValue);
-        const activeDevices = [];
-        if (pumpEntity) {
-            const pumpState = pumpEntity.attributes?.PUMPSTATE || '';
-            const parsedPumpState = EntityHelper.parsePumpState(pumpState);
-            activeDevices.push({
-                icon: 'mdi:pump',
-                name: 'Pump',
-                status: parsedPumpState.status || pumpEntity.state,
-                state: pumpEntity.state,
-                entityId: pumpEntityId,
-            });
-        }
-        if (heaterEntity) {
-            const heaterState = heaterEntity.attributes?.HEATERSTATE || '';
-            const parsedHeaterState = EntityHelper.parseHeaterState(heaterState);
-            activeDevices.push({
-                icon: 'mdi:radiator',
-                name: 'Heater',
-                status: parsedHeaterState.status || heaterEntity.state,
-                state: heaterEntity.state,
-                entityId: heaterEntityId,
-            });
-        }
-        if (solarEntity) {
-            const solarState = solarEntity.attributes?.SOLARSTATE || '';
-            const parsedSolarState = EntityHelper.parseSolarState(solarState);
-            activeDevices.push({
-                icon: 'mdi:solar-power',
-                name: 'Solar',
-                status: parsedSolarState.status || solarEntity.state,
-                state: solarEntity.state,
-                entityId: solarEntityId,
-            });
-        }
-        if (chlorineEntity) {
-            const clState = chlorineEntity.attributes?.DOS_1_CL_STATE || [];
-            const statusText = Array.isArray(clState) && clState.length > 0
-                ? EntityHelper.formatSnakeCase(clState[0])
-                : chlorineEntity.state;
-            activeDevices.push({
-                icon: 'mdi:flask-outline',
-                name: 'Chlorine',
-                status: statusText,
-                state: chlorineEntity.state,
-                entityId: chlorineEntityId,
-            });
-        }
-        if (phEntity) {
-            const phState = phEntity.attributes?.DOS_2_PHM_STATE || [];
-            const statusText = Array.isArray(phState) && phState.length > 0
-                ? EntityHelper.formatSnakeCase(phState[0])
-                : phEntity.state;
-            activeDevices.push({
-                icon: 'mdi:flask-minus',
-                name: 'pH-',
-                status: statusText,
-                state: phEntity.state,
-                entityId: phEntityId,
-            });
-        }
-        // Cover entity
-        const coverEntityId = this._getEntityId('cover_entity', 'cover', 'cover');
-        const coverEntity = this.hass.states[coverEntityId];
-        if (coverEntity) {
-            const pos = coverEntity.attributes?.current_position;
-            const isMoving = coverEntity.state === 'opening' || coverEntity.state === 'closing';
-            activeDevices.push({
-                icon: coverEntity.state === 'open' ? 'mdi:window-shutter-open' : isMoving ? 'mdi:window-shutter' : 'mdi:window-shutter',
-                name: coverEntity.attributes.friendly_name || 'Abdeckung',
-                status: pos !== undefined ? `${Math.round(pos)}%${isMoving ? (coverEntity.state === 'opening' ? ' ↑' : ' ↓') : ''}` : (coverEntity.state === 'open' ? 'Offen' : 'Zu'),
-                state: coverEntity.state === 'open' ? 'on' : coverEntity.state === 'closed' ? 'off' : 'auto',
-                entityId: coverEntityId,
-            });
-        }
-        // Light entity
-        const lightEntityId = this._getEntityId('light_entity', 'light', 'light');
-        const lightEntity = this.hass.states[lightEntityId];
-        if (lightEntity) {
-            const br = lightEntity.attributes?.brightness;
-            const brText = br !== undefined ? ` · ${Math.round(br / 255 * 100)}%` : '';
-            activeDevices.push({
-                icon: lightEntity.state === 'on' ? 'mdi:lightbulb-on' : 'mdi:lightbulb-off-outline',
-                name: lightEntity.attributes.friendly_name || 'Beleuchtung',
-                status: lightEntity.state === 'on' ? `An${brText}` : 'Aus',
-                state: lightEntity.state,
-                entityId: lightEntityId,
-            });
-        }
-        const warnings = [];
-        // Filter entity
-        const filterEntityId = this._getEntityId('filter_entity', 'sensor', 'filter_pressure');
-        const filterEntity = this.hass.states[filterEntityId];
-        if (filterEntity) {
-            const pressureVal = parseFloat(filterEntity.state);
-            activeDevices.push({
-                icon: 'mdi:filter',
-                name: filterEntity.attributes.friendly_name || 'Filter',
-                status: !isNaN(pressureVal) ? `${pressureVal.toFixed(2)} bar` : filterEntity.state,
-                state: !isNaN(pressureVal) && pressureVal > 1.2 ? 'auto' : 'on',
-                entityId: filterEntityId,
-            });
-        }
-        if (orpStatus === 'warning')
-            warnings.push('ORP too low - Check chlorine dosing');
-        if (orpStatus === 'high')
-            warnings.push('ORP too high - Stop chlorine dosing');
-        if (phStatus === 'warning')
-            warnings.push('pH out of range - Check dosing');
-        if (pumpEntity?.attributes?.PUMPSTATE?.includes('ANTI_FREEZE')) {
-            const outsideTemp = heaterEntity?.attributes?.outside_temperature;
-            warnings.push(`Frost protection active${outsideTemp ? ` (${outsideTemp.toFixed(1)}°C)` : ''}`);
-        }
-        const anyActive = activeDevices.some(d => ['on', 'auto', 'heat', 'heating'].includes(d.state));
-        const activeCount = activeDevices.filter(d => ['on', 'auto', 'heat', 'heating'].includes(d.state)).length;
-        // Progress percentages for chemistry tiles
-        const tempPct = poolTemp !== undefined ? this._getValuePercent(poolTemp, 18, 35) : undefined;
-        const phPct = phValue !== undefined ? this._getValuePercent(phValue, 6.5, 8.0) : undefined;
-        const orpPct = orpValue !== undefined ? this._getValuePercent(orpValue, 500, 900) : undefined;
-        // Ideal zone positions for range bar (pH: 7.0-7.4, ORP: 650-750)
-        const phIdealStartPct = this._getValuePercent(7.0, 6.5, 8.0);
-        const phIdealEndPct = this._getValuePercent(7.4, 6.5, 8.0);
-        const orpIdealStartPct = this._getValuePercent(650, 500, 900);
-        const orpIdealEndPct = this._getValuePercent(750, 500, 900);
-        return b` <ha-card class="${this._getCardClasses(anyActive, config)}" style="--card-accent: ${accentColor}" ><div class="accent-bar"></div><div class="card-content"><!-- Header --><div class="header"><div class="header-icon ${anyActive ? 'icon-active' : ''}" style="--icon-accent: ${accentColor}"><ha-icon icon="mdi:pool"></ha-icon></div><div class="header-info"><span class="name">${name}</span><span class="header-subtitle"> ${anyActive ? `${activeCount} device${activeCount !== 1 ? 's' : ''} active` : 'All systems idle'}
+    `}_detectDosingType(e){return e.includes("_cl")?"chlorine":e.includes("_phm")?"ph_minus":e.includes("_php")?"ph_plus":e.includes("_floc")?"flocculant":"chlorine"}_getDosingIcon(e){switch(e){case"chlorine":default:return"mdi:flask-outline";case"ph_minus":return"mdi:flask-minus";case"ph_plus":return"mdi:flask-plus";case"flocculant":return"mdi:flask"}}renderOverviewCard(e=this.config){const t=e.name||"Pool Status",i=this._getAccentColor("overview",e),a=this._getEntityId("pump_entity","switch","pump",0),s=this._getEntityId("heater_entity","climate","heater",1),o=this._getEntityId("solar_entity","climate","solar",2),r=this._getEntityId("chlorine_entity","switch","dos_1_cl",3),n=this._getEntityId("ph_minus_entity","switch","dos_2_phm",4),c=this.hass.states[a],l=this.hass.states[s],d=this.hass.states[o],p=this.hass.states[r],h=this.hass.states[n],v=this._getEntityId("pool_temp_entity","sensor","temperature",5),g=this._getEntityId("ph_value_entity","sensor","ph_value",6),u=this._getEntityId("orp_value_entity","sensor","orp_value",7),m=this.hass.states[v],f=this.hass.states[g],x=this.hass.states[u],b=m?parseFloat(m.state):void 0,y=f?parseFloat(f.state):void 0,w=x?parseFloat(x.state):void 0,$=void 0!==b?ke.getTemperatureColor(b):void 0,_=void 0!==y?ke.getPhColor(y):void 0,k=void 0!==w?ke.getOrpColor(w):void 0,C=void 0===(F=y)||isNaN(F)?"unknown":F<7||F>7.4?"warning":"ok";var F;const A=void 0===(z=w)||isNaN(z)?"unknown":z<650?"warning":z>750?"high":"ok";var z;const S=[];if(c){const e=_e.parsePumpState(c.attributes?.PUMPSTATE||"");S.push({icon:"mdi:pump",name:"Pump",status:e.status||c.state,state:c.state,entityId:a})}if(l){const e=_e.parseHeaterState(l.attributes?.HEATERSTATE||"");S.push({icon:"mdi:radiator",name:"Heater",status:e.status||l.state,state:l.state,entityId:s})}if(d){const e=_e.parseSolarState(d.attributes?.SOLARSTATE||"");S.push({icon:"mdi:solar-power",name:"Solar",status:e.status||d.state,state:d.state,entityId:o})}if(p){const e=p.attributes?.DOS_1_CL_STATE||[],t=Array.isArray(e)&&e.length>0?_e.formatSnakeCase(e[0]):p.state;S.push({icon:"mdi:flask-outline",name:"Chlorine",status:t,state:p.state,entityId:r})}if(h){const e=h.attributes?.DOS_2_PHM_STATE||[],t=Array.isArray(e)&&e.length>0?_e.formatSnakeCase(e[0]):h.state;S.push({icon:"mdi:flask-minus",name:"pH-",status:t,state:h.state,entityId:n})}const E=this._getEntityId("cover_entity","cover","cover"),P=this.hass.states[E];if(P){const e=P.attributes?.current_position,t="opening"===P.state||"closing"===P.state;S.push({icon:"open"===P.state?"mdi:window-shutter-open":"mdi:window-shutter",name:P.attributes.friendly_name||"Abdeckung",status:void 0!==e?`${Math.round(e)}%${t?"opening"===P.state?" ↑":" ↓":""}`:"open"===P.state?"Offen":"Zu",state:"open"===P.state?"on":"closed"===P.state?"off":"auto",entityId:E})}const T=this._getEntityId("light_entity","light","light"),M=this.hass.states[T];if(M){const e=M.attributes?.brightness;S.push({icon:"on"===M.state?"mdi:lightbulb-on":"mdi:lightbulb-off-outline",name:M.attributes.friendly_name||"Beleuchtung",status:"on"===M.state?"An"+(void 0!==e?` · ${Math.round(e/255*100)}%`:""):"Aus",state:M.state,entityId:T})}const O=[],D=this._getEntityId("filter_entity","sensor","filter_pressure"),I=this.hass.states[D];if(I){const e=parseFloat(I.state);S.push({icon:"mdi:filter",name:I.attributes.friendly_name||"Filter",status:isNaN(e)?I.state:e.toFixed(2)+" bar",state:!isNaN(e)&&e>1.2?"auto":"on",entityId:D})}if("warning"===A&&O.push("ORP too low - Check chlorine dosing"),"high"===A&&O.push("ORP too high - Stop chlorine dosing"),"warning"===C&&O.push("pH out of range - Check dosing"),c?.attributes?.PUMPSTATE?.includes("ANTI_FREEZE")){const e=l?.attributes?.outside_temperature;O.push("Frost protection active"+(e?` (${e.toFixed(1)}°C)`:""))}const H=S.some(e=>["on","auto","heat","heating"].includes(e.state)),N=S.filter(e=>["on","auto","heat","heating"].includes(e.state)).length,V=void 0!==b?this._getValuePercent(b,18,35):void 0,R=void 0!==y?this._getValuePercent(y,6.5,8):void 0,U=void 0!==w?this._getValuePercent(w,500,900):void 0,B=this._getValuePercent(7,6.5,8),j=this._getValuePercent(7.4,6.5,8),q=this._getValuePercent(650,500,900),W=this._getValuePercent(750,500,900);return L` <ha-card class="${this._getCardClasses(H,e)}" style="--card-accent: ${i}" ><div class="accent-bar"></div><div class="card-content"><!-- Header --><div class="header"><div class="header-icon ${H?"icon-active":""}" style="--icon-accent: ${i}"><ha-icon icon="mdi:pool"></ha-icon></div><div class="header-info"><span class="name">${t}</span><span class="header-subtitle"> ${H?`${N} device${1!==N?"s":""} active`:"All systems idle"}
               </span>
             </div>
-            ${warnings.length > 0
-            ? b`<div class="overview-warning-badge">${warnings.length}</div>`
-            : anyActive
-                ? b`<div class="overview-active-dot"></div>`
-                : ''}
+            ${O.length>0?L`<div class="overview-warning-badge">${O.length}</div>`:H?L`<div class="overview-active-dot"></div>`:""}
           </div>
 
           <!-- Water Chemistry - Apple Health style metric tiles -->
           <div class="chemistry-grid">
-            ${poolTemp !== undefined
-            ? b` <div class="chemistry-card tooltip-wrap" style="--chem-color: ${tempColor?.color || '#4CAF50'}" @click="${(e) => { e.stopPropagation(); this._showMoreInfo(poolTempSensorId); }}"><div class="chem-icon-wrap"><ha-icon icon="mdi:thermometer-water"></ha-icon></div><span class="chemistry-val">${poolTemp.toFixed(1)}°</span><span class="chemistry-unit">°C</span><span class="chemistry-label">${poolTemp < 22 ? 'Kalt' : poolTemp < 26 ? 'OK' : poolTemp <= 30 ? 'Ideal' : 'Warm'}</span> ${tempPct !== undefined ? b `<div class="chem-mini-bar"><div class="chem-mini-ideal" style="left:${this._getValuePercent(24, 18, 35)}%;width:${this._getValuePercent(30, 18, 35) - this._getValuePercent(24, 18, 35)}%"></div><div class="chem-mini-fill" style="width: ${tempPct}%; background: ${tempColor?.color || '#4CAF50'}"></div></div>`
-                : ''}
+            ${void 0!==b?L` <div class="chemistry-card tooltip-wrap" style="--chem-color: ${$?.color||"#4CAF50"}" @click="${e=>{e.stopPropagation(),this._showMoreInfo(v)}}"><div class="chem-icon-wrap"><ha-icon icon="mdi:thermometer-water"></ha-icon></div><span class="chemistry-val">${b.toFixed(1)}°</span><span class="chemistry-unit">°C</span><span class="chemistry-label">${b<22?"Kalt":b<26?"OK":b<=30?"Ideal":"Warm"}</span> ${void 0!==V?L`<div class="chem-mini-bar"><div class="chem-mini-ideal" style="left:${this._getValuePercent(24,18,35)}%;width:${this._getValuePercent(30,18,35)-this._getValuePercent(24,18,35)}%"></div><div class="chem-mini-fill" style="width: ${V}%; background: ${$?.color||"#4CAF50"}"></div></div>`:""}
                   <div class="t-tip">
                     <div class="t-tip-title"><ha-icon icon="mdi:thermometer-water"></ha-icon>Wassertemperatur</div>
                     <div class="t-tip-desc">Aktuelle Pooltemperatur. Der grüne Bereich zeigt die Komfortzone zum Schwimmen.</div>
                     <div class="t-tip-ideal"><ha-icon icon="mdi:target"></ha-icon>24°C – 30°C Komfort</div>
                   </div>
                   </div>
-                `
-            : ''}
-            ${phValue !== undefined
-            ? b` <div class="chemistry-card tooltip-wrap" style="--chem-color: ${phColor?.color || '#4CAF50'}" @click="${(e) => { e.stopPropagation(); this._showMoreInfo(phSensorId); }}"><div class="chem-icon-wrap"><ha-icon icon="mdi:ph"></ha-icon></div><span class="chemistry-val">${phValue.toFixed(1)}</span><span class="chemistry-unit">pH</span><span class="chemistry-label">${phStatus === 'ok' ? 'Optimal' : 'Achtung'}</span> ${phPct !== undefined ? b `
+                `:""}
+            ${void 0!==y?L` <div class="chemistry-card tooltip-wrap" style="--chem-color: ${_?.color||"#4CAF50"}" @click="${e=>{e.stopPropagation(),this._showMoreInfo(g)}}"><div class="chem-icon-wrap"><ha-icon icon="mdi:ph"></ha-icon></div><span class="chemistry-val">${y.toFixed(1)}</span><span class="chemistry-unit">pH</span><span class="chemistry-label">${"ok"===C?"Optimal":"Achtung"}</span> ${void 0!==R?L`
                           <div class="chem-mini-bar">
-                            <div class="chem-mini-ideal" style="left: ${phIdealStartPct}%; width: ${phIdealEndPct - phIdealStartPct}%"></div>
-                            <div class="chem-mini-fill" style="width: ${phPct}%; background: ${phColor?.color || '#4CAF50'}"></div>
+                            <div class="chem-mini-ideal" style="left: ${B}%; width: ${j-B}%"></div>
+                            <div class="chem-mini-fill" style="width: ${R}%; background: ${_?.color||"#4CAF50"}"></div>
                           </div>
-                        `
-                : ''}
+                        `:""}
                   <div class="t-tip">
                     <div class="t-tip-title"><ha-icon icon="mdi:ph"></ha-icon>pH-Wert</div>
                     <div class="t-tip-desc">Misst den Säuregehalt des Wassers. Zu niedrig: reizt Haut/Augen. Zu hoch: Chlor verliert Wirkung.</div>
                     <div class="t-tip-ideal"><ha-icon icon="mdi:target"></ha-icon>7.0 – 7.4 Optimal</div>
-                    ${phValue < 7.0 ? b`<div class="t-tip-warn"><ha-icon icon="mdi:arrow-up"></ha-icon>pH+ zugeben zum Erhöhen</div>` : phValue > 7.4 ? b`<div class="t-tip-warn"><ha-icon icon="mdi:arrow-down"></ha-icon>pH- zugeben zum Senken</div>` : ''}
+                    ${y<7?L`<div class="t-tip-warn"><ha-icon icon="mdi:arrow-up"></ha-icon>pH+ zugeben zum Erhöhen</div>`:y>7.4?L`<div class="t-tip-warn"><ha-icon icon="mdi:arrow-down"></ha-icon>pH- zugeben zum Senken</div>`:""}
                   </div>
                   </div>
-                `
-            : ''}
-            ${orpValue !== undefined
-            ? b` <div class="chemistry-card tooltip-wrap" style="--chem-color: ${orpColor?.color || '#4CAF50'}" @click="${(e) => { e.stopPropagation(); this._showMoreInfo(orpSensorId); }}"><div class="chem-icon-wrap"><ha-icon icon="mdi:lightning-bolt"></ha-icon></div><span class="chemistry-val">${orpValue.toFixed(0)}</span><span class="chemistry-unit">mV</span><span class="chemistry-label">${orpStatus === 'ok' ? 'Optimal' : orpStatus === 'warning' ? 'Niedrig' : 'Hoch'}</span> ${orpPct !== undefined ? b `
+                `:""}
+            ${void 0!==w?L` <div class="chemistry-card tooltip-wrap" style="--chem-color: ${k?.color||"#4CAF50"}" @click="${e=>{e.stopPropagation(),this._showMoreInfo(u)}}"><div class="chem-icon-wrap"><ha-icon icon="mdi:lightning-bolt"></ha-icon></div><span class="chemistry-val">${w.toFixed(0)}</span><span class="chemistry-unit">mV</span><span class="chemistry-label">${"ok"===A?"Optimal":"warning"===A?"Niedrig":"Hoch"}</span> ${void 0!==U?L`
                           <div class="chem-mini-bar">
-                            <div class="chem-mini-ideal" style="left: ${orpIdealStartPct}%; width: ${orpIdealEndPct - orpIdealStartPct}%"></div>
-                            <div class="chem-mini-fill" style="width: ${orpPct}%; background: ${orpColor?.color || '#4CAF50'}"></div>
+                            <div class="chem-mini-ideal" style="left: ${q}%; width: ${W-q}%"></div>
+                            <div class="chem-mini-fill" style="width: ${U}%; background: ${k?.color||"#4CAF50"}"></div>
                           </div>
-                        `
-                : ''}
+                        `:""}
                   <div class="t-tip">
                     <div class="t-tip-title"><ha-icon icon="mdi:lightning-bolt"></ha-icon>ORP – Desinfektionskraft</div>
                     <div class="t-tip-desc">Redoxpotential zeigt, wie wirksam das Chlor Bakterien abtöten kann. Zu niedrig = unzureichende Desinfektion.</div>
                     <div class="t-tip-ideal"><ha-icon icon="mdi:target"></ha-icon>650 – 750 mV Optimal</div>
-                    ${orpValue < 650 ? b`<div class="t-tip-warn"><ha-icon icon="mdi:flask-outline"></ha-icon>Chlordosierung erhöhen</div>` : orpValue > 750 ? b`<div class="t-tip-warn"><ha-icon icon="mdi:flask-outline"></ha-icon>Chlordosierung reduzieren</div>` : ''}
+                    ${w<650?L`<div class="t-tip-warn"><ha-icon icon="mdi:flask-outline"></ha-icon>Chlordosierung erhöhen</div>`:w>750?L`<div class="t-tip-warn"><ha-icon icon="mdi:flask-outline"></ha-icon>Chlordosierung reduzieren</div>`:""}
                   </div>
                   </div>
-                `
-            : ''}
+                `:""}
           </div>
 
           <!-- Device List - clean rows -->
-          ${activeDevices.length > 0
-            ? b` <div class="overview-section"><div class="section-title"><span>Devices</span><span class="section-count">${activeDevices.length}</span></div><div class="device-list"> ${activeDevices.map((device) => b `
+          ${S.length>0?L` <div class="overview-section"><div class="section-title"><span>Devices</span><span class="section-count">${S.length}</span></div><div class="device-list"> ${S.map(e=>L`
                         <div class="device-row"
-                          @click="${(e) => { e.stopPropagation(); this._showMoreInfo(device.entityId); }}">
-                          <div class="device-icon-wrap ${['on', 'auto', 'heat', 'heating'].includes(device.state) ? 'device-icon-active' : ''}">
-                            <ha-icon icon="${device.icon}"></ha-icon>
+                          @click="${t=>{t.stopPropagation(),this._showMoreInfo(e.entityId)}}">
+                          <div class="device-icon-wrap ${["on","auto","heat","heating"].includes(e.state)?"device-icon-active":""}">
+                            <ha-icon icon="${e.icon}"></ha-icon>
                           </div>
                           <div class="device-info">
-                            <span class="device-name">${device.name}</span>
-                            <span class="device-status">${device.status}</span>
+                            <span class="device-name">${e.name}</span>
+                            <span class="device-status">${e.status}</span>
                           </div>
-                          <div class="device-dot ${['on', 'auto', 'heat', 'heating'].includes(device.state) ? 'dot-active' : 'dot-inactive'}"></div>
+                          <div class="device-dot ${["on","auto","heat","heating"].includes(e.state)?"dot-active":"dot-inactive"}"></div>
                         </div>
                       `)}
                   </div>
                 </div>
-              `
-            : ''}
+              `:""}
 
           <!-- Warnings / All OK -->
-          ${warnings.length > 0
-            ? b` <div class="overview-section"><div class="section-title warning-title"><ha-icon icon="mdi:alert-outline" style="--mdc-icon-size: 14px"></ha-icon><span>Alerts</span></div><div class="warning-list"> ${warnings.map((warning) => b `
+          ${O.length>0?L` <div class="overview-section"><div class="section-title warning-title"><ha-icon icon="mdi:alert-outline" style="--mdc-icon-size: 14px"></ha-icon><span>Alerts</span></div><div class="warning-list"> ${O.map(e=>L`
                         <div class="warning-row">
-                          <ha-icon icon="${warning.includes('Frost') ? 'mdi:snowflake-alert' : 'mdi:alert-circle'}" style="--mdc-icon-size: 16px"></ha-icon>
-                          <span>${warning}</span>
+                          <ha-icon icon="${e.includes("Frost")?"mdi:snowflake-alert":"mdi:alert-circle"}" style="--mdc-icon-size: 16px"></ha-icon>
+                          <span>${e}</span>
                         </div>
                       `)}
                   </div>
                 </div>
-              `
-            : b` <div class="all-ok-display"><ha-icon icon="mdi:check-circle" style="--mdc-icon-size: 18px"></ha-icon><span>All systems normal</span></div> `}
+              `:L` <div class="all-ok-display"><ha-icon icon="mdi:check-circle" style="--mdc-icon-size: 18px"></ha-icon><span>All systems normal</span></div> `}
         </div>
       </ha-card>
-    `;
-    }
-    renderDetailsCard(config = this.config) {
-        const title = config.name || config.title || 'Details';
-        const entities = config.entities || [];
-        const icon = config.icon;
-        if (!entities.length) {
-            return b` <ha-card class="theme-${config.theme || 'luxury'} size-${config.size || 'medium'}"><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">No Entities Configured</span><span class="error-entity">Please provide 'entities' list in card config</span></div></div></ha-card> `;
-        }
-        return b` <ha-card class="theme-${config.theme || 'luxury'} size-${config.size || 'medium'}"><div class="card-content" style="padding: var(--vpc-spacing, 16px);"> ${b `
+    `}renderDetailsCard(e=this.config){const t=e.entities||[],i=e.icon;return t.length?L` <ha-card class="theme-${e.theme||"luxury"} size-${e.size||"medium"}"><div class="card-content" style="padding: var(--vpc-spacing, 16px);"> ${L`
           <div class="card-header" style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
-            ${icon ? b`<div class="header-icon" style="width:38px;height:38px;border-radius:10px;background:var(--vpc-surface);display:flex;align-items:center;justify-content:center;color:var(--vpc-primary);"><ha-icon icon="${icon}"></ha-icon></div>` : ''}
-            <div class="name" style="font-size:16px;font-weight:600;color:var(--vpc-text);margin:0;">${title}</div>
+            ${i?L`<div class="header-icon" style="width:38px;height:38px;border-radius:10px;background:var(--vpc-surface);display:flex;align-items:center;justify-content:center;color:var(--vpc-primary);"><ha-icon icon="${i}"></ha-icon></div>`:""}
+            <div class="name" style="font-size:16px;font-weight:600;color:var(--vpc-text);margin:0;">${e.name||e.title||"Details"}</div>
           </div>
-          ` }
+          `}
           <div class="device-list">
-            ${entities.map(entityConf => {
-            let entityId = '';
-            let entityName = '';
-            let entityIcon = '';
-            if (typeof entityConf === 'string') {
-                entityId = entityConf;
-            }
-            else {
-                entityId = entityConf.entity;
-                entityName = entityConf.name;
-                entityIcon = entityConf.icon;
-            }
-            const stateObj = this.hass.states[entityId];
-            if (!stateObj) {
-                return b` <div class="device-row"><div class="device-info"><div class="device-name">${entityId}</div><div class="device-status" style="color:var(--vpc-danger, #FF3B30)">Not found</div></div></div> `;
-            }
-            const domain = entityId.split('.')[0];
-            const dispName = entityName || stateObj.attributes.friendly_name || entityId;
-            let dispIcon = entityIcon || stateObj.attributes.icon;
-            if (!dispIcon) {
-                if (domain === 'switch' || domain === 'light' || domain === 'binary_sensor') {
-                    dispIcon = stateObj.state === 'on' ? 'mdi:check-circle' : 'mdi:circle-outline';
-                }
-                else if (domain === 'sensor' && stateObj.attributes.device_class === 'temperature') {
-                    dispIcon = 'mdi:thermometer';
-                }
-                else if (domain === 'sensor' && stateObj.attributes.unit_of_measurement === '%') {
-                    dispIcon = 'mdi:water-percent';
-                }
-                else {
-                    dispIcon = 'mdi:information-outline';
-                }
-            }
-            const isSwitchLike = ['switch', 'light', 'input_boolean'].includes(domain);
-            const isBinary = domain === 'binary_sensor';
-            const isOn = stateObj.state === 'on';
-            const isActionable = isSwitchLike;
-            let dispState = stateObj.state;
-            if (stateObj.attributes.unit_of_measurement) {
-                dispState += ' ' + stateObj.attributes.unit_of_measurement;
-            }
-            const onClick = () => {
-                if (isActionable) {
-                    this.hass.callService('homeassistant', 'toggle', { entity_id: entityId });
-                }
-                else {
-                    const event = new Event('hass-more-info', { bubbles: true, composed: true });
-                    event.detail = { entityId: entityId };
-                    this.dispatchEvent(event);
-                }
-            };
-            return b` <div class="device-row" @click="${onClick}"><div class="device-icon-wrap ${isOn && (isSwitchLike || isBinary) ? 'device-icon-active' : ''}"><ha-icon icon="${dispIcon}"></ha-icon></div><div class="device-info"><div class="device-name">${dispName}</div><div class="device-status">${dispState}</div></div> ${isSwitchLike ? b `
-                    <div class="device-dot ${isOn ? 'dot-active' : 'dot-inactive'}"></div>
-                  ` : ''}
+            ${t.map(e=>{let t="",i="",a="";"string"==typeof e?t=e:(t=e.entity,i=e.name,a=e.icon);const s=this.hass.states[t];if(!s)return L` <div class="device-row"><div class="device-info"><div class="device-name">${t}</div><div class="device-status" style="color:var(--vpc-danger, #FF3B30)">Not found</div></div></div> `;const o=t.split(".")[0],r=i||s.attributes.friendly_name||t;let n=a||s.attributes.icon;n||(n="switch"===o||"light"===o||"binary_sensor"===o?"on"===s.state?"mdi:check-circle":"mdi:circle-outline":"sensor"===o&&"temperature"===s.attributes.device_class?"mdi:thermometer":"sensor"===o&&"%"===s.attributes.unit_of_measurement?"mdi:water-percent":"mdi:information-outline");const c=["switch","light","input_boolean"].includes(o),l="on"===s.state,d=c;let p=s.state;return s.attributes.unit_of_measurement&&(p+=" "+s.attributes.unit_of_measurement),L` <div class="device-row" @click="${()=>{if(d)this.hass.callService("homeassistant","toggle",{entity_id:t});else{const e=new Event("hass-more-info",{bubbles:!0,composed:!0});e.detail={entityId:t},this.dispatchEvent(e)}}}"><div class="device-icon-wrap ${l&&(c||"binary_sensor"===o)?"device-icon-active":""}"><ha-icon icon="${n}"></ha-icon></div><div class="device-info"><div class="device-name">${r}</div><div class="device-status">${p}</div></div> ${c?L`
+                    <div class="device-dot ${l?"dot-active":"dot-inactive"}"></div>
+                  `:""}
                 </div>
-              `;
-        })}
+              `})}
           </div>
         </div>
       </ha-card>
-    `;
-    }
-    renderCompactCard(config = this.config) {
-        const entity = this.hass.states[config.entity];
-        const state = entity.state;
-        const name = config.name || entity.attributes.friendly_name || 'Entity';
-        const domain = config.entity.split('.')[0];
-        let icon = config.icon;
-        if (!icon) {
-            if (domain === 'switch' && config.entity.includes('pump')) {
-                icon = 'mdi:pump';
-            }
-            else if (domain === 'climate' && config.entity.includes('heater')) {
-                icon = 'mdi:radiator';
-            }
-            else if (domain === 'climate' && config.entity.includes('solar')) {
-                icon = 'mdi:solar-power';
-            }
-            else if (domain === 'switch' && config.entity.includes('dos')) {
-                icon = 'mdi:flask-outline';
-            }
-            else if (domain === 'cover') {
-                icon = entity.state === 'open' ? 'mdi:window-shutter-open' : 'mdi:window-shutter';
-            }
-            else if (domain === 'light') {
-                icon = entity.state === 'on' ? 'mdi:lightbulb-on' : 'mdi:lightbulb-off-outline';
-            }
-            else if (domain === 'sensor' && config.entity.includes('filter')) {
-                icon = 'mdi:filter';
-            }
-            else {
-                icon = 'mdi:circle';
-            }
-        }
-        let detailStatus = '';
-        let currentValue = '';
-        if (entity.attributes?.PUMPSTATE) {
-            const parsedState = EntityHelper.parsePumpState(entity.attributes.PUMPSTATE);
-            detailStatus = parsedState.status;
-            if (parsedState.level !== undefined && parsedState.level > 0) {
-                currentValue = `Level ${parsedState.level}`;
-            }
-        }
-        else if (entity.attributes?.HEATERSTATE) {
-            const parsedState = EntityHelper.parseHeaterState(entity.attributes.HEATERSTATE);
-            detailStatus = parsedState.status;
-            const temp = EntityHelper.getCurrentTemperature(entity);
-            if (temp !== undefined) {
-                currentValue = `${temp.toFixed(1)}°C`;
-            }
-        }
-        else if (entity.attributes?.SOLARSTATE) {
-            const parsedState = EntityHelper.parseSolarState(entity.attributes.SOLARSTATE);
-            detailStatus = parsedState.status;
-            const temp = EntityHelper.getCurrentTemperature(entity);
-            if (temp !== undefined) {
-                currentValue = `${temp.toFixed(1)}°C`;
-            }
-        }
-        else if (Object.keys(entity.attributes || {}).some(key => key.includes('DOS_') && key.includes('_STATE'))) {
-            const dosingStateKey = Object.keys(entity.attributes || {}).find(key => key.includes('DOS_') && key.includes('_STATE'));
-            const dosingState = dosingStateKey ? entity.attributes[dosingStateKey] : [];
-            if (Array.isArray(dosingState) && dosingState.length > 0) {
-                detailStatus = EntityHelper.formatSnakeCase(dosingState[0]);
-            }
-            const dosingType = this._detectDosingType(config.entity);
-            if (dosingType === 'chlorine') {
-                const orpSensorId = this._getEntityId('orp_value_entity', 'sensor', 'orp_value');
-                const orpSensor = this.hass.states[orpSensorId];
-                if (orpSensor) {
-                    currentValue = `${parseFloat(orpSensor.state).toFixed(0)}mV`;
-                }
-            }
-            else if (dosingType === 'ph_minus' || dosingType === 'ph_plus') {
-                const phSensorId = this._getEntityId('ph_value_entity', 'sensor', 'ph_value');
-                const phSensor = this.hass.states[phSensorId];
-                if (phSensor) {
-                    currentValue = `pH ${parseFloat(phSensor.state).toFixed(1)}`;
-                }
-            }
-        }
-        else if (domain === 'cover') {
-            const pos = entity.attributes?.current_position;
-            if (pos !== undefined)
-                currentValue = `${Math.round(pos)}%`;
-            detailStatus = entity.state === 'open' ? 'Geöffnet' : entity.state === 'closed' ? 'Geschlossen' : entity.state === 'opening' ? 'Öffnet…' : entity.state === 'closing' ? 'Schließt…' : entity.state;
-        }
-        else if (domain === 'light') {
-            const br = entity.attributes?.brightness;
-            if (br !== undefined)
-                currentValue = `${Math.round(br / 255 * 100)}%`;
-            detailStatus = entity.state === 'on' ? 'An' : 'Aus';
-        }
-        else if (domain === 'sensor') {
-            const unit = entity.attributes?.unit_of_measurement || '';
-            const num = parseFloat(entity.state);
-            if (!isNaN(num))
-                currentValue = `${num % 1 === 0 ? num.toFixed(0) : num.toFixed(1)}${unit}`;
-            detailStatus = entity.attributes.device_class || '';
-        }
-        const isActive = state === 'on' || state === 'auto' || state === 'heat' || state === 'heating' || state === 'open' || state === 'opening';
-        return b` <ha-card class="compact-card ${this._getCardClasses(isActive, config)}" @click="${() => this._showMoreInfo(config.entity)}" ><div class="card-content compact"><div class="compact-icon ${isActive ? 'compact-icon-active' : ''}"><ha-icon icon="${icon}" class="${isActive ? 'active' : 'inactive'}" ></ha-icon></div><div class="compact-info"><span class="name">${name}</span><div class="compact-details"> ${currentValue ? b `<span class="compact-value">${currentValue}</span>` : ''}
-              ${detailStatus ? b`<span class="compact-detail">${detailStatus}</span>` : ''}
+    `:L` <ha-card class="theme-${e.theme||"luxury"} size-${e.size||"medium"}"><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">No Entities Configured</span><span class="error-entity">Please provide 'entities' list in card config</span></div></div></ha-card> `}renderCompactCard(e=this.config){const t=this.hass.states[e.entity],i=t.state,a=e.name||t.attributes.friendly_name||"Entity",s=e.entity.split(".")[0];let o=e.icon;o||(o="switch"===s&&e.entity.includes("pump")?"mdi:pump":"climate"===s&&e.entity.includes("heater")?"mdi:radiator":"climate"===s&&e.entity.includes("solar")?"mdi:solar-power":"switch"===s&&e.entity.includes("dos")?"mdi:flask-outline":"cover"===s?"open"===t.state?"mdi:window-shutter-open":"mdi:window-shutter":"light"===s?"on"===t.state?"mdi:lightbulb-on":"mdi:lightbulb-off-outline":"sensor"===s&&e.entity.includes("filter")?"mdi:filter":"mdi:circle");let r="",n="";if(t.attributes?.PUMPSTATE){const e=_e.parsePumpState(t.attributes.PUMPSTATE);r=e.status,void 0!==e.level&&e.level>0&&(n="Level "+e.level)}else if(t.attributes?.HEATERSTATE){r=_e.parseHeaterState(t.attributes.HEATERSTATE).status;const e=_e.getCurrentTemperature(t);void 0!==e&&(n=e.toFixed(1)+"°C")}else if(t.attributes?.SOLARSTATE){r=_e.parseSolarState(t.attributes.SOLARSTATE).status;const e=_e.getCurrentTemperature(t);void 0!==e&&(n=e.toFixed(1)+"°C")}else if(Object.keys(t.attributes||{}).some(e=>e.includes("DOS_")&&e.includes("_STATE"))){const i=Object.keys(t.attributes||{}).find(e=>e.includes("DOS_")&&e.includes("_STATE")),a=i?t.attributes[i]:[];Array.isArray(a)&&a.length>0&&(r=_e.formatSnakeCase(a[0]));const s=this._detectDosingType(e.entity);if("chlorine"===s){const e=this._getEntityId("orp_value_entity","sensor","orp_value"),t=this.hass.states[e];t&&(n=parseFloat(t.state).toFixed(0)+"mV")}else if("ph_minus"===s||"ph_plus"===s){const e=this._getEntityId("ph_value_entity","sensor","ph_value"),t=this.hass.states[e];t&&(n="pH "+parseFloat(t.state).toFixed(1))}}else if("cover"===s){const e=t.attributes?.current_position;void 0!==e&&(n=Math.round(e)+"%"),r="open"===t.state?"Geöffnet":"closed"===t.state?"Geschlossen":"opening"===t.state?"Öffnet…":"closing"===t.state?"Schließt…":t.state}else if("light"===s){const e=t.attributes?.brightness;void 0!==e&&(n=Math.round(e/255*100)+"%"),r="on"===t.state?"An":"Aus"}else if("sensor"===s){const e=t.attributes?.unit_of_measurement||"",i=parseFloat(t.state);isNaN(i)||(n=`${i.toFixed(i%1==0?0:1)}${e}`),r=t.attributes.device_class||""}const c="on"===i||"auto"===i||"heat"===i||"heating"===i||"open"===i||"opening"===i;return L` <ha-card class="compact-card ${this._getCardClasses(c,e)}" @click="${()=>this._showMoreInfo(e.entity)}" ><div class="card-content compact"><div class="compact-icon ${c?"compact-icon-active":""}"><ha-icon icon="${o}" class="${c?"active":"inactive"}" ></ha-icon></div><div class="compact-info"><span class="name">${a}</span><div class="compact-details"> ${n?L`<span class="compact-value">${n}</span>`:""}
+              ${r?L`<span class="compact-detail">${r}</span>`:""}
             </div>
           </div>
-          <status-badge .state="${state}"></status-badge>
+          <vpc-status-badge .state="${i}"></vpc-status-badge>
         </div>
       </ha-card>
-    `;
-    }
-    renderChemicalCard(config = this.config) {
-        const name = config.name || 'Wasserchemie';
-        const accentColor = '#4CAF50';
-        const poolTempSensorId = this._getEntityId('pool_temp_entity', 'sensor', 'temperature', 5);
-        const phSensorId = this._getEntityId('ph_value_entity', 'sensor', 'ph_value', 6);
-        const orpSensorId = this._getEntityId('orp_value_entity', 'sensor', 'orp_value', 7);
-        const targetPhId = this._getEntityId('target_ph_entity', 'number', 'target_ph');
-        const targetOrpId = this._getEntityId('target_orp_entity', 'number', 'target_orp');
-        const poolTempSensor = this.hass.states[poolTempSensorId];
-        const phSensor = this.hass.states[phSensorId];
-        const orpSensor = this.hass.states[orpSensorId];
-        const targetPhEntity = this.hass.states[targetPhId];
-        const targetOrpEntity = this.hass.states[targetOrpId];
-        const poolTemp = poolTempSensor ? parseFloat(poolTempSensor.state) : undefined;
-        const phValue = phSensor ? parseFloat(phSensor.state) : undefined;
-        const orpValue = orpSensor ? parseFloat(orpSensor.state) : undefined;
-        const targetPh = targetPhEntity ? parseFloat(targetPhEntity.state) : 7.2;
-        const targetOrp = targetOrpEntity ? parseFloat(targetOrpEntity.state) : 700;
-        const tempColor = poolTemp !== undefined ? StateColorHelper.getTemperatureColor(poolTemp) : undefined;
-        const phColor = phValue !== undefined ? StateColorHelper.getPhColor(phValue, targetPh) : undefined;
-        const orpColor = orpValue !== undefined ? StateColorHelper.getOrpColor(orpValue, targetOrp) : undefined;
-        const getTempStatus = (t) => {
-            if (t === undefined)
-                return '';
-            if (t < 20)
-                return 'Sehr kalt';
-            if (t < 24)
-                return 'Kühl';
-            if (t <= 28)
-                return 'Perfekt';
-            if (t <= 32)
-                return 'Angenehm warm';
-            return 'Zu warm';
-        };
-        const getPhStatus = (ph) => {
-            if (ph === undefined)
-                return 'Unbekannt';
-            if (ph < 6.8)
-                return 'Zu sauer';
-            if (ph < 7.0)
-                return 'Leicht sauer';
-            if (ph <= 7.4)
-                return 'Optimal';
-            if (ph <= 7.6)
-                return 'Leicht basisch';
-            return 'Zu basisch';
-        };
-        const getOrpStatus = (orp) => {
-            if (orp === undefined)
-                return 'Unbekannt';
-            if (orp < 600)
-                return 'Zu niedrig';
-            if (orp < 650)
-                return 'Niedrig';
-            if (orp <= 750)
-                return 'Optimal';
-            if (orp <= 800)
-                return 'Erhöht';
-            return 'Zu hoch';
-        };
-        const phOk = phValue !== undefined && phValue >= 7.0 && phValue <= 7.4;
-        const orpOk = orpValue !== undefined && orpValue >= 650 && orpValue <= 750;
-        const issuesCount = [!phOk, !orpOk].filter(v => phValue !== undefined && orpValue !== undefined && v).length;
-        const overallStatus = issuesCount === 0 ? 'Optimal' : issuesCount === 1 ? 'Achtung' : 'Eingriff nötig';
-        const overallColor = issuesCount === 0 ? 'var(--vpc-success, #34C759)' : issuesCount === 1 ? 'var(--vpc-warning, #FF9F0A)' : 'var(--vpc-danger, #FF3B30)';
-        const overallIcon = issuesCount === 0 ? 'mdi:water-check' : issuesCount === 1 ? 'mdi:alert' : 'mdi:alert-circle';
-        const tempPct = poolTemp !== undefined ? this._getValuePercent(poolTemp, 18, 35) : undefined;
-        const phPct = phValue !== undefined ? this._getValuePercent(phValue, 6.5, 8.0) : undefined;
-        const orpPct = orpValue !== undefined ? this._getValuePercent(orpValue, 500, 900) : undefined;
-        const targetPhPct = this._getValuePercent(targetPh, 6.5, 8.0);
-        const targetOrpPct = this._getValuePercent(targetOrp, 500, 900);
-        const phIdealStart = this._getValuePercent(7.0, 6.5, 8.0);
-        const phIdealEnd = this._getValuePercent(7.4, 6.5, 8.0);
-        const orpIdealStart = this._getValuePercent(650, 500, 900);
-        const orpIdealEnd = this._getValuePercent(750, 500, 900);
-        return b` <ha-card class="${this._getCardClasses(issuesCount === 0 && (phValue !== undefined || orpValue !== undefined), config)}" style="--card-accent: ${accentColor}"><div class="accent-bar"></div><div class="card-content"><div class="header"><div class="header-icon" style="--icon-accent: ${accentColor}"><ha-icon icon="${config.icon || 'mdi:water-check'}"></ha-icon></div><div class="header-info"><span class="name">${name}</span><span class="header-subtitle" style="color: ${overallColor}">${overallStatus}</span></div><div class="chem-overall-badge" style="background: color-mix(in srgb, ${overallColor} 12%, transparent); color: ${overallColor}; border: 1px solid color-mix(in srgb, ${overallColor} 25%, transparent);"><ha-icon icon="${overallIcon}" style="--mdc-icon-size: 14px"></ha-icon><span>${overallStatus}</span></div></div> ${poolTemp !== undefined ? b `
+    `}renderChemicalCard(e=this.config){const t=e.name||"Wasserchemie",i="#4CAF50",a=this._getEntityId("pool_temp_entity","sensor","temperature",5),s=this._getEntityId("ph_value_entity","sensor","ph_value",6),o=this._getEntityId("orp_value_entity","sensor","orp_value",7),r=this._getEntityId("target_ph_entity","number","target_ph"),n=this._getEntityId("target_orp_entity","number","target_orp"),c=this.hass.states[a],l=this.hass.states[s],d=this.hass.states[o],p=this.hass.states[r],h=this.hass.states[n],v=c?parseFloat(c.state):void 0,g=l?parseFloat(l.state):void 0,u=d?parseFloat(d.state):void 0,m=p?parseFloat(p.state):7.2,f=h?parseFloat(h.state):700,x=void 0!==v?ke.getTemperatureColor(v):void 0,b=void 0!==g?ke.getPhColor(g,m):void 0,y=void 0!==u?ke.getOrpColor(u,f):void 0,w=void 0!==g&&g>=7&&g<=7.4,$=void 0!==u&&u>=650&&u<=750,_=[!w,!$].filter(e=>void 0!==g&&void 0!==u&&e).length,k=0===_?"Optimal":1===_?"Achtung":"Eingriff nötig",C=0===_?"var(--vpc-success, #34C759)":1===_?"var(--vpc-warning, #FF9F0A)":"var(--vpc-danger, #FF3B30)",F=0===_?"mdi:water-check":1===_?"mdi:alert":"mdi:alert-circle",A=void 0!==v?this._getValuePercent(v,18,35):void 0,z=void 0!==g?this._getValuePercent(g,6.5,8):void 0,S=void 0!==u?this._getValuePercent(u,500,900):void 0,E=this._getValuePercent(m,6.5,8),P=this._getValuePercent(f,500,900),T=this._getValuePercent(7,6.5,8),M=this._getValuePercent(7.4,6.5,8),O=this._getValuePercent(650,500,900),D=this._getValuePercent(750,500,900);return L` <ha-card class="${this._getCardClasses(0===_&&(void 0!==g||void 0!==u),e)}" style="--card-accent: ${i}"><div class="accent-bar"></div><div class="card-content"><div class="header"><div class="header-icon" style="--icon-accent: ${i}"><ha-icon icon="${e.icon||"mdi:water-check"}"></ha-icon></div><div class="header-info"><span class="name">${t}</span><span class="header-subtitle" style="color: ${C}">${k}</span></div><div class="chem-overall-badge" style="background: color-mix(in srgb, ${C} 12%, transparent); color: ${C}; border: 1px solid color-mix(in srgb, ${C} 25%, transparent);"><ha-icon icon="${F}" style="--mdc-icon-size: 14px"></ha-icon><span>${k}</span></div></div> ${void 0!==v?L`
             <div class="chem-section tooltip-wrap">
               <div class="chem-section-header">
-                <ha-icon icon="mdi:thermometer-water" style="--mdc-icon-size: 15px; color: ${tempColor?.color || 'var(--vpc-text-secondary)'}"></ha-icon>
+                <ha-icon icon="mdi:thermometer-water" style="--mdc-icon-size: 15px; color: ${x?.color||"var(--vpc-text-secondary)"}"></ha-icon>
                 <span>Wassertemperatur</span>
-                <span class="chem-section-status" style="color: ${tempColor?.color}">${getTempStatus(poolTemp)}</span>
+                <span class="chem-section-status" style="color: ${x?.color}">${(e=>void 0===e?"":e<20?"Sehr kalt":e<24?"Kühl":e<=28?"Perfekt":e<=32?"Angenehm warm":"Zu warm")(v)}</span>
               </div>
-              <div class="chem-big-value" style="color: ${tempColor?.color || 'var(--vpc-text)'}">
-                <span class="chem-big-num">${poolTemp.toFixed(1)}</span>
+              <div class="chem-big-value" style="color: ${x?.color||"var(--vpc-text)"}">
+                <span class="chem-big-num">${v.toFixed(1)}</span>
                 <span class="chem-big-unit">°C</span>
               </div>
-              ${tempPct !== undefined ? b` <div class="chem-gauge-bar"><div class="chem-gauge-track"><div class="chem-gauge-fill" style="width: ${tempPct}%; background: ${tempColor?.color || accentColor}"></div><div class="chem-gauge-zone" style="left: ${this._getValuePercent(24, 18, 35)}%; width: ${this._getValuePercent(30, 18, 35) - this._getValuePercent(24, 18, 35)}%"></div></div><div class="chem-gauge-labels"><span>18°C</span><span class="chem-zone-label">Komfortzone 24–30°C</span><span>35°C</span></div></div> ` : ''}
+              ${void 0!==A?L` <div class="chem-gauge-bar"><div class="chem-gauge-track"><div class="chem-gauge-fill" style="width: ${A}%; background: ${x?.color||i}"></div><div class="chem-gauge-zone" style="left: ${this._getValuePercent(24,18,35)}%; width: ${this._getValuePercent(30,18,35)-this._getValuePercent(24,18,35)}%"></div></div><div class="chem-gauge-labels"><span>18°C</span><span class="chem-zone-label">Komfortzone 24–30°C</span><span>35°C</span></div></div> `:""}
               <div class="t-tip">
                 <div class="t-tip-title"><ha-icon icon="mdi:thermometer-water"></ha-icon>Wassertemperatur</div>
                 <div class="t-tip-desc">Aktuelle Pooltemperatur. Die grüne Zone zeigt den idealen Badekomfort-Bereich.</div>
                 <div class="t-tip-ideal"><ha-icon icon="mdi:target"></ha-icon>24°C – 30°C Komfort</div>
               </div>
             </div>
-          ` : ''}
+          `:""}
 
           <div class="chem-dual-grid">
-            ${phValue !== undefined ? b` <div class="chem-metric-card tooltip-wrap" style="--chem-color: ${phColor?.color || '#4CAF50'}" @click="${(e) => { e.stopPropagation(); this._showMoreInfo(phSensorId); }}"><div class="chem-metric-header"><ha-icon icon="mdi:ph"></ha-icon><span>pH-Wert</span></div><div class="chem-metric-value">${phValue.toFixed(1)}</div><div class="chem-metric-status">${getPhStatus(phValue)}</div> ${phPct !== undefined ? b `
+            ${void 0!==g?L` <div class="chem-metric-card tooltip-wrap" style="--chem-color: ${b?.color||"#4CAF50"}" @click="${e=>{e.stopPropagation(),this._showMoreInfo(s)}}"><div class="chem-metric-header"><ha-icon icon="mdi:ph"></ha-icon><span>pH-Wert</span></div><div class="chem-metric-value">${g.toFixed(1)}</div><div class="chem-metric-status">${H=g,void 0===H?"Unbekannt":H<6.8?"Zu sauer":H<7?"Leicht sauer":H<=7.4?"Optimal":H<=7.6?"Leicht basisch":"Zu basisch"}</div> ${void 0!==z?L`
                   <div class="chem-metric-bar">
                     <div class="chem-metric-track">
-                      <div class="chem-metric-ideal" style="left: ${phIdealStart}%; width: ${phIdealEnd - phIdealStart}%"></div>
-                      <div class="chem-metric-fill" style="width: ${phPct}%"></div>
-                      <div class="chem-metric-target" style="left: ${targetPhPct}%"></div>
+                      <div class="chem-metric-ideal" style="left: ${T}%; width: ${M-T}%"></div>
+                      <div class="chem-metric-fill" style="width: ${z}%"></div>
+                      <div class="chem-metric-target" style="left: ${E}%"></div>
                     </div>
                     <div class="chem-metric-labels"><span>6.5</span><span>8.0</span></div>
                   </div>
-                ` : ''}
+                `:""}
                 <div class="t-tip">
                   <div class="t-tip-title"><ha-icon icon="mdi:ph"></ha-icon>pH-Wert</div>
-                  <div class="t-tip-desc">Säuregehalt des Wassers. Zu niedrig reizt Haut und Augen. Zu hoch reduziert die Chlorwirksamkeit. Ziel: ${targetPh.toFixed(1)}</div>
+                  <div class="t-tip-desc">Säuregehalt des Wassers. Zu niedrig reizt Haut und Augen. Zu hoch reduziert die Chlorwirksamkeit. Ziel: ${m.toFixed(1)}</div>
                   <div class="t-tip-ideal"><ha-icon icon="mdi:target"></ha-icon>7.0 – 7.4 Optimal</div>
-                  ${!phOk ? b`<div class="t-tip-warn"><ha-icon icon="mdi:flask"></ha-icon>${phValue < 7.0 ? 'pH+ zugeben' : 'pH- zugeben'}</div>` : ''}
+                  ${w?"":L`<div class="t-tip-warn"><ha-icon icon="mdi:flask"></ha-icon>${g<7?"pH+ zugeben":"pH- zugeben"}</div>`}
                 </div>
               </div>
-            ` : ''}
+            `:""}
 
-            ${orpValue !== undefined ? b` <div class="chem-metric-card tooltip-wrap" style="--chem-color: ${orpColor?.color || '#4CAF50'}" @click="${(e) => { e.stopPropagation(); this._showMoreInfo(orpSensorId); }}"><div class="chem-metric-header"><ha-icon icon="mdi:lightning-bolt"></ha-icon><span>ORP</span></div><div class="chem-metric-value">${orpValue.toFixed(0)}</div><div class="chem-metric-unit">mV</div><div class="chem-metric-status">${getOrpStatus(orpValue)}</div> ${orpPct !== undefined ? b `
+            ${void 0!==u?L` <div class="chem-metric-card tooltip-wrap" style="--chem-color: ${y?.color||"#4CAF50"}" @click="${e=>{e.stopPropagation(),this._showMoreInfo(o)}}"><div class="chem-metric-header"><ha-icon icon="mdi:lightning-bolt"></ha-icon><span>ORP</span></div><div class="chem-metric-value">${u.toFixed(0)}</div><div class="chem-metric-unit">mV</div><div class="chem-metric-status">${I=u,void 0===I?"Unbekannt":I<600?"Zu niedrig":I<650?"Niedrig":I<=750?"Optimal":I<=800?"Erhöht":"Zu hoch"}</div> ${void 0!==S?L`
                   <div class="chem-metric-bar">
                     <div class="chem-metric-track">
-                      <div class="chem-metric-ideal" style="left: ${orpIdealStart}%; width: ${orpIdealEnd - orpIdealStart}%"></div>
-                      <div class="chem-metric-fill" style="width: ${orpPct}%"></div>
-                      <div class="chem-metric-target" style="left: ${targetOrpPct}%"></div>
+                      <div class="chem-metric-ideal" style="left: ${O}%; width: ${D-O}%"></div>
+                      <div class="chem-metric-fill" style="width: ${S}%"></div>
+                      <div class="chem-metric-target" style="left: ${P}%"></div>
                     </div>
                     <div class="chem-metric-labels"><span>500</span><span>900 mV</span></div>
                   </div>
-                ` : ''}
+                `:""}
                 <div class="t-tip">
                   <div class="t-tip-title"><ha-icon icon="mdi:lightning-bolt"></ha-icon>ORP – Desinfektionskraft</div>
-                  <div class="t-tip-desc">Redoxpotential misst, wie wirksam das Chlor Keime abtötet. Niedriger ORP = unzureichende Desinfektion. Ziel: ${targetOrp.toFixed(0)} mV</div>
+                  <div class="t-tip-desc">Redoxpotential misst, wie wirksam das Chlor Keime abtötet. Niedriger ORP = unzureichende Desinfektion. Ziel: ${f.toFixed(0)} mV</div>
                   <div class="t-tip-ideal"><ha-icon icon="mdi:target"></ha-icon>650 – 750 mV Optimal</div>
-                  ${!orpOk ? b`<div class="t-tip-warn"><ha-icon icon="mdi:flask-outline"></ha-icon>${orpValue < 650 ? 'Chlor erhöhen' : 'Chlor reduzieren'}</div>` : ''}
+                  ${$?"":L`<div class="t-tip-warn"><ha-icon icon="mdi:flask-outline"></ha-icon>${u<650?"Chlor erhöhen":"Chlor reduzieren"}</div>`}
                 </div>
               </div>
-            ` : ''}
+            `:""}
           </div>
 
-          ${issuesCount > 0 ? b` <div class="chem-recommendations"> ${phValue !== undefined && !phOk ? b `
-                <div class="chem-rec-row" style="--rec-color: ${phColor?.color || 'var(--vpc-warning)'}">
+          ${_>0?L` <div class="chem-recommendations"> ${void 0===g||w?"":L`
+                <div class="chem-rec-row" style="--rec-color: ${b?.color||"var(--vpc-warning)"}">
                   <ha-icon icon="mdi:ph"></ha-icon>
-                  <span>${phValue < 7.0 ? 'pH zu sauer: pH+ Mittel zugeben' : 'pH zu basisch: pH- Mittel zugeben'}</span>
+                  <span>${g<7?"pH zu sauer: pH+ Mittel zugeben":"pH zu basisch: pH- Mittel zugeben"}</span>
                 </div>
-              ` : ''}
-              ${orpValue !== undefined && !orpOk ? b` <div class="chem-rec-row" style="--rec-color: ${orpColor?.color || 'var(--vpc-warning)'}"><ha-icon icon="mdi:flask-outline"></ha-icon><span>${orpValue < 650 ? 'ORP zu niedrig: Chlordosierung erhöhen' : 'ORP zu hoch: Chlordosierung reduzieren'}</span></div> ` : ''}
+              `}
+              ${void 0===u||$?"":L` <div class="chem-rec-row" style="--rec-color: ${y?.color||"var(--vpc-warning)"}"><ha-icon icon="mdi:flask-outline"></ha-icon><span>${u<650?"ORP zu niedrig: Chlordosierung erhöhen":"ORP zu hoch: Chlordosierung reduzieren"}</span></div> `}
             </div>
-          ` : b` <div class="all-ok-display"><ha-icon icon="mdi:water-check" style="--mdc-icon-size: 18px"></ha-icon><span>Wasserqualität optimal</span></div> `}
+          `:L` <div class="all-ok-display"><ha-icon icon="mdi:water-check" style="--mdc-icon-size: 18px"></ha-icon><span>Wasserqualität optimal</span></div> `}
         </div>
       </ha-card>
-    `;
-    }
-    renderSensorCard(config = this.config) {
-        const entity = this.hass.states[config.entity];
-        const state = entity.state;
-        const name = config.name || entity.attributes.friendly_name || 'Sensor';
-        const unit = entity.attributes.unit_of_measurement || '';
-        const accentColor = config.accent_color || this._getAccentColor('overview', config);
-        const numValue = parseFloat(state);
-        const isNumeric = !isNaN(numValue);
-        const deviceClass = entity.attributes.device_class;
-        const tooltipMap = {
-            temperature: { title: 'Temperatur', desc: 'Aktuelle Temperaturmessung des Sensors.', ideal: '24°C – 30°C (Pool)' },
-            ph: { title: 'pH-Wert', desc: 'Säuregehalt des Poolwassers.', ideal: '7.0 – 7.4' },
-            voltage: { title: 'ORP / Spannung', desc: 'Redoxpotential – Desinfektionskraft des Wassers.', ideal: '650 – 750 mV' },
-            humidity: { title: 'Luftfeuchtigkeit', desc: 'Relative Luftfeuchtigkeit in Prozent.' },
-            pressure: { title: 'Druck', desc: 'Aktueller Druckwert.' },
-        };
-        const tooltip = tooltipMap[deviceClass] || { title: name, desc: 'Sensorwert aus dem Violet Pool System.' };
-        const displayValue = isNumeric
-            ? (numValue % 1 === 0 ? numValue.toFixed(0) : numValue.toFixed(1))
-            : state;
-        return b` <ha-card class="${this._getCardClasses(false, config)}" style="--card-accent: ${accentColor}" @click="${() => this._showMoreInfo(config.entity)}"><div class="accent-bar"></div><div class="card-content"><div class="header"><div class="header-icon" style="--icon-accent: ${accentColor}"><ha-icon icon="${config.icon || (deviceClass === 'temperature' ? 'mdi:thermometer' : deviceClass === 'ph' ? 'mdi:ph' : 'mdi:gauge')}"></ha-icon></div><div class="header-info"><span class="name">${name}</span><span class="header-subtitle">${deviceClass ? deviceClass.charAt(0).toUpperCase() + deviceClass.slice(1) : 'Sensor'}</span></div></div><div class="sensor-value-display tooltip-wrap"><div class="sensor-big-value"> ${isNumeric ? b `<span class="sensor-num">${displayValue}</span>${unit ? b`<span class="sensor-unit">${unit}</span>` : ''}`
-            : b`<span class="sensor-state-text">${state}</span>`}
+    `;var I,H}renderSensorCard(e=this.config){const t=this.hass.states[e.entity],i=t.state,a=e.name||t.attributes.friendly_name||"Sensor",s=t.attributes.unit_of_measurement||"",o=e.accent_color||this._getAccentColor("overview",e),r=parseFloat(i),n=!isNaN(r),c=t.attributes.device_class,l={temperature:{title:"Temperatur",desc:"Aktuelle Temperaturmessung des Sensors.",ideal:"24°C – 30°C (Pool)"},ph:{title:"pH-Wert",desc:"Säuregehalt des Poolwassers.",ideal:"7.0 – 7.4"},voltage:{title:"ORP / Spannung",desc:"Redoxpotential – Desinfektionskraft des Wassers.",ideal:"650 – 750 mV"},humidity:{title:"Luftfeuchtigkeit",desc:"Relative Luftfeuchtigkeit in Prozent."},pressure:{title:"Druck",desc:"Aktueller Druckwert."}}[c]||{title:a,desc:"Sensorwert aus dem Violet Pool System."},d=n?r.toFixed(r%1==0?0:1):i;return L` <ha-card class="${this._getCardClasses(!1,e)}" style="--card-accent: ${o}" @click="${()=>this._showMoreInfo(e.entity)}"><div class="accent-bar"></div><div class="card-content"><div class="header"><div class="header-icon" style="--icon-accent: ${o}"><ha-icon icon="${e.icon||("temperature"===c?"mdi:thermometer":"ph"===c?"mdi:ph":"mdi:gauge")}"></ha-icon></div><div class="header-info"><span class="name">${a}</span><span class="header-subtitle">${c?c.charAt(0).toUpperCase()+c.slice(1):"Sensor"}</span></div></div><div class="sensor-value-display tooltip-wrap"><div class="sensor-big-value"> ${n?L`<span class="sensor-num">${d}</span>${s?L`<span class="sensor-unit">${s}</span>`:""}`:L`<span class="sensor-state-text">${i}</span>`}
             </div>
             <div class="t-tip">
-              <div class="t-tip-title"><ha-icon icon="mdi:information-outline"></ha-icon>${tooltip.title}</div>
-              <div class="t-tip-desc">${tooltip.desc}</div>
-              ${tooltip.ideal ? b`<div class="t-tip-ideal"><ha-icon icon="mdi:target"></ha-icon>${tooltip.ideal}</div>` : ''}
+              <div class="t-tip-title"><ha-icon icon="mdi:information-outline"></ha-icon>${l.title}</div>
+              <div class="t-tip-desc">${l.desc}</div>
+              ${l.ideal?L`<div class="t-tip-ideal"><ha-icon icon="mdi:target"></ha-icon>${l.ideal}</div>`:""}
             </div>
           </div>
         </div>
       </ha-card>
-    `;
-    }
-    renderCoverCard(config = this.config) {
-        const entityId = config.cover_entity || config.entity || this._buildEntityId('cover', 'cover');
-        const entity = this.hass.states[entityId];
-        if (!entity) {
-            return b`<ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">Cover nicht gefunden</span><span class="error-entity">${entityId}</span></div></div></ha-card>`;
-        }
-        const state = entity.state;
-        const name = config.name || entity.attributes.friendly_name || 'Pool Abdeckung';
-        const position = entity.attributes.current_position ?? (state === 'open' ? 100 : 0);
-        const isMoving = state === 'opening' || state === 'closing';
-        const accentColor = this._getAccentColor('cover', config);
-        const stateLabels = {
-            open: 'Geöffnet', closed: 'Geschlossen',
-            opening: 'Öffnet…', closing: 'Schließt…', stopped: 'Gestoppt',
-        };
-        const coverStatusColor = state === 'open' ? 'var(--vpc-success,#34C759)'
-            : state === 'closed' ? accentColor
-                : isMoving ? 'var(--vpc-warning,#FF9F0A)'
-                    : 'var(--vpc-text-secondary)';
-        const badgeState = state === 'open' ? 'on' : state === 'closed' ? 'off' : 'auto';
-        return b` <ha-card class="${this._getCardClasses(state === 'open' || isMoving, config)}" style="--card-accent: ${accentColor}" @click="${() => this._showMoreInfo(entityId)}"><div class="accent-bar"></div><div class="card-content"><div class="header"><div class="header-icon ${state !== 'closed' ? 'icon-active' : ''}" style="--icon-accent: ${accentColor}"> ${config.icon ? b `<ha-icon icon="${config.icon}"></ha-icon>`
-            : b`<ha-icon icon="${state === 'open' ? 'mdi:window-shutter-open' : isMoving ? 'mdi:window-shutter' : 'mdi:window-shutter'}"></ha-icon>`}
+    `}renderCoverCard(e=this.config){const t=e.cover_entity||e.entity||this._buildEntityId("cover","cover"),i=this.hass.states[t];if(!i)return L`<ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">Cover nicht gefunden</span><span class="error-entity">${t}</span></div></div></ha-card>`;const a=i.state,s=e.name||i.attributes.friendly_name||"Pool Abdeckung",o=i.attributes.current_position??("open"===a?100:0),r="opening"===a||"closing"===a,n=this._getAccentColor("cover",e),c="open"===a?"var(--vpc-success,#34C759)":"closed"===a?n:r?"var(--vpc-warning,#FF9F0A)":"var(--vpc-text-secondary)",l="open"===a?"on":"closed"===a?"off":"auto";return L` <ha-card class="${this._getCardClasses("open"===a||r,e)}" style="--card-accent: ${n}" @click="${()=>this._showMoreInfo(t)}"><div class="accent-bar"></div><div class="card-content"><div class="header"><div class="header-icon ${"closed"!==a?"icon-active":""}" style="--icon-accent: ${n}"> ${e.icon?L`<ha-icon icon="${e.icon}"></ha-icon>`:L`<ha-icon icon="${"open"===a?"mdi:window-shutter-open":"mdi:window-shutter"}"></ha-icon>`}
             </div>
             <div class="header-info">
-              <span class="name">${name}</span>
-              <span class="header-subtitle" style="color:${coverStatusColor}">${stateLabels[state] || state}</span>
+              <span class="name">${s}</span>
+              <span class="header-subtitle" style="color:${c}">${{open:"Geöffnet",closed:"Geschlossen",opening:"Öffnet…",closing:"Schließt…",stopped:"Gestoppt"}[a]||a}</span>
             </div>
-            ${config.show_state !== false ? b`<status-badge .state="${badgeState}" .pulse="${isMoving}"></status-badge>` : ''}
+            ${!1!==e.show_state?L`<vpc-status-badge .state="${l}" .pulse="${r}"></vpc-status-badge>`:""}
           </div>
 
           <!-- Animated pool visualization -->
           <div class="cover-visual">
-            ${coverSVG(position, isMoving, accentColor)}
+            ${function(e,t,i){const a=Math.round(72*(1-Math.max(0,Math.min(100,e))/100));return L` <svg viewBox="0 0 90 48" style="width:100%;height:auto;display:block" xmlns="http://www.w3.org/2000/svg"><!-- Pool shell --><rect x="2" y="4" width="76" height="40" rx="9" fill="rgba(0,160,255,0.1)" stroke="${i}" stroke-width="1.5" stroke-opacity="0.35"/><!-- Water texture --><path d="M8,19 C17,15 27,23 37,19 C47,15 57,23 67,19 C71,17 74,19 77,19" fill="none" stroke="rgba(0,150,255,0.45)" stroke-width="1.4" stroke-linecap="round"/><path d="M8,29 C17,25 27,33 37,29 C47,25 57,33 67,29 C71,27 74,29 77,29" fill="none" stroke="rgba(0,150,255,0.25)" stroke-width="1.1" stroke-linecap="round"/><!-- Cover panel --> ${a>0?L`
+        <rect x="2" y="4" width="${a}" height="40" rx="9"
+              fill="${i}" fill-opacity="0.82"/>
+        ${Array.from({length:Math.min(Math.floor(a/7),11)},(e,t)=>L` <line x1="${9+7*t}" y1="6" x2="${9+7*t}" y2="42" stroke="white" stroke-width="0.6" stroke-opacity="0.22"/> `)}
+      `:""}
+      <!-- Motor / reel housing -->
+      <rect x="80" y="8" width="8" height="32" rx="4"
+            fill="${i}" fill-opacity="0.45"/>
+      <circle cx="84" cy="24" r="5" fill="${i}" fill-opacity="${t?.9:.35}"
+              style="${t?"animation:rotate 1.2s linear infinite":""}"/>
+      <circle cx="84" cy="24" r="2" fill="white" fill-opacity="${t?.8:.4}"/>
+    </svg>`}(o,r,n)}
           </div>
 
           <!-- Position row -->
           <div class="info-row">
-            <ha-icon icon="${isMoving ? 'mdi:rotate-3d-variant' : 'mdi:percent'}" style="--mdc-icon-size:17px"></ha-icon>
+            <ha-icon icon="${r?"mdi:rotate-3d-variant":"mdi:percent"}" style="--mdc-icon-size:17px"></ha-icon>
             <span class="info-label">Position</span>
-            <span class="info-value" style="color:${coverStatusColor}">${Math.round(position)}%</span>
-            ${isMoving ? b`<span class="cover-moving-pill">${state === 'opening' ? '▲ Öffnet' : '▼ Schließt'}</span>` : ''}
+            <span class="info-value" style="color:${c}">${Math.round(o)}%</span>
+            ${r?L`<span class="cover-moving-pill">${"opening"===a?"▲ Öffnet":"▼ Schließt"}</span>`:""}
           </div>
 
           <!-- Position bar -->
           <div class="cover-pos-bar">
-            <div class="cover-pos-fill" style="width:${position}%;background:${accentColor}"></div>
+            <div class="cover-pos-fill" style="width:${o}%;background:${n}"></div>
           </div>
 
           <!-- Position slider -->
-          ${config.show_controls !== false ? b` <slider-control label="Position" min="0" max="100" step="5" .value="${Math.round(position)}" unit="%" @value-changed="${(e) => { e.stopPropagation(); this.hass.callService('cover', 'set_cover_position', { entity_id: entityId, position: e.detail.value }); }}" ></slider-control> ` : ''}
+          ${!1!==e.show_controls?L` <vpc-slider-control label="Position" min="0" max="100" step="5" .value="${Math.round(o)}" unit="%" @value-changed="${e=>{e.stopPropagation(),this.hass.callService("cover","set_cover_position",{entity_id:t,position:e.detail.value})}}" ></vpc-slider-control> `:""}
 
           <!-- Open / Stop / Close buttons -->
-          ${config.show_controls !== false ? b` <div class="cover-controls"><button class="cover-btn cover-btn-open ${state === 'open' ? 'cvr-active' : ''}" @click="${(e) => { e.stopPropagation(); this.hass.callService('cover', 'open_cover', { entity_id: entityId }); }}"><ha-icon icon="mdi:arrow-up" style="--mdc-icon-size:17px"></ha-icon><span>Öffnen</span></button><button class="cover-btn cover-btn-stop ${state === 'stopped' ? 'cvr-active' : ''}" @click="${(e) => { e.stopPropagation(); this.hass.callService('cover', 'stop_cover', { entity_id: entityId }); }}"><ha-icon icon="mdi:stop" style="--mdc-icon-size:17px"></ha-icon><span>Stop</span></button><button class="cover-btn cover-btn-close ${state === 'closed' ? 'cvr-active' : ''}" @click="${(e) => { e.stopPropagation(); this.hass.callService('cover', 'close_cover', { entity_id: entityId }); }}"><ha-icon icon="mdi:arrow-down" style="--mdc-icon-size:17px"></ha-icon><span>Schließen</span></button></div> ` : ''}
+          ${!1!==e.show_controls?L` <div class="cover-controls"><button class="cover-btn cover-btn-open ${"open"===a?"cvr-active":""}" @click="${e=>{e.stopPropagation(),this.hass.callService("cover","open_cover",{entity_id:t})}}"><ha-icon icon="mdi:arrow-up" style="--mdc-icon-size:17px"></ha-icon><span>Öffnen</span></button><button class="cover-btn cover-btn-stop ${"stopped"===a?"cvr-active":""}" @click="${e=>{e.stopPropagation(),this.hass.callService("cover","stop_cover",{entity_id:t})}}"><ha-icon icon="mdi:stop" style="--mdc-icon-size:17px"></ha-icon><span>Stop</span></button><button class="cover-btn cover-btn-close ${"closed"===a?"cvr-active":""}" @click="${e=>{e.stopPropagation(),this.hass.callService("cover","close_cover",{entity_id:t})}}"><ha-icon icon="mdi:arrow-down" style="--mdc-icon-size:17px"></ha-icon><span>Schließen</span></button></div> `:""}
         </div>
-      </ha-card>`;
-    }
-    renderLightCard(config = this.config) {
-        const entityId = config.light_entity || config.entity || this._buildEntityId('light', 'light');
-        const entity = this.hass.states[entityId];
-        if (!entity) {
-            return b`<ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">Licht nicht gefunden</span><span class="error-entity">${entityId}</span></div></div></ha-card>`;
-        }
-        const state = entity.state;
-        const isOn = state === 'on';
-        const name = config.name || entity.attributes.friendly_name || 'Pool Licht';
-        const brightness = entity.attributes.brightness ?? 128;
-        const brightnessPercent = Math.round((brightness / 255) * 100);
-        const rgb = entity.attributes.rgb_color ?? null;
-        const rgbStr = rgb ? `rgb(${rgb[0]},${rgb[1]},${rgb[2]})` : null;
-        const accentColor = rgbStr || config.accent_color || this._getAccentColor('light', config);
-        const colorTemp = entity.attributes.color_temp;
-        const effect = entity.attributes.effect;
-        return b` <ha-card class="${this._getCardClasses(isOn, config)}" style="--card-accent: ${accentColor}" @click="${() => this._showMoreInfo(entityId)}"><div class="accent-bar" style="${isOn && rgb ? `background:${rgbStr};opacity:1` : ''}"></div>
+      </ha-card>`}renderLightCard(e=this.config){const t=e.light_entity||e.entity||this._buildEntityId("light","light"),i=this.hass.states[t];if(!i)return L`<ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">Licht nicht gefunden</span><span class="error-entity">${t}</span></div></div></ha-card>`;const a=i.state,s="on"===a,o=e.name||i.attributes.friendly_name||"Pool Licht",r=i.attributes.brightness??128,n=Math.round(r/255*100),c=i.attributes.rgb_color??null,l=c?`rgb(${c[0]},${c[1]},${c[2]})`:null,d=l||e.accent_color||this._getAccentColor("light",e),p=i.attributes.color_temp,h=i.attributes.effect;return L` <ha-card class="${this._getCardClasses(s,e)}" style="--card-accent: ${d}" @click="${()=>this._showMoreInfo(t)}"><div class="accent-bar" style="${s&&c?`background:${l};opacity:1`:""}"></div>
         <div class="card-content">
           <div class="header">
-            <div class="header-icon ${isOn ? 'icon-active' : ''}" style="--icon-accent: ${accentColor}">
-              ${config.icon
-            ? b`<ha-icon icon="${config.icon}"></ha-icon>`
-            : lightSVG(isOn, rgb, brightness, accentColor)}
+            <div class="header-icon ${s?"icon-active":""}" style="--icon-accent: ${d}">
+              ${e.icon?L`<ha-icon icon="${e.icon}"></ha-icon>`:function(e,t,i,a){const s=t?`rgb(${t[0]},${t[1]},${t[2]})`:a,o=e?i/255:0;return L` <svg viewBox="0 0 48 48" style="width:100%;height:100%;display:block;overflow:visible" xmlns="http://www.w3.org/2000/svg"> ${e?L`
+        <circle cx="24" cy="24" r="23" fill="${s}" fill-opacity="${.07+.18*o}"
+                style="animation:light-glow 2.6s ease-in-out infinite"/>
+        <circle cx="24" cy="24" r="17" fill="${s}" fill-opacity="${.09+.12*o}"/>
+        <g style="transform-origin:24px 24px;animation:spin-slow 9s linear infinite">
+          ${[0,60,120,180,240,300].map(e=>L` <line x1="24" y1="5" x2="24" y2="9" stroke="${s}" stroke-width="2.2" stroke-linecap="round" stroke-opacity="${.4+.4*o}" style="transform:rotate(${e}deg);transform-origin:24px 24px"/> `)}
+        </g>
+      `:L`<circle cx="24" cy="24" r="22" fill="${a}" fill-opacity="0.07"/>`}
+      <!-- Housing ring -->
+      <circle cx="24" cy="24" r="20" fill="none" stroke="${e?s:a}"
+              stroke-width="1.5" stroke-opacity="${e?.55:.3}"/>
+      <!-- LED lens -->
+      <circle cx="24" cy="24" r="12" fill="${e?s:a}"
+              fill-opacity="${e?.88:.28}"/>
+      <!-- Lens highlight -->
+      <ellipse cx="20.5" cy="19.5" rx="4" ry="3" fill="white"
+               fill-opacity="${e?.38:.1}"
+               style="transform:rotate(-20deg);transform-origin:20.5px 19.5px"/>
+      <!-- Mount points -->
+      <circle cx="24" cy="6" r="2" fill="${a}" fill-opacity="0.3"/>
+      <circle cx="24" cy="42" r="2" fill="${a}" fill-opacity="0.3"/>
+    </svg>`}(s,c,r,d)}
             </div>
             <div class="header-info">
-              <span class="name">${name}</span>
-              <span class="header-subtitle" style="${isOn ? `color:${accentColor}` : ''}">
-                ${isOn ? (effect ? effect : brightnessPercent + '%') : 'Aus'}
+              <span class="name">${o}</span>
+              <span class="header-subtitle" style="${s?"color:"+d:""}">
+                ${s?h||n+"%":"Aus"}
               </span>
             </div>
-            ${config.show_state !== false ? b`<status-badge .state="${state}" .pulse="${isOn}"></status-badge>` : ''}
+            ${!1!==e.show_state?L`<vpc-status-badge .state="${a}" .pulse="${s}"></vpc-status-badge>`:""}
           </div>
 
-          ${isOn ? b` <!-- Color swatch with interactive color picker --> ${rgb ? b `
-              <div class="light-color-swatch" style="background:${rgbStr};box-shadow:0 6px 24px ${rgbStr}50">
-                <span class="light-color-label">RGB ${rgb[0]}, ${rgb[1]}, ${rgb[2]}</span>
+          ${s?L` <!-- Color swatch with interactive color picker --> ${c?L`
+              <div class="light-color-swatch" style="background:${l};box-shadow:0 6px 24px ${l}50">
+                <span class="light-color-label">RGB ${c[0]}, ${c[1]}, ${c[2]}</span>
                 <span class="light-color-hint">Farbe wählen</span>
                 <input type="color"
-                       .value="${'#' + rgb.map((v) => v.toString(16).padStart(2, '0')).join('')}"
-                       @click="${(e) => e.stopPropagation()}"
-                       @change="${(e) => {
-            e.stopPropagation();
-            const hex = e.target.value;
-            const r = parseInt(hex.slice(1, 3), 16);
-            const g = parseInt(hex.slice(3, 5), 16);
-            const b = parseInt(hex.slice(5, 7), 16);
-            this.hass.callService('light', 'turn_on', { entity_id: entityId, rgb_color: [r, g, b] });
-        }}"/>
+                       .value="${"#"+c.map(e=>e.toString(16).padStart(2,"0")).join("")}"
+                       @click="${e=>e.stopPropagation()}"
+                       @change="${e=>{e.stopPropagation();const i=e.target.value,a=parseInt(i.slice(1,3),16),s=parseInt(i.slice(3,5),16),o=parseInt(i.slice(5,7),16);this.hass.callService("light","turn_on",{entity_id:t,rgb_color:[a,s,o]})}}"/>
               </div>
-            ` : colorTemp ? b` <div class="light-color-swatch" style="background:linear-gradient(135deg,#ffe8a0,#fff3d4);box-shadow:0 6px 24px rgba(255,220,100,0.4)"><span class="light-color-label" style="color:#8B6914">Warmweiß · ${colorTemp} Mirek</span></div> ` : ''}
+            `:p?L` <div class="light-color-swatch" style="background:linear-gradient(135deg,#ffe8a0,#fff3d4);box-shadow:0 6px 24px rgba(255,220,100,0.4)"><span class="light-color-label" style="color:#8B6914">Warmweiß · ${p} Mirek</span></div> `:""}
 
             <!-- Brightness -->
             <div class="info-row">
               <ha-icon icon="mdi:brightness-6" style="--mdc-icon-size:17px"></ha-icon>
               <span class="info-label">Helligkeit</span>
-              <span class="info-value">${brightnessPercent}%</span>
+              <span class="info-value">${n}%</span>
             </div>
             <div class="cover-pos-bar">
-              <div class="cover-pos-fill" style="width:${brightnessPercent}%;background:${accentColor}"></div>
+              <div class="cover-pos-fill" style="width:${n}%;background:${d}"></div>
             </div>
 
-            ${config.show_controls !== false ? b` <div class="light-brightness-row"><slider-control label="Helligkeit" min="1" max="100" step="5" .value="${brightnessPercent}" unit="%" @value-changed="${(e) => { e.stopPropagation(); this.hass.callService('light', 'turn_on', { entity_id: entityId, brightness_pct: e.detail.value }); }}" ></slider-control></div> ` : ''}
-          ` : ''}
+            ${!1!==e.show_controls?L` <div class="light-brightness-row"><vpc-slider-control label="Helligkeit" min="1" max="100" step="5" .value="${n}" unit="%" @value-changed="${e=>{e.stopPropagation(),this.hass.callService("light","turn_on",{entity_id:t,brightness_pct:e.detail.value})}}" ></vpc-slider-control></div> `:""}
+          `:""}
 
-          ${config.show_controls !== false ? b` <div class="cover-controls"><button class="cover-btn cover-btn-open ${isOn ? 'cvr-active' : ''}" style="--cvr-btn-color:${accentColor}" @click="${(e) => { e.stopPropagation(); this.hass.callService('light', 'turn_on', { entity_id: entityId }); }}"><ha-icon icon="mdi:lightbulb-on" style="--mdc-icon-size:17px"></ha-icon><span>An</span></button><button class="cover-btn cover-btn-close ${!isOn ? 'cvr-active' : ''}" @click="${(e) => { e.stopPropagation(); this.hass.callService('light', 'turn_off', { entity_id: entityId }); }}"><ha-icon icon="mdi:lightbulb-off" style="--mdc-icon-size:17px"></ha-icon><span>Aus</span></button></div> ` : ''}
+          ${!1!==e.show_controls?L` <div class="cover-controls"><button class="cover-btn cover-btn-open ${s?"cvr-active":""}" style="--cvr-btn-color:${d}" @click="${e=>{e.stopPropagation(),this.hass.callService("light","turn_on",{entity_id:t})}}"><ha-icon icon="mdi:lightbulb-on" style="--mdc-icon-size:17px"></ha-icon><span>An</span></button><button class="cover-btn cover-btn-close ${s?"":"cvr-active"}" @click="${e=>{e.stopPropagation(),this.hass.callService("light","turn_off",{entity_id:t})}}"><ha-icon icon="mdi:lightbulb-off" style="--mdc-icon-size:17px"></ha-icon><span>Aus</span></button></div> `:""}
         </div>
-      </ha-card>`;
-    }
-    renderFilterCard(config = this.config) {
-        const pressureEntityId = config.filter_pressure_entity || config.entity || this._buildEntityId('sensor', 'filter_pressure');
-        const filterEntityId = config.filter_entity;
-        const backwashEntityId = config.backwash_entity;
-        const pressureEntity = this.hass.states[pressureEntityId];
-        if (!pressureEntity) {
-            return b`<ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">Filter nicht gefunden</span><span class="error-entity">${pressureEntityId}</span></div></div></ha-card>`;
-        }
-        const pressure = parseFloat(pressureEntity.state) || 0;
-        const unit = pressureEntity.attributes.unit_of_measurement || 'bar';
-        const name = config.name || pressureEntity.attributes.friendly_name || 'Filter';
-        const accentColor = this._getAccentColor('filter', config);
-        const filterEntity = filterEntityId ? this.hass.states[filterEntityId] : undefined;
-        const backwashEntity = backwashEntityId ? this.hass.states[backwashEntityId] : undefined;
-        const isFilterOn = filterEntity ? filterEntity.state === 'on' : true;
-        const isBackwashing = backwashEntity ? backwashEntity.state === 'on' : false;
-        // Pressure zones: 0-0.5 low, 0.5-1.2 normal, 1.2-1.6 elevated, >1.6 critical
-        const pressureColor = pressure < 0.5 ? 'var(--vpc-text-secondary)'
-            : pressure < 1.2 ? 'var(--vpc-success,#34C759)'
-                : pressure < 1.6 ? 'var(--vpc-warning,#FF9F0A)'
-                    : 'var(--vpc-danger,#FF3B30)';
-        const pressureLabel = pressure < 0.5 ? 'Niedrig'
-            : pressure < 1.2 ? 'Normal'
-                : pressure < 1.6 ? 'Erhöht – bald rückspülen'
-                    : 'Kritisch – sofort rückspülen!';
-        // Arc gauge: semicircle, 0-3 bar range
-        const maxBar = 3;
-        const pct = Math.min(100, (pressure / maxBar) * 100);
-        const ang = Math.PI - (pct / 100) * Math.PI;
-        const gx = pct >= 99.5 ? '109.9' : (60 + 50 * Math.cos(ang)).toFixed(1);
-        const gy = pct >= 99.5 ? '60.0' : (60 - 50 * Math.sin(ang)).toFixed(1);
-        const lArc = pct > 50 ? 1 : 0;
-        // Zone arc endpoints (precomputed for 3-bar gauge)
-        const z1x = (60 + 50 * Math.cos(Math.PI - 0.167 * Math.PI)).toFixed(1); // 0.5 bar
-        const z1y = (60 - 50 * Math.sin(Math.PI - 0.167 * Math.PI)).toFixed(1);
-        const z2x = (60 + 50 * Math.cos(Math.PI - 0.4 * Math.PI)).toFixed(1); // 1.2 bar
-        const z2y = (60 - 50 * Math.sin(Math.PI - 0.4 * Math.PI)).toFixed(1);
-        const z3x = (60 + 50 * Math.cos(Math.PI - 0.533 * Math.PI)).toFixed(1); // 1.6 bar
-        const z3y = (60 - 50 * Math.sin(Math.PI - 0.533 * Math.PI)).toFixed(1);
-        return b` <ha-card class="${this._getCardClasses(isFilterOn, config)}" style="--card-accent: ${accentColor}" @click="${() => this._showMoreInfo(pressureEntityId)}"><div class="accent-bar"></div><div class="card-content"><div class="header"><div class="header-icon ${isFilterOn ? 'icon-active' : ''}" style="--icon-accent: ${accentColor}"> ${config.icon ? b `<ha-icon icon="${config.icon}"></ha-icon>`
-            : b`<ha-icon icon="${isBackwashing ? 'mdi:rotate-right' : 'mdi:filter'}" class="${isBackwashing ? 'pump-running' : ''}"></ha-icon>`}
+      </ha-card>`}renderFilterCard(e=this.config){const t=e.filter_pressure_entity||e.entity||this._buildEntityId("sensor","filter_pressure"),i=e.filter_entity,a=e.backwash_entity,s=this.hass.states[t];if(!s)return L`<ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">Filter nicht gefunden</span><span class="error-entity">${t}</span></div></div></ha-card>`;const o=parseFloat(s.state)||0,r=s.attributes.unit_of_measurement||"bar",n=e.name||s.attributes.friendly_name||"Filter",c=this._getAccentColor("filter",e),l=i?this.hass.states[i]:void 0,d=a?this.hass.states[a]:void 0,p=!l||"on"===l.state,h=!!d&&"on"===d.state,v=o<.5?"var(--vpc-text-secondary)":o<1.2?"var(--vpc-success,#34C759)":o<1.6?"var(--vpc-warning,#FF9F0A)":"var(--vpc-danger,#FF3B30)",g=o<.5?"Niedrig":o<1.2?"Normal":o<1.6?"Erhöht – bald rückspülen":"Kritisch – sofort rückspülen!",u=Math.min(100,o/3*100),m=Math.PI-u/100*Math.PI,f=u>=99.5?"109.9":(60+50*Math.cos(m)).toFixed(1),x=u>=99.5?"60.0":(60-50*Math.sin(m)).toFixed(1),b=u>50?1:0,y="44.5",w="12.4",$="65.2",_="10.3";return L` <ha-card class="${this._getCardClasses(p,e)}" style="--card-accent: ${c}" @click="${()=>this._showMoreInfo(t)}"><div class="accent-bar"></div><div class="card-content"><div class="header"><div class="header-icon ${p?"icon-active":""}" style="--icon-accent: ${c}"> ${e.icon?L`<ha-icon icon="${e.icon}"></ha-icon>`:L`<ha-icon icon="${h?"mdi:rotate-right":"mdi:filter"}" class="${h?"pump-running":""}"></ha-icon>`}
             </div>
             <div class="header-info">
-              <span class="name">${name}</span>
-              <span class="header-subtitle" style="${isBackwashing ? 'color:var(--vpc-warning,#FF9F0A)' : ''}">
-                ${isBackwashing ? 'Rückspülung läuft…' : isFilterOn ? 'Aktiv' : 'Aus'}
+              <span class="name">${n}</span>
+              <span class="header-subtitle" style="${h?"color:var(--vpc-warning,#FF9F0A)":""}">
+                ${h?"Rückspülung läuft…":p?"Aktiv":"Aus"}
               </span>
             </div>
-            ${config.show_state !== false ? b`<status-badge .state="${isFilterOn ? 'on' : 'off'}" .pulse="${isBackwashing}"></status-badge>` : ''}
+            ${!1!==e.show_state?L`<vpc-status-badge .state="${p?"on":"off"}" .pulse="${h}"></vpc-status-badge>`:""}
           </div>
 
           <!-- Pressure arc gauge -->
@@ -2691,24 +559,24 @@ class VioletPoolCard extends i {
               <!-- Background arc -->
               <path d="M 10,60 A 50,50 0 0,1 110,60" fill="none" stroke="rgba(120,120,128,0.12)" stroke-width="10" stroke-linecap="round"/>
               <!-- Normal zone (0.5–1.2 bar) -->
-              <path d="M ${z1x},${z1y} A 50,50 0 0,1 ${z2x},${z2y}" fill="none" stroke="rgba(52,199,89,0.22)" stroke-width="10"/>
+              <path d="M ${"16.7"},${"35.0"} A 50,50 0 0,1 ${y},${w}" fill="none" stroke="rgba(52,199,89,0.22)" stroke-width="10"/>
               <!-- Elevated zone (1.2–1.6 bar) -->
-              <path d="M ${z2x},${z2y} A 50,50 0 0,1 ${z3x},${z3y}" fill="none" stroke="rgba(255,159,10,0.22)" stroke-width="10"/>
+              <path d="M ${y},${w} A 50,50 0 0,1 ${$},${_}" fill="none" stroke="rgba(255,159,10,0.22)" stroke-width="10"/>
               <!-- Critical zone (>1.6 bar) -->
-              <path d="M ${z3x},${z3y} A 50,50 0 0,1 109.9,60" fill="none" stroke="rgba(255,59,48,0.22)" stroke-width="10"/>
+              <path d="M ${$},${_} A 50,50 0 0,1 109.9,60" fill="none" stroke="rgba(255,59,48,0.22)" stroke-width="10"/>
               <!-- Value arc -->
-              ${pct > 1 ? b` <path d="M 10,60 A 50,50 0 ${lArc},1 ${gx},${gy}" fill="none" stroke="${pressureColor}" stroke-width="10" stroke-linecap="round"/> ` : ''}
+              ${u>1?L` <path d="M 10,60 A 50,50 0 ${b},1 ${f},${x}" fill="none" stroke="${v}" stroke-width="10" stroke-linecap="round"/> `:""}
               <!-- Tick marks at 0, 1, 2, 3 bar -->
               <line x1="10" y1="58" x2="10" y2="62" stroke="rgba(120,120,128,0.4)" stroke-width="1.5"/>
-              <line x1="${(60 + 50 * Math.cos(Math.PI * 2 / 3)).toFixed(1)}" y1="${(60 - 50 * Math.sin(Math.PI * 2 / 3)).toFixed(1)}" x2="${(60 + 46 * Math.cos(Math.PI * 2 / 3)).toFixed(1)}" y2="${(60 - 46 * Math.sin(Math.PI * 2 / 3)).toFixed(1)}" stroke="rgba(120,120,128,0.4)" stroke-width="1.5"/>
+              <line x1="${"35.0"}" y1="${"16.7"}" x2="${"37.0"}" y2="${"20.2"}" stroke="rgba(120,120,128,0.4)" stroke-width="1.5"/>
               <line x1="60" y1="10" x2="60" y2="14" stroke="rgba(120,120,128,0.4)" stroke-width="1.5"/>
-              <line x1="${(60 + 50 * Math.cos(Math.PI / 3)).toFixed(1)}" y1="${(60 - 50 * Math.sin(Math.PI / 3)).toFixed(1)}" x2="${(60 + 46 * Math.cos(Math.PI / 3)).toFixed(1)}" y2="${(60 - 46 * Math.sin(Math.PI / 3)).toFixed(1)}" stroke="rgba(120,120,128,0.4)" stroke-width="1.5"/>
+              <line x1="${"85.0"}" y1="${"16.7"}" x2="${"83.0"}" y2="${"20.2"}" stroke="rgba(120,120,128,0.4)" stroke-width="1.5"/>
               <line x1="110" y1="58" x2="110" y2="62" stroke="rgba(120,120,128,0.4)" stroke-width="1.5"/>
               <!-- Pressure value text -->
               <text x="60" y="52" text-anchor="middle" font-size="20" font-weight="700"
-                    style="fill:${pressureColor};letter-spacing:-0.5px">${pressure.toFixed(1)}</text>
+                    style="fill:${v};letter-spacing:-0.5px">${o.toFixed(1)}</text>
               <text x="60" y="63" text-anchor="middle" font-size="9" font-weight="500"
-                    style="fill:rgba(110,110,120,0.8)">${unit}</text>
+                    style="fill:rgba(110,110,120,0.8)">${r}</text>
               <!-- Scale labels -->
               <text x="7" y="68" text-anchor="middle" font-size="7.5" style="fill:rgba(110,110,120,0.55)">0</text>
               <text x="60" y="8" text-anchor="middle" font-size="7.5" style="fill:rgba(110,110,120,0.55)">1.5</text>
@@ -2717,103 +585,32 @@ class VioletPoolCard extends i {
           </div>
 
           <!-- Status row -->
-          <div class="info-row ${pressure >= 1.6 ? 'info-row-warning' : ''}">
-            <ha-icon icon="mdi:gauge" style="--mdc-icon-size:17px;color:${pressureColor}"></ha-icon>
+          <div class="info-row ${o>=1.6?"info-row-warning":""}">
+            <ha-icon icon="mdi:gauge" style="--mdc-icon-size:17px;color:${v}"></ha-icon>
             <span class="info-label">Filterdruck</span>
-            <span class="info-value" style="color:${pressureColor}">${pressureLabel}</span>
+            <span class="info-value" style="color:${v}">${g}</span>
           </div>
 
-          ${filterEntity ? b` <div class="info-row"><ha-icon icon="${isFilterOn ? 'mdi:check-circle-outline' : 'mdi:close-circle-outline'}" style="--mdc-icon-size:17px;color:${isFilterOn ? 'var(--vpc-success,#34C759)' : 'var(--vpc-text-secondary)'}"></ha-icon><span class="info-label">Filterpumpe</span><span class="info-value">${isFilterOn ? 'An' : 'Aus'}</span></div> ` : ''}
+          ${l?L` <div class="info-row"><ha-icon icon="${p?"mdi:check-circle-outline":"mdi:close-circle-outline"}" style="--mdc-icon-size:17px;color:${p?"var(--vpc-success,#34C759)":"var(--vpc-text-secondary)"}"></ha-icon><span class="info-label">Filterpumpe</span><span class="info-value">${p?"An":"Aus"}</span></div> `:""}
 
-          ${config.show_controls !== false && backwashEntity ? b` <div class="cover-controls"><button class="cover-btn ${isBackwashing ? 'cover-btn-close cvr-active' : 'cover-btn-open'}" style="--cvr-btn-color:${accentColor}" @click="${(e) => { e.stopPropagation(); this.hass.callService('switch', isBackwashing ? 'turn_off' : 'turn_on', { entity_id: backwashEntityId }); }}"><ha-icon icon="${isBackwashing ? 'mdi:stop' : 'mdi:rotate-right'}" style="--mdc-icon-size:17px"></ha-icon><span>${isBackwashing ? 'Rückspülung stoppen' : 'Rückspülen starten'}</span></button></div> ` : ''}
+          ${!1!==e.show_controls&&d?L` <div class="cover-controls"><button class="cover-btn ${h?"cover-btn-close cvr-active":"cover-btn-open"}" style="--cvr-btn-color:${c}" @click="${e=>{e.stopPropagation(),this.hass.callService("switch",h?"turn_off":"turn_on",{entity_id:a})}}"><ha-icon icon="${h?"mdi:stop":"mdi:rotate-right"}" style="--mdc-icon-size:17px"></ha-icon><span>${h?"Rückspülung stoppen":"Rückspülen starten"}</span></button></div> `:""}
         </div>
-      </ha-card>`;
-    }
-    static get styles() {
-        return i$3`:host{--vpc-font:-apple-system, 'SF Pro Display', 'SF Pro Text', system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;--vpc-spacing:18px;--vpc-radius:20px;--vpc-inner-radius:12px;--vpc-bg:var(--ha-card-background, var(--card-background-color, #ffffff));--vpc-surface:rgba(120,120,128,0.06);--vpc-border:none;--vpc-shadow:0 2px 20px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.04);--vpc-backdrop:none;--vpc-primary:var(--primary-color, #007AFF);--vpc-success:#34C759;--vpc-warning:#FF9F0A;--vpc-danger:#FF3B30;--vpc-purple:#AF52DE;--vpc-teal:#5AC8FA;--vpc-orange:#FF9500;--vpc-indigo:#5856D6;--vpc-text:var(--primary-text-color, #1C1C1E);--vpc-text-secondary:var(--secondary-text-color, #6D6D72);--vpc-text-tertiary:rgba(60,60,67,0.45);--vpc-icon-size:22px;--vpc-transition:all 0.28s cubic-bezier(0.34, 1.4, 0.64, 1);--vpc-transition-fast:all 0.18s ease;--card-accent:var(--primary-color, #007AFF);--icon-accent:var(--card-accent);display:block;font-family:var(--vpc-font);}ha-card.theme-apple{--vpc-bg:#ffffff;--vpc-shadow:0 2px 20px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04);--vpc-radius:22px;--vpc-inner-radius:13px;--vpc-surface:rgba(120,120,128,0.06);--vpc-primary:#007AFF;}ha-card.theme-dark{--vpc-bg:#1C1C1E;--vpc-surface:rgba(255,255,255,0.06);--vpc-border:1px solid rgba(255,255,255,0.08);--vpc-shadow:0 4px 30px rgba(0,0,0,0.4);--vpc-radius:22px;--vpc-text:#FFFFFF;--vpc-text-secondary:#8E8E93;--vpc-text-tertiary:rgba(255,255,255,0.25);--vpc-primary:#0A84FF;--vpc-success:#30D158;--vpc-warning:#FFD60A;--vpc-danger:#FF453A;}ha-card.theme-luxury, ha-card.theme-glass{--vpc-bg:rgba(255,255,255,0.72);--vpc-backdrop:blur(24px) saturate(180%);--vpc-radius:26px;--vpc-border:1px solid rgba(255,255,255,0.4);--vpc-shadow:0 8px 40px rgba(31,38,135,0.12), 0 2px 8px rgba(0,0,0,0.06);}ha-card.theme-modern{--vpc-radius:18px;--vpc-spacing:20px;--vpc-shadow:0 1px 3px rgba(0,0,0,0.05), 0 0 0 1px rgba(0,0,0,0.04);}ha-card.theme-minimalist{--vpc-radius:14px;--vpc-shadow:none;--vpc-border:1px solid rgba(0,0,0,0.07);--vpc-surface:transparent;}ha-card.theme-neon{--vpc-bg:#0D0D14;--vpc-border:1px solid rgba(0,212,255,0.2);--vpc-shadow:0 0 30px rgba(0,212,255,0.07);--vpc-radius:14px;--vpc-primary:#00D4FF;--vpc-text:#E8E8F0;--vpc-text-secondary:#6E6E80;--vpc-surface:rgba(0,212,255,0.04);--vpc-success:#00E676;--vpc-warning:#FFEA00;--vpc-danger:#FF1744;}ha-card.theme-premium{--vpc-bg:linear-gradient(145deg, rgba(255,255,255,0.96) 0%, rgba(248,248,255,0.96) 100%);--vpc-radius:24px;--vpc-shadow:0 12px 50px -8px rgba(80,80,160,0.15), 0 0 0 1px rgba(255,255,255,0.9);--vpc-border:1px solid rgba(255,255,255,0.7);}@media (prefers-color-scheme:dark){ha-card.theme-apple{--vpc-bg:#1C1C1E;--vpc-surface:rgba(255,255,255,0.06);--vpc-border:1px solid rgba(255,255,255,0.08);--vpc-text:#FFFFFF;--vpc-text-secondary:#8E8E93;--vpc-primary:#0A84FF;--vpc-success:#30D158;--vpc-warning:#FFD60A;--vpc-danger:#FF453A;}ha-card.theme-luxury, ha-card.theme-glass{--vpc-bg:rgba(18,18,30,0.80);--vpc-border:1px solid rgba(255,255,255,0.09);--vpc-shadow:0 8px 40px rgba(0,0,0,0.45);}ha-card.theme-premium{--vpc-bg:linear-gradient(145deg, rgba(28,28,38,0.97) 0%, rgba(20,20,32,0.97) 100%);--vpc-border:1px solid rgba(255,255,255,0.07);}ha-card.theme-minimalist{--vpc-border:1px solid rgba(255,255,255,0.07);}ha-card.theme-modern{--vpc-shadow:0 1px 3px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.04);}}ha-card{font-family:var(--vpc-font);padding:var(--vpc-spacing);background:var(--vpc-bg);border-radius:var(--vpc-radius);box-shadow:var(--vpc-shadow);border:var(--vpc-border);backdrop-filter:var(--vpc-backdrop);-webkit-backdrop-filter:var(--vpc-backdrop);transition:transform 0.22s cubic-bezier(0.34,1.4,0.64,1), box-shadow 0.22s ease;overflow:visible;position:relative;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;}ha-card:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,0,0,0.11), 0 2px 6px rgba(0,0,0,0.05);}ha-card:active{transform:scale(0.985);box-shadow:0 2px 8px rgba(0,0,0,0.07);transition:transform 0.1s ease, box-shadow 0.1s ease;}ha-card.theme-dark:hover{box-shadow:0 8px 30px rgba(0,0,0,0.5);}ha-card.theme-neon:hover{box-shadow:0 0 40px rgba(0,212,255,0.12), 0 4px 20px rgba(0,0,0,0.3);}ha-card.theme-neon.is-active{box-shadow:0 0 50px rgba(0,212,255,0.2), inset 0 0 20px rgba(0,212,255,0.04);border-color:rgba(0,212,255,0.35);}.accent-bar{position:absolute;top:0;left:0;right:0;height:3px;background:var(--card-accent);opacity:0.65;transition:opacity 0.3s ease, height 0.3s ease;}ha-card.is-active .accent-bar{height:4px;opacity:1;}ha-card.theme-neon .accent-bar{background:linear-gradient(90deg, #00D4FF, #7C4DFF, #00D4FF);box-shadow:0 0 12px rgba(0,212,255,0.5);height:2px;animation:neon-flow 3s linear infinite;}ha-card.theme-minimalist .accent-bar{height:2px;opacity:0.45;}@keyframes neon-flow{0%{background-position:0% 50%;}100%{background-position:200% 50%;}}.card-content{display:flex;flex-direction:column;gap:14px;}.card-content.compact{flex-direction:row;align-items:center;gap:14px;}.header{display:flex;align-items:center;gap:14px;}.header-icon{width:46px;height:46px;border-radius:15px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb, var(--icon-accent, var(--vpc-primary)) 12%, transparent);transition:background 0.25s ease, box-shadow 0.25s ease;flex-shrink:0;}.header-icon.icon-active{background:color-mix(in srgb, var(--icon-accent, var(--vpc-primary)) 18%, transparent);box-shadow:0 0 0 5px color-mix(in srgb, var(--icon-accent, var(--vpc-primary)) 8%, transparent);}ha-card.theme-neon .header-icon{background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.18);}ha-card.theme-neon .header-icon.icon-active{box-shadow:0 0 16px rgba(0,212,255,0.25);}.header-icon ha-icon{--mdc-icon-size:24px;color:var(--icon-accent, var(--vpc-primary));}.header-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}.name{font-family:var(--vpc-font);font-size:16px;font-weight:600;letter-spacing:-0.3px;color:var(--vpc-text);line-height:1.25;}.header-subtitle{font-family:var(--vpc-font);font-size:13px;font-weight:400;color:var(--vpc-text-secondary);line-height:1.2;}ha-icon{--mdc-icon-size:var(--vpc-icon-size);color:var(--vpc-primary);transition:color 0.2s ease;}@keyframes rotate{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}@keyframes pulse-glow{0%, 100%{opacity:1;transform:scale(1);}50%{opacity:0.65;transform:scale(0.95);}}@keyframes breathe{0%, 100%{transform:scale(1);opacity:1;}50%{transform:scale(1.08);opacity:0.85;}}@keyframes spin-slow{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}.pump-running{animation:rotate 1.8s linear infinite;}.heater-active{animation:breathe 2.5s ease-in-out infinite;color:var(--vpc-danger, #FF3B30);}.solar-active{animation:breathe 3s ease-in-out infinite;color:var(--vpc-warning, #FF9F0A);}.dosing-active{animation:pulse-glow 2s ease-in-out infinite;color:var(--vpc-success, #34C759);}.speed-segments-container{display:flex;align-items:center;gap:8px;}.speed-segments{display:flex;flex:1;gap:6px;}.speed-segment{flex:1;display:flex;align-items:center;justify-content:center;gap:4px;padding:9px 6px;border-radius:var(--vpc-inner-radius, 12px);border:none;background:var(--vpc-surface, rgba(120,120,128,0.06));color:var(--vpc-text-secondary);font-family:var(--vpc-font);font-size:12px;font-weight:500;cursor:pointer;transition:all 0.18s ease;-webkit-tap-highlight-color:transparent;letter-spacing:-0.2px;position:relative;overflow:visible;}.speed-segment:hover{background:color-mix(in srgb, var(--seg-color) 10%, transparent);color:var(--seg-color);}.speed-segment.seg-active{background:color-mix(in srgb, var(--seg-color) 15%, transparent);color:var(--seg-color);font-weight:600;box-shadow:inset 0 0 0 1.5px color-mix(in srgb, var(--seg-color) 40%, transparent);}.speed-segment.seg-past{background:color-mix(in srgb, var(--seg-color) 08%, transparent);color:color-mix(in srgb, var(--seg-color) 70%, var(--vpc-text-secondary));}.speed-off-btn{width:38px;height:38px;border-radius:12px;border:none;background:var(--vpc-surface);color:var(--vpc-text-secondary);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.18s ease;flex-shrink:0;-webkit-tap-highlight-color:transparent;}.speed-off-btn:hover{background:rgba(255,59,48,0.1);color:var(--vpc-danger, #FF3B30);}.speed-off-btn.seg-active{background:rgba(255,59,48,0.12);color:var(--vpc-danger, #FF3B30);box-shadow:inset 0 0 0 1.5px rgba(255,59,48,0.3);}ha-card.theme-neon .speed-segment{border:1px solid rgba(0,212,255,0.1);}ha-card.theme-neon .speed-segment.seg-active{box-shadow:0 0 12px color-mix(in srgb, var(--seg-color) 50%, transparent);}.temp-hero{display:flex;align-items:center;gap:12px;padding:6px 0 4px;}.temp-hero-main{display:flex;align-items:baseline;gap:4px;}.temp-hero-value{font-family:var(--vpc-font);font-size:44px;font-weight:700;line-height:1;letter-spacing:-2px;color:var(--temp-color, var(--vpc-text));}.temp-hero-unit{font-size:22px;font-weight:400;color:var(--temp-color, var(--vpc-text));opacity:0.65;letter-spacing:-0.5px;}.temp-hero-target-pill{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:100px;background:var(--vpc-surface);font-size:13px;font-weight:500;color:var(--vpc-text-secondary);white-space:nowrap;}.temp-range-bar, .chem-range-bar{display:flex;flex-direction:column;gap:5px;}.temp-range-track, .chem-range-track{height:6px;background:var(--vpc-surface);border-radius:100px;position:relative;overflow:visible;}.temp-range-fill, .chem-range-fill{height:100%;border-radius:100px;transition:width 0.5s cubic-bezier(0.34,1.4,0.64,1);}.temp-range-target{position:absolute;top:50%;transform:translate(-50%, -50%);width:3px;height:14px;background:var(--vpc-text-secondary);border-radius:2px;opacity:0.7;}.temp-range-labels, .chem-range-labels{display:flex;justify-content:space-between;font-size:11px;font-weight:400;color:var(--vpc-text-tertiary, rgba(60,60,67,0.45));letter-spacing:0px;}.dosing-value-block{display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:var(--vpc-inner-radius, 12px);background:var(--vpc-surface);}ha-card.theme-neon .dosing-value-block{background:rgba(0,212,255,0.04);border:1px solid rgba(0,212,255,0.08);}.dosing-value-row{display:flex;align-items:center;justify-content:space-between;gap:10px;}.dosing-value-main{display:flex;align-items:baseline;gap:6px;}.dosing-label-tag{font-size:12px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;color:var(--vpc-text-secondary);}.dosing-current-value{font-family:var(--vpc-font);font-size:32px;font-weight:700;line-height:1;letter-spacing:-1px;}.dosing-current-unit{font-size:15px;font-weight:400;opacity:0.65;}.dosing-status-pill{padding:4px 10px;border-radius:100px;font-size:12px;font-weight:600;white-space:nowrap;}.chem-range-target{position:absolute;top:50%;transform:translate(-50%, -50%);display:flex;flex-direction:column;align-items:center;gap:2px;}.chem-target-line{width:2px;height:14px;background:var(--vpc-text);border-radius:2px;opacity:0.5;}.chem-target-label{position:absolute;top:16px;font-size:9px;font-weight:600;color:var(--vpc-text-secondary);white-space:nowrap;transform:translateX(-50%);}.chem-mini-bar{width:100%;height:4px;background:var(--vpc-surface, rgba(120,120,128,0.1));border-radius:100px;overflow:hidden;position:relative;margin-top:4px;}.chem-mini-fill{height:100%;border-radius:100px;transition:width 0.5s cubic-bezier(0.34,1.4,0.64,1);}.chem-mini-ideal{position:absolute;top:0;height:100%;background:rgba(52,199,89,0.18);border-radius:2px;}.solar-temp-comparison{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px;background:var(--vpc-surface);border-radius:var(--vpc-inner-radius, 12px);}ha-card.theme-neon .solar-temp-comparison{background:rgba(0,212,255,0.04);border:1px solid rgba(0,212,255,0.08);}.solar-temp-tile{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;}.solar-temp-tile ha-icon{--mdc-icon-size:18px;color:var(--vpc-text-secondary);}.solar-temp-tile-val{font-size:20px;font-weight:700;letter-spacing:-0.5px;color:var(--vpc-text);line-height:1;}.solar-temp-tile-label{font-size:11px;font-weight:500;color:var(--vpc-text-secondary);text-transform:uppercase;letter-spacing:0.3px;}.solar-delta-badge{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 12px;border-radius:100px;font-size:12px;font-weight:700;}.delta-great{background:rgba(52,199,89,0.12);color:var(--vpc-success, #34C759);}.delta-ok{background:rgba(255,159,10,0.12);color:var(--vpc-warning, #FF9F0A);}.delta-low{background:rgba(255,59,48,0.10);color:var(--vpc-danger, #FF3B30);}.delta-hint-text{font-size:12px;font-weight:400;color:var(--vpc-text-secondary);padding:2px 0;}.chemistry-grid{display:grid;grid-template-columns:repeat(3, 1fr);gap:8px;}.chemistry-card{display:flex;flex-direction:column;align-items:center;gap:2px;padding:14px 8px 12px;border-radius:var(--vpc-inner-radius, 12px);background:var(--vpc-surface);cursor:pointer;transition:transform 0.18s ease, background 0.18s ease;position:relative;overflow:visible;}.chemistry-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--chem-color, var(--vpc-primary));opacity:0.6;border-radius:100px;}.chemistry-card:hover{transform:scale(1.02);background:color-mix(in srgb, var(--chem-color) 8%, var(--vpc-surface));}ha-card.theme-neon .chemistry-card{background:rgba(0,212,255,0.04);border:1px solid rgba(0,212,255,0.08);}.chem-icon-wrap{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb, var(--chem-color, var(--vpc-primary)) 12%, transparent);margin-bottom:4px;}.chem-icon-wrap ha-icon{--mdc-icon-size:16px;color:var(--chem-color, var(--vpc-primary));}.chemistry-val{font-family:var(--vpc-font);font-size:18px;font-weight:700;letter-spacing:-0.5px;color:var(--chem-color, var(--vpc-text));line-height:1;}.chemistry-unit{font-size:11px;font-weight:500;color:var(--vpc-text-secondary);letter-spacing:0.2px;}.chemistry-label{font-size:10px;font-weight:500;color:var(--vpc-text-secondary);text-transform:uppercase;letter-spacing:0.4px;}.overview-warning-badge{width:22px;height:22px;border-radius:50%;background:var(--vpc-danger, #FF3B30);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}.overview-active-dot{width:10px;height:10px;border-radius:50%;background:var(--vpc-success, #34C759);box-shadow:0 0 8px rgba(52,199,89,0.5);flex-shrink:0;animation:pulse-glow 2s ease-in-out infinite;}.overview-section{display:flex;flex-direction:column;gap:6px;}.section-title{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--vpc-text-secondary);text-transform:uppercase;letter-spacing:0.6px;padding:0 2px;}.section-count{margin-left:auto;font-size:11px;font-weight:500;color:var(--vpc-text-tertiary);}.warning-title ha-icon{color:var(--vpc-warning, #FF9F0A);}.warning-title{color:var(--vpc-warning, #FF9F0A);}.temp-hero{display:flex;align-items:baseline;gap:4px;padding:8px 0;}.temp-hero-value{font-size:42px;font-weight:800;line-height:1;color:var(--temp-color, var(--vpc-text));letter-spacing:-1px;}.temp-hero-unit{font-size:22px;font-weight:500;color:var(--temp-color, var(--vpc-text));opacity:0.7;}.temp-hero-target{font-size:16px;font-weight:500;color:var(--vpc-text-secondary);margin-left:12px;}.info-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:var(--vpc-inner-radius, 12px);background:var(--vpc-surface);font-size:14px;color:var(--vpc-text);font-family:var(--vpc-font);}ha-card.theme-neon .info-row{background:rgba(0,212,255,0.04);border:1px solid rgba(0,212,255,0.08);}.info-row ha-icon{--mdc-icon-size:17px;color:var(--vpc-text-secondary);flex-shrink:0;}.info-label{flex:1;font-weight:400;color:var(--vpc-text-secondary);}.info-value{font-weight:600;color:var(--vpc-text);letter-spacing:-0.2px;}.info-badge{padding:3px 9px;border-radius:100px;font-size:11px;font-weight:600;}.info-badge.warning{background:color-mix(in srgb, var(--vpc-warning, #FF9F0A) 12%, transparent);color:var(--vpc-warning, #FF9F0A);}.info-row-warning{background:color-mix(in srgb, var(--vpc-warning, #FF9F0A) 06%, transparent);border:1px solid color-mix(in srgb, var(--vpc-warning, #FF9F0A) 18%, transparent);}.solar-temps{display:flex;flex-direction:column;gap:8px;}.chemistry-grid{display:grid;grid-template-columns:repeat(3, 1fr);gap:10px;}.chemistry-card{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px;border-radius:14px;background:rgba(var(--rgb-primary-text-color, 0,0,0), 0.03);cursor:pointer;transition:var(--vpc-transition);border:1px solid transparent;}.chemistry-card:hover{background:rgba(var(--rgb-primary-text-color, 0,0,0), 0.06);transform:translateY(-1px);}ha-card.theme-neon .chemistry-card{background:rgba(0, 255, 255, 0.04);border:1px solid rgba(0, 255, 255, 0.08);}.chemistry-card ha-icon{--mdc-icon-size:20px;color:var(--chem-color, var(--vpc-primary));}.chemistry-val{font-size:16px;font-weight:700;color:var(--chem-color, var(--vpc-text));line-height:1;}.chemistry-label{font-size:11px;font-weight:500;color:var(--vpc-text-secondary);text-transform:uppercase;letter-spacing:0.3px;}.overview-section{display:flex;flex-direction:column;gap:8px;}.section-title{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--vpc-text-secondary);text-transform:uppercase;letter-spacing:0.5px;padding:0 2px;}.section-title ha-icon{--mdc-icon-size:16px;color:var(--vpc-text-secondary);}.warning-title ha-icon{color:#ef6c00;}.warning-title{color:#ef6c00;}.device-list{display:flex;flex-direction:column;gap:3px;}.device-row{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:var(--vpc-inner-radius, 12px);background:var(--vpc-surface);cursor:pointer;transition:background 0.18s ease, transform 0.15s ease;}.device-row:hover{background:color-mix(in srgb, var(--vpc-primary) 6%, var(--vpc-surface));transform:scale(1.005);}ha-card.theme-neon .device-row{background:rgba(0,212,255,0.04);border:1px solid rgba(0,212,255,0.06);}.device-icon-wrap{width:32px;height:32px;border-radius:9px;background:var(--vpc-surface);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background 0.2s ease;}.device-icon-wrap ha-icon{--mdc-icon-size:18px;color:var(--vpc-text-secondary);}.device-icon-active{background:color-mix(in srgb, var(--vpc-primary) 12%, transparent);}.device-icon-active ha-icon{color:var(--vpc-primary) !important;}.device-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;}.device-name{font-weight:500;font-size:14px;letter-spacing:-0.1px;color:var(--vpc-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.device-status{color:var(--vpc-text-secondary);font-size:12px;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.device-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}.dot-active{background:var(--vpc-success, #34C759);box-shadow:0 0 6px rgba(52,199,89,0.5);}.dot-inactive{background:var(--vpc-text-secondary);opacity:0.25;}.warning-list{display:flex;flex-direction:column;gap:5px;}.warning-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--vpc-inner-radius, 12px);background:color-mix(in srgb, var(--vpc-warning, #FF9F0A) 8%, transparent);border:1px solid color-mix(in srgb, var(--vpc-warning, #FF9F0A) 20%, transparent);font-size:13px;font-weight:500;color:var(--vpc-warning, #FF9F0A);}.warning-row ha-icon{color:var(--vpc-warning, #FF9F0A);flex-shrink:0;}.all-ok-display{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;border-radius:var(--vpc-inner-radius, 12px);background:color-mix(in srgb, var(--vpc-success, #34C759) 8%, transparent);border:1px solid color-mix(in srgb, var(--vpc-success, #34C759) 18%, transparent);color:var(--vpc-success, #34C759);font-weight:500;font-size:14px;}.all-ok-display ha-icon{color:var(--vpc-success, #34C759);}ha-card.compact-card{padding:12px 14px;}.compact-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:var(--vpc-surface);flex-shrink:0;transition:background 0.2s ease;}.compact-icon-active{background:color-mix(in srgb, var(--vpc-primary) 12%, transparent);}.compact-icon ha-icon{--mdc-icon-size:20px;}.compact-icon ha-icon.active{color:var(--vpc-primary);}.compact-icon ha-icon.inactive{color:var(--vpc-text-secondary);opacity:0.45;}.compact-info{flex:1;min-width:0;}.compact-details{display:flex;gap:8px;font-size:12px;margin-top:2px;align-items:center;}.compact-value{font-weight:600;color:var(--vpc-text);letter-spacing:-0.2px;}.compact-detail{color:var(--vpc-text-secondary);font-size:11px;}.system-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));gap:20px;}.error-state{display:flex;align-items:center;gap:14px;padding:20px;}.error-icon{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:rgba(244, 67, 54, 0.1);}.error-icon ha-icon{--mdc-icon-size:24px;color:#d32f2f;}.error-info{display:flex;flex-direction:column;gap:2px;}.error-title{font-size:14px;font-weight:600;color:#d32f2f;}.error-entity{font-size:12px;color:var(--vpc-text-secondary);font-family:monospace;}ha-card.size-small{--vpc-spacing:12px;--vpc-icon-size:20px;--vpc-radius:16px;}ha-card.size-small .header-icon{width:38px;height:38px;border-radius:11px;}ha-card.size-small .name{font-size:14px;}ha-card.size-small .temp-hero-value{font-size:34px;letter-spacing:-1.5px;}ha-card.size-large{--vpc-spacing:22px;--vpc-icon-size:28px;--vpc-radius:26px;}ha-card.size-large .header-icon{width:54px;height:54px;border-radius:17px;}ha-card.size-large .name{font-size:18px;}ha-card.size-large .temp-hero-value{font-size:56px;letter-spacing:-3px;}ha-card.size-fullscreen{--vpc-spacing:28px;--vpc-icon-size:32px;--vpc-radius:28px;height:100%;min-height:80vh;}ha-card.size-fullscreen .header-icon{width:60px;height:60px;border-radius:19px;}ha-card.size-fullscreen .name{font-size:20px;}ha-card.size-fullscreen .temp-hero-value{font-size:68px;letter-spacing:-4px;}ha-card.animation-none{transition:none !important;}ha-card.animation-none:hover, ha-card.animation-none:active{transform:none !important;}ha-card.animation-subtle{transition:transform 0.15s ease, box-shadow 0.15s ease;}ha-card.animation-subtle:hover{transform:translateY(-1px);}ha-card.animation-smooth{transition:transform 0.25s cubic-bezier(0.34,1.4,0.64,1), box-shadow 0.25s ease;}ha-card.animation-energetic{transition:transform 0.2s cubic-bezier(0.34,1.6,0.64,1), box-shadow 0.2s ease;}ha-card.animation-energetic:hover{transform:translateY(-4px) scale(1.008);}@keyframes flow-gradient{0%{background-position:0% 50%;}100%{background-position:200% 50%;}}ha-card.flow-active .accent-bar{background:linear-gradient(90deg, var(--card-accent), color-mix(in srgb, var(--card-accent) 60%, white), var(--card-accent));background-size:200% 100%;animation:flow-gradient 2.5s linear infinite;}.error-state{display:flex;align-items:center;gap:14px;padding:20px;}.error-icon{width:46px;height:46px;border-radius:15px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb, var(--vpc-danger, #FF3B30) 10%, transparent);flex-shrink:0;}.error-icon ha-icon{--mdc-icon-size:24px;color:var(--vpc-danger, #FF3B30);}.error-info{display:flex;flex-direction:column;gap:3px;}.error-title{font-size:15px;font-weight:600;color:var(--vpc-danger, #FF3B30);letter-spacing:-0.2px;}.error-entity{font-size:12px;color:var(--vpc-text-secondary);font-family:'SF Mono', 'Fira Code', 'Cascadia Code', ui-monospace, monospace;opacity:0.7;}.system-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));gap:16px;}@media (max-width:600px){.chemistry-grid{grid-template-columns:repeat(3, 1fr);gap:6px;}.chemistry-card{padding:11px 6px 10px;}.chemistry-val{font-size:16px;}.system-grid{grid-template-columns:1fr;}.temp-hero-value{font-size:38px;letter-spacing:-1.5px;}.dosing-current-value{font-size:28px;}.speed-segment{font-size:11px;padding:8px 4px;}}@media (pointer:coarse){.speed-segment, .speed-off-btn, .device-row, .chemistry-card{min-height:44px;}}.speed-segment{min-width:0;}.speed-segment span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}.tooltip-wrap{position:relative;}.t-tip{position:absolute;top:calc(100% + 7px);left:50%;transform:translateX(-50%) translateY(-4px) scale(0.94);transform-origin:top center;z-index:9999;min-width:148px;max-width:250px;padding:9px 12px;background:rgba(18,18,26,0.94);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border:1px solid rgba(255,255,255,0.11);border-radius:11px;box-shadow:0 8px 28px rgba(0,0,0,0.4),0 2px 6px rgba(0,0,0,0.25);opacity:0;pointer-events:none;transition:opacity 0.13s ease,transform 0.17s cubic-bezier(0.34,1.4,0.64,1),transition-delay 0s;white-space:normal;text-align:left;}.tooltip-wrap:hover .t-tip{opacity:1;transform:translateX(-50%) translateY(0) scale(1);transition-delay:0.38s;}.t-tip.t-up{top:auto;bottom:calc(100% + 7px);transform-origin:bottom center;transform:translateX(-50%) translateY(4px) scale(0.94);}.tooltip-wrap:hover .t-tip.t-up{transform:translateX(-50%) translateY(0) scale(1);}.t-tip-title{font-size:11.5px;font-weight:600;color:rgba(255,255,255,0.94);margin-bottom:4px;display:flex;align-items:center;gap:5px;}.t-tip-title ha-icon{--mdc-icon-size:13px;color:rgba(255,255,255,0.55);flex-shrink:0;}.t-tip-desc{font-size:11px;color:rgba(255,255,255,0.67);line-height:1.55;}.t-tip-ideal{display:flex;align-items:center;gap:5px;margin-top:6px;padding:3px 8px;background:rgba(52,199,89,0.18);border-radius:6px;font-size:10.5px;font-weight:600;color:#34C759;}.t-tip-ideal ha-icon{--mdc-icon-size:11px;flex-shrink:0;}.t-tip-warn{display:flex;align-items:center;gap:5px;margin-top:5px;padding:3px 8px;background:rgba(255,159,10,0.16);border-radius:6px;font-size:10.5px;font-weight:600;color:#FF9F0A;}.chem-overall-badge{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:100px;font-size:11.5px;font-weight:600;flex-shrink:0;}.chem-overall-badge ha-icon{--mdc-icon-size:14px;}.chem-section{background:var(--vpc-surface);border-radius:var(--vpc-inner-radius,12px);padding:13px 15px;display:flex;flex-direction:column;gap:9px;position:relative;overflow:visible;}.chem-section-header{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:500;color:var(--vpc-text-secondary);}.chem-section-status{margin-left:auto;font-weight:600;font-size:12px;}.chem-big-value{display:flex;align-items:baseline;gap:5px;}.chem-big-num{font-size:42px;font-weight:700;letter-spacing:-2px;line-height:1;}.chem-big-unit{font-size:20px;font-weight:400;opacity:0.6;letter-spacing:-0.5px;}.chem-gauge-bar{display:flex;flex-direction:column;gap:5px;}.chem-gauge-track{height:7px;background:rgba(0,0,0,0.07);border-radius:100px;position:relative;overflow:visible;}ha-card.theme-dark .chem-gauge-track,ha-card.theme-neon .chem-gauge-track{background:rgba(255,255,255,0.08);}.chem-gauge-fill{height:100%;border-radius:100px;transition:width 0.55s cubic-bezier(0.34,1.4,0.64,1);}.chem-gauge-zone{position:absolute;top:0;height:100%;background:rgba(52,199,89,0.22);border-radius:2px;}.chem-gauge-labels{display:flex;justify-content:space-between;font-size:10.5px;color:var(--vpc-text-tertiary);}.chem-zone-label{font-size:10.5px;color:var(--vpc-success,#34C759);font-weight:500;}.chem-dual-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}.chem-metric-card{background:var(--vpc-surface);border-radius:var(--vpc-inner-radius,12px);padding:13px 12px;display:flex;flex-direction:column;gap:6px;cursor:pointer;transition:transform 0.15s ease,border-color 0.15s ease;border:1px solid transparent;position:relative;overflow:visible;}.chem-metric-card:hover{transform:scale(1.025);border-color:color-mix(in srgb,var(--chem-color,var(--vpc-primary)) 22%,transparent);}.chem-metric-header{display:flex;align-items:center;gap:6px;font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--vpc-text-secondary);}.chem-metric-header ha-icon{color:var(--chem-color,var(--vpc-primary));--mdc-icon-size:15px;}.chem-metric-value{font-size:34px;font-weight:700;letter-spacing:-1.5px;line-height:1;color:var(--chem-color,var(--vpc-text));}.chem-metric-unit{font-size:12px;font-weight:500;color:var(--vpc-text-secondary);margin-top:-3px;}.chem-metric-status{font-size:11px;font-weight:600;color:var(--chem-color,var(--vpc-text-secondary));}.chem-metric-bar{display:flex;flex-direction:column;gap:4px;}.chem-metric-track{height:5px;background:rgba(0,0,0,0.07);border-radius:100px;position:relative;overflow:visible;}ha-card.theme-dark .chem-metric-track{background:rgba(255,255,255,0.08);}.chem-metric-ideal{position:absolute;top:0;height:100%;background:rgba(52,199,89,0.2);border-radius:2px;}.chem-metric-fill{height:100%;border-radius:100px;background:var(--chem-color,var(--vpc-primary));transition:width 0.5s ease;}.chem-metric-target{position:absolute;top:50%;transform:translate(-50%,-50%);width:2px;height:13px;background:var(--vpc-text);border-radius:1px;opacity:0.45;}.chem-metric-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--vpc-text-tertiary);}.chem-recommendations{display:flex;flex-direction:column;gap:6px;}.chem-rec-row{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:var(--vpc-inner-radius,12px);background:color-mix(in srgb,var(--rec-color,var(--vpc-warning)) 9%,transparent);border:1px solid color-mix(in srgb,var(--rec-color,var(--vpc-warning)) 22%,transparent);font-size:12.5px;font-weight:500;color:var(--rec-color,var(--vpc-warning));}.chem-rec-row ha-icon{--mdc-icon-size:15px;flex-shrink:0;}.sensor-value-display{background:var(--vpc-surface);border-radius:var(--vpc-inner-radius,12px);padding:18px 16px;display:flex;align-items:center;justify-content:center;position:relative;overflow:visible;}.sensor-big-value{display:flex;align-items:baseline;gap:6px;}.sensor-num{font-size:56px;font-weight:700;letter-spacing:-2.5px;line-height:1;color:var(--card-accent,var(--vpc-primary));}.sensor-unit{font-size:26px;font-weight:400;opacity:0.6;letter-spacing:-0.5px;color:var(--card-accent,var(--vpc-text));}.sensor-state-text{font-size:28px;font-weight:600;color:var(--vpc-text);}.device-row{overflow:visible;}@keyframes flicker{0%,100%{transform:scaleX(1) skewX(0deg);opacity:1;}25%{transform:scaleX(1.06) skewX(-2deg);opacity:0.88;}50%{transform:scaleX(0.96) skewX(1.5deg);opacity:0.82;}75%{transform:scaleX(1.04) skewX(-1deg);opacity:0.94;}}@keyframes light-glow{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.65;transform:scale(1.07);}}@keyframes flow-dot{0%,100%{opacity:0.7;transform:scale(1);}50%{opacity:0.3;transform:scale(0.6);}}.header-icon svg{display:block;width:100%;height:100%;}.cover-visual{padding:2px 0;}.cover-pos-bar{height:5px;background:var(--vpc-surface);border-radius:100px;overflow:hidden;margin-top:-4px;}.cover-pos-fill{height:100%;border-radius:100px;transition:width 0.55s cubic-bezier(0.34,1.4,0.64,1);}.cover-moving-pill{padding:2px 8px;border-radius:100px;font-size:11px;font-weight:600;background:rgba(255,159,10,0.14);color:var(--vpc-warning,#FF9F0A);white-space:nowrap;}.cover-controls{display:flex;gap:7px;}.cover-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px;border:none;border-radius:var(--vpc-inner-radius,12px);background:var(--vpc-surface);color:var(--vpc-text-secondary);font-family:var(--vpc-font);font-size:11.5px;font-weight:500;cursor:pointer;transition:all 0.18s ease;-webkit-tap-highlight-color:transparent;}.cover-btn:hover{background:color-mix(in srgb,var(--card-accent) 12%,transparent);color:var(--card-accent);}.cover-btn-open.cvr-active{background:rgba(52,199,89,0.13);color:var(--vpc-success,#34C759);box-shadow:inset 0 0 0 1.5px rgba(52,199,89,0.32);}.cover-btn-stop.cvr-active{background:rgba(255,159,10,0.13);color:var(--vpc-warning,#FF9F0A);box-shadow:inset 0 0 0 1.5px rgba(255,159,10,0.32);}.cover-btn-close.cvr-active{background:rgba(255,59,48,0.12);color:var(--vpc-danger,#FF3B30);box-shadow:inset 0 0 0 1.5px rgba(255,59,48,0.3);}.light-color-swatch{height:54px;border-radius:var(--vpc-inner-radius,12px);display:flex;align-items:center;justify-content:center;transition:background 0.4s ease,box-shadow 0.4s ease;}.light-color-label{font-size:11.5px;font-weight:600;color:white;text-shadow:0 1px 4px rgba(0,0,0,0.45);letter-spacing:0.1px;}.light-brightness-row{margin-top:-4px;}.light-color-swatch{position:relative;overflow:hidden;}.light-color-swatch input[type=color]{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;border:none;padding:0;}.light-color-hint{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:10.5px;font-weight:600;color:rgba(255,255,255,0.65);pointer-events:none;}.filter-gauge-wrap{display:flex;justify-content:center;padding:4px 0 0;}`;
-    }
-    getCardSize() {
-        switch (this.config?.card_type) {
-            case 'compact':
-                return 1;
-            case 'overview':
-                return 5;
-            case 'details':
-                return Math.ceil((this.config.entities?.length || 1) / 2) + 1;
-            case 'chemical':
-                return 6;
-            case 'sensor':
-                return 2;
-            case 'cover':
-                return 4;
-            case 'light':
-                return 3;
-            default:
-                return 3;
-        }
-    }
-    static getStubConfig() {
-        return {
-            type: 'custom:violet-pool-card',
-            entity_prefix: 'violet_pool',
-            entity: 'switch.violet_pool_pump',
-            card_type: 'pump',
-        };
-    }
-    static async getConfigElement() {
-        await Promise.resolve().then(function () { return violetPoolCardEditor; });
-        return document.createElement('violet-pool-card-editor');
-    }
-}
-__decorate([
-    n({ attribute: false })
-], VioletPoolCard.prototype, "hass", void 0);
-__decorate([
-    r()
-], VioletPoolCard.prototype, "config", void 0);
-if (!customElements.get('violet-pool-card')) {
-    customElements.define('violet-pool-card', VioletPoolCard);
-}
-window.customCards = window.customCards || [];
-window.customCards.push({
-    type: 'violet-pool-card',
-    name: 'Violet Pool Card',
-    description: 'Premium card for Violet Pool Controller with glassmorphism design',
-    preview: true,
-});
-
-class VioletPoolCardEditor extends i {
-    setConfig(config) {
-        this._config = config;
-    }
-    render() {
-        if (!this.hass || !this._config) {
-            return b``;
-        }
-        const needsEntity = !['overview', 'system', 'details', 'chemical', 'cover', 'light'].includes(this._config.card_type);
-        const coverOrLight = this._config.card_type === 'cover' || this._config.card_type === 'light';
-        const domainFilter = {
-            pump: ['switch'], heater: ['climate'], solar: ['climate'],
-            dosing: ['switch'], compact: [], sensor: ['sensor'],
-            cover: ['cover'], light: ['light'],
-        };
-        const includeDomains = domainFilter[this._config.card_type] || [];
-        return b` <div class="card-config"><!-- Card Type Selection --><div class="config-section"><div class="section-header"><ha-icon icon="mdi:card-outline"></ha-icon><span>Kartentyp</span></div><ha-select label="Kartentyp" .value="${this._config.card_type}" @selected="${this._cardTypeChanged}" @closed="${(e) => e.stopPropagation()}" ><mwc-list-item value="pump">🔵 Pumpe</mwc-list-item><mwc-list-item value="heater">🔥 Heizung</mwc-list-item><mwc-list-item value="solar">☀️ Solar</mwc-list-item><mwc-list-item value="dosing">💧 Dosierung</mwc-list-item><mwc-list-item value="cover">🪟 Abdeckung</mwc-list-item><mwc-list-item value="light">💡 Beleuchtung</mwc-list-item><mwc-list-item value="overview">📊 Übersicht</mwc-list-item><mwc-list-item value="compact">📋 Kompakt</mwc-list-item><mwc-list-item value="system">🖥️ System Dashboard</mwc-list-item><mwc-list-item value="details">📝 Details Liste</mwc-list-item><mwc-list-item value="chemical">🧪 Wasserchemie</mwc-list-item><mwc-list-item value="sensor">📡 Sensor Anzeige</mwc-list-item></ha-select></div><!-- Controller Configuration --><div class="config-section"><div class="section-header"><ha-icon icon="mdi:chip"></ha-icon><span>Controller Configuration</span></div><ha-textfield label="Entity Prefix" .value="${this._config.entity_prefix || 'violet_pool'}" @input="${this._entityPrefixChanged}" helper="Name of your pool controller (e.g., 'violet_pool', 'pool_1', 'garden_pool')" ></ha-textfield><div class="prefix-info"><ha-icon icon="mdi:information-outline"></ha-icon><span> The entity prefix should match your Violet Pool Controller name in Home Assistant. All entities will be automatically discovered based on this prefix. </span></div></div><!-- Entity Selection --> ${needsEntity || coverOrLight ? b `
+      </ha-card>`}static get styles(){return r`:host{--vpc-font:-apple-system, 'SF Pro Display', 'SF Pro Text', system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;--vpc-spacing:18px;--vpc-radius:20px;--vpc-inner-radius:12px;--vpc-bg:var(--ha-card-background, var(--card-background-color, #ffffff));--vpc-surface:rgba(120,120,128,0.06);--vpc-border:none;--vpc-shadow:0 2px 20px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.04);--vpc-backdrop:none;--vpc-primary:var(--primary-color, #007AFF);--vpc-success:#34C759;--vpc-warning:#FF9F0A;--vpc-danger:#FF3B30;--vpc-purple:#AF52DE;--vpc-teal:#5AC8FA;--vpc-orange:#FF9500;--vpc-indigo:#5856D6;--vpc-text:var(--primary-text-color, #1C1C1E);--vpc-text-secondary:var(--secondary-text-color, #6D6D72);--vpc-text-tertiary:rgba(60,60,67,0.45);--vpc-icon-size:22px;--vpc-transition:all 0.28s cubic-bezier(0.34, 1.4, 0.64, 1);--vpc-transition-fast:all 0.18s ease;--card-accent:var(--primary-color, #007AFF);--icon-accent:var(--card-accent);display:block;font-family:var(--vpc-font);}ha-card.theme-apple{--vpc-bg:#ffffff;--vpc-shadow:0 2px 20px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04);--vpc-radius:22px;--vpc-inner-radius:13px;--vpc-surface:rgba(120,120,128,0.06);--vpc-primary:#007AFF;}ha-card.theme-dark{--vpc-bg:#1C1C1E;--vpc-surface:rgba(255,255,255,0.06);--vpc-border:1px solid rgba(255,255,255,0.08);--vpc-shadow:0 4px 30px rgba(0,0,0,0.4);--vpc-radius:22px;--vpc-text:#FFFFFF;--vpc-text-secondary:#8E8E93;--vpc-text-tertiary:rgba(255,255,255,0.25);--vpc-primary:#0A84FF;--vpc-success:#30D158;--vpc-warning:#FFD60A;--vpc-danger:#FF453A;}ha-card.theme-luxury, ha-card.theme-glass{--vpc-bg:rgba(255,255,255,0.72);--vpc-backdrop:blur(24px) saturate(180%);--vpc-radius:26px;--vpc-border:1px solid rgba(255,255,255,0.4);--vpc-shadow:0 8px 40px rgba(31,38,135,0.12), 0 2px 8px rgba(0,0,0,0.06);}ha-card.theme-modern{--vpc-radius:18px;--vpc-spacing:20px;--vpc-shadow:0 1px 3px rgba(0,0,0,0.05), 0 0 0 1px rgba(0,0,0,0.04);}ha-card.theme-minimalist{--vpc-radius:14px;--vpc-shadow:none;--vpc-border:1px solid rgba(0,0,0,0.07);--vpc-surface:transparent;}ha-card.theme-neon{--vpc-bg:#0D0D14;--vpc-border:1px solid rgba(0,212,255,0.2);--vpc-shadow:0 0 30px rgba(0,212,255,0.07);--vpc-radius:14px;--vpc-primary:#00D4FF;--vpc-text:#E8E8F0;--vpc-text-secondary:#6E6E80;--vpc-surface:rgba(0,212,255,0.04);--vpc-success:#00E676;--vpc-warning:#FFEA00;--vpc-danger:#FF1744;}ha-card.theme-premium{--vpc-bg:linear-gradient(145deg, rgba(255,255,255,0.96) 0%, rgba(248,248,255,0.96) 100%);--vpc-radius:24px;--vpc-shadow:0 12px 50px -8px rgba(80,80,160,0.15), 0 0 0 1px rgba(255,255,255,0.9);--vpc-border:1px solid rgba(255,255,255,0.7);}@media (prefers-color-scheme:dark){ha-card.theme-apple{--vpc-bg:#1C1C1E;--vpc-surface:rgba(255,255,255,0.06);--vpc-border:1px solid rgba(255,255,255,0.08);--vpc-text:#FFFFFF;--vpc-text-secondary:#8E8E93;--vpc-primary:#0A84FF;--vpc-success:#30D158;--vpc-warning:#FFD60A;--vpc-danger:#FF453A;}ha-card.theme-luxury, ha-card.theme-glass{--vpc-bg:rgba(18,18,30,0.80);--vpc-border:1px solid rgba(255,255,255,0.09);--vpc-shadow:0 8px 40px rgba(0,0,0,0.45);}ha-card.theme-premium{--vpc-bg:linear-gradient(145deg, rgba(28,28,38,0.97) 0%, rgba(20,20,32,0.97) 100%);--vpc-border:1px solid rgba(255,255,255,0.07);}ha-card.theme-minimalist{--vpc-border:1px solid rgba(255,255,255,0.07);}ha-card.theme-modern{--vpc-shadow:0 1px 3px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.04);}}ha-card{font-family:var(--vpc-font);padding:var(--vpc-spacing);background:var(--vpc-bg);border-radius:var(--vpc-radius);box-shadow:var(--vpc-shadow);border:var(--vpc-border);backdrop-filter:var(--vpc-backdrop);-webkit-backdrop-filter:var(--vpc-backdrop);transition:transform 0.22s cubic-bezier(0.34,1.4,0.64,1), box-shadow 0.22s ease;overflow:visible;position:relative;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;}ha-card:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,0,0,0.11), 0 2px 6px rgba(0,0,0,0.05);}ha-card:active{transform:scale(0.985);box-shadow:0 2px 8px rgba(0,0,0,0.07);transition:transform 0.1s ease, box-shadow 0.1s ease;}ha-card.theme-dark:hover{box-shadow:0 8px 30px rgba(0,0,0,0.5);}ha-card.theme-neon:hover{box-shadow:0 0 40px rgba(0,212,255,0.12), 0 4px 20px rgba(0,0,0,0.3);}ha-card.theme-neon.is-active{box-shadow:0 0 50px rgba(0,212,255,0.2), inset 0 0 20px rgba(0,212,255,0.04);border-color:rgba(0,212,255,0.35);}.accent-bar{position:absolute;top:0;left:0;right:0;height:3px;background:var(--card-accent);opacity:0.65;transition:opacity 0.3s ease, height 0.3s ease;}ha-card.is-active .accent-bar{height:4px;opacity:1;}ha-card.theme-neon .accent-bar{background:linear-gradient(90deg, #00D4FF, #7C4DFF, #00D4FF);box-shadow:0 0 12px rgba(0,212,255,0.5);height:2px;animation:neon-flow 3s linear infinite;}ha-card.theme-minimalist .accent-bar{height:2px;opacity:0.45;}@keyframes neon-flow{0%{background-position:0% 50%;}100%{background-position:200% 50%;}}.card-content{display:flex;flex-direction:column;gap:14px;}.card-content.compact{flex-direction:row;align-items:center;gap:14px;}.header{display:flex;align-items:center;gap:14px;}.header-icon{width:46px;height:46px;border-radius:15px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb, var(--icon-accent, var(--vpc-primary)) 12%, transparent);transition:background 0.25s ease, box-shadow 0.25s ease;flex-shrink:0;}.header-icon.icon-active{background:color-mix(in srgb, var(--icon-accent, var(--vpc-primary)) 18%, transparent);box-shadow:0 0 0 5px color-mix(in srgb, var(--icon-accent, var(--vpc-primary)) 8%, transparent);}ha-card.theme-neon .header-icon{background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.18);}ha-card.theme-neon .header-icon.icon-active{box-shadow:0 0 16px rgba(0,212,255,0.25);}.header-icon ha-icon{--mdc-icon-size:24px;color:var(--icon-accent, var(--vpc-primary));}.header-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}.name{font-family:var(--vpc-font);font-size:16px;font-weight:600;letter-spacing:-0.3px;color:var(--vpc-text);line-height:1.25;}.header-subtitle{font-family:var(--vpc-font);font-size:13px;font-weight:400;color:var(--vpc-text-secondary);line-height:1.2;}ha-icon{--mdc-icon-size:var(--vpc-icon-size);color:var(--vpc-primary);transition:color 0.2s ease;}@keyframes rotate{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}@keyframes pulse-glow{0%, 100%{opacity:1;transform:scale(1);}50%{opacity:0.65;transform:scale(0.95);}}@keyframes breathe{0%, 100%{transform:scale(1);opacity:1;}50%{transform:scale(1.08);opacity:0.85;}}@keyframes spin-slow{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}.pump-running{animation:rotate 1.8s linear infinite;}.heater-active{animation:breathe 2.5s ease-in-out infinite;color:var(--vpc-danger, #FF3B30);}.solar-active{animation:breathe 3s ease-in-out infinite;color:var(--vpc-warning, #FF9F0A);}.dosing-active{animation:pulse-glow 2s ease-in-out infinite;color:var(--vpc-success, #34C759);}.speed-segments-container{display:flex;align-items:center;gap:8px;}.speed-segments{display:flex;flex:1;gap:6px;}.speed-segment{flex:1;display:flex;align-items:center;justify-content:center;gap:4px;padding:9px 6px;border-radius:var(--vpc-inner-radius, 12px);border:none;background:var(--vpc-surface, rgba(120,120,128,0.06));color:var(--vpc-text-secondary);font-family:var(--vpc-font);font-size:12px;font-weight:500;cursor:pointer;transition:all 0.18s ease;-webkit-tap-highlight-color:transparent;letter-spacing:-0.2px;position:relative;overflow:visible;}.speed-segment:hover{background:color-mix(in srgb, var(--seg-color) 10%, transparent);color:var(--seg-color);}.speed-segment.seg-active{background:color-mix(in srgb, var(--seg-color) 15%, transparent);color:var(--seg-color);font-weight:600;box-shadow:inset 0 0 0 1.5px color-mix(in srgb, var(--seg-color) 40%, transparent);}.speed-segment.seg-past{background:color-mix(in srgb, var(--seg-color) 08%, transparent);color:color-mix(in srgb, var(--seg-color) 70%, var(--vpc-text-secondary));}.speed-off-btn{width:38px;height:38px;border-radius:12px;border:none;background:var(--vpc-surface);color:var(--vpc-text-secondary);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.18s ease;flex-shrink:0;-webkit-tap-highlight-color:transparent;}.speed-off-btn:hover{background:rgba(255,59,48,0.1);color:var(--vpc-danger, #FF3B30);}.speed-off-btn.seg-active{background:rgba(255,59,48,0.12);color:var(--vpc-danger, #FF3B30);box-shadow:inset 0 0 0 1.5px rgba(255,59,48,0.3);}ha-card.theme-neon .speed-segment{border:1px solid rgba(0,212,255,0.1);}ha-card.theme-neon .speed-segment.seg-active{box-shadow:0 0 12px color-mix(in srgb, var(--seg-color) 50%, transparent);}.temp-hero{display:flex;align-items:center;gap:12px;padding:6px 0 4px;}.temp-hero-main{display:flex;align-items:baseline;gap:4px;}.temp-hero-value{font-family:var(--vpc-font);font-size:44px;font-weight:700;line-height:1;letter-spacing:-2px;color:var(--temp-color, var(--vpc-text));}.temp-hero-unit{font-size:22px;font-weight:400;color:var(--temp-color, var(--vpc-text));opacity:0.65;letter-spacing:-0.5px;}.temp-hero-target-pill{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:100px;background:var(--vpc-surface);font-size:13px;font-weight:500;color:var(--vpc-text-secondary);white-space:nowrap;}.temp-range-bar, .chem-range-bar{display:flex;flex-direction:column;gap:5px;}.temp-range-track, .chem-range-track{height:6px;background:var(--vpc-surface);border-radius:100px;position:relative;overflow:visible;}.temp-range-fill, .chem-range-fill{height:100%;border-radius:100px;transition:width 0.5s cubic-bezier(0.34,1.4,0.64,1);}.temp-range-target{position:absolute;top:50%;transform:translate(-50%, -50%);width:3px;height:14px;background:var(--vpc-text-secondary);border-radius:2px;opacity:0.7;}.temp-range-labels, .chem-range-labels{display:flex;justify-content:space-between;font-size:11px;font-weight:400;color:var(--vpc-text-tertiary, rgba(60,60,67,0.45));letter-spacing:0px;}.dosing-value-block{display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:var(--vpc-inner-radius, 12px);background:var(--vpc-surface);}ha-card.theme-neon .dosing-value-block{background:rgba(0,212,255,0.04);border:1px solid rgba(0,212,255,0.08);}.dosing-value-row{display:flex;align-items:center;justify-content:space-between;gap:10px;}.dosing-value-main{display:flex;align-items:baseline;gap:6px;}.dosing-label-tag{font-size:12px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;color:var(--vpc-text-secondary);}.dosing-current-value{font-family:var(--vpc-font);font-size:32px;font-weight:700;line-height:1;letter-spacing:-1px;}.dosing-current-unit{font-size:15px;font-weight:400;opacity:0.65;}.dosing-status-pill{padding:4px 10px;border-radius:100px;font-size:12px;font-weight:600;white-space:nowrap;}.chem-range-target{position:absolute;top:50%;transform:translate(-50%, -50%);display:flex;flex-direction:column;align-items:center;gap:2px;}.chem-target-line{width:2px;height:14px;background:var(--vpc-text);border-radius:2px;opacity:0.5;}.chem-target-label{position:absolute;top:16px;font-size:9px;font-weight:600;color:var(--vpc-text-secondary);white-space:nowrap;transform:translateX(-50%);}.chem-mini-bar{width:100%;height:4px;background:var(--vpc-surface, rgba(120,120,128,0.1));border-radius:100px;overflow:hidden;position:relative;margin-top:4px;}.chem-mini-fill{height:100%;border-radius:100px;transition:width 0.5s cubic-bezier(0.34,1.4,0.64,1);}.chem-mini-ideal{position:absolute;top:0;height:100%;background:rgba(52,199,89,0.18);border-radius:2px;}.solar-temp-comparison{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px;background:var(--vpc-surface);border-radius:var(--vpc-inner-radius, 12px);}ha-card.theme-neon .solar-temp-comparison{background:rgba(0,212,255,0.04);border:1px solid rgba(0,212,255,0.08);}.solar-temp-tile{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;}.solar-temp-tile ha-icon{--mdc-icon-size:18px;color:var(--vpc-text-secondary);}.solar-temp-tile-val{font-size:20px;font-weight:700;letter-spacing:-0.5px;color:var(--vpc-text);line-height:1;}.solar-temp-tile-label{font-size:11px;font-weight:500;color:var(--vpc-text-secondary);text-transform:uppercase;letter-spacing:0.3px;}.solar-delta-badge{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 12px;border-radius:100px;font-size:12px;font-weight:700;}.delta-great{background:rgba(52,199,89,0.12);color:var(--vpc-success, #34C759);}.delta-ok{background:rgba(255,159,10,0.12);color:var(--vpc-warning, #FF9F0A);}.delta-low{background:rgba(255,59,48,0.10);color:var(--vpc-danger, #FF3B30);}.delta-hint-text{font-size:12px;font-weight:400;color:var(--vpc-text-secondary);padding:2px 0;}.chemistry-grid{display:grid;grid-template-columns:repeat(3, 1fr);gap:8px;}.chemistry-card{display:flex;flex-direction:column;align-items:center;gap:2px;padding:14px 8px 12px;border-radius:var(--vpc-inner-radius, 12px);background:var(--vpc-surface);cursor:pointer;transition:transform 0.18s ease, background 0.18s ease;position:relative;overflow:visible;}.chemistry-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--chem-color, var(--vpc-primary));opacity:0.6;border-radius:100px;}.chemistry-card:hover{transform:scale(1.02);background:color-mix(in srgb, var(--chem-color) 8%, var(--vpc-surface));}ha-card.theme-neon .chemistry-card{background:rgba(0,212,255,0.04);border:1px solid rgba(0,212,255,0.08);}.chem-icon-wrap{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb, var(--chem-color, var(--vpc-primary)) 12%, transparent);margin-bottom:4px;}.chem-icon-wrap ha-icon{--mdc-icon-size:16px;color:var(--chem-color, var(--vpc-primary));}.chemistry-val{font-family:var(--vpc-font);font-size:18px;font-weight:700;letter-spacing:-0.5px;color:var(--chem-color, var(--vpc-text));line-height:1;}.chemistry-unit{font-size:11px;font-weight:500;color:var(--vpc-text-secondary);letter-spacing:0.2px;}.chemistry-label{font-size:10px;font-weight:500;color:var(--vpc-text-secondary);text-transform:uppercase;letter-spacing:0.4px;}.overview-warning-badge{width:22px;height:22px;border-radius:50%;background:var(--vpc-danger, #FF3B30);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}.overview-active-dot{width:10px;height:10px;border-radius:50%;background:var(--vpc-success, #34C759);box-shadow:0 0 8px rgba(52,199,89,0.5);flex-shrink:0;animation:pulse-glow 2s ease-in-out infinite;}.overview-section{display:flex;flex-direction:column;gap:6px;}.section-title{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--vpc-text-secondary);text-transform:uppercase;letter-spacing:0.6px;padding:0 2px;}.section-count{margin-left:auto;font-size:11px;font-weight:500;color:var(--vpc-text-tertiary);}.warning-title ha-icon{color:var(--vpc-warning, #FF9F0A);}.warning-title{color:var(--vpc-warning, #FF9F0A);}.temp-hero{display:flex;align-items:baseline;gap:4px;padding:8px 0;}.temp-hero-value{font-size:42px;font-weight:800;line-height:1;color:var(--temp-color, var(--vpc-text));letter-spacing:-1px;}.temp-hero-unit{font-size:22px;font-weight:500;color:var(--temp-color, var(--vpc-text));opacity:0.7;}.temp-hero-target{font-size:16px;font-weight:500;color:var(--vpc-text-secondary);margin-left:12px;}.info-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:var(--vpc-inner-radius, 12px);background:var(--vpc-surface);font-size:14px;color:var(--vpc-text);font-family:var(--vpc-font);}ha-card.theme-neon .info-row{background:rgba(0,212,255,0.04);border:1px solid rgba(0,212,255,0.08);}.info-row ha-icon{--mdc-icon-size:17px;color:var(--vpc-text-secondary);flex-shrink:0;}.info-label{flex:1;font-weight:400;color:var(--vpc-text-secondary);}.info-value{font-weight:600;color:var(--vpc-text);letter-spacing:-0.2px;}.info-badge{padding:3px 9px;border-radius:100px;font-size:11px;font-weight:600;}.info-badge.warning{background:color-mix(in srgb, var(--vpc-warning, #FF9F0A) 12%, transparent);color:var(--vpc-warning, #FF9F0A);}.info-row-warning{background:color-mix(in srgb, var(--vpc-warning, #FF9F0A) 06%, transparent);border:1px solid color-mix(in srgb, var(--vpc-warning, #FF9F0A) 18%, transparent);}.solar-temps{display:flex;flex-direction:column;gap:8px;}.chemistry-grid{display:grid;grid-template-columns:repeat(3, 1fr);gap:10px;}.chemistry-card{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px;border-radius:14px;background:rgba(var(--rgb-primary-text-color, 0,0,0), 0.03);cursor:pointer;transition:var(--vpc-transition);border:1px solid transparent;}.chemistry-card:hover{background:rgba(var(--rgb-primary-text-color, 0,0,0), 0.06);transform:translateY(-1px);}ha-card.theme-neon .chemistry-card{background:rgba(0, 255, 255, 0.04);border:1px solid rgba(0, 255, 255, 0.08);}.chemistry-card ha-icon{--mdc-icon-size:20px;color:var(--chem-color, var(--vpc-primary));}.chemistry-val{font-size:16px;font-weight:700;color:var(--chem-color, var(--vpc-text));line-height:1;}.chemistry-label{font-size:11px;font-weight:500;color:var(--vpc-text-secondary);text-transform:uppercase;letter-spacing:0.3px;}.overview-section{display:flex;flex-direction:column;gap:8px;}.section-title{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--vpc-text-secondary);text-transform:uppercase;letter-spacing:0.5px;padding:0 2px;}.section-title ha-icon{--mdc-icon-size:16px;color:var(--vpc-text-secondary);}.warning-title ha-icon{color:#ef6c00;}.warning-title{color:#ef6c00;}.device-list{display:flex;flex-direction:column;gap:3px;}.device-row{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:var(--vpc-inner-radius, 12px);background:var(--vpc-surface);cursor:pointer;transition:background 0.18s ease, transform 0.15s ease;}.device-row:hover{background:color-mix(in srgb, var(--vpc-primary) 6%, var(--vpc-surface));transform:scale(1.005);}ha-card.theme-neon .device-row{background:rgba(0,212,255,0.04);border:1px solid rgba(0,212,255,0.06);}.device-icon-wrap{width:32px;height:32px;border-radius:9px;background:var(--vpc-surface);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background 0.2s ease;}.device-icon-wrap ha-icon{--mdc-icon-size:18px;color:var(--vpc-text-secondary);}.device-icon-active{background:color-mix(in srgb, var(--vpc-primary) 12%, transparent);}.device-icon-active ha-icon{color:var(--vpc-primary) !important;}.device-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;}.device-name{font-weight:500;font-size:14px;letter-spacing:-0.1px;color:var(--vpc-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.device-status{color:var(--vpc-text-secondary);font-size:12px;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.device-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}.dot-active{background:var(--vpc-success, #34C759);box-shadow:0 0 6px rgba(52,199,89,0.5);}.dot-inactive{background:var(--vpc-text-secondary);opacity:0.25;}.warning-list{display:flex;flex-direction:column;gap:5px;}.warning-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--vpc-inner-radius, 12px);background:color-mix(in srgb, var(--vpc-warning, #FF9F0A) 8%, transparent);border:1px solid color-mix(in srgb, var(--vpc-warning, #FF9F0A) 20%, transparent);font-size:13px;font-weight:500;color:var(--vpc-warning, #FF9F0A);}.warning-row ha-icon{color:var(--vpc-warning, #FF9F0A);flex-shrink:0;}.all-ok-display{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;border-radius:var(--vpc-inner-radius, 12px);background:color-mix(in srgb, var(--vpc-success, #34C759) 8%, transparent);border:1px solid color-mix(in srgb, var(--vpc-success, #34C759) 18%, transparent);color:var(--vpc-success, #34C759);font-weight:500;font-size:14px;}.all-ok-display ha-icon{color:var(--vpc-success, #34C759);}ha-card.compact-card{padding:12px 14px;}.compact-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:var(--vpc-surface);flex-shrink:0;transition:background 0.2s ease;}.compact-icon-active{background:color-mix(in srgb, var(--vpc-primary) 12%, transparent);}.compact-icon ha-icon{--mdc-icon-size:20px;}.compact-icon ha-icon.active{color:var(--vpc-primary);}.compact-icon ha-icon.inactive{color:var(--vpc-text-secondary);opacity:0.45;}.compact-info{flex:1;min-width:0;}.compact-details{display:flex;gap:8px;font-size:12px;margin-top:2px;align-items:center;}.compact-value{font-weight:600;color:var(--vpc-text);letter-spacing:-0.2px;}.compact-detail{color:var(--vpc-text-secondary);font-size:11px;}.system-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));gap:20px;}.error-state{display:flex;align-items:center;gap:14px;padding:20px;}.error-icon{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:rgba(244, 67, 54, 0.1);}.error-icon ha-icon{--mdc-icon-size:24px;color:#d32f2f;}.error-info{display:flex;flex-direction:column;gap:2px;}.error-title{font-size:14px;font-weight:600;color:#d32f2f;}.error-entity{font-size:12px;color:var(--vpc-text-secondary);font-family:monospace;}ha-card.size-small{--vpc-spacing:12px;--vpc-icon-size:20px;--vpc-radius:16px;}ha-card.size-small .header-icon{width:38px;height:38px;border-radius:11px;}ha-card.size-small .name{font-size:14px;}ha-card.size-small .temp-hero-value{font-size:34px;letter-spacing:-1.5px;}ha-card.size-large{--vpc-spacing:22px;--vpc-icon-size:28px;--vpc-radius:26px;}ha-card.size-large .header-icon{width:54px;height:54px;border-radius:17px;}ha-card.size-large .name{font-size:18px;}ha-card.size-large .temp-hero-value{font-size:56px;letter-spacing:-3px;}ha-card.size-fullscreen{--vpc-spacing:28px;--vpc-icon-size:32px;--vpc-radius:28px;height:100%;min-height:80vh;}ha-card.size-fullscreen .header-icon{width:60px;height:60px;border-radius:19px;}ha-card.size-fullscreen .name{font-size:20px;}ha-card.size-fullscreen .temp-hero-value{font-size:68px;letter-spacing:-4px;}ha-card.animation-none{transition:none !important;}ha-card.animation-none:hover, ha-card.animation-none:active{transform:none !important;}ha-card.animation-subtle{transition:transform 0.15s ease, box-shadow 0.15s ease;}ha-card.animation-subtle:hover{transform:translateY(-1px);}ha-card.animation-smooth{transition:transform 0.25s cubic-bezier(0.34,1.4,0.64,1), box-shadow 0.25s ease;}ha-card.animation-energetic{transition:transform 0.2s cubic-bezier(0.34,1.6,0.64,1), box-shadow 0.2s ease;}ha-card.animation-energetic:hover{transform:translateY(-4px) scale(1.008);}@keyframes flow-gradient{0%{background-position:0% 50%;}100%{background-position:200% 50%;}}ha-card.flow-active .accent-bar{background:linear-gradient(90deg, var(--card-accent), color-mix(in srgb, var(--card-accent) 60%, white), var(--card-accent));background-size:200% 100%;animation:flow-gradient 2.5s linear infinite;}.error-state{display:flex;align-items:center;gap:14px;padding:20px;}.error-icon{width:46px;height:46px;border-radius:15px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb, var(--vpc-danger, #FF3B30) 10%, transparent);flex-shrink:0;}.error-icon ha-icon{--mdc-icon-size:24px;color:var(--vpc-danger, #FF3B30);}.error-info{display:flex;flex-direction:column;gap:3px;}.error-title{font-size:15px;font-weight:600;color:var(--vpc-danger, #FF3B30);letter-spacing:-0.2px;}.error-entity{font-size:12px;color:var(--vpc-text-secondary);font-family:'SF Mono', 'Fira Code', 'Cascadia Code', ui-monospace, monospace;opacity:0.7;}.system-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));gap:16px;}@media (max-width:600px){.chemistry-grid{grid-template-columns:repeat(3, 1fr);gap:6px;}.chemistry-card{padding:11px 6px 10px;}.chemistry-val{font-size:16px;}.system-grid{grid-template-columns:1fr;}.temp-hero-value{font-size:38px;letter-spacing:-1.5px;}.dosing-current-value{font-size:28px;}.speed-segment{font-size:11px;padding:8px 4px;}}@media (pointer:coarse){.speed-segment, .speed-off-btn, .device-row, .chemistry-card{min-height:44px;}}.speed-segment{min-width:0;}.speed-segment span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}.tooltip-wrap{position:relative;}.t-tip{position:absolute;top:calc(100% + 7px);left:50%;transform:translateX(-50%) translateY(-4px) scale(0.94);transform-origin:top center;z-index:9999;min-width:148px;max-width:250px;padding:9px 12px;background:rgba(18,18,26,0.94);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border:1px solid rgba(255,255,255,0.11);border-radius:11px;box-shadow:0 8px 28px rgba(0,0,0,0.4),0 2px 6px rgba(0,0,0,0.25);opacity:0;pointer-events:none;transition:opacity 0.13s ease,transform 0.17s cubic-bezier(0.34,1.4,0.64,1),transition-delay 0s;white-space:normal;text-align:left;}.tooltip-wrap:hover .t-tip{opacity:1;transform:translateX(-50%) translateY(0) scale(1);transition-delay:0.38s;}.t-tip.t-up{top:auto;bottom:calc(100% + 7px);transform-origin:bottom center;transform:translateX(-50%) translateY(4px) scale(0.94);}.tooltip-wrap:hover .t-tip.t-up{transform:translateX(-50%) translateY(0) scale(1);}.t-tip-title{font-size:11.5px;font-weight:600;color:rgba(255,255,255,0.94);margin-bottom:4px;display:flex;align-items:center;gap:5px;}.t-tip-title ha-icon{--mdc-icon-size:13px;color:rgba(255,255,255,0.55);flex-shrink:0;}.t-tip-desc{font-size:11px;color:rgba(255,255,255,0.67);line-height:1.55;}.t-tip-ideal{display:flex;align-items:center;gap:5px;margin-top:6px;padding:3px 8px;background:rgba(52,199,89,0.18);border-radius:6px;font-size:10.5px;font-weight:600;color:#34C759;}.t-tip-ideal ha-icon{--mdc-icon-size:11px;flex-shrink:0;}.t-tip-warn{display:flex;align-items:center;gap:5px;margin-top:5px;padding:3px 8px;background:rgba(255,159,10,0.16);border-radius:6px;font-size:10.5px;font-weight:600;color:#FF9F0A;}.chem-overall-badge{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:100px;font-size:11.5px;font-weight:600;flex-shrink:0;}.chem-overall-badge ha-icon{--mdc-icon-size:14px;}.chem-section{background:var(--vpc-surface);border-radius:var(--vpc-inner-radius,12px);padding:13px 15px;display:flex;flex-direction:column;gap:9px;position:relative;overflow:visible;}.chem-section-header{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:500;color:var(--vpc-text-secondary);}.chem-section-status{margin-left:auto;font-weight:600;font-size:12px;}.chem-big-value{display:flex;align-items:baseline;gap:5px;}.chem-big-num{font-size:42px;font-weight:700;letter-spacing:-2px;line-height:1;}.chem-big-unit{font-size:20px;font-weight:400;opacity:0.6;letter-spacing:-0.5px;}.chem-gauge-bar{display:flex;flex-direction:column;gap:5px;}.chem-gauge-track{height:7px;background:rgba(0,0,0,0.07);border-radius:100px;position:relative;overflow:visible;}ha-card.theme-dark .chem-gauge-track,ha-card.theme-neon .chem-gauge-track{background:rgba(255,255,255,0.08);}.chem-gauge-fill{height:100%;border-radius:100px;transition:width 0.55s cubic-bezier(0.34,1.4,0.64,1);}.chem-gauge-zone{position:absolute;top:0;height:100%;background:rgba(52,199,89,0.22);border-radius:2px;}.chem-gauge-labels{display:flex;justify-content:space-between;font-size:10.5px;color:var(--vpc-text-tertiary);}.chem-zone-label{font-size:10.5px;color:var(--vpc-success,#34C759);font-weight:500;}.chem-dual-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}.chem-metric-card{background:var(--vpc-surface);border-radius:var(--vpc-inner-radius,12px);padding:13px 12px;display:flex;flex-direction:column;gap:6px;cursor:pointer;transition:transform 0.15s ease,border-color 0.15s ease;border:1px solid transparent;position:relative;overflow:visible;}.chem-metric-card:hover{transform:scale(1.025);border-color:color-mix(in srgb,var(--chem-color,var(--vpc-primary)) 22%,transparent);}.chem-metric-header{display:flex;align-items:center;gap:6px;font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--vpc-text-secondary);}.chem-metric-header ha-icon{color:var(--chem-color,var(--vpc-primary));--mdc-icon-size:15px;}.chem-metric-value{font-size:34px;font-weight:700;letter-spacing:-1.5px;line-height:1;color:var(--chem-color,var(--vpc-text));}.chem-metric-unit{font-size:12px;font-weight:500;color:var(--vpc-text-secondary);margin-top:-3px;}.chem-metric-status{font-size:11px;font-weight:600;color:var(--chem-color,var(--vpc-text-secondary));}.chem-metric-bar{display:flex;flex-direction:column;gap:4px;}.chem-metric-track{height:5px;background:rgba(0,0,0,0.07);border-radius:100px;position:relative;overflow:visible;}ha-card.theme-dark .chem-metric-track{background:rgba(255,255,255,0.08);}.chem-metric-ideal{position:absolute;top:0;height:100%;background:rgba(52,199,89,0.2);border-radius:2px;}.chem-metric-fill{height:100%;border-radius:100px;background:var(--chem-color,var(--vpc-primary));transition:width 0.5s ease;}.chem-metric-target{position:absolute;top:50%;transform:translate(-50%,-50%);width:2px;height:13px;background:var(--vpc-text);border-radius:1px;opacity:0.45;}.chem-metric-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--vpc-text-tertiary);}.chem-recommendations{display:flex;flex-direction:column;gap:6px;}.chem-rec-row{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:var(--vpc-inner-radius,12px);background:color-mix(in srgb,var(--rec-color,var(--vpc-warning)) 9%,transparent);border:1px solid color-mix(in srgb,var(--rec-color,var(--vpc-warning)) 22%,transparent);font-size:12.5px;font-weight:500;color:var(--rec-color,var(--vpc-warning));}.chem-rec-row ha-icon{--mdc-icon-size:15px;flex-shrink:0;}.sensor-value-display{background:var(--vpc-surface);border-radius:var(--vpc-inner-radius,12px);padding:18px 16px;display:flex;align-items:center;justify-content:center;position:relative;overflow:visible;}.sensor-big-value{display:flex;align-items:baseline;gap:6px;}.sensor-num{font-size:56px;font-weight:700;letter-spacing:-2.5px;line-height:1;color:var(--card-accent,var(--vpc-primary));}.sensor-unit{font-size:26px;font-weight:400;opacity:0.6;letter-spacing:-0.5px;color:var(--card-accent,var(--vpc-text));}.sensor-state-text{font-size:28px;font-weight:600;color:var(--vpc-text);}.device-row{overflow:visible;}@keyframes flicker{0%,100%{transform:scaleX(1) skewX(0deg);opacity:1;}25%{transform:scaleX(1.06) skewX(-2deg);opacity:0.88;}50%{transform:scaleX(0.96) skewX(1.5deg);opacity:0.82;}75%{transform:scaleX(1.04) skewX(-1deg);opacity:0.94;}}@keyframes light-glow{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.65;transform:scale(1.07);}}@keyframes flow-dot{0%,100%{opacity:0.7;transform:scale(1);}50%{opacity:0.3;transform:scale(0.6);}}.header-icon svg{display:block;width:100%;height:100%;}.cover-visual{padding:2px 0;}.cover-pos-bar{height:5px;background:var(--vpc-surface);border-radius:100px;overflow:hidden;margin-top:-4px;}.cover-pos-fill{height:100%;border-radius:100px;transition:width 0.55s cubic-bezier(0.34,1.4,0.64,1);}.cover-moving-pill{padding:2px 8px;border-radius:100px;font-size:11px;font-weight:600;background:rgba(255,159,10,0.14);color:var(--vpc-warning,#FF9F0A);white-space:nowrap;}.cover-controls{display:flex;gap:7px;}.cover-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px;border:none;border-radius:var(--vpc-inner-radius,12px);background:var(--vpc-surface);color:var(--vpc-text-secondary);font-family:var(--vpc-font);font-size:11.5px;font-weight:500;cursor:pointer;transition:all 0.18s ease;-webkit-tap-highlight-color:transparent;}.cover-btn:hover{background:color-mix(in srgb,var(--card-accent) 12%,transparent);color:var(--card-accent);}.cover-btn-open.cvr-active{background:rgba(52,199,89,0.13);color:var(--vpc-success,#34C759);box-shadow:inset 0 0 0 1.5px rgba(52,199,89,0.32);}.cover-btn-stop.cvr-active{background:rgba(255,159,10,0.13);color:var(--vpc-warning,#FF9F0A);box-shadow:inset 0 0 0 1.5px rgba(255,159,10,0.32);}.cover-btn-close.cvr-active{background:rgba(255,59,48,0.12);color:var(--vpc-danger,#FF3B30);box-shadow:inset 0 0 0 1.5px rgba(255,59,48,0.3);}.light-color-swatch{height:54px;border-radius:var(--vpc-inner-radius,12px);display:flex;align-items:center;justify-content:center;transition:background 0.4s ease,box-shadow 0.4s ease;}.light-color-label{font-size:11.5px;font-weight:600;color:white;text-shadow:0 1px 4px rgba(0,0,0,0.45);letter-spacing:0.1px;}.light-brightness-row{margin-top:-4px;}.light-color-swatch{position:relative;overflow:hidden;}.light-color-swatch input[type=color]{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;border:none;padding:0;}.light-color-hint{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:10.5px;font-weight:600;color:rgba(255,255,255,0.65);pointer-events:none;}.filter-gauge-wrap{display:flex;justify-content:center;padding:4px 0 0;}`}getCardSize(){switch(this.config?.card_type){case"compact":return 1;case"overview":return 5;case"details":return Math.ceil((this.config.entities?.length||1)/2)+1;case"chemical":return 6;case"sensor":return 2;case"cover":return 4;default:return 3}}static getStubConfig(){return{type:"custom:violet-pool-card",entity_prefix:"violet_pool",entity:"switch.violet_pool_pump",card_type:"pump"}}static async getConfigElement(){return await Promise.resolve().then(function(){return Ae}),document.createElement("violet-pool-card-editor")}}e([pe({attribute:!1})],Ce.prototype,"hass",void 0),e([he()],Ce.prototype,"config",void 0),customElements.get("violet-pool-card")||customElements.define("violet-pool-card",Ce),window.customCards=window.customCards||[],window.customCards.push({type:"violet-pool-card",name:"Violet Pool Card",description:"Premium card for Violet Pool Controller with glassmorphism design",preview:!0});class Fe extends ne{setConfig(e){this._config=e}render(){if(!this.hass||!this._config)return L``;const e="cover"===this._config.card_type||"light"===this._config.card_type,t={pump:["switch"],heater:["climate"],solar:["climate"],dosing:["switch"],compact:[],sensor:["sensor"],cover:["cover"],light:["light"]}[this._config.card_type]||[];return L` <div class="card-config"><!-- Card Type Selection --><div class="config-section"><div class="section-header"><ha-icon icon="mdi:card-outline"></ha-icon><span>Kartentyp</span></div><ha-select label="Kartentyp" .value="${this._config.card_type}" @selected="${this._cardTypeChanged}" @closed="${e=>e.stopPropagation()}" ><mwc-list-item value="pump">🔵 Pumpe</mwc-list-item><mwc-list-item value="heater">🔥 Heizung</mwc-list-item><mwc-list-item value="solar">☀️ Solar</mwc-list-item><mwc-list-item value="dosing">💧 Dosierung</mwc-list-item><mwc-list-item value="cover">🪟 Abdeckung</mwc-list-item><mwc-list-item value="light">💡 Beleuchtung</mwc-list-item><mwc-list-item value="overview">📊 Übersicht</mwc-list-item><mwc-list-item value="compact">📋 Kompakt</mwc-list-item><mwc-list-item value="system">🖥️ System Dashboard</mwc-list-item><mwc-list-item value="details">📝 Details Liste</mwc-list-item><mwc-list-item value="chemical">🧪 Wasserchemie</mwc-list-item><mwc-list-item value="sensor">📡 Sensor Anzeige</mwc-list-item></ha-select></div><!-- Controller Configuration --><div class="config-section"><div class="section-header"><ha-icon icon="mdi:chip"></ha-icon><span>Controller Configuration</span></div><ha-textfield label="Entity Prefix" .value="${this._config.entity_prefix||"violet_pool"}" @input="${this._entityPrefixChanged}" helper="Name of your pool controller (e.g., 'violet_pool', 'pool_1', 'garden_pool')" ></ha-textfield><div class="prefix-info"><ha-icon icon="mdi:information-outline"></ha-icon><span> The entity prefix should match your Violet Pool Controller name in Home Assistant. All entities will be automatically discovered based on this prefix. </span></div></div><!-- Entity Selection --> ${!["overview","system","details","chemical","cover","light"].includes(this._config.card_type)||e?L`
           <div class="config-section">
             <div class="section-header">
               <ha-icon icon="mdi:lightning-bolt"></ha-icon>
               <span>Entität</span>
             </div>
             <ha-entity-picker
-              label="${coverOrLight ? (this._config.card_type === 'cover' ? 'Cover Entität' : 'Licht Entität') : 'Entität'}"
+              label="${e?"cover"===this._config.card_type?"Cover Entität":"Licht Entität":"Entität"}"
               .hass="${this.hass}"
               .value="${this._config.entity}"
-              .includeDomains="${includeDomains.length ? includeDomains : undefined}"
+              .includeDomains="${t.length?t:void 0}"
               @value-changed="${this._entityChanged}"
               allow-custom-entity
             ></ha-entity-picker>
           </div>
-        ` : ''}
+        `:""}
 
         <!-- Premium Design Options -->
         <div class="config-section premium-section">
@@ -2826,7 +623,7 @@ class VioletPoolCardEditor extends i {
           <div class="picker-container">
             <label>Card Size</label>
             <div class="size-picker">
-              ${['small', 'medium', 'large', 'fullscreen'].map((size) => b` <button class="size-button ${this._config.size === size ? 'active' : ''}" @click="${() => this._sizeChanged(size)}" ><div class="size-preview size-${size}"></div><span>${this._formatSizeName(size)}</span></button> `)}
+              ${["small","medium","large","fullscreen"].map(e=>L` <button class="size-button ${this._config.size===e?"active":""}" @click="${()=>this._sizeChanged(e)}" ><div class="size-preview size-${e}"></div><span>${this._formatSizeName(e)}</span></button> `)}
             </div>
           </div>
 
@@ -2834,14 +631,7 @@ class VioletPoolCardEditor extends i {
           <div class="picker-container">
             <label>Theme Style</label>
             <div class="theme-picker">
-              ${[
-            { value: 'apple', icon: '', label: 'Apple', desc: 'Clean & Light', preview: '#fff' },
-            { value: 'dark', icon: '', label: 'Dark', desc: 'Deep Dark', preview: '#1C1C1E' },
-            { value: 'glass', icon: '', label: 'Glass', desc: 'Frosted Glass', preview: 'rgba(255,255,255,0.7)' },
-            { value: 'modern', icon: '', label: 'Modern', desc: 'Minimal Flat', preview: '#f8f8fa' },
-            { value: 'minimalist', icon: '', label: 'Minimal', desc: 'Ultra Clean', preview: '#fff' },
-            { value: 'neon', icon: '', label: 'Neon', desc: 'Dark Glow', preview: '#0D0D14' },
-        ].map((theme) => b` <button class="theme-button ${this._config.theme === theme.value || (!this._config.theme && theme.value === 'apple') ? 'active' : ''}" @click="${() => this._themeChanged(theme.value)}" ><div class="theme-preview theme-${theme.value}"><div class="theme-dot" style="background:${theme.preview}"></div></div><div class="theme-info"><span class="theme-label">${theme.label}</span><span class="theme-desc">${theme.desc}</span></div></button> `)}
+              ${[{value:"apple",icon:"",label:"Apple",desc:"Clean & Light",preview:"#fff"},{value:"dark",icon:"",label:"Dark",desc:"Deep Dark",preview:"#1C1C1E"},{value:"glass",icon:"",label:"Glass",desc:"Frosted Glass",preview:"rgba(255,255,255,0.7)"},{value:"modern",icon:"",label:"Modern",desc:"Minimal Flat",preview:"#f8f8fa"},{value:"minimalist",icon:"",label:"Minimal",desc:"Ultra Clean",preview:"#fff"},{value:"neon",icon:"",label:"Neon",desc:"Dark Glow",preview:"#0D0D14"}].map(e=>L` <button class="theme-button ${this._config.theme===e.value||!this._config.theme&&"apple"===e.value?"active":""}" @click="${()=>this._themeChanged(e.value)}" ><div class="theme-preview theme-${e.value}"><div class="theme-dot" style="background:${e.preview}"></div></div><div class="theme-info"><span class="theme-label">${e.label}</span><span class="theme-desc">${e.desc}</span></div></button> `)}
             </div>
           </div>
 
@@ -2849,12 +639,7 @@ class VioletPoolCardEditor extends i {
           <div class="picker-container">
             <label>Animation Level</label>
             <div class="animation-picker">
-              ${[
-            { value: 'none', icon: '⏸️', label: 'None', desc: 'Static' },
-            { value: 'subtle', icon: '🌙', label: 'Subtle', desc: 'Professional' },
-            { value: 'smooth', icon: '✨', label: 'Smooth', desc: 'Balanced' },
-            { value: 'energetic', icon: '🚀', label: 'Energetic', desc: 'Dynamic' },
-        ].map((anim) => b` <button class="animation-button ${this._config.animation === anim.value ? 'active' : ''}" @click="${() => this._animationChanged(anim.value)}" ><span class="anim-icon">${anim.icon}</span><div class="anim-info"><span class="anim-label">${anim.label}</span><span class="anim-desc">${anim.desc}</span></div></button> `)}
+              ${[{value:"none",icon:"⏸️",label:"None",desc:"Static"},{value:"subtle",icon:"🌙",label:"Subtle",desc:"Professional"},{value:"smooth",icon:"✨",label:"Smooth",desc:"Balanced"},{value:"energetic",icon:"🚀",label:"Energetic",desc:"Dynamic"}].map(e=>L` <button class="animation-button ${this._config.animation===e.value?"active":""}" @click="${()=>this._animationChanged(e.value)}" ><span class="anim-icon">${e.icon}</span><div class="anim-info"><span class="anim-label">${e.label}</span><span class="anim-desc">${e.desc}</span></div></button> `)}
             </div>
           </div>
         </div>
@@ -2868,14 +653,14 @@ class VioletPoolCardEditor extends i {
 
           <ha-textfield
             label="Custom Name (optional)"
-            .value="${this._config.name || ''}"
+            .value="${this._config.name||""}"
             @input="${this._nameChanged}"
           ></ha-textfield>
 
           <ha-icon-picker
             label="Custom Icon (optional)"
             .hass="${this.hass}"
-            .value="${this._config.icon || ''}"
+            .value="${this._config.icon||""}"
             @value-changed="${this._iconChanged}"
           ></ha-icon-picker>
         </div>
@@ -2889,51 +674,45 @@ class VioletPoolCardEditor extends i {
 
           <ha-formfield label="Show state badge">
             <ha-switch
-              .checked="${this._config.show_state !== false}"
+              .checked="${!1!==this._config.show_state}"
               @change="${this._showStateChanged}"
             ></ha-switch>
           </ha-formfield>
 
           <ha-formfield label="Show detail status">
             <ha-switch
-              .checked="${this._config.show_detail_status !== false}"
+              .checked="${!1!==this._config.show_detail_status}"
               @change="${this._showDetailStatusChanged}"
             ></ha-switch>
           </ha-formfield>
 
           <ha-formfield label="Show controls">
             <ha-switch
-              .checked="${this._config.show_controls !== false}"
+              .checked="${!1!==this._config.show_controls}"
               @change="${this._showControlsChanged}"
             ></ha-switch>
           </ha-formfield>
 
-          ${this._config.card_type === 'pump'
-            ? b` <ha-formfield label="Show runtime counter"><ha-switch .checked="${this._config.show_runtime === true}" @change="${this._showRuntimeChanged}" ></ha-switch></ha-formfield> `
-            : ''}
+          ${"pump"===this._config.card_type?L` <ha-formfield label="Show runtime counter"><ha-switch .checked="${!0===this._config.show_runtime}" @change="${this._showRuntimeChanged}" ></ha-switch></ha-formfield> `:""}
 
-          ${this._config.card_type === 'dosing'
-            ? b` <ha-formfield label="Show dosing history"><ha-switch .checked="${this._config.show_history === true}" @change="${this._showHistoryChanged}" ></ha-switch></ha-formfield> `
-            : ''}
+          ${"dosing"===this._config.card_type?L` <ha-formfield label="Show dosing history"><ha-switch .checked="${!0===this._config.show_history}" @change="${this._showHistoryChanged}" ></ha-switch></ha-formfield> `:""}
         </div>
 
         <!-- Dosing Type (for dosing cards) -->
-        ${this._config.card_type === 'dosing'
-            ? b` <div class="config-section"><div class="section-header"><ha-icon icon="mdi:flask"></ha-icon><span>Dosing Type</span></div><ha-select label="Dosing Type" .value="${this._config.dosing_type || 'chlorine'}" @selected="${this._dosingTypeChanged}" @closed="${(e) => e.stopPropagation()}" ><mwc-list-item value="chlorine">💧 Chlorine (ORP)</mwc-list-item><mwc-list-item value="ph_minus">➖ pH Minus</mwc-list-item><mwc-list-item value="ph_plus">➕ pH Plus</mwc-list-item><mwc-list-item value="flocculant">🌊 Flocculant</mwc-list-item></ha-select></div> `
-            : ''}
+        ${"dosing"===this._config.card_type?L` <div class="config-section"><div class="section-header"><ha-icon icon="mdi:flask"></ha-icon><span>Dosing Type</span></div><ha-select label="Dosing Type" .value="${this._config.dosing_type||"chlorine"}" @selected="${this._dosingTypeChanged}" @closed="${e=>e.stopPropagation()}" ><mwc-list-item value="chlorine">💧 Chlorine (ORP)</mwc-list-item><mwc-list-item value="ph_minus">➖ pH Minus</mwc-list-item><mwc-list-item value="ph_plus">➕ pH Plus</mwc-list-item><mwc-list-item value="flocculant">🌊 Flocculant</mwc-list-item></ha-select></div> `:""}
 
         <!-- Entity Overrides (card-type specific) -->
-        ${['pump', 'heater', 'solar', 'dosing', 'overview', 'system', 'chemical'].includes(this._config.card_type) ? b` <details class="advanced-section"><summary><ha-icon icon="mdi:swap-horizontal"></ha-icon><span>Entitäten überschreiben</span></summary><div class="advanced-content"> ${this._config.card_type === 'pump' || this._config.card_type === 'overview' || this._config.card_type === 'system' ? b `
-                <ha-entity-picker label="Pumpe (override)" .hass="${this.hass}" .value="${this._config.pump_entity || ''}" .includeDomains="${['switch']}" @value-changed="${(e) => this._overrideChanged('pump_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker>
-              ` : ''}
-              ${this._config.card_type === 'heater' || this._config.card_type === 'overview' || this._config.card_type === 'system' ? b` <ha-entity-picker label="Heizung (override)" .hass="${this.hass}" .value="${this._config.heater_entity || ''}" .includeDomains="${['climate']}" @value-changed="${(e) => this._overrideChanged('heater_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker> ` : ''}
-              ${this._config.card_type === 'solar' || this._config.card_type === 'overview' || this._config.card_type === 'system' ? b` <ha-entity-picker label="Solar (override)" .hass="${this.hass}" .value="${this._config.solar_entity || ''}" .includeDomains="${['climate']}" @value-changed="${(e) => this._overrideChanged('solar_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker> ` : ''}
-              ${this._config.card_type === 'dosing' || this._config.card_type === 'overview' || this._config.card_type === 'system' ? b` <ha-entity-picker label="Chlor-Dosierung (override)" .hass="${this.hass}" .value="${this._config.chlorine_entity || ''}" .includeDomains="${['switch']}" @value-changed="${(e) => this._overrideChanged('chlorine_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker> ` : ''}
-              ${['dosing', 'overview', 'system', 'chemical'].includes(this._config.card_type) ? b` <ha-entity-picker label="pH-Sensor (override)" .hass="${this.hass}" .value="${this._config.ph_value_entity || ''}" .includeDomains="${['sensor']}" @value-changed="${(e) => this._overrideChanged('ph_value_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker><ha-entity-picker label="ORP-Sensor (override)" .hass="${this.hass}" .value="${this._config.orp_value_entity || ''}" .includeDomains="${['sensor']}" @value-changed="${(e) => this._overrideChanged('orp_value_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker> ` : ''}
-              ${['heater', 'solar', 'overview', 'system', 'chemical'].includes(this._config.card_type) ? b` <ha-entity-picker label="Pool-Temperatur (override)" .hass="${this.hass}" .value="${this._config.pool_temp_entity || ''}" .includeDomains="${['sensor']}" @value-changed="${(e) => this._overrideChanged('pool_temp_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker> ` : ''}
+        ${["pump","heater","solar","dosing","overview","system","chemical"].includes(this._config.card_type)?L` <details class="advanced-section"><summary><ha-icon icon="mdi:swap-horizontal"></ha-icon><span>Entitäten überschreiben</span></summary><div class="advanced-content"> ${"pump"===this._config.card_type||"overview"===this._config.card_type||"system"===this._config.card_type?L`
+                <ha-entity-picker label="Pumpe (override)" .hass="${this.hass}" .value="${this._config.pump_entity||""}" .includeDomains="${["switch"]}" @value-changed="${e=>this._overrideChanged("pump_entity",e.detail.value)}" allow-custom-entity></ha-entity-picker>
+              `:""}
+              ${"heater"===this._config.card_type||"overview"===this._config.card_type||"system"===this._config.card_type?L` <ha-entity-picker label="Heizung (override)" .hass="${this.hass}" .value="${this._config.heater_entity||""}" .includeDomains="${["climate"]}" @value-changed="${e=>this._overrideChanged("heater_entity",e.detail.value)}" allow-custom-entity></ha-entity-picker> `:""}
+              ${"solar"===this._config.card_type||"overview"===this._config.card_type||"system"===this._config.card_type?L` <ha-entity-picker label="Solar (override)" .hass="${this.hass}" .value="${this._config.solar_entity||""}" .includeDomains="${["climate"]}" @value-changed="${e=>this._overrideChanged("solar_entity",e.detail.value)}" allow-custom-entity></ha-entity-picker> `:""}
+              ${"dosing"===this._config.card_type||"overview"===this._config.card_type||"system"===this._config.card_type?L` <ha-entity-picker label="Chlor-Dosierung (override)" .hass="${this.hass}" .value="${this._config.chlorine_entity||""}" .includeDomains="${["switch"]}" @value-changed="${e=>this._overrideChanged("chlorine_entity",e.detail.value)}" allow-custom-entity></ha-entity-picker> `:""}
+              ${["dosing","overview","system","chemical"].includes(this._config.card_type)?L` <ha-entity-picker label="pH-Sensor (override)" .hass="${this.hass}" .value="${this._config.ph_value_entity||""}" .includeDomains="${["sensor"]}" @value-changed="${e=>this._overrideChanged("ph_value_entity",e.detail.value)}" allow-custom-entity></ha-entity-picker><ha-entity-picker label="ORP-Sensor (override)" .hass="${this.hass}" .value="${this._config.orp_value_entity||""}" .includeDomains="${["sensor"]}" @value-changed="${e=>this._overrideChanged("orp_value_entity",e.detail.value)}" allow-custom-entity></ha-entity-picker> `:""}
+              ${["heater","solar","overview","system","chemical"].includes(this._config.card_type)?L` <ha-entity-picker label="Pool-Temperatur (override)" .hass="${this.hass}" .value="${this._config.pool_temp_entity||""}" .includeDomains="${["sensor"]}" @value-changed="${e=>this._overrideChanged("pool_temp_entity",e.detail.value)}" allow-custom-entity></ha-entity-picker> `:""}
             </div>
           </details>
-        ` : ''}
+        `:""}
 
         <!-- Advanced Customization -->
         <details class="advanced-section">
@@ -2945,14 +724,14 @@ class VioletPoolCardEditor extends i {
           <div class="advanced-content">
             <ha-textfield
               label="Accent Color (hex)"
-              .value="${this._config.accent_color || ''}"
+              .value="${this._config.accent_color||""}"
               placeholder="#2196F3"
               @input="${this._accentColorChanged}"
             ></ha-textfield>
 
             <ha-textfield
               label="Icon Color (hex)"
-              .value="${this._config.icon_color || ''}"
+              .value="${this._config.icon_color||""}"
               placeholder="#2196F3"
               @input="${this._iconColorChanged}"
             ></ha-textfield>
@@ -2960,7 +739,7 @@ class VioletPoolCardEditor extends i {
             <ha-textfield
               type="number"
               label="Blur Intensity (0-30)"
-              .value="${this._config.blur_intensity || 10}"
+              .value="${this._config.blur_intensity||10}"
               min="0"
               max="30"
               @input="${this._blurIntensityChanged}"
@@ -2968,189 +747,4 @@ class VioletPoolCardEditor extends i {
           </div>
         </details>
       </div>
-    `;
-    }
-    _formatSizeName(size) {
-        const names = {
-            small: 'Small',
-            medium: 'Medium',
-            large: 'Large',
-            fullscreen: 'Fullscreen',
-        };
-        return names[size] || size;
-    }
-    _cardTypeChanged(ev) {
-        const target = ev.target;
-        if (this._config.card_type === target.value)
-            return;
-        this._config = {
-            ...this._config,
-            card_type: target.value,
-        };
-        this._fireConfigChanged();
-    }
-    _entityPrefixChanged(ev) {
-        const target = ev.target;
-        const value = target.value.trim().toLowerCase().replace(/[^a-z0-9_]/g, '_');
-        if (this._config.entity_prefix === value)
-            return;
-        this._config = {
-            ...this._config,
-            entity_prefix: value || 'violet_pool',
-        };
-        this._fireConfigChanged();
-    }
-    _entityChanged(ev) {
-        const target = ev.detail;
-        if (this._config.entity === target.value)
-            return;
-        this._config = {
-            ...this._config,
-            entity: target.value,
-        };
-        this._fireConfigChanged();
-    }
-    _sizeChanged(size) {
-        this._config = {
-            ...this._config,
-            size: size,
-        };
-        this._fireConfigChanged();
-    }
-    _themeChanged(theme) {
-        this._config = {
-            ...this._config,
-            theme: theme,
-        };
-        this._fireConfigChanged();
-    }
-    _animationChanged(animation) {
-        this._config = {
-            ...this._config,
-            animation: animation,
-        };
-        this._fireConfigChanged();
-    }
-    _nameChanged(ev) {
-        const target = ev.target;
-        this._config = {
-            ...this._config,
-            name: target.value || undefined,
-        };
-        this._fireConfigChanged();
-    }
-    _iconChanged(ev) {
-        this._config = {
-            ...this._config,
-            icon: ev.detail.value || undefined,
-        };
-        this._fireConfigChanged();
-    }
-    _showStateChanged(ev) {
-        const target = ev.target;
-        this._config = {
-            ...this._config,
-            show_state: target.checked,
-        };
-        this._fireConfigChanged();
-    }
-    _showDetailStatusChanged(ev) {
-        const target = ev.target;
-        this._config = {
-            ...this._config,
-            show_detail_status: target.checked,
-        };
-        this._fireConfigChanged();
-    }
-    _showControlsChanged(ev) {
-        const target = ev.target;
-        this._config = {
-            ...this._config,
-            show_controls: target.checked,
-        };
-        this._fireConfigChanged();
-    }
-    _showRuntimeChanged(ev) {
-        const target = ev.target;
-        this._config = {
-            ...this._config,
-            show_runtime: target.checked,
-        };
-        this._fireConfigChanged();
-    }
-    _showHistoryChanged(ev) {
-        const target = ev.target;
-        this._config = {
-            ...this._config,
-            show_history: target.checked,
-        };
-        this._fireConfigChanged();
-    }
-    _dosingTypeChanged(ev) {
-        const target = ev.target;
-        this._config = {
-            ...this._config,
-            dosing_type: target.value,
-        };
-        this._fireConfigChanged();
-    }
-    _accentColorChanged(ev) {
-        const target = ev.target;
-        this._config = {
-            ...this._config,
-            accent_color: target.value || undefined,
-        };
-        this._fireConfigChanged();
-    }
-    _iconColorChanged(ev) {
-        const target = ev.target;
-        this._config = {
-            ...this._config,
-            icon_color: target.value || undefined,
-        };
-        this._fireConfigChanged();
-    }
-    _blurIntensityChanged(ev) {
-        const target = ev.target;
-        this._config = {
-            ...this._config,
-            blur_intensity: parseInt(target.value) || 10,
-        };
-        this._fireConfigChanged();
-    }
-    _overrideChanged(key, value) {
-        this._config = {
-            ...this._config,
-            [key]: value || undefined,
-        };
-        this._fireConfigChanged();
-    }
-    _fireConfigChanged() {
-        const event = new CustomEvent('config-changed', {
-            detail: { config: this._config },
-            bubbles: true,
-            composed: true,
-        });
-        this.dispatchEvent(event);
-    }
-    static get styles() {
-        return i$3`:host{font-family:-apple-system, system-ui, 'Segoe UI', sans-serif;}.card-config{display:flex;flex-direction:column;gap:14px;padding:16px;}.config-section{background:var(--card-background-color, #fff);border:1px solid var(--divider-color, rgba(0,0,0,0.08));border-radius:14px;padding:16px;}.section-header{display:flex;align-items:center;gap:8px;margin-bottom:14px;font-weight:600;font-size:14px;letter-spacing:-0.2px;color:var(--primary-text-color);}.section-header ha-icon{--mdc-icon-size:18px;color:var(--primary-color);}.prefix-info{display:flex;align-items:flex-start;gap:8px;padding:10px 12px;margin-top:10px;background:rgba(0,122,255,0.07);border-radius:10px;font-size:12px;color:var(--secondary-text-color);line-height:1.4;}.prefix-info ha-icon{--mdc-icon-size:16px;color:#007AFF;flex-shrink:0;margin-top:2px;}.premium-section{background:var(--card-background-color, #fff);border:2px solid rgba(0,122,255,0.15);}.premium-header{color:#007AFF;}.picker-container{margin-bottom:20px;}.picker-container:last-child{margin-bottom:0;}.picker-container > label{display:block;font-weight:500;font-size:13px;margin-bottom:10px;color:var(--secondary-text-color);text-transform:uppercase;letter-spacing:0.5px;}.size-picker{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}.theme-picker{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}.animation-picker{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;}.size-button, .theme-button, .animation-button{display:flex;align-items:center;gap:10px;padding:10px;background:var(--secondary-background-color, rgba(120,120,128,0.06));border:1.5px solid transparent;border-radius:10px;cursor:pointer;transition:all 0.16s ease;font-family:inherit;}.size-button{flex-direction:column;gap:6px;align-items:center;}.theme-button{flex-direction:column;gap:6px;align-items:center;padding:10px 8px;}.size-button:hover, .theme-button:hover, .animation-button:hover{border-color:rgba(0,122,255,0.3);background:rgba(0,122,255,0.05);}.size-button.active, .animation-button.active{border-color:#007AFF;background:rgba(0,122,255,0.1);color:#007AFF;}.theme-button.active{border-color:#007AFF;background:rgba(0,122,255,0.08);box-shadow:0 0 0 3px rgba(0,122,255,0.15);}.size-preview{width:36px;height:26px;border-radius:6px;border:2px solid currentColor;opacity:0.3;}.size-preview.size-small{width:22px;height:18px;}.size-preview.size-medium{width:30px;height:22px;}.size-preview.size-large{width:40px;height:28px;}.size-preview.size-fullscreen{width:46px;height:34px;}.size-button.active .size-preview{opacity:1;}.size-button span{font-size:11px;font-weight:500;}.theme-preview{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;border:1px solid rgba(0,0,0,0.08);}.theme-preview.theme-apple{background:#F2F2F7;}.theme-preview.theme-dark{background:#1C1C1E;}.theme-preview.theme-glass{background:rgba(255,255,255,0.6);backdrop-filter:blur(8px);}.theme-preview.theme-modern{background:#f8f8fa;border:1px solid #eee;}.theme-preview.theme-minimalist{background:#fff;}.theme-preview.theme-neon{background:#0D0D14;border:1px solid rgba(0,212,255,0.3);}.theme-preview.theme-luxury{background:linear-gradient(135deg,rgba(255,255,255,0.9),rgba(240,240,255,0.9));}.theme-dot{width:20px;height:20px;border-radius:50%;border:2px solid rgba(0,0,0,0.1);}.theme-info, .anim-info{display:flex;flex-direction:column;gap:1px;}.theme-label, .anim-label{font-weight:600;color:var(--primary-text-color);font-size:12px;}.theme-desc, .anim-desc{color:var(--secondary-text-color);font-size:10px;}.anim-icon{font-size:18px;}.advanced-section{background:var(--card-background-color);border:1px solid var(--divider-color);border-radius:14px;padding:14px;}.advanced-section summary{display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;font-size:14px;color:var(--primary-text-color);list-style:none;}.advanced-section summary::-webkit-details-marker{display:none;}.advanced-section summary ha-icon{--mdc-icon-size:18px;color:var(--primary-color);}.advanced-content{display:flex;flex-direction:column;gap:12px;margin-top:14px;}ha-select, ha-textfield, ha-entity-picker, ha-icon-picker{width:100%;}ha-formfield{display:flex;align-items:center;margin-bottom:10px;}`;
-    }
-}
-__decorate([
-    n({ attribute: false })
-], VioletPoolCardEditor.prototype, "hass", void 0);
-__decorate([
-    r()
-], VioletPoolCardEditor.prototype, "_config", void 0);
-if (!customElements.get('violet-pool-card-editor')) {
-    customElements.define('violet-pool-card-editor', VioletPoolCardEditor);
-}
-
-var violetPoolCardEditor = /*#__PURE__*/Object.freeze({
-    __proto__: null,
-    VioletPoolCardEditor: VioletPoolCardEditor
-});
-
-export { VioletPoolCard };
-//# sourceMappingURL=violet-pool-card.js.map
+    `}_formatSizeName(e){return{small:"Small",medium:"Medium",large:"Large",fullscreen:"Fullscreen"}[e]||e}_cardTypeChanged(e){const t=e.target;this._config.card_type!==t.value&&(this._config={...this._config,card_type:t.value},this._fireConfigChanged())}_entityPrefixChanged(e){const t=e.target.value.trim().toLowerCase().replace(/[^a-z0-9_]/g,"_");this._config.entity_prefix!==t&&(this._config={...this._config,entity_prefix:t||"violet_pool"},this._fireConfigChanged())}_entityChanged(e){const t=e.detail;this._config.entity!==t.value&&(this._config={...this._config,entity:t.value},this._fireConfigChanged())}_sizeChanged(e){this._config={...this._config,size:e},this._fireConfigChanged()}_themeChanged(e){this._config={...this._config,theme:e},this._fireConfigChanged()}_animationChanged(e){this._config={...this._config,animation:e},this._fireConfigChanged()}_nameChanged(e){this._config={...this._config,name:e.target.value||void 0},this._fireConfigChanged()}_iconChanged(e){this._config={...this._config,icon:e.detail.value||void 0},this._fireConfigChanged()}_showStateChanged(e){this._config={...this._config,show_state:e.target.checked},this._fireConfigChanged()}_showDetailStatusChanged(e){this._config={...this._config,show_detail_status:e.target.checked},this._fireConfigChanged()}_showControlsChanged(e){this._config={...this._config,show_controls:e.target.checked},this._fireConfigChanged()}_showRuntimeChanged(e){this._config={...this._config,show_runtime:e.target.checked},this._fireConfigChanged()}_showHistoryChanged(e){this._config={...this._config,show_history:e.target.checked},this._fireConfigChanged()}_dosingTypeChanged(e){this._config={...this._config,dosing_type:e.target.value},this._fireConfigChanged()}_accentColorChanged(e){this._config={...this._config,accent_color:e.target.value||void 0},this._fireConfigChanged()}_iconColorChanged(e){this._config={...this._config,icon_color:e.target.value||void 0},this._fireConfigChanged()}_blurIntensityChanged(e){this._config={...this._config,blur_intensity:parseInt(e.target.value)||10},this._fireConfigChanged()}_overrideChanged(e,t){this._config={...this._config,[e]:t||void 0},this._fireConfigChanged()}_fireConfigChanged(){const e=new CustomEvent("config-changed",{detail:{config:this._config},bubbles:!0,composed:!0});this.dispatchEvent(e)}static get styles(){return r`:host{font-family:-apple-system, system-ui, 'Segoe UI', sans-serif;}.card-config{display:flex;flex-direction:column;gap:14px;padding:16px;}.config-section{background:var(--card-background-color, #fff);border:1px solid var(--divider-color, rgba(0,0,0,0.08));border-radius:14px;padding:16px;}.section-header{display:flex;align-items:center;gap:8px;margin-bottom:14px;font-weight:600;font-size:14px;letter-spacing:-0.2px;color:var(--primary-text-color);}.section-header ha-icon{--mdc-icon-size:18px;color:var(--primary-color);}.prefix-info{display:flex;align-items:flex-start;gap:8px;padding:10px 12px;margin-top:10px;background:rgba(0,122,255,0.07);border-radius:10px;font-size:12px;color:var(--secondary-text-color);line-height:1.4;}.prefix-info ha-icon{--mdc-icon-size:16px;color:#007AFF;flex-shrink:0;margin-top:2px;}.premium-section{background:var(--card-background-color, #fff);border:2px solid rgba(0,122,255,0.15);}.premium-header{color:#007AFF;}.picker-container{margin-bottom:20px;}.picker-container:last-child{margin-bottom:0;}.picker-container > label{display:block;font-weight:500;font-size:13px;margin-bottom:10px;color:var(--secondary-text-color);text-transform:uppercase;letter-spacing:0.5px;}.size-picker{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}.theme-picker{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}.animation-picker{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;}.size-button, .theme-button, .animation-button{display:flex;align-items:center;gap:10px;padding:10px;background:var(--secondary-background-color, rgba(120,120,128,0.06));border:1.5px solid transparent;border-radius:10px;cursor:pointer;transition:all 0.16s ease;font-family:inherit;}.size-button{flex-direction:column;gap:6px;align-items:center;}.theme-button{flex-direction:column;gap:6px;align-items:center;padding:10px 8px;}.size-button:hover, .theme-button:hover, .animation-button:hover{border-color:rgba(0,122,255,0.3);background:rgba(0,122,255,0.05);}.size-button.active, .animation-button.active{border-color:#007AFF;background:rgba(0,122,255,0.1);color:#007AFF;}.theme-button.active{border-color:#007AFF;background:rgba(0,122,255,0.08);box-shadow:0 0 0 3px rgba(0,122,255,0.15);}.size-preview{width:36px;height:26px;border-radius:6px;border:2px solid currentColor;opacity:0.3;}.size-preview.size-small{width:22px;height:18px;}.size-preview.size-medium{width:30px;height:22px;}.size-preview.size-large{width:40px;height:28px;}.size-preview.size-fullscreen{width:46px;height:34px;}.size-button.active .size-preview{opacity:1;}.size-button span{font-size:11px;font-weight:500;}.theme-preview{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;border:1px solid rgba(0,0,0,0.08);}.theme-preview.theme-apple{background:#F2F2F7;}.theme-preview.theme-dark{background:#1C1C1E;}.theme-preview.theme-glass{background:rgba(255,255,255,0.6);backdrop-filter:blur(8px);}.theme-preview.theme-modern{background:#f8f8fa;border:1px solid #eee;}.theme-preview.theme-minimalist{background:#fff;}.theme-preview.theme-neon{background:#0D0D14;border:1px solid rgba(0,212,255,0.3);}.theme-preview.theme-luxury{background:linear-gradient(135deg,rgba(255,255,255,0.9),rgba(240,240,255,0.9));}.theme-dot{width:20px;height:20px;border-radius:50%;border:2px solid rgba(0,0,0,0.1);}.theme-info, .anim-info{display:flex;flex-direction:column;gap:1px;}.theme-label, .anim-label{font-weight:600;color:var(--primary-text-color);font-size:12px;}.theme-desc, .anim-desc{color:var(--secondary-text-color);font-size:10px;}.anim-icon{font-size:18px;}.advanced-section{background:var(--card-background-color);border:1px solid var(--divider-color);border-radius:14px;padding:14px;}.advanced-section summary{display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;font-size:14px;color:var(--primary-text-color);list-style:none;}.advanced-section summary::-webkit-details-marker{display:none;}.advanced-section summary ha-icon{--mdc-icon-size:18px;color:var(--primary-color);}.advanced-content{display:flex;flex-direction:column;gap:12px;margin-top:14px;}ha-select, ha-textfield, ha-entity-picker, ha-icon-picker{width:100%;}ha-formfield{display:flex;align-items:center;margin-bottom:10px;}`}}e([pe({attribute:!1})],Fe.prototype,"hass",void 0),e([he()],Fe.prototype,"_config",void 0),customElements.get("violet-pool-card-editor")||customElements.define("violet-pool-card-editor",Fe);var Ae=Object.freeze({__proto__:null,VioletPoolCardEditor:Fe});export{Ce as VioletPoolCard};

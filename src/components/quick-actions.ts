@@ -1,5 +1,5 @@
 import { LitElement, html, css, TemplateResult, CSSResultGroup } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 
 export interface QuickAction {
   icon: string;
@@ -12,7 +12,6 @@ export interface QuickAction {
   confirmMessage?: string;
 }
 
-@customElement('quick-actions')
 export class QuickActions extends LitElement {
   @property({ type: Array }) public actions: QuickAction[] = [];
   @property({ type: Boolean }) public vertical = false;
@@ -105,6 +104,11 @@ export class QuickActions extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'quick-actions': QuickActions;
+    'vpc-quick-actions': QuickActions;
   }
+}
+
+
+if (!customElements.get('vpc-quick-actions')) {
+  customElements.define('vpc-quick-actions', QuickActions);
 }

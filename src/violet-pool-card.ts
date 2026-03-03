@@ -335,7 +335,7 @@ export class VioletPoolCard extends LitElement {
               </span>
             </div>
             ${config.show_state
-              ? html`<status-badge .state="${state}" .pulse="${isRunning}"></status-badge>`
+              ? html`<vpc-status-badge .state="${state}" .pulse="${isRunning}"></vpc-status-badge>`
               : ''}
           </div>
 
@@ -371,11 +371,11 @@ export class VioletPoolCard extends LitElement {
           </div>
 
           ${config.show_detail_status && pumpState
-            ? html`<detail-status .raw="${pumpState}"></detail-status>`
+            ? html`<vpc-detail-status .raw="${pumpState}"></vpc-detail-status>`
             : ''}
 
           ${config.show_controls
-            ? html` <slider-control label="Speed Level" min="0" max="3" step="1" .value="${currentSpeed}" .labels="${['OFF', 'ECO', 'Normal', 'Boost']}" @value-changed="${(e: CustomEvent) => this._handlePumpSpeedChange(e, config.entity!)}" ></slider-control> `
+            ? html` <vpc-slider-control label="Speed Level" min="0" max="3" step="1" .value="${currentSpeed}" .labels="${['OFF', 'ECO', 'Normal', 'Boost']}" @value-changed="${(e: CustomEvent) => this._handlePumpSpeedChange(e, config.entity!)}" ></vpc-slider-control> `
             : ''}
 
           ${config.show_runtime && runtimeSeconds > 0
@@ -458,7 +458,7 @@ export class VioletPoolCard extends LitElement {
       ? this._getValuePercent(targetTemp, minTemp, maxTemp)
       : undefined;
 
-    return html` <ha-card class="${this._getCardClasses(isHeating, config)}" style="--card-accent: ${accentColor}" @click="${() => this._showMoreInfo(config.entity!)}" ><div class="accent-bar"></div><div class="card-content"><div class="header"><div class="header-icon ${isHeating ? 'icon-active' : ''}" style="--icon-accent: ${accentColor}">${config.icon ? html`<ha-icon icon="${config.icon}" class="${isHeating ? 'heater-active' : ''}"></ha-icon>` : heaterSVG(isHeating, accentColor)}</div><div class="header-info"><span class="name">${name}</span><span class="header-subtitle">${this._getFriendlyState(state)}</span></div> ${config.show_state ? html`<status-badge .state="${state}"></status-badge>`
+    return html` <ha-card class="${this._getCardClasses(isHeating, config)}" style="--card-accent: ${accentColor}" @click="${() => this._showMoreInfo(config.entity!)}" ><div class="accent-bar"></div><div class="card-content"><div class="header"><div class="header-icon ${isHeating ? 'icon-active' : ''}" style="--icon-accent: ${accentColor}">${config.icon ? html`<ha-icon icon="${config.icon}" class="${isHeating ? 'heater-active' : ''}"></ha-icon>` : heaterSVG(isHeating, accentColor)}</div><div class="header-info"><span class="name">${name}</span><span class="header-subtitle">${this._getFriendlyState(state)}</span></div> ${config.show_state ? html`<vpc-status-badge .state="${state}"></vpc-status-badge>`
               : ''}
           </div>
 
@@ -491,7 +491,7 @@ export class VioletPoolCard extends LitElement {
             : ''}
 
           ${config.show_detail_status && heaterState
-            ? html`<detail-status .raw="${heaterState}"></detail-status>`
+            ? html`<vpc-detail-status .raw="${heaterState}"></vpc-detail-status>`
             : ''}
 
           ${outsideTemp !== undefined
@@ -508,7 +508,7 @@ export class VioletPoolCard extends LitElement {
 
           ${config.show_controls
             ? html` ${targetTemp !== undefined ? html`
-                      <slider-control
+                      <vpc-slider-control
                         label="Target Temperature"
                         .min="${minTemp}"
                         .max="${maxTemp}"
@@ -517,10 +517,10 @@ export class VioletPoolCard extends LitElement {
                         unit="°C"
                         showMinMax
                         @value-changed="${(e: CustomEvent) => this._handleTemperatureChange(e, config.entity!)}"
-                      ></slider-control>
+                      ></vpc-slider-control>
                     `
                   : ''}
-                <quick-actions .actions="${quickActions}"></quick-actions>
+                <vpc-quick-actions .actions="${quickActions}"></vpc-quick-actions>
               `
             : ''}
         </div>
@@ -594,12 +594,12 @@ export class VioletPoolCard extends LitElement {
       ? this._getValuePercent(targetTemp, minTemp, maxTemp)
       : undefined;
 
-    return html` <ha-card class="${this._getCardClasses(isSolarActive, config)}" style="--card-accent: ${accentColor}" @click="${() => this._showMoreInfo(config.entity!)}" ><div class="accent-bar"></div><div class="card-content"><div class="header"><div class="header-icon ${isSolarActive ? 'icon-active' : ''}" style="--icon-accent: ${accentColor}">${config.icon ? html`<ha-icon icon="${config.icon}" class="${isSolarActive ? 'solar-active' : ''}"></ha-icon>` : solarSVG(isSolarActive, accentColor)}</div><div class="header-info"><span class="name">${name}</span><span class="header-subtitle">${this._getFriendlyState(state)}</span></div> ${config.show_state ? html`<status-badge .state="${state}"></status-badge>`
+    return html` <ha-card class="${this._getCardClasses(isSolarActive, config)}" style="--card-accent: ${accentColor}" @click="${() => this._showMoreInfo(config.entity!)}" ><div class="accent-bar"></div><div class="card-content"><div class="header"><div class="header-icon ${isSolarActive ? 'icon-active' : ''}" style="--icon-accent: ${accentColor}">${config.icon ? html`<ha-icon icon="${config.icon}" class="${isSolarActive ? 'solar-active' : ''}"></ha-icon>` : solarSVG(isSolarActive, accentColor)}</div><div class="header-info"><span class="name">${name}</span><span class="header-subtitle">${this._getFriendlyState(state)}</span></div> ${config.show_state ? html`<vpc-status-badge .state="${state}"></vpc-status-badge>`
               : ''}
           </div>
 
           ${config.show_detail_status && solarState
-            ? html`<detail-status .raw="${solarState}"></detail-status>`
+            ? html`<vpc-detail-status .raw="${solarState}"></vpc-detail-status>`
             : ''}
 
           <div class="solar-temps">
@@ -639,7 +639,7 @@ export class VioletPoolCard extends LitElement {
 
           ${config.show_controls
             ? html` ${targetTemp !== undefined ? html`
-                      <slider-control
+                      <vpc-slider-control
                         label="Target Temperature"
                         .min="${minTemp}"
                         .max="${maxTemp}"
@@ -648,10 +648,10 @@ export class VioletPoolCard extends LitElement {
                         unit="°C"
                         showMinMax
                         @value-changed="${(e: CustomEvent) => this._handleTemperatureChange(e, config.entity!)}"
-                      ></slider-control>
+                      ></vpc-slider-control>
                     `
                   : ''}
-                <quick-actions .actions="${quickActions}"></quick-actions>
+                <vpc-quick-actions .actions="${quickActions}"></vpc-quick-actions>
               `
             : ''}
         </div>
@@ -770,7 +770,7 @@ export class VioletPoolCard extends LitElement {
           : (currentValue! < 7.0 ? 'Acidic' : currentValue! > 7.4 ? 'Alkaline' : 'Optimal'))
       : '';
 
-    return html` <ha-card class="${this._getCardClasses(isDosing, config)}" style="--card-accent: ${accentColor}" @click="${() => this._showMoreInfo(config.entity!)}" ><div class="accent-bar"></div><div class="card-content"><div class="header"><div class="header-icon ${isDosing ? 'icon-active' : ''}" style="--icon-accent: ${accentColor}"><ha-icon icon="${config.icon || this._getDosingIcon(dosingType)}" class="${isDosing ? 'dosing-active' : ''}" ></ha-icon></div><div class="header-info"><span class="name">${name}</span><span class="header-subtitle">${this._getFriendlyState(state)}</span></div> ${config.show_state ? html`<status-badge .state="${state}" .pulse="${isDosing}"></status-badge>`
+    return html` <ha-card class="${this._getCardClasses(isDosing, config)}" style="--card-accent: ${accentColor}" @click="${() => this._showMoreInfo(config.entity!)}" ><div class="accent-bar"></div><div class="card-content"><div class="header"><div class="header-icon ${isDosing ? 'icon-active' : ''}" style="--icon-accent: ${accentColor}"><ha-icon icon="${config.icon || this._getDosingIcon(dosingType)}" class="${isDosing ? 'dosing-active' : ''}" ></ha-icon></div><div class="header-info"><span class="name">${name}</span><span class="header-subtitle">${this._getFriendlyState(state)}</span></div> ${config.show_state ? html`<vpc-status-badge .state="${state}" .pulse="${isDosing}"></vpc-status-badge>`
               : ''}
           </div>
 
@@ -800,11 +800,11 @@ export class VioletPoolCard extends LitElement {
             : ''}
 
           ${config.show_detail_status && Array.isArray(dosingState) && dosingState.length > 0
-            ? html`<warning-chips .warnings="${dosingState}" defaultType="warning"></warning-chips>`
+            ? html`<vpc-warning-chips .warnings="${dosingState}" defaultType="warning"></vpc-warning-chips>`
             : ''}
 
           ${config.show_controls
-            ? html`<quick-actions .actions="${quickActions}"></quick-actions>`
+            ? html`<vpc-quick-actions .actions="${quickActions}"></vpc-quick-actions>`
             : ''}
 
           ${config.show_history && dosingVolume24h !== undefined
@@ -1321,7 +1321,7 @@ export class VioletPoolCard extends LitElement {
               ${detailStatus ? html`<span class="compact-detail">${detailStatus}</span>` : ''}
             </div>
           </div>
-          <status-badge .state="${state}"></status-badge>
+          <vpc-status-badge .state="${state}"></vpc-status-badge>
         </div>
       </ha-card>
     `;
@@ -1622,7 +1622,7 @@ export class VioletPoolCard extends LitElement {
               <span class="name">${name}</span>
               <span class="header-subtitle" style="color:${coverStatusColor}">${stateLabels[state] || state}</span>
             </div>
-            ${config.show_state !== false ? html`<status-badge .state="${badgeState}" .pulse="${isMoving}"></status-badge>` : ''}
+            ${config.show_state !== false ? html`<vpc-status-badge .state="${badgeState}" .pulse="${isMoving}"></vpc-status-badge>` : ''}
           </div>
 
           <!-- Animated pool visualization -->
@@ -1645,12 +1645,12 @@ export class VioletPoolCard extends LitElement {
 
           <!-- Position slider -->
           ${config.show_controls !== false ? html`
-            <slider-control
+            <vpc-slider-control
               label="Position"
               min="0" max="100" step="5"
               .value="${Math.round(position)}" unit="%"
               @value-changed="${(e: CustomEvent) => { e.stopPropagation(); this.hass.callService('cover', 'set_cover_position', { entity_id: entityId, position: e.detail.value }); }}"
-            ></slider-control>
+            ></vpc-slider-control>
           ` : ''}
 
           <!-- Open / Stop / Close buttons -->
@@ -1713,7 +1713,7 @@ export class VioletPoolCard extends LitElement {
                 ${isOn ? (effect ? effect : brightnessPercent + '%') : 'Aus'}
               </span>
             </div>
-            ${config.show_state !== false ? html`<status-badge .state="${state}" .pulse="${isOn}"></status-badge>` : ''}
+            ${config.show_state !== false ? html`<vpc-status-badge .state="${state}" .pulse="${isOn}"></vpc-status-badge>` : ''}
           </div>
 
           ${isOn ? html`
@@ -1752,7 +1752,7 @@ export class VioletPoolCard extends LitElement {
 
             ${config.show_controls !== false ? html`
               <div class="light-brightness-row">
-                <slider-control
+                <vpc-slider-control
                   label="Helligkeit"
                   min="1" max="100" step="5"
                   .value="${brightnessPercent}" unit="%"
@@ -1760,7 +1760,7 @@ export class VioletPoolCard extends LitElement {
                     e.stopPropagation();
                     this.hass.callService('light', 'turn_on', { entity_id: entityId, brightness_pct: e.detail.value });
                   }}"
-                ></slider-control>
+                ></vpc-slider-control>
               </div>
             ` : ''}
           ` : ''}
@@ -1848,7 +1848,7 @@ export class VioletPoolCard extends LitElement {
                 ${isBackwashing ? 'Rückspülung läuft…' : isFilterOn ? 'Aktiv' : 'Aus'}
               </span>
             </div>
-            ${config.show_state !== false ? html`<status-badge .state="${isFilterOn ? 'on' : 'off'}" .pulse="${isBackwashing}"></status-badge>` : ''}
+            ${config.show_state !== false ? html`<vpc-status-badge .state="${isFilterOn ? 'on' : 'off'}" .pulse="${isBackwashing}"></vpc-status-badge>` : ''}
           </div>
 
           <!-- Pressure arc gauge -->

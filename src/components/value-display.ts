@@ -1,5 +1,5 @@
 import { LitElement, html, css, TemplateResult, CSSResultGroup } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 
 export type ValueStatus = 'normal' | 'low' | 'high' | 'critical' | 'ok' | 'warning' | 'error';
 
@@ -18,7 +18,6 @@ const STATUS_CONFIG: Record<ValueStatus, StatusConfig> = {
   error: { color: '#F44336', icon: 'mdi:close-circle' },
 };
 
-@customElement('value-display')
 export class ValueDisplay extends LitElement {
   @property({ type: Number }) public value?: number;
   @property() public unit = '';
@@ -95,6 +94,11 @@ export class ValueDisplay extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'value-display': ValueDisplay;
+    'vpc-value-display': ValueDisplay;
   }
+}
+
+
+if (!customElements.get('vpc-value-display')) {
+  customElements.define('vpc-value-display', ValueDisplay);
 }

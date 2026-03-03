@@ -1,5 +1,5 @@
 import { LitElement, html, css, TemplateResult, CSSResultGroup } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 
 export type ChipType = 'info' | 'warning' | 'error' | 'success';
 
@@ -39,7 +39,6 @@ export interface Warning {
   dismissable?: boolean;
 }
 
-@customElement('warning-chips')
 export class WarningChips extends LitElement {
   @property({ type: Array }) public warnings: Warning[] | string[] = [];
   @property() public defaultType: ChipType = 'warning';
@@ -143,6 +142,11 @@ export class WarningChips extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'warning-chips': WarningChips;
+    'vpc-warning-chips': WarningChips;
   }
+}
+
+
+if (!customElements.get('vpc-warning-chips')) {
+  customElements.define('vpc-warning-chips', WarningChips);
 }
