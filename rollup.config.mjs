@@ -56,15 +56,15 @@ export default {
     }),
     !dev && terser({
       module: true,
-      toplevel: true,
+      toplevel: false,
       ecma: 2020,
       compress: {
         drop_console: true,
         drop_debugger: true,
         pure_funcs: ['console.info', 'console.debug', 'console.log', 'console.warn', 'console.error'],
         passes: 3,
-        unsafe: true,
-        pure_getters: true,
+        unsafe: false,
+        pure_getters: false,
       },
       mangle: {
         properties: false,
