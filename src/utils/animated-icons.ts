@@ -320,3 +320,133 @@ export function valveSVG(open: boolean, color: string): TemplateResult {
       ` : ''}
     </svg>`;
 }
+
+/**
+ * Animated backwash icon
+ */
+export function backwashSVG(active: boolean, color: string): TemplateResult {
+  return html`
+    <svg viewBox="0 0 48 48" style="width:100%;height:100%;display:block;overflow:visible" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="24" cy="24" r="22" fill="${color}" fill-opacity="${active ? 0.15 : 0.07}"/>
+      <circle cx="24" cy="24" r="21" fill="none" stroke="${color}" stroke-width="1.5" stroke-opacity="0.38"/>
+      <!-- Arrows forming a circle to represent backwash -->
+      <path d="M24,12 A12,12 0 1,1 12,24" fill="none" stroke="${color}" stroke-width="3" stroke-linecap="round"/>
+      <polygon points="12,24 8,18 16,18" fill="${color}" />
+      <path d="M24,36 A12,12 0 1,1 36,24" fill="none" stroke="${color}" stroke-width="3" stroke-linecap="round"/>
+      <polygon points="36,24 40,30 32,30" fill="${color}" />
+    </svg>`;
+}
+
+/**
+ * Refill icon
+ */
+export function refillSVG(level: number, maxLevel: number, color: string): TemplateResult {
+  const percent = Math.min(level / maxLevel, 1);
+  return html`
+    <svg viewBox="0 0 48 48" style="width:100%;height:100%;display:block;overflow:visible" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="24" cy="24" r="22" fill="${color}" fill-opacity="0.1"/>
+      <rect x="18" y="14" width="12" height="20" rx="2" fill="none" stroke="${color}" stroke-width="2"/>
+      <rect x="18" y="${34 - 20 * percent}" width="12" height="${20 * percent}" rx="2" fill="${color}" fill-opacity="0.7"/>
+    </svg>`;
+}
+
+/**
+ * Solar surplus icon
+ */
+export function solarSurplusSVG(hasSurplus: boolean, _isExporting: boolean, color: string): TemplateResult {
+  return html`
+    <svg viewBox="0 0 48 48" style="width:100%;height:100%;display:block;overflow:visible" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="24" cy="24" r="22" fill="${color}" fill-opacity="${hasSurplus ? 0.15 : 0.07}"/>
+      <circle cx="24" cy="24" r="12" fill="${color}" fill-opacity="0.8"/>
+      <!-- Rays -->
+      ${[0,45,90,135,180,225,270,315].map(deg => html`
+        <line x1="24" y1="8" x2="24" y2="4" stroke="${color}" stroke-width="2" style="transform:rotate(${deg}deg);transform-origin:24px 24px;"/>
+      `)}
+    </svg>`;
+}
+
+/**
+ * Flow rate icon
+ */
+export function flowRateSVG(_flow: number, _maxFlow: number, color: string): TemplateResult {
+
+  return html`
+    <svg viewBox="0 0 48 48" style="width:100%;height:100%;display:block;overflow:visible" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="24" cy="24" r="22" fill="${color}" fill-opacity="0.1"/>
+      <path d="M12,24 Q18,16 24,24 T36,24" fill="none" stroke="${color}" stroke-width="3" stroke-linecap="round"/>
+    </svg>`;
+}
+
+/**
+ * Inlet icon
+ */
+export function inletSVG(isInflowing: boolean, color: string): TemplateResult {
+  return html`
+    <svg viewBox="0 0 48 48" style="width:100%;height:100%;display:block;overflow:visible" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="24" cy="24" r="22" fill="${color}" fill-opacity="${isInflowing ? 0.15 : 0.07}"/>
+      <!-- Pipe symbol -->
+      <rect x="16" y="16" width="16" height="8" fill="${color}" />
+      <polygon points="24,32 16,24 32,24" fill="${color}" />
+    </svg>`;
+}
+
+/**
+ * Counter current icon
+ */
+export function counterCurrentSVG(isActive: boolean, color: string): TemplateResult {
+  return html`
+    <svg viewBox="0 0 48 48" style="width:100%;height:100%;display:block;overflow:visible" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="24" cy="24" r="22" fill="${color}" fill-opacity="${isActive ? 0.15 : 0.07}"/>
+      <!-- Two opposite arrows -->
+      <path d="M16,20 L32,20 M32,20 L28,16 M32,20 L28,24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round"/>
+      <path d="M32,28 L16,28 M16,28 L20,24 M16,28 L20,32" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round"/>
+    </svg>`;
+}
+
+/**
+ * Chlorine Canister icon
+ */
+export function chlorineCanisterSVG(_level: number, _maxLevel: number, color: string): TemplateResult {
+  return html`
+    <svg viewBox="0 0 48 48" style="width:100%;height:100%;display:block;overflow:visible" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="24" cy="24" r="22" fill="${color}" fill-opacity="0.1"/>
+      <rect x="18" y="12" width="12" height="24" rx="2" fill="none" stroke="${color}" stroke-width="2"/>
+      <text x="24" y="28" text-anchor="middle" font-size="10" fill="${color}">Cl</text>
+    </svg>`;
+}
+
+/**
+ * pH Plus Canister icon
+ */
+export function phPlusCanisterSVG(_level: number, _maxLevel: number, color: string): TemplateResult {
+  return html`
+    <svg viewBox="0 0 48 48" style="width:100%;height:100%;display:block;overflow:visible" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="24" cy="24" r="22" fill="${color}" fill-opacity="0.1"/>
+      <rect x="18" y="12" width="12" height="24" rx="2" fill="none" stroke="${color}" stroke-width="2"/>
+      <text x="24" y="28" text-anchor="middle" font-size="10" fill="${color}">pH+</text>
+    </svg>`;
+}
+
+/**
+ * pH Minus Canister icon
+ */
+export function phMinusCanisterSVG(_level: number, _maxLevel: number, color: string): TemplateResult {
+  return html`
+    <svg viewBox="0 0 48 48" style="width:100%;height:100%;display:block;overflow:visible" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="24" cy="24" r="22" fill="${color}" fill-opacity="0.1"/>
+      <rect x="18" y="12" width="12" height="24" rx="2" fill="none" stroke="${color}" stroke-width="2"/>
+      <text x="24" y="28" text-anchor="middle" font-size="10" fill="${color}">pH-</text>
+    </svg>`;
+}
+
+/**
+ * Flocculant Canister icon
+ */
+export function flocculantCanisterSVG(_level: number, _maxLevel: number, color: string): TemplateResult {
+  return html`
+    <svg viewBox="0 0 48 48" style="width:100%;height:100%;display:block;overflow:visible" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="24" cy="24" r="22" fill="${color}" fill-opacity="0.1"/>
+      <rect x="18" y="12" width="12" height="24" rx="2" fill="none" stroke="${color}" stroke-width="2"/>
+      <text x="24" y="28" text-anchor="middle" font-size="10" fill="${color}">Floc</text>
+    </svg>`;
+}

@@ -225,6 +225,7 @@ export interface PumpState {
   isRunning: boolean;
   speed: 0 | 1 | 2 | 3;
   runtime?: number;
+  mode?: string;
 }
 
 export interface TemperatureState {

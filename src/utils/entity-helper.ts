@@ -11,6 +11,7 @@ export interface PumpState {
   level?: number;
   status: string;
   rawState: string;
+  mode?: string;
 }
 
 export class EntityHelper {
