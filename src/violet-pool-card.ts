@@ -423,6 +423,7 @@ export class VioletPoolCard extends LitElement {
 
   private renderPumpCard(config: VioletPoolCardConfig = this.config): TemplateResult {
     const entity = this.hass.states[config.entity!];
+    if (!entity) return this._renderLoadingSkeleton(config);
     const state = entity.state;
     const name = config.name || entity.attributes.friendly_name || 'Pump';
     const pumpState = entity.attributes?.PUMPSTATE || '';
@@ -517,6 +518,7 @@ export class VioletPoolCard extends LitElement {
 
   private renderHeaterCard(config: VioletPoolCardConfig = this.config): TemplateResult {
     const entity = this.hass.states[config.entity!];
+    if (!entity) return this._renderLoadingSkeleton(config);
     const state = entity.state;
     const name = config.name || entity.attributes.friendly_name || 'Heater';
     const accentColor = this._getAccentColor('heater', config);
@@ -659,6 +661,7 @@ export class VioletPoolCard extends LitElement {
 
   private renderSolarCard(config: VioletPoolCardConfig = this.config): TemplateResult {
     const entity = this.hass.states[config.entity!];
+    if (!entity) return this._renderLoadingSkeleton(config);
     const state = entity.state;
     const name = config.name || entity.attributes.friendly_name || 'Solar';
     const accentColor = this._getAccentColor('solar', config);
@@ -784,6 +787,7 @@ export class VioletPoolCard extends LitElement {
 
   private renderDosingCard(config: VioletPoolCardConfig = this.config): TemplateResult {
     const entity = this.hass.states[config.entity!];
+    if (!entity) return this._renderLoadingSkeleton(config);
     const state = entity.state;
     const name = config.name || entity.attributes.friendly_name || 'Dosing';
     const accentColor = this._getAccentColor('dosing', config);
