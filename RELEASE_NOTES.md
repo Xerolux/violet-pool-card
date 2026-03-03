@@ -10,12 +10,15 @@
 
 ### 🚀 Improvements | Verbesserungen
 
+- 📝 Release v0.1.1 - Update changelog and version (eebb8ae)
 - 📝 Release v0.1.1 - Update changelog and version (60e2ad7)
 - fix: remove dead code causing TS warning and optimize compilation (36bb7ec)
 - 📝 Release v0.1.3 - Update changelog and version (bb8738d)
 
 ### 🔧 Bug Fixes | Fehlerbehebungen
 
+- fix-custom-elements (66d54c6)
+- fix: use customElements.define directly instead of Lit decorator (d4c6651)
 - fix-lit-bundling (703cac5)
 - Fix module resolution errors by bundling Lit (af499d7)
 - fix-violet-pool-card- (a560d4c)
@@ -67,4 +70,4 @@ Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
 
 ---
 
-_Generated automatically by GitHub Actions on 2026-03-03 05:48:41 UTC_
+_Generated automatically by GitHub Actions on 2026-03-03 07:00:28 UTC_
