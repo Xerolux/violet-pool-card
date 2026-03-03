@@ -797,7 +797,7 @@ export class VioletPoolCard extends LitElement {
           : (currentValue! < 7.0 ? 'Acidic' : currentValue! > 7.4 ? 'Alkaline' : 'Optimal'))
       : '';
 
-    return html` <ha-card class="${this._getCardClasses(isDosing, config)}" style="--card-accent: ${accentColor}" @click="${() => this._showMoreInfo(config.entity!)}" ><div class="accent-bar"></div><div class="card-content"><div class="header"><div class="header-icon ${isDosing ? 'icon-active' : ''}" style="--icon-accent: ${accentColor}"><ha-icon icon="${config.icon || this._getDosingIcon(dosingType)}" class="${isDosing ? 'dosing-active' : ''}" ></ha-icon></div><div class="header-info"><span class="name">${name}</span><span class="header-subtitle">${this._getFriendlyState(state)}</span></div> ${config.show_state ? html`<vpc-status-badge .state="${state}" .pulse="${isDosing}"></vpc-status-badge>`
+    return html` <ha-card class="${this._getCardClasses(isDosing, config)}" style="--card-accent: ${accentColor}" @click="${() => this._showMoreInfo(config.entity!)}" ><div class="accent-bar"></div><div class="card-content"><div class="header"><div class="header-icon ${isDosing ? 'icon-active' : ''}" style="--icon-accent: ${accentColor}">${isDosing ? dosingDropletSVG(isDosing, currentValue ? (currentValue / (maxValue || 100)) * 100 : 50, accentColor) : html`<ha-icon icon="${config.icon || this._getDosingIcon(dosingType)}" class="${isDosing ? 'dosing-active' : ''}" ></ha-icon>`}</div><div class="header-info"><span class="name">${name}</span><span class="header-subtitle">${this._getFriendlyState(state)}</span></div> ${config.show_state ? html`<vpc-status-badge .state="${state}" .pulse="${isDosing}"></vpc-status-badge>`
               : ''}
           </div>
 
