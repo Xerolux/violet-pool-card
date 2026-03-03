@@ -269,6 +269,61 @@ export class VioletPoolCard extends LitElement {
   }
 
   /**
+   * Render loading skeleton for entity while data loads
+   */
+  private _renderLoadingSkeleton(config: VioletPoolCardConfig): TemplateResult {
+    return html`
+      <ha-card class="${this._getCardClasses(false, config)}">
+        <div class="accent-bar" style="opacity: 0.3;"></div>
+        <div class="card-content">
+          <div class="header">
+            <div class="header-icon" style="background: linear-gradient(90deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.05) 100%); background-size: 1000px 100%; animation: skeleton-loading 2s infinite;"></div>
+            <div class="header-info">
+              <div style="width: 120px; height: 18px; background: linear-gradient(90deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.05) 100%); background-size: 1000px 100%; animation: skeleton-loading 2s infinite; border-radius: 4px; margin-bottom: 8px;"></div>
+              <div style="width: 80px; height: 14px; background: linear-gradient(90deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.05) 100%); background-size: 1000px 100%; animation: skeleton-loading 2s infinite; border-radius: 4px;"></div>
+            </div>
+          </div>
+          <div style="margin-top: 12px; height: 48px; background: linear-gradient(90deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.05) 100%); background-size: 1000px 100%; animation: skeleton-loading 2s infinite; border-radius: 8px;"></div>
+          <div style="margin-top: 12px; height: 44px; background: linear-gradient(90deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.05) 100%); background-size: 1000px 100%; animation: skeleton-loading 2s infinite; border-radius: 8px;"></div>
+        </div>
+      </ha-card>
+    `;
+  }
+
+  /**
+   * Get minutes since last entity update
+   */
+  private _getMinutesSinceUpdate(entity: HassEntity | undefined): number {
+    if (!entity?.last_updated) return 0;
+    const lastUpdate = new Date(entity.last_updated);
+    const now = new Date();
+    return Math.floor((now.getTime() - lastUpdate.getTime()) / 60000);
+  }
+
+  /**
+   * Render timeout indicator if data is stale
+   */
+  private _renderTimeoutIndicator(entity: HassEntity | undefined): TemplateResult {
+    const minutesStale = this._getMinutesSinceUpdate(entity);
+    if (minutesStale < 1) return html``;
+
+    const isError = minutesStale > 30;
+    const bgColor = isError ? 'rgba(255,59,48,0.08)' : 'rgba(255,159,10,0.08)';
+    const borderColor = isError ? 'rgba(255,59,48,0.2)' : 'rgba(255,159,10,0.2)';
+    const textColor = isError ? '#FF3B30' : '#FF9F0A';
+
+    return html`
+      <div style="padding: 8px 12px; border-radius: 8px; background: ${bgColor}; border: 1px solid ${borderColor}; font-size: 12px; color: ${textColor}; margin-top: 8px; display: flex; align-items: center; justify-content: space-between;">
+        <span>⚠️ Daten ${minutesStale} Minute${minutesStale > 1 ? 'n' : ''} alt</span>
+        <button style="margin-left: 8px; padding: 4px 8px; background: ${textColor}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600;"
+                @click="${() => this.requestUpdate()}">
+          ↻
+        </button>
+      </div>
+    `;
+  }
+
+  /**
    * Get accent color for card type
    */
   private _getAccentColor(cardType: string, config: VioletPoolCardConfig): string {
@@ -1775,8 +1830,21 @@ export class VioletPoolCard extends LitElement {
                        }}"/>
               </div>
             ` : colorTemp ? html`
-              <div class="light-color-swatch" style="background:linear-gradient(135deg,#ffe8a0,#fff3d4);box-shadow:0 6px 24px rgba(255,220,100,0.4)">
-                <span class="light-color-label" style="color:#8B6914">Warmweiß · ${colorTemp} Mirek</span>
+              <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 12px;">
+                <!-- Kelvin Slider for Color Temperature -->
+                <div style="padding: 12px; background: var(--vpc-surface); border-radius: 12px;">
+                  <div style="font-size: 12px; font-weight: 600; color: var(--vpc-text); margin-bottom: 8px;">Farbtemperatur</div>
+                  <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px;">
+                    <div style="width: 30px; text-align: center; font-size: 11px; color: var(--vpc-text-secondary);">🔵<br/>6500K</div>
+                    <input type="range" min="154" max="500" value="${colorTemp || 250}" style="flex: 1; height: 6px; cursor: pointer;"
+                           @change="${(e: Event) => {
+                             const mirek = parseInt((e.target as HTMLInputElement).value);
+                             this.hass.callService('light', 'turn_on', { entity_id: entityId, color_temp: mirek });
+                           }}"/>
+                    <div style="width: 30px; text-align: center; font-size: 11px; color: var(--vpc-text-secondary);">🟠<br/>2000K</div>
+                  </div>
+                  <div style="margin-top: 8px; padding: 8px; background: linear-gradient(90deg, #FFA500 0%, #FFD700 50%, #87CEEB 100%); border-radius: 4px; height: 20px;"></div>
+                </div>
               </div>
             ` : ''}
 
