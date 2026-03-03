@@ -1479,18 +1479,10 @@ export class VioletPoolCard extends LitElement {
                   <ha-icon icon="mdi:ph"></ha-icon>
                   <span>pH-Wert</span>
                 </div>
-                <div class="chem-metric-value">${phValue.toFixed(1)}</div>
+                <div style="height: 80px; padding: 8px 0; display: flex; align-items: center; justify-content: center;">
+                  ${gaugeNeedleSVG(phValue, 6.5, 8.0, phColor?.color || '#4CAF50')}
+                </div>
                 <div class="chem-metric-status">${getPhStatus(phValue)}</div>
-                ${phPct !== undefined ? html`
-                  <div class="chem-metric-bar">
-                    <div class="chem-metric-track">
-                      <div class="chem-metric-ideal" style="left: ${phIdealStart}%; width: ${phIdealEnd - phIdealStart}%"></div>
-                      <div class="chem-metric-fill" style="width: ${phPct}%"></div>
-                      <div class="chem-metric-target" style="left: ${targetPhPct}%"></div>
-                    </div>
-                    <div class="chem-metric-labels"><span>6.5</span><span>8.0</span></div>
-                  </div>
-                ` : ''}
                 <div class="t-tip">
                   <div class="t-tip-title"><ha-icon icon="mdi:ph"></ha-icon>pH-Wert</div>
                   <div class="t-tip-desc">Säuregehalt des Wassers. Zu niedrig reizt Haut und Augen. Zu hoch reduziert die Chlorwirksamkeit. Ziel: ${targetPh.toFixed(1)}</div>
@@ -1506,19 +1498,10 @@ export class VioletPoolCard extends LitElement {
                   <ha-icon icon="mdi:lightning-bolt"></ha-icon>
                   <span>ORP</span>
                 </div>
-                <div class="chem-metric-value">${orpValue.toFixed(0)}</div>
-                <div class="chem-metric-unit">mV</div>
+                <div style="height: 80px; padding: 8px 0; display: flex; align-items: center; justify-content: center;">
+                  ${gaugeNeedleSVG(orpValue, 500, 900, orpColor?.color || '#4CAF50')}
+                </div>
                 <div class="chem-metric-status">${getOrpStatus(orpValue)}</div>
-                ${orpPct !== undefined ? html`
-                  <div class="chem-metric-bar">
-                    <div class="chem-metric-track">
-                      <div class="chem-metric-ideal" style="left: ${orpIdealStart}%; width: ${orpIdealEnd - orpIdealStart}%"></div>
-                      <div class="chem-metric-fill" style="width: ${orpPct}%"></div>
-                      <div class="chem-metric-target" style="left: ${targetOrpPct}%"></div>
-                    </div>
-                    <div class="chem-metric-labels"><span>500</span><span>900 mV</span></div>
-                  </div>
-                ` : ''}
                 <div class="t-tip">
                   <div class="t-tip-title"><ha-icon icon="mdi:lightning-bolt"></ha-icon>ORP – Desinfektionskraft</div>
                   <div class="t-tip-desc">Redoxpotential misst, wie wirksam das Chlor Keime abtötet. Niedriger ORP = unzureichende Desinfektion. Ziel: ${targetOrp.toFixed(0)} mV</div>
@@ -1592,13 +1575,26 @@ export class VioletPoolCard extends LitElement {
               <span class="header-subtitle">${deviceClass ? deviceClass.charAt(0).toUpperCase() + deviceClass.slice(1) : 'Sensor'}</span>
             </div>
           </div>
-          <div class="sensor-value-display tooltip-wrap">
-            <div class="sensor-big-value">
-              ${isNumeric
-                ? html`<span class="sensor-num">${displayValue}</span>${unit ? html`<span class="sensor-unit">${unit}</span>` : ''}`
-                : html`<span class="sensor-state-text">${state}</span>`}
+          ${isNumeric ? html`
+            <div style="padding: 12px 0; min-height: 100px; display: flex; flex-direction: column; align-items: center;">
+              <div style="height: 70px; width: 100%; display: flex; align-items: center;">
+                ${chartSVG([numValue * 0.8, numValue, numValue * 1.1, numValue * 0.9, numValue, numValue * 1.05], accentColor)}
+              </div>
+              <div class="sensor-big-value" style="margin-top: 8px;">
+                <span class="sensor-num">${displayValue}</span>
+                ${unit ? html`<span class="sensor-unit">${unit}</span>` : ''}
+              </div>
             </div>
-            <div class="t-tip">
+          ` : html`
+            <div class="sensor-value-display">
+              <div class="sensor-big-value">
+                <span class="sensor-state-text">${state}</span>
+              </div>
+            </div>
+          `}
+
+          <div class="tooltip-wrap" style="width: 100%; position: relative;">
+            <div class="t-tip" style="position: static; opacity: 0.7; background: var(--vpc-surface); transform: none; width: 100%; max-width: 100%; margin-top: 8px; padding: 8px; border: none; box-shadow: none; border-radius: 8px;">
               <div class="t-tip-title"><ha-icon icon="mdi:information-outline"></ha-icon>${tooltip.title}</div>
               <div class="t-tip-desc">${tooltip.desc}</div>
               ${tooltip.ideal ? html`<div class="t-tip-ideal"><ha-icon icon="mdi:target"></ha-icon>${tooltip.ideal}</div>` : ''}
@@ -1878,38 +1874,9 @@ export class VioletPoolCard extends LitElement {
             ${config.show_state !== false ? html`<vpc-status-badge .state="${isFilterOn ? 'on' : 'off'}" .pulse="${isBackwashing}"></vpc-status-badge>` : ''}
           </div>
 
-          <!-- Pressure arc gauge -->
-          <div class="filter-gauge-wrap">
-            <svg viewBox="0 0 120 68" style="width:100%;max-height:90px;display:block;overflow:visible">
-              <!-- Background arc -->
-              <path d="M 10,60 A 50,50 0 0,1 110,60" fill="none" stroke="rgba(120,120,128,0.12)" stroke-width="10" stroke-linecap="round"/>
-              <!-- Normal zone (0.5–1.2 bar) -->
-              <path d="M ${z1x},${z1y} A 50,50 0 0,1 ${z2x},${z2y}" fill="none" stroke="rgba(52,199,89,0.22)" stroke-width="10"/>
-              <!-- Elevated zone (1.2–1.6 bar) -->
-              <path d="M ${z2x},${z2y} A 50,50 0 0,1 ${z3x},${z3y}" fill="none" stroke="rgba(255,159,10,0.22)" stroke-width="10"/>
-              <!-- Critical zone (>1.6 bar) -->
-              <path d="M ${z3x},${z3y} A 50,50 0 0,1 109.9,60" fill="none" stroke="rgba(255,59,48,0.22)" stroke-width="10"/>
-              <!-- Value arc -->
-              ${pct > 1 ? html`
-                <path d="M 10,60 A 50,50 0 ${lArc},1 ${gx},${gy}" fill="none"
-                      stroke="${pressureColor}" stroke-width="10" stroke-linecap="round"/>
-              ` : ''}
-              <!-- Tick marks at 0, 1, 2, 3 bar -->
-              <line x1="10" y1="58" x2="10" y2="62" stroke="rgba(120,120,128,0.4)" stroke-width="1.5"/>
-              <line x1="${(60 + 50 * Math.cos(Math.PI * 2 / 3)).toFixed(1)}" y1="${(60 - 50 * Math.sin(Math.PI * 2 / 3)).toFixed(1)}" x2="${(60 + 46 * Math.cos(Math.PI * 2 / 3)).toFixed(1)}" y2="${(60 - 46 * Math.sin(Math.PI * 2 / 3)).toFixed(1)}" stroke="rgba(120,120,128,0.4)" stroke-width="1.5"/>
-              <line x1="60" y1="10" x2="60" y2="14" stroke="rgba(120,120,128,0.4)" stroke-width="1.5"/>
-              <line x1="${(60 + 50 * Math.cos(Math.PI / 3)).toFixed(1)}" y1="${(60 - 50 * Math.sin(Math.PI / 3)).toFixed(1)}" x2="${(60 + 46 * Math.cos(Math.PI / 3)).toFixed(1)}" y2="${(60 - 46 * Math.sin(Math.PI / 3)).toFixed(1)}" stroke="rgba(120,120,128,0.4)" stroke-width="1.5"/>
-              <line x1="110" y1="58" x2="110" y2="62" stroke="rgba(120,120,128,0.4)" stroke-width="1.5"/>
-              <!-- Pressure value text -->
-              <text x="60" y="52" text-anchor="middle" font-size="20" font-weight="700"
-                    style="fill:${pressureColor};letter-spacing:-0.5px">${pressure.toFixed(1)}</text>
-              <text x="60" y="63" text-anchor="middle" font-size="9" font-weight="500"
-                    style="fill:rgba(110,110,120,0.8)">${unit}</text>
-              <!-- Scale labels -->
-              <text x="7" y="68" text-anchor="middle" font-size="7.5" style="fill:rgba(110,110,120,0.55)">0</text>
-              <text x="60" y="8" text-anchor="middle" font-size="7.5" style="fill:rgba(110,110,120,0.55)">1.5</text>
-              <text x="113" y="68" text-anchor="middle" font-size="7.5" style="fill:rgba(110,110,120,0.55)">3</text>
-            </svg>
+          <!-- Pressure gauge with animated needle -->
+          <div class="filter-gauge-wrap" style="padding: 12px 0;">
+            ${filterGaugeSVG(pressure, 3, accentColor)}
           </div>
 
           <!-- Status row -->
