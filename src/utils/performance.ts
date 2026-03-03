@@ -135,7 +135,7 @@ export class PerformanceMonitor {
 /**
  * Decorator for measuring function performance
  */
-export function measurePerformance(target: any, propertyKey: string, descriptor: PropertyDescriptor): PropertyDescriptor {
+export function measurePerformance(_target: any, propertyKey: string, descriptor: PropertyDescriptor): PropertyDescriptor {
   const originalMethod = descriptor.value;
 
   descriptor.value = function (...args: any[]) {
