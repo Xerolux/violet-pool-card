@@ -423,20 +423,20 @@ export class VioletPoolCard extends LitElement {
     if (!entity) return this._renderLoadingSkeleton(config);
     const state = entity.state;
     const name = config.name || entity.attributes.friendly_name || 'Pump';
-    const pumpState = entity.attributes?.PUMPSTATE || '';
+    const pumpState = (entity.attributes?.PUMPSTATE as string) || '';
     const accentColor = this._getAccentColor('pump', config);
 
     const parsedState = EntityHelper.parsePumpState(pumpState);
     const currentSpeed = parsedState.level !== undefined ? parsedState.level : 0;
 
-    const rpmLevel0 = entity.attributes?.PUMP_RPM_0 || 0;
-    const rpmLevel1 = entity.attributes?.PUMP_RPM_1 || 0;
-    const rpmLevel2 = entity.attributes?.PUMP_RPM_2 || 0;
-    const rpmLevel3 = entity.attributes?.PUMP_RPM_3 || 0;
+    const rpmLevel0 = Number(entity.attributes?.PUMP_RPM_0) || 0;
+    const rpmLevel1 = Number(entity.attributes?.PUMP_RPM_1) || 0;
+    const rpmLevel2 = Number(entity.attributes?.PUMP_RPM_2) || 0;
+    const rpmLevel3 = Number(entity.attributes?.PUMP_RPM_3) || 0;
     const rpmValues = [rpmLevel0, rpmLevel1, rpmLevel2, rpmLevel3];
     const currentRPM = rpmValues[currentSpeed] || 0;
 
-    const runtimeSeconds = entity.attributes?.runtime || 0;
+    const runtimeSeconds = Number(entity.attributes?.runtime) || 0;
     const runtimeHours = Math.floor(runtimeSeconds / 3600);
     const runtimeMinutes = Math.floor((runtimeSeconds % 3600) / 60);
     const runtimeDisplay = runtimeHours > 0
@@ -525,14 +525,14 @@ export class VioletPoolCard extends LitElement {
     const minTemp = EntityHelper.getMinTemperature(entity) || 18;
     const maxTemp = EntityHelper.getMaxTemperature(entity) || 35;
 
-    const heaterState = entity.attributes?.HEATERSTATE || '';
+    const heaterState = (entity.attributes?.HEATERSTATE as string) || '';
 
-    const outsideTemp = entity.attributes?.outside_temperature;
-    const minOutsideTemp = entity.attributes?.min_outside_temperature || 14.5;
+    const outsideTemp = entity.attributes?.outside_temperature as number | null | undefined;
+    const minOutsideTemp = (entity.attributes?.min_outside_temperature as number) || 14.5;
 
     const isBlockedByOutsideTemp =
-      heaterState.includes('BLOCKED_BY_OUTSIDE_TEMP') ||
-      (outsideTemp !== undefined && outsideTemp < minOutsideTemp);
+      (heaterState as string).includes('BLOCKED_BY_OUTSIDE_TEMP') ||
+      (outsideTemp != null && outsideTemp < minOutsideTemp);
 
     const tempColor = currentTemp !== undefined
       ? StateColorHelper.getTemperatureColor(currentTemp)
@@ -616,7 +616,7 @@ export class VioletPoolCard extends LitElement {
             ? html`<vpc-detail-status .raw="${heaterState}"></vpc-detail-status>`
             : ''}
 
-          ${outsideTemp !== undefined
+          ${outsideTemp != null
             ? html` <div class="info-row tooltip-wrap ${isBlockedByOutsideTemp ? 'info-row-warning' : ''}" style="position:relative"><ha-icon icon="mdi:thermometer"></ha-icon><span class="info-label">Außentemperatur</span><span class="info-value">${outsideTemp.toFixed(1)}°C</span> ${isBlockedByOutsideTemp ? html`<span class="info-badge warning">Min ${minOutsideTemp}°C</span>`
                     : ''}
                 <div class="t-tip">
@@ -668,9 +668,9 @@ export class VioletPoolCard extends LitElement {
     const minTemp = EntityHelper.getMinTemperature(entity) || 18;
     const maxTemp = EntityHelper.getMaxTemperature(entity) || 32;
 
-    const absorberTemp = entity.attributes?.absorber_temperature;
+    const absorberTemp = entity.attributes?.absorber_temperature as number | null | undefined;
 
-    const tempDelta = absorberTemp !== undefined && poolTemp !== undefined
+    const tempDelta = absorberTemp != null && poolTemp !== undefined
       ? absorberTemp - poolTemp
       : undefined;
 
@@ -740,7 +740,7 @@ export class VioletPoolCard extends LitElement {
                   </div>
                 </div> `
                 : ''}
-              ${absorberTemp !== undefined
+              ${absorberTemp != null
                 ? html` <div class="solar-temp-tile"><ha-icon icon="mdi:solar-panel" style="--mdc-icon-size: 18px"></ha-icon><div class="solar-temp-tile-val">${absorberTemp.toFixed(1)}°C</div><div class="solar-temp-tile-label">Absorber</div></div> `
                 : ''}
             </div>
@@ -809,8 +809,8 @@ export class VioletPoolCard extends LitElement {
       const targetOrpId = this._getEntityId('target_orp_entity', 'number', 'target_orp');
       const targetEntity = this.hass.states[targetOrpId];
       targetValue = targetEntity ? parseFloat(targetEntity.state) : undefined;
-      minValue = targetEntity?.attributes?.min || 600;
-      maxValue = targetEntity?.attributes?.max || 800;
+      minValue = Number(targetEntity?.attributes?.min) || 600;
+      maxValue = Number(targetEntity?.attributes?.max) || 800;
       unit = 'mV';
     } else if (dosingType === 'ph_minus' || dosingType === 'ph_plus') {
       const phSensorId = this._getEntityId('ph_value_entity', 'sensor', 'ph_value');
@@ -819,8 +819,8 @@ export class VioletPoolCard extends LitElement {
       const targetPhId = this._getEntityId('target_ph_entity', 'number', 'target_ph');
       const targetEntity = this.hass.states[targetPhId];
       targetValue = targetEntity ? parseFloat(targetEntity.state) : undefined;
-      minValue = targetEntity?.attributes?.min || 6.8;
-      maxValue = targetEntity?.attributes?.max || 7.8;
+      minValue = Number(targetEntity?.attributes?.min) || 6.8;
+      maxValue = Number(targetEntity?.attributes?.max) || 7.8;
       unit = '';
     }
 
@@ -1009,7 +1009,7 @@ export class VioletPoolCard extends LitElement {
     const activeDevices: Array<{icon: string; name: string; status: string; state: string; entityId: string}> = [];
 
     if (pumpEntity) {
-      const pumpState = pumpEntity.attributes?.PUMPSTATE || '';
+      const pumpState = (pumpEntity.attributes?.PUMPSTATE as string) || '';
       const parsedPumpState = EntityHelper.parsePumpState(pumpState);
       activeDevices.push({
         icon: 'mdi:pump',
@@ -1021,7 +1021,7 @@ export class VioletPoolCard extends LitElement {
     }
 
     if (heaterEntity) {
-      const heaterState = heaterEntity.attributes?.HEATERSTATE || '';
+      const heaterState = (heaterEntity.attributes?.HEATERSTATE as string) || '';
       const parsedHeaterState = EntityHelper.parseHeaterState(heaterState);
       activeDevices.push({
         icon: 'mdi:radiator',
@@ -1033,7 +1033,7 @@ export class VioletPoolCard extends LitElement {
     }
 
     if (solarEntity) {
-      const solarState = solarEntity.attributes?.SOLARSTATE || '';
+      const solarState = (solarEntity.attributes?.SOLARSTATE as string) || '';
       const parsedSolarState = EntityHelper.parseSolarState(solarState);
       activeDevices.push({
         icon: 'mdi:solar-power',
@@ -1080,8 +1080,8 @@ export class VioletPoolCard extends LitElement {
       const isMoving = coverEntity.state === 'opening' || coverEntity.state === 'closing';
       activeDevices.push({
         icon: coverEntity.state === 'open' ? 'mdi:window-shutter-open' : isMoving ? 'mdi:window-shutter' : 'mdi:window-shutter',
-        name: coverEntity.attributes.friendly_name || 'Abdeckung',
-        status: pos !== undefined ? `${Math.round(pos)}%${isMoving ? (coverEntity.state === 'opening' ? ' ↑' : ' ↓') : ''}` : (coverEntity.state === 'open' ? 'Offen' : 'Zu'),
+        name: (coverEntity.attributes.friendly_name as string) || 'Abdeckung',
+        status: pos != null ? `${Math.round(Number(pos))}%${isMoving ? (coverEntity.state === 'opening' ? ' ↑' : ' ↓') : ''}` : (coverEntity.state === 'open' ? 'Offen' : 'Zu'),
         state: coverEntity.state === 'open' ? 'on' : coverEntity.state === 'closed' ? 'off' : 'auto',
         entityId: coverEntityId,
       });
@@ -1091,11 +1091,11 @@ export class VioletPoolCard extends LitElement {
     const lightEntityId = this._getEntityId('light_entity', 'light', 'light');
     const lightEntity = this.hass.states[lightEntityId];
     if (lightEntity) {
-      const br = lightEntity.attributes?.brightness;
-      const brText = br !== undefined ? ` · ${Math.round(br / 255 * 100)}%` : '';
+      const br = lightEntity.attributes?.brightness as number | undefined;
+      const brText = br != null ? ` · ${Math.round(br / 255 * 100)}%` : '';
       activeDevices.push({
         icon: lightEntity.state === 'on' ? 'mdi:lightbulb-on' : 'mdi:lightbulb-off-outline',
-        name: lightEntity.attributes.friendly_name || 'Beleuchtung',
+        name: (lightEntity.attributes.friendly_name as string) || 'Beleuchtung',
         status: lightEntity.state === 'on' ? `An${brText}` : 'Aus',
         state: lightEntity.state,
         entityId: lightEntityId,
@@ -1111,7 +1111,7 @@ export class VioletPoolCard extends LitElement {
       const pressureVal = parseFloat(filterEntity.state);
       activeDevices.push({
         icon: 'mdi:filter',
-        name: filterEntity.attributes.friendly_name || 'Filter',
+        name: (filterEntity.attributes.friendly_name as string) || 'Filter',
         status: !isNaN(pressureVal) ? `${pressureVal.toFixed(2)} bar` : filterEntity.state,
         state: !isNaN(pressureVal) && pressureVal > 1.2 ? 'auto' : 'on',
         entityId: filterEntityId,
@@ -1122,9 +1122,9 @@ export class VioletPoolCard extends LitElement {
     if (orpStatus === 'high') warnings.push('ORP too high - Stop chlorine dosing');
     if (phStatus === 'warning') warnings.push('pH out of range - Check dosing');
 
-    if (pumpEntity?.attributes?.PUMPSTATE?.includes('ANTI_FREEZE')) {
-      const outsideTemp = heaterEntity?.attributes?.outside_temperature;
-      warnings.push(`Frost protection active${outsideTemp ? ` (${outsideTemp.toFixed(1)}°C)` : ''}`);
+    if ((pumpEntity?.attributes?.PUMPSTATE as string | undefined)?.includes('ANTI_FREEZE')) {
+      const outsideTempRaw = heaterEntity?.attributes?.outside_temperature as number | null | undefined;
+      warnings.push(`Frost protection active${outsideTempRaw != null ? ` (${outsideTempRaw.toFixed(1)}°C)` : ''}`);
     }
 
     const anyActive = activeDevices.some(d => ['on', 'auto', 'heat', 'heating'].includes(d.state));
@@ -1385,20 +1385,20 @@ export class VioletPoolCard extends LitElement {
     let currentValue = '';
 
     if (entity.attributes?.PUMPSTATE) {
-      const parsedState = EntityHelper.parsePumpState(entity.attributes.PUMPSTATE);
+      const parsedState = EntityHelper.parsePumpState(entity.attributes.PUMPSTATE as string);
       detailStatus = parsedState.status;
       if (parsedState.level !== undefined && parsedState.level > 0) {
         currentValue = `Level ${parsedState.level}`;
       }
     } else if (entity.attributes?.HEATERSTATE) {
-      const parsedState = EntityHelper.parseHeaterState(entity.attributes.HEATERSTATE);
+      const parsedState = EntityHelper.parseHeaterState(entity.attributes.HEATERSTATE as string);
       detailStatus = parsedState.status;
       const temp = EntityHelper.getCurrentTemperature(entity);
       if (temp !== undefined) {
         currentValue = `${temp.toFixed(1)}°C`;
       }
     } else if (entity.attributes?.SOLARSTATE) {
-      const parsedState = EntityHelper.parseSolarState(entity.attributes.SOLARSTATE);
+      const parsedState = EntityHelper.parseSolarState(entity.attributes.SOLARSTATE as string);
       detailStatus = parsedState.status;
       const temp = EntityHelper.getCurrentTemperature(entity);
       if (temp !== undefined) {
@@ -1428,18 +1428,18 @@ export class VioletPoolCard extends LitElement {
         }
       }
     } else if (domain === 'cover') {
-      const pos = entity.attributes?.current_position;
-      if (pos !== undefined) currentValue = `${Math.round(pos)}%`;
+      const pos = entity.attributes?.current_position as number | null | undefined;
+      if (pos != null) currentValue = `${Math.round(pos)}%`;
       detailStatus = entity.state === 'open' ? 'Geöffnet' : entity.state === 'closed' ? 'Geschlossen' : entity.state === 'opening' ? 'Öffnet…' : entity.state === 'closing' ? 'Schließt…' : entity.state;
     } else if (domain === 'light') {
-      const br = entity.attributes?.brightness;
-      if (br !== undefined) currentValue = `${Math.round(br / 255 * 100)}%`;
+      const br = entity.attributes?.brightness as number | null | undefined;
+      if (br != null) currentValue = `${Math.round(br / 255 * 100)}%`;
       detailStatus = entity.state === 'on' ? 'An' : 'Aus';
     } else if (domain === 'sensor') {
       const unit = entity.attributes?.unit_of_measurement || '';
       const num = parseFloat(entity.state);
       if (!isNaN(num)) currentValue = `${num % 1 === 0 ? num.toFixed(0) : num.toFixed(1)}${unit}`;
-      detailStatus = entity.attributes.device_class || '';
+      detailStatus = (entity.attributes.device_class as string) || '';
     }
 
     const isActive = state === 'on' || state === 'auto' || state === 'heat' || state === 'heating' || state === 'open' || state === 'opening';
@@ -1633,13 +1633,13 @@ export class VioletPoolCard extends LitElement {
   private renderSensorCard(config: VioletPoolCardConfig = this.config): TemplateResult {
     const entity = this.hass.states[config.entity!];
     const state = entity.state;
-    const name = config.name || entity.attributes.friendly_name || 'Sensor';
-    const unit = entity.attributes.unit_of_measurement || '';
+    const name = config.name || (entity.attributes.friendly_name as string) || 'Sensor';
+    const unit = (entity.attributes.unit_of_measurement as string) || '';
     const accentColor = config.accent_color || this._getAccentColor('overview', config);
 
     const numValue = parseFloat(state);
     const isNumeric = !isNaN(numValue);
-    const deviceClass = entity.attributes.device_class;
+    const deviceClass = entity.attributes.device_class as string | undefined;
 
     const tooltipMap: Record<string, { title: string; desc: string; ideal?: string }> = {
       temperature: { title: 'Temperatur', desc: 'Aktuelle Temperaturmessung des Sensors.', ideal: '24°C – 30°C (Pool)' },
@@ -1648,7 +1648,7 @@ export class VioletPoolCard extends LitElement {
       humidity: { title: 'Luftfeuchtigkeit', desc: 'Relative Luftfeuchtigkeit in Prozent.' },
       pressure: { title: 'Druck', desc: 'Aktueller Druckwert.' },
     };
-    const tooltip = tooltipMap[deviceClass] || { title: name, desc: 'Sensorwert aus dem Violet Pool System.' };
+    const tooltip = (deviceClass && tooltipMap[deviceClass]) || { title: name, desc: 'Sensorwert aus dem Violet Pool System.' };
 
     const displayValue = isNumeric
       ? (numValue % 1 === 0 ? numValue.toFixed(0) : numValue.toFixed(1))
@@ -1706,7 +1706,7 @@ export class VioletPoolCard extends LitElement {
 
     const state = entity.state;
     const name = config.name || entity.attributes.friendly_name || 'Pool Abdeckung';
-    const position: number = entity.attributes.current_position ?? (state === 'open' ? 100 : 0);
+    const position: number = Number(entity.attributes.current_position ?? (state === 'open' ? 100 : 0));
     const isMoving = state === 'opening' || state === 'closing';
     const accentColor = this._getAccentColor('cover', config);
 
@@ -1802,9 +1802,9 @@ export class VioletPoolCard extends LitElement {
     const state = entity.state;
     const isOn = state === 'on';
     const name = config.name || entity.attributes.friendly_name || 'Pool Licht';
-    const brightness: number = entity.attributes.brightness ?? 128;
+    const brightness: number = Number(entity.attributes.brightness ?? 128);
     const brightnessPercent = Math.round((brightness / 255) * 100);
-    const rgb: [number, number, number] | null = entity.attributes.rgb_color ?? null;
+    const rgb: [number, number, number] | null = (entity.attributes.rgb_color as [number, number, number]) ?? null;
     const rgbStr = rgb ? `rgb(${rgb[0]},${rgb[1]},${rgb[2]})` : null;
     const accentColor = rgbStr || config.accent_color || this._getAccentColor('light', config);
     const colorTemp = entity.attributes.color_temp;
@@ -2175,9 +2175,9 @@ export class VioletPoolCard extends LitElement {
     const name = config.name || 'System Alerts';
 
     // Mock alerts
-    const alerts = [
-      { severity: 'warning' as const, message: 'pH slightly elevated', icon: 'mdi:water-alert' },
-      { severity: 'info' as const, message: 'Backwash scheduled', icon: 'mdi:information' },
+    const alerts: Array<{ severity: 'warning' | 'info' | 'error'; message: string; icon: string }> = [
+      { severity: 'warning', message: 'pH slightly elevated', icon: 'mdi:water-alert' },
+      { severity: 'info', message: 'Backwash scheduled', icon: 'mdi:information' },
     ];
 
     return html`
