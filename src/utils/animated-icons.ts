@@ -12,7 +12,7 @@ export function pumpSVG(speed: number, color: string): TemplateResult {
       <circle cx="24" cy="24" r="22" fill="${color}" fill-opacity="${isOn ? 0.13 : 0.07}"/>
       <circle cx="24" cy="24" r="21" fill="none" stroke="${color}" stroke-width="1.5" stroke-opacity="0.38"/>
       <circle cx="24" cy="24" r="13.5" fill="none" stroke="${color}" stroke-width="0.7" stroke-opacity="0.18" stroke-dasharray="5 3"/>
-      <g style="transform-origin:24px 24px;animation:${dur !== 'none' ? `rotate ${dur} linear infinite` : 'none'}">
+      <g style="transform-origin:24px 24px;will-change:transform;animation:${dur !== 'none' ? `rotate ${dur} linear infinite` : 'none'}">
         <ellipse cx="24" cy="14" rx="4" ry="8.5" fill="${color}" fill-opacity="0.9"/>
         <ellipse cx="34" cy="24" rx="8.5" ry="4" fill="${color}" fill-opacity="0.7"/>
         <ellipse cx="24" cy="34" rx="4" ry="8.5" fill="${color}" fill-opacity="0.9"/>
@@ -38,7 +38,7 @@ export function heaterSVG(active: boolean, color: string): TemplateResult {
       <circle cx="24" cy="24" r="21" fill="none" stroke="${color}" stroke-width="1.5" stroke-opacity="0.38"/>
       <path d="M24,8 C17,15 12,20 14,27 C15,33 20,38 24,40 C28,38 33,33 34,27 C36,20 31,15 24,8Z"
             fill="${color}" fill-opacity="${active ? 0.88 : 0.5}"
-            style="${active ? 'animation:flicker 1.9s ease-in-out infinite;transform-origin:24px 40px' : ''}"/>
+            style="${active ? 'will-change:opacity;animation:flicker 1.9s ease-in-out infinite;transform-origin:24px 40px' : ''}"/>
       <path d="M24,19 C21,23 19,26 20,30 C21,34 22.5,37 24,38 C25.5,37 27,34 28,30 C29,26 27,23 24,19Z"
             fill="white" fill-opacity="${active ? 0.55 : 0.2}"
             style="${active ? 'animation:flicker 1.4s ease-in-out infinite 0.2s;transform-origin:24px 38px' : ''}"/>
@@ -54,7 +54,7 @@ export function solarSVG(active: boolean, color: string): TemplateResult {
   return html`
     <svg viewBox="0 0 48 48" style="width:100%;height:100%;display:block;overflow:visible" xmlns="http://www.w3.org/2000/svg">
       <circle cx="24" cy="24" r="22" fill="${color}" fill-opacity="${active ? 0.13 : 0.07}"/>
-      <g style="transform-origin:24px 24px;animation:${active ? 'spin-slow 14s linear infinite' : 'none'}">
+      <g style="transform-origin:24px 24px;will-change:transform;animation:${active ? 'spin-slow 14s linear infinite' : 'none'}">
         ${rays.map(angle => html`
           <rect x="22.5" y="3" width="3" height="5.5" rx="1.5"
                 fill="${color}" fill-opacity="${active ? 0.75 : 0.3}"
@@ -63,7 +63,7 @@ export function solarSVG(active: boolean, color: string): TemplateResult {
       </g>
       ${active ? html`
         <circle cx="24" cy="24" r="14" fill="none" stroke="${color}" stroke-width="1.5"
-          stroke-opacity="0.35" style="animation:breathe 2.8s ease-in-out infinite"/>
+          stroke-opacity="0.35" style="will-change:transform;animation:breathe 2.8s ease-in-out infinite"/>
       ` : ''}
       <circle cx="24" cy="24" r="10.5" fill="${color}" fill-opacity="${active ? 0.9 : 0.45}"/>
       <circle cx="24" cy="24" r="7" fill="white" fill-opacity="${active ? 0.5 : 0.22}"/>
@@ -101,7 +101,7 @@ export function coverSVG(position: number, isMoving: boolean, color: string): Te
       <rect x="80" y="8" width="8" height="32" rx="4"
             fill="${color}" fill-opacity="0.45"/>
       <circle cx="84" cy="24" r="5" fill="${color}" fill-opacity="${isMoving ? 0.9 : 0.35}"
-              style="${isMoving ? 'animation:rotate 1.2s linear infinite' : ''}"/>
+              style="${isMoving ? 'will-change:transform;animation:rotate 1.2s linear infinite' : ''}"/>
       <circle cx="84" cy="24" r="2" fill="white" fill-opacity="${isMoving ? 0.8 : 0.4}"/>
     </svg>`;
 }
@@ -119,9 +119,9 @@ export function lightSVG(on: boolean, rgb: [number, number, number] | null, brig
     <svg viewBox="0 0 48 48" style="width:100%;height:100%;display:block;overflow:visible" xmlns="http://www.w3.org/2000/svg">
       ${on ? html`
         <circle cx="24" cy="24" r="23" fill="${rgbStr}" fill-opacity="${0.07 + bNorm * 0.18}"
-                style="animation:light-glow 2.6s ease-in-out infinite"/>
+                style="will-change:opacity;animation:light-glow 2.6s ease-in-out infinite"/>
         <circle cx="24" cy="24" r="17" fill="${rgbStr}" fill-opacity="${0.09 + bNorm * 0.12}"/>
-        <g style="transform-origin:24px 24px;animation:spin-slow 9s linear infinite">
+        <g style="transform-origin:24px 24px;will-change:transform;animation:spin-slow 9s linear infinite">
           ${glowRays.map(a => html`
             <line x1="24" y1="5" x2="24" y2="9" stroke="${rgbStr}"
                   stroke-width="2.2" stroke-linecap="round" stroke-opacity="${0.4 + bNorm * 0.4}"
@@ -160,13 +160,13 @@ export function valveSVG(open: boolean, color: string): TemplateResult {
       <rect x="18" y="16" width="12" height="16" rx="3" fill="${color}" fill-opacity="0.85"/>
       <!-- Valve handle -->
       <rect x="22" y="8" width="4" height="10" rx="2" fill="${color}" fill-opacity="0.9"
-            style="transform:rotate(${open ? 0 : 90}deg);transform-origin:24px 18px;transition:transform 0.4s ease"/>
+            style="will-change:transform;transform:rotate(${open ? 0 : 90}deg);transform-origin:24px 18px;transition:transform 0.4s ease"/>
       <rect x="17" y="7" width="14" height="3" rx="1.5" fill="${color}" fill-opacity="0.75"
-            style="transform:rotate(${open ? 0 : 90}deg);transform-origin:24px 8.5px;transition:transform 0.4s ease"/>
+            style="will-change:transform;transform:rotate(${open ? 0 : 90}deg);transform-origin:24px 8.5px;transition:transform 0.4s ease"/>
       <!-- Flow indicator -->
       ${open ? html`
-        <circle cx="9" cy="24" r="2" fill="white" fill-opacity="0.7" style="animation:flow-dot 1.2s ease-in-out infinite"/>
-        <circle cx="39" cy="24" r="2" fill="white" fill-opacity="0.7" style="animation:flow-dot 1.2s ease-in-out infinite 0.3s"/>
+        <circle cx="9" cy="24" r="2" fill="white" fill-opacity="0.7" style="will-change:transform;animation:flow-dot 1.2s ease-in-out infinite"/>
+        <circle cx="39" cy="24" r="2" fill="white" fill-opacity="0.7" style="will-change:transform;animation:flow-dot 1.2s ease-in-out infinite 0.3s"/>
       ` : ''}
     </svg>`;
 }
