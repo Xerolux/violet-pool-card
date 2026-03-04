@@ -19,6 +19,7 @@ import { ServiceCaller } from './utils/service-caller';
 import { EntityHelper } from './utils/entity-helper';
 import { StateColorHelper } from './utils/state-color';
 import { i18n } from './utils/i18n';
+import { PerformanceMonitor } from './utils/performance';
 import { pumpSVG, heaterSVG, solarSVG, coverSVG, lightSVG, dosingDropletSVG, gaugeNeedleSVG, filterGaugeSVG, chartSVG, backwashSVG, refillSVG, solarSurplusSVG, flowRateSVG, inletSVG, counterCurrentSVG, chlorineCanisterSVG, phPlusCanisterSVG, phMinusCanisterSVG, flocculantCanisterSVG } from './utils/animated-icons';
 
 
@@ -145,6 +146,11 @@ export class VioletPoolCard extends LitElement {
       throw new Error('You need to define an entity');
     }
 
+    // Enable performance monitoring in development
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      PerformanceMonitor.enable();
+    }
+
     this.config = {
       show_state: true,
       show_detail_status: true,
@@ -161,6 +167,10 @@ export class VioletPoolCard extends LitElement {
       ...config,
     };
   }
+
+  // Cache for computed card classes and styles
+  private _cardClassCache = new Map<string, string>();
+  private _cardStyleCache = new Map<string, string>();
 
   private _buildEntityId(domain: string, suffix: string): string {
     const prefix = this.config.entity_prefix || 'violet_pool';
@@ -302,6 +312,9 @@ export class VioletPoolCard extends LitElement {
       return html``;
     }
 
+    // Performance monitoring
+    PerformanceMonitor.markStart('card-render');
+
     if (this.config.entity) {
       const entity = this.hass.states[this.config.entity];
       if (!entity) {
@@ -363,9 +376,21 @@ export class VioletPoolCard extends LitElement {
       default:
         return html` <ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">Unknown Card Type</span><span class="error-entity">${this.config.card_type}</span></div></div></ha-card> `;
     }
+    
+    // End performance monitoring
+    const renderTime = PerformanceMonitor.markEnd('card-render');
+    if (renderTime > 0) {
+      PerformanceMonitor.logCardMetrics(this.config.card_type, renderTime);
+    }
   }
 
   private _getCardClasses(isActive: boolean, config: VioletPoolCardConfig): string {
+    const cacheKey = `${isActive}-${config.size || 'medium'}-${config.theme || config.style}-${config.animation}-${config.show_flow_animation}`;
+    
+    if (this._cardClassCache.has(cacheKey)) {
+      return this._cardClassCache.get(cacheKey)!;
+    }
+
     const classes = [];
 
     classes.push(`size-${config.size || 'medium'}`);
@@ -388,10 +413,27 @@ export class VioletPoolCard extends LitElement {
       classes.push('is-active');
     }
 
-    return classes.join(' ');
+    const result = classes.join(' ');
+    this._cardClassCache.set(cacheKey, result);
+    
+    // Limit cache size
+    if (this._cardClassCache.size > 50) {
+      const firstKey = this._cardClassCache.keys().next().value;
+      if (firstKey) {
+        this._cardClassCache.delete(firstKey);
+      }
+    }
+
+    return result;
   }
 
   private _getCardStyles(config: VioletPoolCardConfig): string {
+    const cacheKey = `${config.custom_width}-${config.custom_height}-${config.custom_padding}-${config.border_radius}-${config.shadow_intensity}`;
+    
+    if (this._cardStyleCache.has(cacheKey)) {
+      return this._cardStyleCache.get(cacheKey)!;
+    }
+
     const styles: string[] = [];
 
     if (config.custom_width) {
@@ -420,7 +462,18 @@ export class VioletPoolCard extends LitElement {
       styles.push(`--vpc-shadow: ${shadows[config.shadow_intensity]};`);
     }
 
-    return styles.join(' ');
+    const result = styles.join(' ');
+    this._cardStyleCache.set(cacheKey, result);
+    
+    // Limit cache size
+    if (this._cardStyleCache.size > 50) {
+      const firstKey = this._cardStyleCache.keys().next().value;
+      if (firstKey) {
+        this._cardStyleCache.delete(firstKey);
+      }
+    }
+
+    return result;
   }
 
   /**
@@ -2463,6 +2516,37 @@ export class VioletPoolCard extends LitElement {
     const pressure: number = parseFloat(pressureEntity.state) || 0;
     const name = config.name || pressureEntity.attributes.friendly_name || 'Filterdruck';
     const accentColor = this._getAccentColor('filter', config);
+    
+    // Enhanced controls for filter
+    const quickActions: QuickAction[] = [
+      {
+        icon: 'mdi:restart',
+        label: 'Backwash',
+        action: async () => {
+          const serviceCaller = new ServiceCaller(this.hass);
+          await serviceCaller.startFilterBackwash(pressureEntityId, 300);
+        },
+        color: '#00BCD4',
+      },
+      {
+        icon: 'mdi:water',
+        label: 'Rinse',
+        action: async () => {
+          const serviceCaller = new ServiceCaller(this.hass);
+          await serviceCaller.startFilterRinse(pressureEntityId, 120);
+        },
+        color: '#2196F3',
+      },
+      {
+        icon: 'mdi:refresh',
+        label: 'Reset Pressure',
+        action: async () => {
+          const serviceCaller = new ServiceCaller(this.hass);
+          await serviceCaller.resetFilterPressure(pressureEntityId);
+        },
+        color: '#FF9F0A',
+      },
+    ];
 
     const backwashEntity = backwashEntityId ? this.hass.states[backwashEntityId] : undefined;
     const isBackwashing = backwashEntity ? backwashEntity.state === 'on' : false;
@@ -2670,7 +2754,7 @@ export class VioletPoolCard extends LitElement {
                 ` : ''}
               </div>
               <!-- Percentage text on bar -->
-              <span style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 11px; font-weight: bold; color: ${percent > 50 ? 'white' : 'var(--vpc-text)'}; text-shadow: 0 0 2px rgba(0,0,0,0.3);">${percent.toFixed(0)}%</span>
+              <span style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 11px; font-weight: bold; color: ${percent > 50 ? 'white' : 'var(--vpc-text)'}; text-shadow: 0 0 2px rgba(0,0,0,0.3); z-index: 1; pointer-events: none;">${percent.toFixed(0)}%</span>
             </div>
           </div>
 
@@ -2760,7 +2844,7 @@ export class VioletPoolCard extends LitElement {
             <div style="width: 100%; height: 24px; background: var(--vpc-bg); border-radius: 12px; overflow: hidden; position: relative;">
               <div style="height: 100%; background: linear-gradient(90deg, var(--vpc-text-secondary) 0%, ${surplusColor} 100%); width: ${Math.min(power / (threshold * 2) * 100, 100)}%; transition: width 0.5s ease;"></div>
               <!-- Threshold marker -->
-              <div style="position: absolute; top: 0; bottom: 0; left: ${threshold > 0 ? Math.min(threshold / (threshold * 2) * 100, 100) : 0}%; width: 2px; background: rgba(0,0,0,0.5);"></div>
+                  <div style="position: absolute; top: 0; bottom: 0; left: ${threshold > 0 ? Math.min(threshold / (threshold * 2) * 100, 100) : 0}%; width: 2px; background: rgba(0,0,0,0.5); z-index: 2; pointer-events: none;"></div>
             </div>
             ${power > threshold ? html`
               <div style="margin-top: 6px; font-size: 11px; color: ${surplusColor}; font-weight: 600;">
@@ -2803,11 +2887,98 @@ export class VioletPoolCard extends LitElement {
    * Render Flow Rate Card - displays water flow rate with animation
    */
   private renderFlowRateCard(config: VioletPoolCardConfig = this.config): TemplateResult {
-    const entityId = config.entity || this._buildEntityId('sensor', 'flow_rate');
-    const entity = this.hass.states[entityId];
-    if (!entity) {
-      return html`<ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">Durchfluss-Sensor nicht gefunden</span><span class="error-entity">${entityId}</span></div></div></ha-card>`;
-    }
+    const entity = this.hass.states[config.entity!];
+    if (!entity) return this._renderLoadingSkeleton(config);
+    const flowRate = parseFloat(entity.state);
+    const unit = entity.attributes?.unit_of_measurement || 'm³/h';
+    const name = config.name || entity.attributes.friendly_name || 'Flow Rate';
+    const accentColor = this._getAccentColor('flow_rate', config);
+
+    const isFlowing = flowRate > 0;
+    const flowColor = isFlowing ? StateColorHelper.getFlowRateColor(flowRate) : undefined;
+    
+    // Enhanced controls for flow rate
+    const quickActions: QuickAction[] = [
+      {
+        icon: 'mdi:water-pump',
+        label: 'Test Flow',
+        action: async () => {
+          const serviceCaller = new ServiceCaller(this.hass);
+          await serviceCaller.callService('violet_pool_controller', 'test_flow_rate', {
+            entity_id: config.entity!,
+          });
+        },
+        color: accentColor,
+      },
+      {
+        icon: 'mdi:cog',
+        label: 'Calibrate',
+        action: async () => {
+          const serviceCaller = new ServiceCaller(this.hass);
+          await serviceCaller.calibrateSensor('flow', flowRate);
+        },
+        color: '#FF9F0A',
+      },
+    ];
+
+    return html`
+      <ha-card class="${this._getCardClasses(isFlowing, config)}" style="--card-accent: ${accentColor}" @click="${() => this._showMoreInfo(config.entity!)}">
+        <div class="accent-bar"></div>
+        <div class="card-content">
+          <div class="header">
+            <div class="header-icon ${isFlowing ? 'icon-active' : ''}" style="--icon-accent: ${accentColor}">
+              ${flowRateSVG(isFlowing, accentColor)}
+            </div>
+            <div class="header-info">
+              <span class="name">${name}</span>
+              <span class="header-subtitle">${isFlowing ? 'Flowing' : 'No Flow'}</span>
+            </div>
+            ${config.show_state ? html`<vpc-status-badge .state="${isFlowing ? 'on' : 'off'}"></vpc-status-badge>` : ''}
+          </div>
+
+          <div class="info-row tooltip-wrap" style="margin-top: 12px;">
+            <ha-icon icon="mdi:water"></ha-icon>
+            <span class="info-label">Current Flow</span>
+            <span class="info-value" style="color: ${flowColor?.color || 'var(--vpc-text)'}; font-weight: 600;">${flowRate.toFixed(2)} ${unit}</span>
+            <div class="t-tip">
+              <div class="t-tip-title"><ha-icon icon="mdi:water"></ha-icon>Flow Rate</div>
+              <div class="t-tip-desc">Current water flow rate through the system. Normal range: 15-25 m³/h for standard pools.</div>
+              <div class="t-tip-ideal"><ha-icon icon="mdi:target"></ha-icon>Ideal: 15-25 m³/h</div>
+            </div>
+          </div>
+
+          <!-- Flow visualization -->
+          <div style="width: 100%; height: 24px; background: var(--vpc-surface); border-radius: 12px; overflow: hidden; position: relative; margin-top: 12px;">
+            <div style="height: 100%; background: linear-gradient(90deg, ${flowColor?.color || accentColor} 0%, ${flowColor?.color || accentColor}dd 100%); width: ${Math.min(100, Math.max(0, (flowRate / 30) * 100))}%; transition: width 0.5s ease; position: relative;">
+              ${isFlowing ? html`
+                <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: repeating-linear-gradient(90deg, transparent, transparent 10px, rgba(255,255,255,0.3) 10px, rgba(255,255,255,0.3) 20px); animation: shimmer 2s linear infinite;"></div>
+              ` : ''}
+            </div>
+            <span style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 11px; font-weight: bold; color: var(--vpc-text); z-index: 1;">${Math.round((flowRate / 30) * 100)}%</span>
+          </div>
+
+          ${config.show_detail_status ? html`
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px;">
+              <div style="background: var(--vpc-surface); border-radius: 8px; padding: 8px;">
+                <div style="font-size: 11px; color: var(--vpc-text-secondary);">Min Today</div>
+                <div style="font-size: 14px; font-weight: 600;">${(entity.attributes?.min_today || 0).toFixed(2)} ${unit}</div>
+              </div>
+              <div style="background: var(--vpc-surface); border-radius: 8px; padding: 8px;">
+                <div style="font-size: 11px; color: var(--vpc-text-secondary);">Max Today</div>
+                <div style="font-size: 14px; font-weight: 600;">${(entity.attributes?.max_today || 0).toFixed(2)} ${unit}</div>
+              </div>
+            </div>
+          ` : ''}
+
+          ${config.show_controls ? html`
+            <div style="margin-top: 12px;">
+              <vpc-quick-actions .actions="${quickActions}"></vpc-quick-actions>
+            </div>
+          ` : ''}
+        </div>
+      </ha-card>
+    `;
+  }
 
     const flow = parseFloat(entity.state) || 0;
     const maxFlow = (config as any).max_flow || 10;
@@ -3218,11 +3389,11 @@ export class VioletPoolCard extends LitElement {
   static get styles(): CSSResultGroup {
     return css`:host{--vpc-font:-apple-system, 'SF Pro Display', 'SF Pro Text', system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;--vpc-spacing:18px;--vpc-radius:20px;--vpc-inner-radius:12px;--vpc-bg:var(--ha-card-background, var(--card-background-color, #ffffff));--vpc-surface:rgba(120,120,128,0.06);--vpc-border:none;--vpc-shadow:0 2px 20px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.04);--vpc-backdrop:none;--vpc-primary:var(--primary-color, #007AFF);--vpc-success:#34C759;--vpc-warning:#FF9F0A;--vpc-danger:#FF3B30;--vpc-purple:#AF52DE;--vpc-teal:#5AC8FA;--vpc-orange:#FF9500;--vpc-indigo:#5856D6;--vpc-text:var(--primary-text-color, #1C1C1E);--vpc-text-secondary:var(--secondary-text-color, #6D6D72);--vpc-text-tertiary:rgba(60,60,67,0.45);--vpc-icon-size:22px;--vpc-transition:all 0.28s cubic-bezier(0.34, 1.4, 0.64, 1);--vpc-transition-fast:all 0.18s ease;--card-accent:var(--primary-color, #007AFF);--icon-accent:var(--card-accent);display:block;font-family:var(--vpc-font);}ha-card.theme-classic{--vpc-bg:#ffffff;--vpc-shadow:0 2px 20px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04);--vpc-radius:22px;--vpc-inner-radius:13px;--vpc-surface:rgba(120,120,128,0.06);--vpc-primary:#007AFF;}ha-card.theme-midnight{--vpc-bg:#1C1C1E;--vpc-surface:rgba(255,255,255,0.06);--vpc-border:1px solid rgba(255,255,255,0.08);--vpc-shadow:0 4px 30px rgba(0,0,0,0.4);--vpc-radius:22px;--vpc-text:#FFFFFF;--vpc-text-secondary:#8E8E93;--vpc-text-tertiary:rgba(255,255,255,0.25);--vpc-primary:#0A84FF;--vpc-success:#30D158;--vpc-warning:#FFD60A;--vpc-danger:#FF453A;}ha-card.theme-elegance, ha-card.theme-frost{--vpc-bg:rgba(255,255,255,0.72);--vpc-backdrop:blur(24px) saturate(180%);--vpc-radius:26px;--vpc-border:1px solid rgba(255,255,255,0.4);--vpc-shadow:0 8px 40px rgba(31,38,135,0.12), 0 2px 8px rgba(0,0,0,0.06);}ha-card.theme-vibrant{--vpc-radius:18px;--vpc-spacing:20px;--vpc-shadow:0 1px 3px rgba(0,0,0,0.05), 0 0 0 1px rgba(0,0,0,0.04);}ha-card.theme-pure{--vpc-radius:14px;--vpc-shadow:none;--vpc-border:1px solid rgba(0,0,0,0.07);--vpc-surface:transparent;}ha-card.theme-glow{--vpc-bg:#0D0D14;--vpc-border:1px solid rgba(0,212,255,0.2);--vpc-shadow:0 0 30px rgba(0,212,255,0.07);--vpc-radius:14px;--vpc-primary:#00D4FF;--vpc-text:#E8E8F0;--vpc-text-secondary:#6E6E80;--vpc-surface:rgba(0,212,255,0.04);--vpc-success:#00E676;--vpc-warning:#FFEA00;--vpc-danger:#FF1744;}ha-card.theme-metallic{--vpc-bg:linear-gradient(145deg, rgba(255,255,255,0.96) 0%, rgba(248,248,255,0.96) 100%);--vpc-radius:24px;--vpc-shadow:0 12px 50px -8px rgba(80,80,160,0.15), 0 0 0 1px rgba(255,255,255,0.9);--vpc-border:1px solid rgba(255,255,255,0.7);}ha-card.theme-ocean{--vpc-bg:#0077BE;--vpc-primary:#00A8E8;--vpc-surface:rgba(0,168,232,0.12);--vpc-text:#FFFFFF;--vpc-text-secondary:rgba(255,255,255,0.75);--vpc-shadow:0 6px 28px rgba(0,119,190,0.3);--vpc-radius:20px;}ha-card.theme-sunset{--vpc-bg:linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);--vpc-primary:#FFF8DC;--vpc-surface:rgba(255,248,220,0.18);--vpc-text:#FFFFFF;--vpc-text-secondary:rgba(255,255,255,0.8);--vpc-shadow:0 8px 32px rgba(255,107,53,0.35);--vpc-radius:22px;}ha-card.theme-forest{--vpc-bg:#228B22;--vpc-primary:#90EE90;--vpc-surface:rgba(144,238,144,0.15);--vpc-text:#FFFFFF;--vpc-text-secondary:rgba(255,255,255,0.75);--vpc-shadow:0 6px 28px rgba(34,139,34,0.35);--vpc-radius:20px;}ha-card.theme-aurora{--vpc-bg:linear-gradient(135deg, #00C9FF 0%, #92FE9D 50%, #5EE7DF 100%);--vpc-primary:#FFFFFF;--vpc-surface:rgba(255,255,255,0.16);--vpc-text:#FFFFFF;--vpc-text-secondary:rgba(255,255,255,0.8);--vpc-shadow:0 10px 40px rgba(0,201,255,0.25);--vpc-radius:24px;}@media (prefers-color-scheme:dark){ha-card.theme-classic{--vpc-bg:#1C1C1E;--vpc-surface:rgba(255,255,255,0.06);--vpc-border:1px solid rgba(255,255,255,0.08);--vpc-text:#FFFFFF;--vpc-text-secondary:#8E8E93;--vpc-primary:#0A84FF;--vpc-success:#30D158;--vpc-warning:#FFD60A;--vpc-danger:#FF453A;}ha-card.theme-elegance, ha-card.theme-frost{--vpc-bg:rgba(18,18,30,0.80);--vpc-border:1px solid rgba(255,255,255,0.09);--vpc-shadow:0 8px 40px rgba(0,0,0,0.45);}ha-card.theme-metallic{--vpc-bg:linear-gradient(145deg, rgba(28,28,38,0.97) 0%, rgba(20,20,32,0.97) 100%);--vpc-border:1px solid rgba(255,255,255,0.07);}ha-card.theme-pure{--vpc-border:1px solid rgba(255,255,255,0.07);}ha-card.theme-vibrant{--vpc-shadow:0 1px 3px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.04);}ha-card.theme-ocean{--vpc-bg:#005A8F;--vpc-primary:#6DD5FA;--vpc-surface:rgba(109,213,250,0.10);--vpc-shadow:0 8px 32px rgba(0,90,143,0.5);}ha-card.theme-sunset{--vpc-bg:linear-gradient(135deg, #D4502D 0%, #C7761A 100%);--vpc-primary:#FFE4B5;--vpc-surface:rgba(255,228,181,0.12);--vpc-shadow:0 8px 32px rgba(212,80,45,0.5);}ha-card.theme-forest{--vpc-bg:#1A5C1A;--vpc-primary:#98FB98;--vpc-surface:rgba(152,251,152,0.10);--vpc-shadow:0 8px 32px rgba(26,92,26,0.5);}}ha-card{font-family:var(--vpc-font);padding:var(--vpc-spacing);background:var(--vpc-bg);border-radius:var(--vpc-radius);box-shadow:var(--vpc-shadow);border:var(--vpc-border);backdrop-filter:var(--vpc-backdrop);-webkit-backdrop-filter:var(--vpc-backdrop);transition:transform 0.22s cubic-bezier(0.34,1.4,0.64,1), box-shadow 0.22s ease;overflow:visible;position:relative;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;}ha-card:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,0,0,0.11), 0 2px 6px rgba(0,0,0,0.05);}ha-card:active{transform:scale(0.985);box-shadow:0 2px 8px rgba(0,0,0,0.07);transition:transform 0.1s ease, box-shadow 0.1s ease;}ha-card.theme-midnight:hover{box-shadow:0 8px 30px rgba(0,0,0,0.5);}ha-card.theme-glow:hover{box-shadow:0 0 40px rgba(0,212,255,0.12), 0 4px 20px rgba(0,0,0,0.3);}ha-card.theme-glow.is-active{box-shadow:0 0 50px rgba(0,212,255,0.2), inset 0 0 20px rgba(0,212,255,0.04);border-color:rgba(0,212,255,0.35);}.accent-bar{position:absolute;top:0;left:0;right:0;height:3px;background:var(--card-accent);opacity:0.65;transition:opacity 0.3s ease, height 0.3s ease;}ha-card.is-active .accent-bar{height:4px;opacity:1;}ha-card.theme-glow .accent-bar{background:linear-gradient(90deg, #00D4FF, #7C4DFF, #00D4FF);box-shadow:0 0 12px rgba(0,212,255,0.5);height:2px;animation:neon-flow 3s linear infinite;}ha-card.theme-pure .accent-bar{height:2px;opacity:0.45;}@keyframes neon-flow{0%{background-position:0% 50%;}100%{background-position:200% 50%;}}.card-content{display:flex;flex-direction:column;gap:14px;}.card-content.compact{flex-direction:row;align-items:center;gap:14px;}.header{display:flex;align-items:center;gap:14px;}.header-icon{width:46px;height:46px;border-radius:15px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb, var(--icon-accent, var(--vpc-primary)) 12%, transparent);transition:background 0.25s ease, box-shadow 0.25s ease;flex-shrink:0;}.header-icon.icon-active{background:color-mix(in srgb, var(--icon-accent, var(--vpc-primary)) 18%, transparent);box-shadow:0 0 0 5px color-mix(in srgb, var(--icon-accent, var(--vpc-primary)) 8%, transparent);}ha-card.theme-glow .header-icon{background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.18);}ha-card.theme-glow .header-icon.icon-active{box-shadow:0 0 16px rgba(0,212,255,0.25);}.header-icon ha-icon{--mdc-icon-size:24px;color:var(--icon-accent, var(--vpc-primary));}.header-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}.name{font-family:var(--vpc-font);font-size:16px;font-weight:600;letter-spacing:-0.3px;color:var(--vpc-text);line-height:1.25;}.header-subtitle{font-family:var(--vpc-font);font-size:13px;font-weight:400;color:var(--vpc-text-secondary);line-height:1.2;}ha-icon{--mdc-icon-size:var(--vpc-icon-size);color:var(--vpc-primary);transition:color 0.2s ease;}@keyframes rotate{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}@keyframes pulse-glow{0%, 100%{opacity:1;transform:scale(1);}50%{opacity:0.65;transform:scale(0.95);}}@keyframes breathe{0%, 100%{transform:scale(1);opacity:1;}50%{transform:scale(1.08);opacity:0.85;}}@keyframes spin-slow{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}.pump-running{animation:rotate 1.8s linear infinite;}.heater-active{animation:breathe 2.5s ease-in-out infinite;color:var(--vpc-danger, #FF3B30);}.solar-active{animation:breathe 3s ease-in-out infinite;color:var(--vpc-warning, #FF9F0A);}.dosing-active{animation:pulse-glow 2s ease-in-out infinite;color:var(--vpc-success, #34C759);}.speed-segments-container{display:flex;align-items:center;gap:8px;}.speed-segments{display:flex;flex:1;gap:6px;}.speed-segment{flex:1;display:flex;align-items:center;justify-content:center;gap:4px;padding:9px 6px;border-radius:var(--vpc-inner-radius, 12px);border:none;background:var(--vpc-surface, rgba(120,120,128,0.06));color:var(--vpc-text-secondary);font-family:var(--vpc-font);font-size:12px;font-weight:500;cursor:pointer;transition:all 0.18s ease;-webkit-tap-highlight-color:transparent;letter-spacing:-0.2px;position:relative;overflow:visible;}.speed-segment:hover{background:color-mix(in srgb, var(--seg-color) 10%, transparent);color:var(--seg-color);}.speed-segment.seg-active{background:color-mix(in srgb, var(--seg-color) 15%, transparent);color:var(--seg-color);font-weight:600;box-shadow:inset 0 0 0 1.5px color-mix(in srgb, var(--seg-color) 40%, transparent);}.speed-segment.seg-past{background:color-mix(in srgb, var(--seg-color) 08%, transparent);color:color-mix(in srgb, var(--seg-color) 70%, var(--vpc-text-secondary));}.speed-off-btn{width:38px;height:38px;border-radius:12px;border:none;background:var(--vpc-surface);color:var(--vpc-text-secondary);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.18s ease;flex-shrink:0;-webkit-tap-highlight-color:transparent;}.speed-off-btn:hover{background:rgba(255,59,48,0.1);color:var(--vpc-danger, #FF3B30);}.speed-off-btn.seg-active{background:rgba(255,59,48,0.12);color:var(--vpc-danger, #FF3B30);box-shadow:inset 0 0 0 1.5px rgba(255,59,48,0.3);}ha-card.theme-glow .speed-segment{border:1px solid rgba(0,212,255,0.1);}ha-card.theme-glow .speed-segment.seg-active{box-shadow:0 0 12px color-mix(in srgb, var(--seg-color) 50%, transparent);}.temp-hero{display:flex;align-items:center;gap:12px;padding:6px 0 4px;}.temp-hero-main{display:flex;align-items:baseline;gap:4px;}.temp-hero-value{font-family:var(--vpc-font);font-size:44px;font-weight:700;line-height:1;letter-spacing:-2px;color:var(--temp-color, var(--vpc-text));}.temp-hero-unit{font-size:22px;font-weight:400;color:var(--temp-color, var(--vpc-text));opacity:0.65;letter-spacing:-0.5px;}.temp-hero-target-pill{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:100px;background:var(--vpc-surface);font-size:13px;font-weight:500;color:var(--vpc-text-secondary);white-space:nowrap;}.temp-range-bar, .chem-range-bar{display:flex;flex-direction:column;gap:5px;}.temp-range-track, .chem-range-track{height:6px;background:var(--vpc-surface);border-radius:100px;position:relative;overflow:visible;}.temp-range-fill, .chem-range-fill{height:100%;border-radius:100px;transition:width 0.5s cubic-bezier(0.34,1.4,0.64,1);}.temp-range-target{position:absolute;top:50%;transform:translate(-50%, -50%);width:3px;height:14px;background:var(--vpc-text-secondary);border-radius:2px;opacity:0.7;}.temp-range-labels, .chem-range-labels{display:flex;justify-content:space-between;font-size:11px;font-weight:400;color:var(--vpc-text-tertiary, rgba(60,60,67,0.45));letter-spacing:0px;}.dosing-value-block{display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:var(--vpc-inner-radius, 12px);background:var(--vpc-surface);}ha-card.theme-glow .dosing-value-block{background:rgba(0,212,255,0.04);border:1px solid rgba(0,212,255,0.08);}.dosing-value-row{display:flex;align-items:center;justify-content:space-between;gap:10px;}.dosing-value-main{display:flex;align-items:baseline;gap:6px;}.dosing-label-tag{font-size:12px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;color:var(--vpc-text-secondary);}.dosing-current-value{font-family:var(--vpc-font);font-size:32px;font-weight:700;line-height:1;letter-spacing:-1px;}.dosing-current-unit{font-size:15px;font-weight:400;opacity:0.65;}.dosing-status-pill{padding:4px 10px;border-radius:100px;font-size:12px;font-weight:600;white-space:nowrap;}.chem-range-target{position:absolute;top:50%;transform:translate(-50%, -50%);display:flex;flex-direction:column;align-items:center;gap:2px;}.chem-target-line{width:2px;height:14px;background:var(--vpc-text);border-radius:2px;opacity:0.5;}.chem-target-label{position:absolute;top:16px;font-size:9px;font-weight:600;color:var(--vpc-text-secondary);white-space:nowrap;transform:translateX(-50%);}.chem-mini-bar{width:100%;height:4px;background:var(--vpc-surface, rgba(120,120,128,0.1));border-radius:100px;overflow:hidden;position:relative;margin-top:4px;}.chem-mini-fill{height:100%;border-radius:100px;transition:width 0.5s cubic-bezier(0.34,1.4,0.64,1);}.chem-mini-ideal{position:absolute;top:0;height:100%;background:rgba(52,199,89,0.18);border-radius:2px;}.solar-temp-comparison{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px;background:var(--vpc-surface);border-radius:var(--vpc-inner-radius, 12px);}ha-card.theme-glow .solar-temp-comparison{background:rgba(0,212,255,0.04);border:1px solid rgba(0,212,255,0.08);}.solar-temp-tile{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;}.solar-temp-tile ha-icon{--mdc-icon-size:18px;color:var(--vpc-text-secondary);}.solar-temp-tile-val{font-size:20px;font-weight:700;letter-spacing:-0.5px;color:var(--vpc-text);line-height:1;}.solar-temp-tile-label{font-size:11px;font-weight:500;color:var(--vpc-text-secondary);text-transform:uppercase;letter-spacing:0.3px;}.solar-delta-badge{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 12px;border-radius:100px;font-size:12px;font-weight:700;}.delta-great{background:rgba(52,199,89,0.12);color:var(--vpc-success, #34C759);}.delta-ok{background:rgba(255,159,10,0.12);color:var(--vpc-warning, #FF9F0A);}.delta-low{background:rgba(255,59,48,0.10);color:var(--vpc-danger, #FF3B30);}.delta-hint-text{font-size:12px;font-weight:400;color:var(--vpc-text-secondary);padding:2px 0;}.chemistry-grid{display:grid;grid-template-columns:repeat(3, 1fr);gap:8px;}.chemistry-card{display:flex;flex-direction:column;align-items:center;gap:2px;padding:14px 8px 12px;border-radius:var(--vpc-inner-radius, 12px);background:var(--vpc-surface);cursor:pointer;transition:transform 0.18s ease, background 0.18s ease;position:relative;overflow:visible;}.chemistry-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--chem-color, var(--vpc-primary));opacity:0.6;border-radius:100px;}.chemistry-card:hover{transform:scale(1.02);background:color-mix(in srgb, var(--chem-color) 8%, var(--vpc-surface));}ha-card.theme-glow .chemistry-card{background:rgba(0,212,255,0.04);border:1px solid rgba(0,212,255,0.08);}.chem-icon-wrap{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb, var(--chem-color, var(--vpc-primary)) 12%, transparent);margin-bottom:4px;}.chem-icon-wrap ha-icon{--mdc-icon-size:16px;color:var(--chem-color, var(--vpc-primary));}.chemistry-val{font-family:var(--vpc-font);font-size:18px;font-weight:700;letter-spacing:-0.5px;color:var(--chem-color, var(--vpc-text));line-height:1;}.chemistry-unit{font-size:11px;font-weight:500;color:var(--vpc-text-secondary);letter-spacing:0.2px;}.chemistry-label{font-size:10px;font-weight:500;color:var(--vpc-text-secondary);text-transform:uppercase;letter-spacing:0.4px;}.overview-warning-badge{width:22px;height:22px;border-radius:50%;background:var(--vpc-danger, #FF3B30);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}.overview-active-dot{width:10px;height:10px;border-radius:50%;background:var(--vpc-success, #34C759);box-shadow:0 0 8px rgba(52,199,89,0.5);flex-shrink:0;animation:pulse-glow 2s ease-in-out infinite;}.overview-section{display:flex;flex-direction:column;gap:6px;}.section-title{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--vpc-text-secondary);text-transform:uppercase;letter-spacing:0.6px;padding:0 2px;}.section-count{margin-left:auto;font-size:11px;font-weight:500;color:var(--vpc-text-tertiary);}.warning-title ha-icon{color:var(--vpc-warning, #FF9F0A);}.warning-title{color:var(--vpc-warning, #FF9F0A);}.temp-hero{display:flex;align-items:baseline;gap:4px;padding:8px 0;}.temp-hero-value{font-size:42px;font-weight:800;line-height:1;color:var(--temp-color, var(--vpc-text));letter-spacing:-1px;}.temp-hero-unit{font-size:22px;font-weight:500;color:var(--temp-color, var(--vpc-text));opacity:0.7;}.temp-hero-target{font-size:16px;font-weight:500;color:var(--vpc-text-secondary);margin-left:12px;}.info-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:var(--vpc-inner-radius, 12px);background:var(--vpc-surface);font-size:14px;color:var(--vpc-text);font-family:var(--vpc-font);}ha-card.theme-glow .info-row{background:rgba(0,212,255,0.04);border:1px solid rgba(0,212,255,0.08);}.info-row ha-icon{--mdc-icon-size:17px;color:var(--vpc-text-secondary);flex-shrink:0;}.info-label{flex:1;font-weight:400;color:var(--vpc-text-secondary);}.info-value{font-weight:600;color:var(--vpc-text);letter-spacing:-0.2px;}.info-badge{padding:3px 9px;border-radius:100px;font-size:11px;font-weight:600;}.info-badge.warning{background:color-mix(in srgb, var(--vpc-warning, #FF9F0A) 12%, transparent);color:var(--vpc-warning, #FF9F0A);}.info-row-warning{background:color-mix(in srgb, var(--vpc-warning, #FF9F0A) 06%, transparent);border:1px solid color-mix(in srgb, var(--vpc-warning, #FF9F0A) 18%, transparent);}.solar-temps{display:flex;flex-direction:column;gap:8px;}.chemistry-grid{display:grid;grid-template-columns:repeat(3, 1fr);gap:10px;}.chemistry-card{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px;border-radius:14px;background:rgba(var(--rgb-primary-text-color, 0,0,0), 0.03);cursor:pointer;transition:var(--vpc-transition);border:1px solid transparent;}.chemistry-card:hover{background:rgba(var(--rgb-primary-text-color, 0,0,0), 0.06);transform:translateY(-1px);}ha-card.theme-glow .chemistry-card{background:rgba(0, 255, 255, 0.04);border:1px solid rgba(0, 255, 255, 0.08);}.chemistry-card ha-icon{--mdc-icon-size:20px;color:var(--chem-color, var(--vpc-primary));}.chemistry-val{font-size:16px;font-weight:700;color:var(--chem-color, var(--vpc-text));line-height:1;}.chemistry-label{font-size:11px;font-weight:500;color:var(--vpc-text-secondary);text-transform:uppercase;letter-spacing:0.3px;}.overview-section{display:flex;flex-direction:column;gap:8px;}.section-title{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--vpc-text-secondary);text-transform:uppercase;letter-spacing:0.5px;padding:0 2px;}.section-title ha-icon{--mdc-icon-size:16px;color:var(--vpc-text-secondary);}.warning-title ha-icon{color:#ef6c00;}.warning-title{color:#ef6c00;}.device-list{display:flex;flex-direction:column;gap:3px;}.device-row{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:var(--vpc-inner-radius, 12px);background:var(--vpc-surface);cursor:pointer;transition:background 0.18s ease, transform 0.15s ease;}.device-row:hover{background:color-mix(in srgb, var(--vpc-primary) 6%, var(--vpc-surface));transform:scale(1.005);}ha-card.theme-glow .device-row{background:rgba(0,212,255,0.04);border:1px solid rgba(0,212,255,0.06);}.device-icon-wrap{width:32px;height:32px;border-radius:9px;background:var(--vpc-surface);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background 0.2s ease;}.device-icon-wrap ha-icon{--mdc-icon-size:18px;color:var(--vpc-text-secondary);}.device-icon-active{background:color-mix(in srgb, var(--vpc-primary) 12%, transparent);}.device-icon-active ha-icon{color:var(--vpc-primary) !important;}.device-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;}.device-name{font-weight:500;font-size:14px;letter-spacing:-0.1px;color:var(--vpc-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.device-status{color:var(--vpc-text-secondary);font-size:12px;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.device-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}.dot-active{background:var(--vpc-success, #34C759);box-shadow:0 0 6px rgba(52,199,89,0.5);}.dot-inactive{background:var(--vpc-text-secondary);opacity:0.25;}.warning-list{display:flex;flex-direction:column;gap:5px;}.warning-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--vpc-inner-radius, 12px);background:color-mix(in srgb, var(--vpc-warning, #FF9F0A) 8%, transparent);border:1px solid color-mix(in srgb, var(--vpc-warning, #FF9F0A) 20%, transparent);font-size:13px;font-weight:500;color:var(--vpc-warning, #FF9F0A);}.warning-row ha-icon{color:var(--vpc-warning, #FF9F0A);flex-shrink:0;}.all-ok-display{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;border-radius:var(--vpc-inner-radius, 12px);background:color-mix(in srgb, var(--vpc-success, #34C759) 8%, transparent);border:1px solid color-mix(in srgb, var(--vpc-success, #34C759) 18%, transparent);color:var(--vpc-success, #34C759);font-weight:500;font-size:14px;}.all-ok-display ha-icon{color:var(--vpc-success, #34C759);}ha-card.compact-card{padding:12px 14px;}.compact-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:var(--vpc-surface);flex-shrink:0;transition:background 0.2s ease;}.compact-icon-active{background:color-mix(in srgb, var(--vpc-primary) 12%, transparent);}.compact-icon ha-icon{--mdc-icon-size:20px;}.compact-icon ha-icon.active{color:var(--vpc-primary);}.compact-icon ha-icon.inactive{color:var(--vpc-text-secondary);opacity:0.45;}.compact-info{flex:1;min-width:0;}.compact-details{display:flex;gap:8px;font-size:12px;margin-top:2px;align-items:center;}.compact-value{font-weight:600;color:var(--vpc-text);letter-spacing:-0.2px;}.compact-detail{color:var(--vpc-text-secondary);font-size:11px;}.system-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));gap:20px;}.error-state{display:flex;align-items:center;gap:14px;padding:20px;}.error-icon{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:rgba(244, 67, 54, 0.1);}.error-icon ha-icon{--mdc-icon-size:24px;color:#d32f2f;}.error-info{display:flex;flex-direction:column;gap:2px;}.error-title{font-size:14px;font-weight:600;color:#d32f2f;}.error-entity{font-size:12px;color:var(--vpc-text-secondary);font-family:monospace;}ha-card.size-small{--vpc-spacing:12px;--vpc-icon-size:20px;--vpc-radius:16px;}ha-card.size-small .header-icon{width:38px;height:38px;border-radius:11px;}ha-card.size-small .name{font-size:14px;}ha-card.size-small .temp-hero-value{font-size:34px;letter-spacing:-1.5px;}ha-card.size-large{--vpc-spacing:22px;--vpc-icon-size:28px;--vpc-radius:26px;}ha-card.size-large .header-icon{width:54px;height:54px;border-radius:17px;}ha-card.size-large .name{font-size:18px;}ha-card.size-large .temp-hero-value{font-size:56px;letter-spacing:-3px;}ha-card.size-fullscreen{--vpc-spacing:28px;--vpc-icon-size:32px;--vpc-radius:28px;height:100%;min-height:80vh;}ha-card.size-fullscreen .header-icon{width:60px;height:60px;border-radius:19px;}ha-card.size-fullscreen .name{font-size:20px;}ha-card.size-fullscreen .temp-hero-value{font-size:68px;letter-spacing:-4px;}ha-card.animation-none{transition:none !important;}ha-card.animation-none:hover, ha-card.animation-none:active{transform:none !important;}ha-card.animation-subtle{transition:transform 0.15s ease, box-shadow 0.15s ease;}ha-card.animation-subtle:hover{transform:translateY(-1px);}ha-card.animation-smooth{transition:transform 0.25s cubic-bezier(0.34,1.4,0.64,1), box-shadow 0.25s ease;}ha-card.animation-energetic{transition:transform 0.2s cubic-bezier(0.34,1.6,0.64,1), box-shadow 0.2s ease;}ha-card.animation-energetic:hover{transform:translateY(-4px) scale(1.008);}@keyframes flow-gradient{0%{background-position:0% 50%;}100%{background-position:200% 50%;}}ha-card.flow-active .accent-bar{background:linear-gradient(90deg, var(--card-accent), color-mix(in srgb, var(--card-accent) 60%, white), var(--card-accent));background-size:200% 100%;animation:flow-gradient 2.5s linear infinite;}.error-state{display:flex;align-items:center;gap:14px;padding:20px;}.error-icon{width:46px;height:46px;border-radius:15px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb, var(--vpc-danger, #FF3B30) 10%, transparent);flex-shrink:0;}.error-icon ha-icon{--mdc-icon-size:24px;color:var(--vpc-danger, #FF3B30);}.error-info{display:flex;flex-direction:column;gap:3px;}.error-title{font-size:15px;font-weight:600;color:var(--vpc-danger, #FF3B30);letter-spacing:-0.2px;}.error-entity{font-size:12px;color:var(--vpc-text-secondary);font-family:'SF Mono', 'Fira Code', 'Cascadia Code', ui-monospace, monospace;opacity:0.7;}.system-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));gap:16px;}@media (max-width:600px){.chemistry-grid{grid-template-columns:repeat(3, 1fr);gap:6px;}.chemistry-card{padding:11px 6px 10px;}.chemistry-val{font-size:16px;}.system-grid{grid-template-columns:1fr;}.temp-hero-value{font-size:38px;letter-spacing:-1.5px;}.dosing-current-value{font-size:28px;}.speed-segment{font-size:11px;padding:8px 4px;}}@media (pointer:coarse){.speed-segment, .speed-off-btn, .device-row, .chemistry-card{min-height:44px;}}.speed-segment{min-width:0;}.speed-segment span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
 /* === TOOLTIP SYSTEM === */
-.tooltip-wrap{position:relative;}
-.t-tip{position:absolute;top:calc(100% + 7px);left:50%;transform:translateX(-50%) translateY(-4px) scale(0.94);transform-origin:top center;z-index:9999;min-width:148px;max-width:250px;padding:9px 12px;background:rgba(18,18,26,0.94);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border:1px solid rgba(255,255,255,0.11);border-radius:11px;box-shadow:0 8px 28px rgba(0,0,0,0.4),0 2px 6px rgba(0,0,0,0.25);opacity:0;pointer-events:none;transition:opacity 0.13s ease,transform 0.17s cubic-bezier(0.34,1.4,0.64,1),transition-delay 0s;white-space:normal;text-align:left;}
-.tooltip-wrap:hover .t-tip{opacity:1;transform:translateX(-50%) translateY(0) scale(1);transition-delay:0.38s;}
-.t-tip.t-up{top:auto;bottom:calc(100% + 7px);transform-origin:bottom center;transform:translateX(-50%) translateY(4px) scale(0.94);}
-.tooltip-wrap:hover .t-tip.t-up{transform:translateX(-50%) translateY(0) scale(1);}
+  .tooltip-wrap{position:relative;z-index:1;contain:layout style paint;}
+  .t-tip{position:absolute;top:calc(100% + 7px);left:50%;transform:translateX(-50%) translateY(-4px) scale(0.94);transform-origin:top center;z-index:99999;min-width:148px;max-width:250px;padding:9px 12px;background:rgba(18,18,26,0.94);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border:1px solid rgba(255,255,255,0.11);border-radius:11px;box-shadow:0 8px 28px rgba(0,0,0,0.4),0 2px 6px rgba(0,0,0,0.25);opacity:0;pointer-events:none;transition:opacity 0.13s ease,transform 0.17s cubic-bezier(0.34,1.4,0.64,1),transition-delay 0s;white-space:normal;text-align:left;will-change:transform,opacity;word-wrap:break-word;overflow-wrap:break-word;}
+  .tooltip-wrap:hover .t-tip{opacity:1;transform:translateX(-50%) translateY(0) scale(1);transition-delay:0.15s;pointer-events:auto;}
+  .t-tip.t-up{top:auto;bottom:calc(100% + 7px);transform-origin:bottom center;transform:translateX(-50%) translateY(4px) scale(0.94);}
+  .tooltip-wrap:hover .t-tip.t-up{transform:translateX(-50%) translateY(0) scale(1);}
 .t-tip-title{font-size:11.5px;font-weight:600;color:rgba(255,255,255,0.94);margin-bottom:4px;display:flex;align-items:center;gap:5px;}
 .t-tip-title ha-icon{--mdc-icon-size:13px;color:rgba(255,255,255,0.55);flex-shrink:0;}
 .t-tip-desc{font-size:11px;color:rgba(255,255,255,0.67);line-height:1.55;}
@@ -3232,21 +3403,21 @@ export class VioletPoolCard extends LitElement {
 /* === CHEMICAL CARD === */
 .chem-overall-badge{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:100px;font-size:11.5px;font-weight:600;flex-shrink:0;}
 .chem-overall-badge ha-icon{--mdc-icon-size:14px;}
-.chem-section{background:var(--vpc-surface);border-radius:var(--vpc-inner-radius,12px);padding:13px 15px;display:flex;flex-direction:column;gap:9px;position:relative;overflow:visible;}
+  .chem-section{background:var(--vpc-surface);border-radius:var(--vpc-inner-radius,12px);padding:13px 15px;display:flex;flex-direction:column;gap:9px;position:relative;overflow:hidden;contain:layout style paint;}
 .chem-section-header{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:500;color:var(--vpc-text-secondary);}
 .chem-section-status{margin-left:auto;font-weight:600;font-size:12px;}
 .chem-big-value{display:flex;align-items:baseline;gap:5px;}
 .chem-big-num{font-size:42px;font-weight:700;letter-spacing:-2px;line-height:1;}
 .chem-big-unit{font-size:20px;font-weight:400;opacity:0.6;letter-spacing:-0.5px;}
 .chem-gauge-bar{display:flex;flex-direction:column;gap:5px;}
-.chem-gauge-track{height:7px;background:rgba(0,0,0,0.07);border-radius:100px;position:relative;overflow:visible;}
+  .chem-gauge-track{height:7px;background:rgba(0,0,0,0.07);border-radius:100px;position:relative;overflow:hidden;}
 ha-card.theme-midnight .chem-gauge-track,ha-card.theme-glow .chem-gauge-track{background:rgba(255,255,255,0.08);}
 .chem-gauge-fill{height:100%;border-radius:100px;transition:width 0.55s cubic-bezier(0.34,1.4,0.64,1);}
 .chem-gauge-zone{position:absolute;top:0;height:100%;background:rgba(52,199,89,0.22);border-radius:2px;}
 .chem-gauge-labels{display:flex;justify-content:space-between;font-size:10.5px;color:var(--vpc-text-tertiary);}
 .chem-zone-label{font-size:10.5px;color:var(--vpc-success,#34C759);font-weight:500;}
 .chem-dual-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
-.chem-metric-card{background:var(--vpc-surface);border-radius:var(--vpc-inner-radius,12px);padding:13px 12px;display:flex;flex-direction:column;gap:6px;cursor:pointer;transition:transform 0.15s ease,border-color 0.15s ease;border:1px solid transparent;position:relative;overflow:visible;}
+  .chem-metric-card{background:var(--vpc-surface);border-radius:var(--vpc-inner-radius,12px);padding:13px 12px;display:flex;flex-direction:column;gap:6px;cursor:pointer;transition:transform 0.15s ease,border-color 0.15s ease;border:1px solid transparent;position:relative;overflow:hidden;contain:layout style paint;}
 .chem-metric-card:hover{transform:scale(1.025);border-color:color-mix(in srgb,var(--chem-color,var(--vpc-primary)) 22%,transparent);}
 .chem-metric-header{display:flex;align-items:center;gap:6px;font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--vpc-text-secondary);}
 .chem-metric-header ha-icon{color:var(--chem-color,var(--vpc-primary));--mdc-icon-size:15px;}
@@ -3264,13 +3435,13 @@ ha-card.theme-midnight .chem-metric-track{background:rgba(255,255,255,0.08);}
 .chem-rec-row{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:var(--vpc-inner-radius,12px);background:color-mix(in srgb,var(--rec-color,var(--vpc-warning)) 9%,transparent);border:1px solid color-mix(in srgb,var(--rec-color,var(--vpc-warning)) 22%,transparent);font-size:12.5px;font-weight:500;color:var(--rec-color,var(--vpc-warning));}
 .chem-rec-row ha-icon{--mdc-icon-size:15px;flex-shrink:0;}
 /* === SENSOR CARD === */
-.sensor-value-display{background:var(--vpc-surface);border-radius:var(--vpc-inner-radius,12px);padding:18px 16px;display:flex;align-items:center;justify-content:center;position:relative;overflow:visible;}
+  .sensor-value-display{background:var(--vpc-surface);border-radius:var(--vpc-inner-radius,12px);padding:18px 16px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;contain:layout style paint;}
 .sensor-big-value{display:flex;align-items:baseline;gap:6px;}
 .sensor-num{font-size:40px;font-weight:700;letter-spacing:-2.5px;line-height:1;color:var(--card-accent,var(--vpc-primary));}
 .sensor-unit{font-size:18px;font-weight:400;opacity:0.6;letter-spacing:-0.5px;color:var(--card-accent,var(--vpc-text));}
 .sensor-state-text{font-size:28px;font-weight:600;color:var(--vpc-text);}
 /* === DETAIL CARD TOOLTIP FIX === */
-.device-row{overflow:visible;}
+  .device-row{overflow:hidden;contain:layout style paint;}
 /* === ANIMATED SVG ICONS === */
 @keyframes flicker{0%,100%{transform:scaleX(1) skewX(0deg);opacity:1;}25%{transform:scaleX(1.06) skewX(-2deg);opacity:0.88;}50%{transform:scaleX(0.96) skewX(1.5deg);opacity:0.82;}75%{transform:scaleX(1.04) skewX(-1deg);opacity:0.94;}}
 @keyframes light-glow{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.65;transform:scale(1.07);}}
@@ -3280,7 +3451,7 @@ ha-card.theme-midnight .chem-metric-track{background:rgba(255,255,255,0.08);}
 .cover-visual{padding:2px 0;}
 .cover-pos-bar{height:5px;background:var(--vpc-surface);border-radius:100px;overflow:hidden;margin-top:-4px;}
 .cover-pos-fill{height:100%;border-radius:100px;transition:width 0.55s cubic-bezier(0.34,1.4,0.64,1);}
-.cover-moving-pill{padding:2px 8px;border-radius:100px;font-size:11px;font-weight:600;background:rgba(255,159,10,0.14);color:var(--vpc-warning,#FF9F0A);white-space:nowrap;}
+  .cover-moving-pill{padding:2px 8px;border-radius:100px;font-size:11px;font-weight:600;background:rgba(255,159,10,0.14);color:var(--vpc-warning,#FF9F0A);white-space:nowrap;max-width:120px;overflow:hidden;text-overflow:ellipsis;}
 .cover-controls{display:flex;gap:7px;}
 .cover-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px;border:none;border-radius:var(--vpc-inner-radius,12px);background:var(--vpc-surface);color:var(--vpc-text-secondary);font-family:var(--vpc-font);font-size:11.5px;font-weight:500;cursor:pointer;transition:all 0.18s ease;-webkit-tap-highlight-color:transparent;}
 .cover-btn:hover{background:color-mix(in srgb,var(--card-accent) 12%,transparent);color:var(--card-accent);}

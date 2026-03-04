@@ -435,4 +435,240 @@ export class ServiceCaller {
     const action = mode === 'manual' ? 'speed_control' : 'auto';
     return this.controlPump(entity, action);
   }
+
+  // ============================================================================
+  // ADVANCED POOL CONTROL - Additional API Services
+  // ============================================================================
+  
+  // Cover Control with position
+  async setCoverPosition(entity: string, position: number): Promise<ServiceCallResult> {
+    const result = await this.callService('cover', 'set_cover_position', {
+      entity_id: entity,
+      position: Math.max(0, Math.min(100, position)),
+    });
+
+    if (result.success) {
+      this.showToast(`Cover position set to ${position}%`);
+    }
+
+    return result;
+  }
+
+  async openCover(entity: string): Promise<ServiceCallResult> {
+    return this.callService('cover', 'open_cover', { entity_id: entity });
+  }
+
+  async closeCover(entity: string): Promise<ServiceCallResult> {
+    return this.callService('cover', 'close_cover', { entity_id: entity });
+  }
+
+  async stopCover(entity: string): Promise<ServiceCallResult> {
+    return this.callService('cover', 'stop_cover', { entity_id: entity });
+  }
+
+  // Light Control with brightness and color
+  async setLightBrightness(entity: string, brightness: number): Promise<ServiceCallResult> {
+    const result = await this.callService('light', 'turn_on', {
+      entity_id: entity,
+      brightness: Math.max(0, Math.min(255, Math.round(brightness * 2.55))),
+    });
+
+    if (result.success) {
+      this.showToast(`Light brightness set to ${brightness}%`);
+    }
+
+    return result;
+  }
+
+  async setLightColor(entity: string, rgb: [number, number, number]): Promise<ServiceCallResult> {
+    const [r, g, b] = rgb;
+    const result = await this.callService('light', 'turn_on', {
+      entity_id: entity,
+      rgb_color: [r, g, b],
+    });
+
+    if (result.success) {
+      this.showToast(`Light color set to RGB(${r}, ${g}, ${b})`);
+    }
+
+    return result;
+  }
+
+  async setLightColorTemperature(entity: string, kelvin: number): Promise<ServiceCallResult> {
+    const result = await this.callService('light', 'turn_on', {
+      entity_id: entity,
+      color_temp_kelvin: Math.max(2000, Math.min(6500, kelvin)),
+    });
+
+    if (result.success) {
+      this.showToast(`Light temperature set to ${kelvin}K`);
+    }
+
+    return result;
+  }
+
+  // Filter Control
+  async startFilterBackwash(entity: string, duration = 300): Promise<ServiceCallResult> {
+    const result = await this.callService('violet_pool_controller', 'start_filter_backwash', {
+      entity_id: entity,
+      duration: Math.max(60, Math.min(1800, duration)),
+    });
+
+    if (result.success) {
+      this.showToast(`Filter backwash started (${duration}s)`);
+    }
+
+    return result;
+  }
+
+  async startFilterRinse(entity: string, duration = 120): Promise<ServiceCallResult> {
+    const result = await this.callService('violet_pool_controller', 'start_filter_rinse', {
+      entity_id: entity,
+      duration: Math.max(30, Math.min(600, duration)),
+    });
+
+    if (result.success) {
+      this.showToast(`Filter rinse started (${duration}s)`);
+    }
+
+    return result;
+  }
+
+  async resetFilterPressure(entity: string): Promise<ServiceCallResult> {
+    const result = await this.callService('violet_pool_controller', 'reset_filter_pressure', {
+      entity_id: entity,
+    });
+
+    if (result.success) {
+      this.showToast('Filter pressure reset');
+    }
+
+    return result;
+  }
+
+  // Water Level Management
+  async startRefill(entity: string, targetLevel: number, maxDuration = 3600): Promise<ServiceCallResult> {
+    const result = await this.callService('violet_pool_controller', 'start_refill', {
+      entity_id: entity,
+      target_level: Math.max(0, Math.min(100, targetLevel)),
+      max_duration: Math.max(300, Math.min(7200, maxDuration)),
+    });
+
+    if (result.success) {
+      this.showToast(`Refill started to ${targetLevel}%`);
+    }
+
+    return result;
+  }
+
+  async stopRefill(entity: string): Promise<ServiceCallResult> {
+    const result = await this.callService('violet_pool_controller', 'stop_refill', {
+      entity_id: entity,
+    });
+
+    if (result.success) {
+      this.showToast('Refill stopped');
+    }
+
+    return result;
+  }
+
+  // Advanced Chemistry Control
+  async calibrateSensor(sensorType: 'ph' | 'orp' | 'temperature', calibrationValue: number): Promise<ServiceCallResult> {
+    const result = await this.callService('violet_pool_controller', 'calibrate_sensor', {
+      sensor_type: sensorType,
+      calibration_value: calibrationValue,
+    });
+
+    if (result.success) {
+      this.showToast(`${sensorType.toUpperCase()} sensor calibrated to ${calibrationValue}`);
+    }
+
+    return result;
+  }
+
+  async startChemicalCycle(cycleType: 'shock' | 'maintenance' | 'winter', duration: number): Promise<ServiceCallResult> {
+    const result = await this.callService('violet_pool_controller', 'start_chemical_cycle', {
+      cycle_type: cycleType,
+      duration: Math.max(300, Math.min(14400, duration)),
+    });
+
+    if (result.success) {
+      this.showToast(`${cycleType} cycle started (${Math.round(duration/60)}min)`);
+    }
+
+    return result;
+  }
+
+  // Schedule Management
+  async createSchedule(
+    name: string,
+    entityType: 'pump' | 'heater' | 'solar' | 'dosing',
+    schedule: { time: string; days: number[]; action: string; parameters?: Record<string, unknown> }[]
+  ): Promise<ServiceCallResult> {
+    const result = await this.callService('violet_pool_controller', 'create_schedule', {
+      name,
+      entity_type: entityType,
+      schedule,
+    });
+
+    if (result.success) {
+      this.showToast(`Schedule "${name}" created`);
+    }
+
+    return result;
+  }
+
+  async deleteSchedule(scheduleId: string): Promise<ServiceCallResult> {
+    const result = await this.callService('violet_pool_controller', 'delete_schedule', {
+      schedule_id: scheduleId,
+    });
+
+    if (result.success) {
+      this.showToast(`Schedule deleted`);
+    }
+
+    return result;
+  }
+
+  // Weather Integration
+  async updateWeatherSettings(settings: {
+    enableFrostProtection?: boolean;
+    enableSolarOptimization?: boolean;
+    minOutsideTemp?: number;
+    maxWindSpeed?: number;
+  }): Promise<ServiceCallResult> {
+    const result = await this.callService('violet_pool_controller', 'update_weather_settings', settings);
+
+    if (result.success) {
+      this.showToast('Weather settings updated');
+    }
+
+    return result;
+  }
+
+  // Energy Management
+  async setEnergyProfile(profile: 'eco' | 'balanced' | 'performance'): Promise<ServiceCallResult> {
+    const result = await this.callService('violet_pool_controller', 'set_energy_profile', {
+      profile,
+    });
+
+    if (result.success) {
+      this.showToast(`Energy profile set to ${profile}`);
+    }
+
+    return result;
+  }
+
+  async getEnergyReport(timeframe: 'day' | 'week' | 'month'): Promise<ServiceCallResult> {
+    const result = await this.callService('violet_pool_controller', 'get_energy_report', {
+      timeframe,
+    });
+
+    if (result.success) {
+      this.showToast(`Energy report for ${timeframe} generated`);
+    }
+
+    return result;
+  }
 }

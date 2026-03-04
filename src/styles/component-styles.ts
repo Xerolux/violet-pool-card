@@ -29,6 +29,7 @@ export const cardBaseStyles = css`
   ha-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.11), 0 2px 6px rgba(0, 0, 0, 0.05);
+    will-change: transform, box-shadow;
   }
 
   ha-card:active {
@@ -57,6 +58,7 @@ export const buttonStyles = css`
   button:hover:not(:disabled) {
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    will-change: transform, box-shadow;
   }
 
   button:active:not(:disabled) {
@@ -221,6 +223,8 @@ export const headerStyles = css`
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    flex-shrink: 1;
+    min-width: 0;
   }
 `;
 
@@ -239,14 +243,15 @@ export const gridLayoutStyles = css`
     flex-direction: column;
     align-items: center;
     gap: 2px;
-    padding: 14px 8px 12px;
+    padding: 14px 6px 12px;
     border-radius: var(--ds-radius-md);
     background: var(--vpc-surface);
     cursor: pointer;
     transition: transform 0.18s ease, background 0.18s ease;
     position: relative;
-    overflow: visible;
+    overflow: hidden;
     min-height: 44px;
+    contain: layout style paint;
   }
 
   .chemistry-card::before {
@@ -264,6 +269,7 @@ export const gridLayoutStyles = css`
   .chemistry-card:hover {
     transform: scale(1.02);
     background: color-mix(in srgb, var(--chem-color) 8%, var(--vpc-surface));
+    will-change: transform, background;
   }
 
   .device-list {
@@ -282,11 +288,13 @@ export const gridLayoutStyles = css`
     cursor: pointer;
     transition: background 0.18s ease, transform 0.15s ease;
     min-height: 44px;
+    contain: layout style paint;
   }
 
   .device-row:hover {
     background: color-mix(in srgb, var(--vpc-primary) 6%, var(--vpc-surface));
     transform: scale(1.005);
+    will-change: transform, background;
   }
 
   @media (max-width: 600px) {
