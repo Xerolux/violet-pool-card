@@ -10,6 +10,7 @@ on:
       - 'tsconfig.json'
       - 'package.json'
       - 'package-lock.json'
+  workflow_dispatch:
 
 permissions:
   contents: write
