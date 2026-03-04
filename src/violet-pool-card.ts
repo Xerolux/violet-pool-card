@@ -356,6 +356,10 @@ export class VioletPoolCard extends LitElement {
         return this.renderPhMinusCanisterCard();
       case 'flocculant_canister':
         return this.renderFlocculantCanisterCard();
+      case 'digital_rules':
+        return this.renderDigitalRulesCard();
+      case 'diagnostics':
+        return this.renderDiagnosticsCard();
       default:
         return html` <ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">Unknown Card Type</span><span class="error-entity">${this.config.card_type}</span></div></div></ha-card> `;
     }
@@ -482,6 +486,8 @@ export class VioletPoolCard extends LitElement {
       case 'ph_plus_canister': return '#2196F3';
       case 'ph_minus_canister': return '#FF9800';
       case 'flocculant_canister': return '#9C27B0';
+      case 'digital_rules': return '#00BCD4';
+      case 'diagnostics': return '#9C27B0';
       default: return '#2196F3';
     }
   }
@@ -1150,7 +1156,34 @@ export class VioletPoolCard extends LitElement {
             : ''}
 
           ${config.show_controls
-            ? html`<vpc-quick-actions .actions="${quickActions}"></vpc-quick-actions>`
+            ? html`
+              <!-- Enhanced Dosing Controls -->
+              <div style="background: var(--vpc-surface); border-radius: 10px; padding: 12px; margin-bottom: 12px;">
+                <div style="font-size: 11px; font-weight: 600; color: var(--vpc-text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">
+                  Manual Dosing Control
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+                  <button style="padding: 8px; border: none; border-radius: 6px; background: ${accentColor}; color: white; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
+                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).manualDose(dosingType === 'chlorine' ? 'Chlor' : dosingType === 'ph_minus' ? 'pH-' : dosingType === 'ph_plus' ? 'pH+' : 'Flockmittel' as any, 30, false); }}">
+                    <ha-icon icon="mdi:play" style="--mdc-icon-size: 14px;"></ha-icon> 30s
+                  </button>
+                  <button style="padding: 8px; border: none; border-radius: 6px; background: ${accentColor}; color: white; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
+                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).manualDose(dosingType === 'chlorine' ? 'Chlor' : dosingType === 'ph_minus' ? 'pH-' : dosingType === 'ph_plus' ? 'pH+' : 'Flockmittel' as any, 60, false); }}">
+                    <ha-icon icon="mdi:play" style="--mdc-icon-size: 14px;"></ha-icon> 60s
+                  </button>
+                  <button style="padding: 8px; border: none; border-radius: 6px; background: #34C759; color: white; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
+                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).autoDose(dosingType === 'chlorine' ? 'Chlor' : dosingType === 'ph_minus' ? 'pH-' : dosingType === 'ph_plus' ? 'pH+' : 'Flockmittel' as any); }}">
+                    <ha-icon icon="mdi:auto-fix" style="--mdc-icon-size: 14px;"></ha-icon> Auto
+                  </button>
+                  <button style="padding: 8px; border: none; border-radius: 6px; background: #FF3B30; color: white; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
+                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).stopDosing(dosingType === 'chlorine' ? 'Chlor' : dosingType === 'ph_minus' ? 'pH-' : dosingType === 'ph_plus' ? 'pH+' : 'Flockmittel' as any); }}">
+                    <ha-icon icon="mdi:stop" style="--mdc-icon-size: 14px;"></ha-icon> Stop
+                  </button>
+                </div>
+              </div>
+
+              <vpc-quick-actions .actions="${quickActions}"></vpc-quick-actions>
+            `
             : ''}
 
           ${config.show_history && dosingVolume24h !== undefined
@@ -3286,6 +3319,111 @@ ha-card.theme-midnight .chem-metric-track{background:rgba(255,255,255,0.08);}
       default:
         return 3;
     }
+  }
+
+  private renderDigitalRulesCard(config: VioletPoolCardConfig = this.config): TemplateResult {
+    const accentColor = this._getAccentColor('digital_rules', config);
+
+    const rules = [
+      { id: 'DIRULE_1', label: 'Rule 1', icon: 'mdi:toggle-switch' },
+      { id: 'DIRULE_2', label: 'Rule 2', icon: 'mdi:toggle-switch' },
+      { id: 'DIRULE_3', label: 'Rule 3', icon: 'mdi:toggle-switch' },
+      { id: 'DIRULE_4', label: 'Rule 4', icon: 'mdi:toggle-switch' },
+      { id: 'DIRULE_5', label: 'Rule 5', icon: 'mdi:toggle-switch' },
+      { id: 'DIRULE_6', label: 'Rule 6', icon: 'mdi:toggle-switch' },
+      { id: 'DIRULE_7', label: 'Rule 7', icon: 'mdi:toggle-switch' },
+    ];
+
+    return html`
+      <ha-card class="${this._getCardClasses(true, config)}" style="--card-accent: ${accentColor}">
+        <div class="accent-bar"></div>
+        <div class="card-content">
+          <div class="header">
+            <div class="header-icon" style="--icon-accent: ${accentColor}">
+              <ha-icon icon="mdi:auto-fix"></ha-icon>
+            </div>
+            <div class="header-info">
+              <span class="name">${config.name || 'Digital Rules'}</span>
+              <span class="header-subtitle">7 Automation Rules</span>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 16px;">
+            ${rules.map(rule => html`
+              <div style="background: var(--vpc-surface); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 6px;">
+                <div style="font-size: 12px; font-weight: 600; color: var(--vpc-text-secondary);">${rule.label}</div>
+                <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                  <button style="flex: 1; padding: 6px; border: none; border-radius: 6px; background: ${accentColor}; color: white; font-size: 10px; font-weight: 600; cursor: pointer;"
+                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).manageDigitalRules(rule.id as any, 'trigger'); }}">
+                    Trigger
+                  </button>
+                  <button style="flex: 1; padding: 6px; border: none; border-radius: 6px; background: #FF9F0A; color: white; font-size: 10px; font-weight: 600; cursor: pointer;"
+                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).manageDigitalRules(rule.id as any, 'lock'); }}">
+                    Lock
+                  </button>
+                  <button style="flex: 1; padding: 6px; border: none; border-radius: 6px; background: #34C759; color: white; font-size: 10px; font-weight: 600; cursor: pointer;"
+                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).manageDigitalRules(rule.id as any, 'unlock'); }}">
+                    Unlock
+                  </button>
+                </div>
+              </div>
+            `)}
+          </div>
+        </div>
+      </ha-card>
+    `;
+  }
+
+  private renderDiagnosticsCard(config: VioletPoolCardConfig = this.config): TemplateResult {
+    const accentColor = this._getAccentColor('diagnostics', config);
+    const deviceId = config.entity || 'violet_pool_controller';
+
+    return html`
+      <ha-card class="${this._getCardClasses(true, config)}" style="--card-accent: ${accentColor}">
+        <div class="accent-bar"></div>
+        <div class="card-content">
+          <div class="header">
+            <div class="header-icon" style="--icon-accent: ${accentColor}">
+              <ha-icon icon="mdi:hospital-box"></ha-icon>
+            </div>
+            <div class="header-info">
+              <span class="name">${config.name || 'Diagnostics'}</span>
+              <span class="header-subtitle">System Health & Logs</span>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 16px;">
+            <!-- Connection Status -->
+            <button style="padding: 12px 16px; border: none; border-radius: 10px; background: var(--vpc-surface); color: var(--vpc-text); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 10px;"
+                    @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).testConnection(deviceId); }}">
+              <ha-icon icon="mdi:wifi-check" style="--mdc-icon-size: 20px; color: #34C759;"></ha-icon>
+              <span>Test Connection</span>
+            </button>
+
+            <!-- Error Summary -->
+            <button style="padding: 12px 16px; border: none; border-radius: 10px; background: var(--vpc-surface); color: var(--vpc-text); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 10px;"
+                    @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).getErrorSummary(deviceId, true); }}">
+              <ha-icon icon="mdi:alert-circle" style="--mdc-icon-size: 20px; color: #FF9F0A;"></ha-icon>
+              <span>Error Summary</span>
+            </button>
+
+            <!-- Export Logs -->
+            <button style="padding: 12px 16px; border: none; border-radius: 10px; background: var(--vpc-surface); color: var(--vpc-text); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 10px;"
+                    @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).exportDiagnosticLogs(deviceId, 500); }}">
+              <ha-icon icon="mdi:file-document-outline" style="--mdc-icon-size: 20px; color: #2196F3;"></ha-icon>
+              <span>Export Logs (500 lines)</span>
+            </button>
+
+            <!-- Clear Error History -->
+            <button style="padding: 12px 16px; border: none; border-radius: 10px; background: #FF3B30; color: white; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 10px;"
+                    @click="${(e: Event) => { e.stopPropagation(); if (confirm('Clear error history?')) new ServiceCaller(this.hass).clearErrorHistory(deviceId); }}">
+              <ha-icon icon="mdi:trash-can-outline" style="--mdc-icon-size: 20px;"></ha-icon>
+              <span>Clear Error History</span>
+            </button>
+          </div>
+        </div>
+      </ha-card>
+    `;
   }
 
   public static getStubConfig(): VioletPoolCardConfig {
