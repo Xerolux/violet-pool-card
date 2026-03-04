@@ -20,7 +20,7 @@ export class ServiceCaller {
     window.dispatchEvent(event);
   }
 
-  private async callService(
+  public async callService(
     domain: string,
     service: string,
     serviceData?: Record<string, unknown>
@@ -574,7 +574,7 @@ export class ServiceCaller {
   }
 
   // Advanced Chemistry Control
-  async calibrateSensor(sensorType: 'ph' | 'orp' | 'temperature', calibrationValue: number): Promise<ServiceCallResult> {
+  async calibrateSensor(sensorType: 'ph' | 'orp' | 'temperature' | 'flow', calibrationValue: number): Promise<ServiceCallResult> {
     const result = await this.callService('violet_pool_controller', 'calibrate_sensor', {
       sensor_type: sensorType,
       calibration_value: calibrationValue,

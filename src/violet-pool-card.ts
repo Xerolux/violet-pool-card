@@ -2517,36 +2517,7 @@ export class VioletPoolCard extends LitElement {
     const name = config.name || pressureEntity.attributes.friendly_name || 'Filterdruck';
     const accentColor = this._getAccentColor('filter', config);
     
-    // Enhanced controls for filter
-    const quickActions: QuickAction[] = [
-      {
-        icon: 'mdi:restart',
-        label: 'Backwash',
-        action: async () => {
-          const serviceCaller = new ServiceCaller(this.hass);
-          await serviceCaller.startFilterBackwash(pressureEntityId, 300);
-        },
-        color: '#00BCD4',
-      },
-      {
-        icon: 'mdi:water',
-        label: 'Rinse',
-        action: async () => {
-          const serviceCaller = new ServiceCaller(this.hass);
-          await serviceCaller.startFilterRinse(pressureEntityId, 120);
-        },
-        color: '#2196F3',
-      },
-      {
-        icon: 'mdi:refresh',
-        label: 'Reset Pressure',
-        action: async () => {
-          const serviceCaller = new ServiceCaller(this.hass);
-          await serviceCaller.resetFilterPressure(pressureEntityId);
-        },
-        color: '#FF9F0A',
-      },
-    ];
+
 
     const backwashEntity = backwashEntityId ? this.hass.states[backwashEntityId] : undefined;
     const isBackwashing = backwashEntity ? backwashEntity.state === 'on' : false;
@@ -2978,70 +2949,6 @@ export class VioletPoolCard extends LitElement {
         </div>
       </ha-card>
     `;
-  }
-
-    const flow = parseFloat(entity.state) || 0;
-    const maxFlow = (config as any).max_flow || 10;
-    const name = config.name || entity.attributes.friendly_name || 'Durchfluss';
-    const accentColor = this._getAccentColor('flow_rate', config);
-
-    const flowPercent = Math.min((flow / maxFlow) * 100, 100);
-    const isFlowing = flow > 0;
-    const flowColor = isFlowing ? accentColor : 'var(--vpc-text-secondary)';
-
-    return html`
-      <ha-card class="${this._getCardClasses(isFlowing, config)}"
-               style="--card-accent: ${flowColor}"
-               @click="${() => this._showMoreInfo(entityId)}">
-        <div class="accent-bar"></div>
-        <div class="card-content">
-          <div class="header">
-            <div class="header-icon ${isFlowing ? 'icon-active' : ''}" style="--icon-accent: ${flowColor}">
-              ${config.icon
-                ? html`<ha-icon icon="${config.icon}" class="${isFlowing ? 'pump-running' : ''}"></ha-icon>`
-                : flowRateSVG(flow, maxFlow, flowColor)}
-            </div>
-            <div class="header-info">
-              <span class="name">${name}</span>
-              <span class="header-subtitle" style="color:${flowColor}">
-                ${isFlowing ? 'Fließt' : 'Kein Durchfluss'}
-              </span>
-            </div>
-            ${config.show_state !== false ? html`
-              <div style="text-align: right;">
-                <span style="font-size: 18px; font-weight: bold; color: ${flowColor};">${flow.toFixed(1)} m³/h</span>
-              </div>
-            ` : ''}
-          </div>
-
-          <!-- Flow rate visualization -->
-          <div style="margin: 12px 0; padding: 12px; background: var(--vpc-surface); border-radius: 12px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-              <span style="font-size: 12px; font-weight: 600; color: var(--vpc-text);">Durchfluss</span>
-              <span style="font-size: 12px; color: var(--vpc-text-secondary);">Max: ${maxFlow} m³/h</span>
-            </div>
-            <div style="width: 100%; height: 24px; background: var(--vpc-bg); border-radius: 12px; overflow: hidden; position: relative;">
-              <div style="height: 100%; background: linear-gradient(90deg, var(--vpc-text-secondary) 0%, ${flowColor} 100%); width: ${flowPercent}%; transition: width 0.5s ease;"></div>
-            </div>
-            <div style="margin-top: 6px; font-size: 11px; color: ${flowColor}; font-weight: 600;">
-              <ha-icon icon="mdi:water" style="--mdc-icon-size:12px"></ha-icon>
-              ${flowPercent.toFixed(0)}% von Maximaldurchfluss
-            </div>
-          </div>
-
-          <!-- Info rows -->
-          <div class="info-row tooltip-wrap" style="margin-top: 8px;">
-            <ha-icon icon="mdi:speedometer" style="--mdc-icon-size:17px;color:${flowColor}"></ha-icon>
-            <span class="info-label">Status</span>
-            <span class="info-value" style="color:${flowColor}">${isFlowing ? 'Aktiv' : 'Inaktiv'}</span>
-            <div class="t-tip">
-              <div class="t-tip-title">Durchflussrate</div>
-              <div class="t-tip-desc">Aktuelle Wasserdurchflussmenge pro Stunde. Ein ausreichender Durchfluss ist wichtig für die Filtration und den Betrieb der Zusatzgeräte.</div>
-              ${flow < maxFlow * 0.3 ? html`<div class="t-tip-warn"><ha-icon icon="mdi:alert"></ha-icon>Niedriger Durchfluss</div>` : ''}
-            </div>
-          </div>
-        </div>
-      </ha-card>`;
   }
 
   /**

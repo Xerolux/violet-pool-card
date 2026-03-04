@@ -6,16 +6,30 @@ export interface ColorConfig {
 
 export class StateColorHelper {
   public static getTemperatureColor(temp: number): ColorConfig {
-    if (temp < 15) {
-      return { color: '#2196F3', intensity: 'high' }; // Cold - Blue
-    } else if (temp < 20) {
-      return { color: '#00BCD4', intensity: 'medium' }; // Cool - Cyan
-    } else if (temp < 26) {
-      return { color: '#4CAF50', intensity: 'low' }; // Ideal - Green
+    if (temp < 18) {
+      return { color: '#2196F3', intensity: 'medium' }; // Cold - Blue
+    } else if (temp < 24) {
+      return { color: '#00BCD4', intensity: 'low' }; // Cool - Light Blue
     } else if (temp < 30) {
+      return { color: '#4CAF50', intensity: 'low' }; // Optimal - Green
+    } else if (temp < 35) {
       return { color: '#FF9800', intensity: 'medium' }; // Warm - Orange
     } else {
       return { color: '#F44336', intensity: 'high' }; // Hot - Red
+    }
+  }
+
+  public static getFlowRateColor(flow: number): ColorConfig {
+    if (flow < 5) {
+      return { color: '#F44336', intensity: 'high' }; // Very Low - Red
+    } else if (flow < 10) {
+      return { color: '#FF9800', intensity: 'medium' }; // Low - Orange
+    } else if (flow < 20) {
+      return { color: '#4CAF50', intensity: 'low' }; // Normal - Green
+    } else if (flow < 30) {
+      return { color: '#00BCD4', intensity: 'low' }; // Good - Light Blue
+    } else {
+      return { color: '#2196F3', intensity: 'medium' }; // High - Blue
     }
   }
 
