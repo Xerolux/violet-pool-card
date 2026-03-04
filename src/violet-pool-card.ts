@@ -899,13 +899,24 @@ export class VioletPoolCard extends LitElement {
       },
       {
         icon: 'mdi:sun-thermometer',
-        label: 'ON',
+        label: 'HEAT',
         action: async () => {
           const serviceCaller = new ServiceCaller(this.hass);
           await serviceCaller.setHvacMode(config.entity!, 'heat');
         },
         active: state === 'heat' || state === 'heating',
         color: '#FF9800',
+      },
+      {
+        icon: 'mdi:lightning-bolt',
+        label: 'PV BOOST',
+        action: async () => {
+          const serviceCaller = new ServiceCaller(this.hass);
+          await serviceCaller.managePvSurplus('activate', 2);
+        },
+        active: false,
+        color: '#FFD700',
+        confirmMessage: 'Activate PV surplus heating with pump speed 2?',
       },
     ];
 
@@ -1066,6 +1077,17 @@ export class VioletPoolCard extends LitElement {
         },
         color: '#FF9800',
         confirmMessage: 'Start manual dosing for 60 seconds?',
+      },
+      {
+        icon: 'mdi:stop-circle',
+        label: 'STOP',
+        action: async () => {
+          const serviceCaller = new ServiceCaller(this.hass);
+          const dosType = dosingType === 'chlorine' ? 'Chlor' : dosingType === 'ph_minus' ? 'pH-' : dosingType === 'ph_plus' ? 'pH+' : 'Flockmittel';
+          await serviceCaller.stopDosing(dosType as any);
+        },
+        color: '#FF3B30',
+        confirmMessage: 'Stop current dosing?',
       },
     ];
 
@@ -2353,6 +2375,26 @@ export class VioletPoolCard extends LitElement {
                     this.hass.callService('light', 'turn_on', { entity_id: entityId, brightness_pct: e.detail.value });
                   }}"
                 ></vpc-slider-control>
+              </div>
+
+              <!-- DMX Scene Control -->
+              <div style="margin-top: 12px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px;">
+                <button style="padding: 8px; border: none; border-radius: 8px; background: var(--vpc-surface); color: var(--vpc-text); font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
+                        @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).controlDmxScenes('all_on'); }}">
+                  <ha-icon icon="mdi:lightbulb-on" style="--mdc-icon-size:14px"></ha-icon> All ON
+                </button>
+                <button style="padding: 8px; border: none; border-radius: 8px; background: var(--vpc-surface); color: var(--vpc-text); font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
+                        @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).controlDmxScenes('all_off'); }}">
+                  <ha-icon icon="mdi:lightbulb-off" style="--mdc-icon-size:14px"></ha-icon> All OFF
+                </button>
+                <button style="padding: 8px; border: none; border-radius: 8px; background: var(--vpc-surface); color: var(--vpc-text); font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
+                        @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).controlDmxScenes('sequence', 2); }}">
+                  <ha-icon icon="mdi:play-speed" style="--mdc-icon-size:14px"></ha-icon> Sequence
+                </button>
+                <button style="padding: 8px; border: none; border-radius: 8px; background: #FF6B9D; color: white; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
+                        @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).controlDmxScenes('party_mode'); }}">
+                  <ha-icon icon="mdi:party-popper" style="--mdc-icon-size:14px"></ha-icon> Party! 🎉
+                </button>
               </div>
             ` : ''}
           ` : ''}
