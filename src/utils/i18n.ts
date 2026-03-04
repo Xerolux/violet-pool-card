@@ -4,6 +4,7 @@
  */
 
 export type Language = 'en' | 'de';
+export type TranslationKey = keyof typeof TRANSLATIONS.en;
 
 export const TRANSLATIONS = {
   en: {
@@ -167,19 +168,17 @@ export class i18n {
   private static language: Language = 'de';
 
   static setLanguage(lang: Language): void {
-    this.language = lang;
+    if (this.language !== lang) {
+      this.language = lang;
+    }
   }
 
   static getLanguage(): Language {
     return this.language;
   }
 
-  static t(key: keyof typeof TRANSLATIONS.en): string {
+  static t(key: TranslationKey): string {
     const translations = TRANSLATIONS[this.language];
     return translations[key as keyof typeof translations] || key;
-  }
-
-  static translateCardType(cardType: string): string {
-    return this.t(cardType as keyof typeof TRANSLATIONS.en);
   }
 }

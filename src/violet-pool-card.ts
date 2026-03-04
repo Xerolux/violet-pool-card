@@ -31,6 +31,8 @@ interface HassEntity {
 interface HomeAssistant {
   states: { [entity_id: string]: HassEntity };
   callService: (domain: string, service: string, serviceData?: Record<string, unknown>) => Promise<unknown>;
+  locale?: { language: string };
+  language?: string;
 }
 
 interface LovelaceCardConfig {
@@ -115,13 +117,10 @@ export class VioletPoolCard extends LitElement {
   @property({ attribute: false })
   public set hass(hass: HomeAssistant) {
     this._hass = hass;
-    const localeObj = (hass as any).locale;
-    const langStr = (hass as any).language;
-    if (localeObj && localeObj.language) {
+    // Detect language: prefer locale.language, fallback to language property
+    const langStr = hass.locale?.language || hass.language;
+    if (langStr) {
       // Switch i18n to German if language starts with 'de', else fallback to English
-      i18n.setLanguage(localeObj.language.startsWith('de') ? 'de' : 'en');
-    } else if (langStr) {
-      // Fallback for older Home Assistant versions
       i18n.setLanguage(langStr.startsWith('de') ? 'de' : 'en');
     }
   }
@@ -247,6 +246,52 @@ export class VioletPoolCard extends LitElement {
     }
 
     return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+  }
+
+  private _getRgbColorName(rgb: [number, number, number] | null): string {
+    if (!rgb) return 'Keine Farbe';
+
+    const [r, g, b] = rgb;
+
+    // Check for near-white
+    if (r > 200 && g > 200 && b > 200) return 'Weiß';
+
+    // Check for near-black
+    if (r < 50 && g < 50 && b < 50) return 'Schwarz';
+
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const delta = max - min;
+
+    // Hue calculation
+    let hue = 0;
+    if (delta !== 0) {
+      if (max === r) {
+        hue = ((g - b) / delta + (g < b ? 6 : 0)) / 6;
+      } else if (max === g) {
+        hue = ((b - r) / delta + 2) / 6;
+      } else {
+        hue = ((r - g) / delta + 4) / 6;
+      }
+    }
+
+    // Saturation and Value
+    const saturation = max === 0 ? 0 : delta / max;
+    const value = max / 255;
+
+    // Determine color name based on hue
+    if (saturation < 0.1) {
+      return 'Grau';
+    }
+
+    if (hue < 0.05 || hue >= 0.95) return 'Rot';
+    if (hue < 0.15) return 'Orange';
+    if (hue < 0.25) return 'Gelb';
+    if (hue < 0.4) return 'Grün';
+    if (hue < 0.55) return 'Cyan';
+    if (hue < 0.7) return 'Blau';
+    if (hue < 0.85) return 'Magenta';
+    return 'Rot';
   }
 
   protected render(): TemplateResult {
@@ -407,35 +452,12 @@ export class VioletPoolCard extends LitElement {
    * Render Quick-Settings Panel with common pool actions
    */
   private _renderQuickSettingsPanel(): TemplateResult {
-    const pumpEntityId = this._getEntityId('pump_entity', 'switch', 'pump', 0);
     const heaterEntityId = this._getEntityId('heater_entity', 'climate', 'heater', 1);
 
     return html`
-      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 12px; background: var(--vpc-surface); border-radius: 12px; margin-top: 12px;">
-        <!-- Pump Presets -->
-        ${[
-          { label: '⚡ Boost', speed: 3, icon: 'mdi:rocket' },
-          { label: '⚙️ Normal', speed: 2, icon: 'mdi:speedometer' },
-          { label: '🔋 Eco', speed: 1, icon: 'mdi:leaf' },
-          { label: `❌ ${i18n.t('off')}`, speed: 0, icon: 'mdi:power-off' },
-        ].map(preset => html`
-          <button style="padding: 10px; border: 1px solid var(--vpc-text-secondary); border-radius: 8px; background: transparent; color: var(--vpc-text); font-weight: 600; cursor: pointer; font-size: 12px; transition: all 0.2s;"
-                  @click="${(e: Event) => {
-                    e.stopPropagation();
-                    if (preset.speed === 0) {
-                      this.hass.callService('switch', 'turn_off', { entity_id: pumpEntityId });
-                    } else {
-                      this.hass.callService('switch', 'turn_on', { entity_id: pumpEntityId, service_data: { speed: preset.speed } });
-                    }
-                  }}"
-                  @mouseover="${(e: Event) => { (e.target as HTMLElement).style.background = 'var(--vpc-primary)'; (e.target as HTMLElement).style.color = 'white'; }}"
-                  @mouseout="${(e: Event) => { (e.target as HTMLElement).style.background = 'transparent'; (e.target as HTMLElement).style.color = 'var(--vpc-text)'; }}">
-            ${preset.label}
-          </button>
-        `)}
-
-        <!-- Heater Controls -->
-        <button style="padding: 10px; border: 1px solid var(--vpc-warning); border-radius: 8px; background: transparent; color: var(--vpc-warning); font-weight: 600; cursor: pointer; font-size: 12px; grid-column: span 2;"
+      <div style="display: grid; gap: 8px; padding: 12px; background: var(--vpc-surface); border-radius: 12px; margin-top: 12px;">
+        <!-- Heater Control -->
+        <button style="padding: 10px; border: 1px solid var(--vpc-warning); border-radius: 8px; background: transparent; color: var(--vpc-warning); font-weight: 600; cursor: pointer; font-size: 12px;"
                 @click="${(e: Event) => { e.stopPropagation(); this.hass.callService('climate', 'set_temperature', { entity_id: heaterEntityId, temperature: 26 }); }}">
           🔥 ${i18n.t('heater_plus_two')}
         </button>
@@ -683,9 +705,6 @@ export class VioletPoolCard extends LitElement {
             ? html`<vpc-detail-status .raw="${pumpState}"></vpc-detail-status>`
             : ''}
 
-          ${config.show_controls
-            ? html` <vpc-slider-control label="Speed Level" min="0" max="3" step="1" .value="${currentSpeed}" .labels="${['OFF', 'ECO', 'Normal', 'Boost']}" @value-changed="${(e: CustomEvent) => this._handlePumpSpeedChange(e, config.entity!)}" ></vpc-slider-control> `
-            : ''}
 
           ${config.show_runtime && runtimeSeconds > 0
             ? html` <div class="info-row"><ha-icon icon="mdi:timer-outline"></ha-icon><span class="info-label">Runtime</span><span class="info-value">${runtimeDisplay}</span></div> `
@@ -695,11 +714,6 @@ export class VioletPoolCard extends LitElement {
     `;
   }
 
-  private async _handlePumpSpeedChange(e: CustomEvent, entityId: string) {
-    const speed = e.detail.value;
-    const serviceCaller = new ServiceCaller(this.hass);
-    await serviceCaller.setPumpSpeed(entityId, speed);
-  }
 
   private renderHeaterCard(config: VioletPoolCardConfig = this.config): TemplateResult {
     const entity = this.hass.states[config.entity!];
@@ -1303,6 +1317,65 @@ export class VioletPoolCard extends LitElement {
         status: !isNaN(pressureVal) ? `${pressureVal.toFixed(2)} bar` : filterEntity.state,
         state: !isNaN(pressureVal) && pressureVal > 1.2 ? 'auto' : 'on',
         entityId: filterEntityId,
+      });
+    }
+
+    // Pool level / Füllstand
+    const poolLevelEntityId = this._getEntityId('pool_level_entity' as any, 'sensor', 'pool_level');
+    const poolLevelEntity = this.hass.states[poolLevelEntityId];
+    if (poolLevelEntity) {
+      const levelVal = parseFloat(poolLevelEntity.state);
+      activeDevices.push({
+        icon: 'mdi:water-percent',
+        name: (poolLevelEntity.attributes.friendly_name as string) || 'Füllstand',
+        status: !isNaN(levelVal) ? `${levelVal.toFixed(0)}%` : poolLevelEntity.state,
+        state: 'on',
+        entityId: poolLevelEntityId,
+      });
+    }
+
+    // Flow rate / Durchfluss
+    const flowRateEntityId = this._getEntityId('flow_rate_entity' as any, 'sensor', 'flow_rate');
+    const flowRateEntity = this.hass.states[flowRateEntityId];
+    if (flowRateEntity) {
+      const flowVal = parseFloat(flowRateEntity.state);
+      const unit = flowRateEntity.attributes.unit_of_measurement || 'm³/h';
+      activeDevices.push({
+        icon: 'mdi:water-flow',
+        name: (flowRateEntity.attributes.friendly_name as string) || 'Durchfluss',
+        status: !isNaN(flowVal) ? `${flowVal.toFixed(2)} ${unit}` : flowRateEntity.state,
+        state: flowVal > 0 ? 'on' : 'off',
+        entityId: flowRateEntityId,
+      });
+    }
+
+    // Inlet / Anströmung
+    const inletEntityId = this._getEntityId('inlet_entity' as any, 'sensor', 'inlet');
+    const inletEntity = this.hass.states[inletEntityId];
+    if (inletEntity) {
+      const inletVal = parseFloat(inletEntity.state);
+      const unit = inletEntity.attributes.unit_of_measurement || '';
+      activeDevices.push({
+        icon: 'mdi:water-inlet',
+        name: (inletEntity.attributes.friendly_name as string) || 'Anströmung',
+        status: !isNaN(inletVal) ? `${inletVal.toFixed(2)} ${unit}` : inletEntity.state,
+        state: inletVal > 0 ? 'on' : 'off',
+        entityId: inletEntityId,
+      });
+    }
+
+    // Chlorine value / Chlor-Wert (sensor)
+    const chlorineValueEntityId = this._getEntityId('chlorine_value_entity' as any, 'sensor', 'chlorine_value');
+    const chlorineValueEntity = this.hass.states[chlorineValueEntityId];
+    if (chlorineValueEntity) {
+      const clVal = parseFloat(chlorineValueEntity.state);
+      const unit = chlorineValueEntity.attributes.unit_of_measurement || 'ppm';
+      activeDevices.push({
+        icon: 'mdi:flask-outline',
+        name: (chlorineValueEntity.attributes.friendly_name as string) || 'Chlor-Wert',
+        status: !isNaN(clVal) ? `${clVal.toFixed(2)} ${unit}` : chlorineValueEntity.state,
+        state: 'on',
+        entityId: chlorineValueEntityId,
       });
     }
 
@@ -2159,6 +2232,17 @@ export class VioletPoolCard extends LitElement {
           </div>
 
           ${isOn ? html`
+            <!-- Current Color Display -->
+            <div style="margin-bottom: 12px; padding: 10px; background: var(--vpc-surface); border-radius: 10px; text-align: center;">
+              <div style="font-size: 11px; font-weight: 600; color: var(--vpc-text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">
+                Aktuelle Farbe
+              </div>
+              <div style="font-size: 14px; font-weight: 600; color: var(--vpc-text); display: flex; align-items: center; justify-content: center; gap: 8px;">
+                ${rgb ? html`<div style="width: 24px; height: 24px; border-radius: 50%; background: rgb(${rgb[0]},${rgb[1]},${rgb[2]}); border: 2px solid var(--vpc-text-secondary);"></div>` : ''}
+                <span>${this._getRgbColorName(rgb)}</span>
+              </div>
+            </div>
+
             <!-- Color Circle Picker -->
             <div style="margin-bottom: 12px;">
               <div style="font-size: 11px; font-weight: 600; color: var(--vpc-text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">
