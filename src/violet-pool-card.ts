@@ -8,6 +8,10 @@ import './components/detail-status';
 import './components/warning-chips';
 import './components/slider-control';
 import './components/quick-actions';
+import './components/duration-slider';
+import './components/action-selector';
+import './components/safety-toggle';
+import './components/speed-slider';
 import type { QuickAction } from './components/quick-actions';
 
 // Import utilities
@@ -589,7 +593,7 @@ export class VioletPoolCard extends LitElement {
         label: '30m',
         action: async () => {
           const serviceCaller = new ServiceCaller(this.hass);
-          await serviceCaller.controlPump(config.entity!, 'on', currentSpeed > 0 ? currentSpeed : 2, 30 * 60);
+          await serviceCaller.controlPump(config.entity!, 'speed_control', currentSpeed > 0 ? currentSpeed : 2, 30 * 60);
         },
         active: false,
         color: '#4CAF50',
@@ -599,7 +603,7 @@ export class VioletPoolCard extends LitElement {
         label: '1h',
         action: async () => {
           const serviceCaller = new ServiceCaller(this.hass);
-          await serviceCaller.controlPump(config.entity!, 'on', currentSpeed > 0 ? currentSpeed : 2, 60 * 60);
+          await serviceCaller.controlPump(config.entity!, 'speed_control', currentSpeed > 0 ? currentSpeed : 2, 60 * 60);
         },
         active: false,
         color: '#4CAF50',
@@ -609,7 +613,7 @@ export class VioletPoolCard extends LitElement {
         label: '2h',
         action: async () => {
           const serviceCaller = new ServiceCaller(this.hass);
-          await serviceCaller.controlPump(config.entity!, 'on', currentSpeed > 0 ? currentSpeed : 2, 2 * 60 * 60);
+          await serviceCaller.controlPump(config.entity!, 'speed_control', currentSpeed > 0 ? currentSpeed : 2, 2 * 60 * 60);
         },
         active: false,
         color: '#4CAF50',
@@ -619,7 +623,7 @@ export class VioletPoolCard extends LitElement {
         label: '4h',
         action: async () => {
           const serviceCaller = new ServiceCaller(this.hass);
-          await serviceCaller.controlPump(config.entity!, 'on', currentSpeed > 0 ? currentSpeed : 2, 4 * 60 * 60);
+          await serviceCaller.controlPump(config.entity!, 'speed_control', currentSpeed > 0 ? currentSpeed : 2, 4 * 60 * 60);
         },
         active: false,
         color: '#4CAF50',
