@@ -435,25 +435,79 @@ target_entity: number.violet_pool_target_temp
 
 ### Entity-Mappings
 
+Die Karte unterstützt sowohl automatische als auch manuelle Entity-Zuordnung. Automatische Erkennung funktioniert basierend auf dem Entity-Prefix.
+
+#### Automatische Erkennung (Empfohlen)
+
 ```yaml
-# Manuelle Entity-Zuordnung (optional)
-entity_prefix: violet_pool           # Basis-Prefix
-pump_entity: switch.my_pump          # Pumpen-Entity
-heater_entity: climate.my_heater     # Heizer-Entity
-solar_entity: climate.my_solar       # Solar-Entity
-chlorine_entity: switch.my_chlorine  # Chlor-Dosier
-ph_minus_entity: switch.my_phm       # pH- Dosier
-ph_plus_entity: switch.my_php        # pH+ Dosier
-pool_temp_entity: sensor.my_temp     # Pool-Temp
-ph_value_entity: sensor.my_ph        # pH-Wert
-orp_value_entity: sensor.my_orp      # ORP-Wert
-target_orp_entity: number.my_orp     # ORP-Ziel
-target_ph_entity: number.my_ph       # pH-Ziel
-cover_entity: cover.my_cover         # Abdeckung
-light_entity: light.my_light         # Licht
-filter_entity: switch.my_filter      # Filter
-filter_pressure_entity: sensor.my_fp # Filter-Druck
-backwash_entity: switch.my_backwash  # Rückspüle
+type: custom:violet-pool-card
+card_type: pump
+entity: switch.violet_pool_controller_filterpumpe
+# Erkennt automatisch alle zugehörigen Sensoren und Controls
+```
+
+#### Manuelle Entity-Zuordnung (Optional)
+
+```yaml
+# Für Custom-Konfigurationen mit nicht-Standard Entity-IDs
+entity_prefix: violet_pool_controller    # Basis-Prefix
+
+# Pumpen
+pump_entity: switch.violet_pool_controller_filterpumpe
+pump_status: sensor.violet_pool_controller_pumpen_status
+pump_speed: number.violet_pool_controller_pumpengeschwindigkeit
+pump_mode: select.violet_pool_controller_pumpen_modus
+
+# Heizung
+heater_entity: climate.violet_pool_controller_heizung
+heater_target_temp: number.violet_pool_controller_heizung_zieltemperatur
+heater_mode: select.violet_pool_controller_heizungs_modus
+pool_temp_entity: sensor.violet_pool_controller_beckenwasser
+
+# Solar
+solar_entity: climate.violet_pool_controller_solarabsorber
+solar_target_temp: number.violet_pool_controller_solar_zieltemperatur
+solar_mode: select.violet_pool_controller_solar_modus
+absorber_temp: sensor.violet_pool_controller_solarabsorber
+
+# Dosierung
+chlorine_entity: switch.violet_pool_controller_chlor_dosierung
+ph_plus_entity: switch.violet_pool_controller_dosierung_ph
+ph_minus_entity: switch.violet_pool_controller_dosierung_ph_2
+flocculant_entity: switch.violet_pool_controller_flockmittel
+
+# Chemie-Zielwerte
+target_ph_entity: number.violet_pool_controller_ph_sollwert
+target_orp_entity: number.violet_pool_controller_redox_sollwert
+target_chlorine_entity: number.violet_pool_controller_chlor_sollwert
+
+# Chemie-Messwerte
+ph_value_entity: sensor.violet_pool_controller_ph_wert
+orp_value_entity: sensor.violet_pool_controller_redoxpotential
+chlorine_value_entity: sensor.violet_pool_controller_chlorgehalt
+
+# Abdeckung & Licht
+cover_entity: cover.violet_pool_controller_abdeckung
+light_entity: switch.violet_pool_controller_beleuchtung
+
+# Wasser
+filter_pressure_entity: sensor.violet_pool_controller_filterdruck
+backwash_entity: switch.violet_pool_controller_ruckspulung
+refill_entity: switch.violet_pool_controller_nachspulung
+
+# PV & Energie
+pv_surplus_entity: switch.violet_pool_controller_pv_uberschuss
+pv_mode: select.violet_pool_controller_pv_uberschuss_modus
+eco_mode_entity: binary_sensor.violet_pool_controller_eco_mode
+```
+
+#### Konfiguration über dashboard.yaml
+
+Eine vollständige `dashboard.yaml` mit allen Entities ist im Repository enthalten. Sie können diese als Basis für Ihre Konfiguration verwenden:
+
+```yaml
+# dashboard.yaml - Vollständige Entitäten-Konfiguration
+# Enthält alle 100+ verfügbaren Entities vom Violet Pool Controller
 ```
 
 ---
@@ -464,7 +518,7 @@ backwash_entity: switch.my_backwash  # Rückspüle
 
 ```yaml
 type: custom:violet-pool-card
-entity: switch.violet_pool_pump
+entity: switch.violet_pool_controller_filterpumpe
 card_type: pump
 name: "Pool Pumpe"
 icon: mdi:pump
@@ -476,13 +530,52 @@ show_state: true
 show_detail_status: true
 show_controls: true
 show_runtime: true
+
+# Auto-erkannte verwandte Entities:
+# - Geschwindigkeit: number.violet_pool_controller_pumpengeschwindigkeit
+# - Modus: select.violet_pool_controller_pumpen_modus
+# - Status: sensor.violet_pool_controller_pumpen_status
+# - RPM: sensor.violet_pool_controller_pump_rpm_0
 ```
 
-### Dosierungs-Dashboard
+### Heizungs-Steuerung
 
 ```yaml
 type: custom:violet-pool-card
-entity: switch.violet_pool_dos_1_cl
+entity: climate.violet_pool_controller_heizung
+card_type: heater
+name: "Heizung"
+theme: luxury
+size: medium
+animation: smooth
+
+# Mit Entity-Mappings:
+heater_target_temp: number.violet_pool_controller_heizung_zieltemperatur
+heater_mode: select.violet_pool_controller_heizungs_modus
+pool_temp_entity: sensor.violet_pool_controller_beckenwasser
+```
+
+### Solar-Absorber
+
+```yaml
+type: custom:violet-pool-card
+entity: climate.violet_pool_controller_solarabsorber
+card_type: solar
+name: "Solar & Absorber"
+theme: luxury
+size: large
+
+# Auto-erkannte Entities:
+# - Absorber Temp: sensor.violet_pool_controller_solarabsorber
+# - Rücklauf: sensor.violet_pool_controller_absorber_rucklauf
+# - Zieltemperatur: number.violet_pool_controller_solar_zieltemperatur
+```
+
+### Dosierungs-Dashboard - Chlor
+
+```yaml
+type: custom:violet-pool-card
+entity: switch.violet_pool_controller_chlor_dosierung
 card_type: dosing
 name: "Chlor Dosierung"
 dosing_type: chlorine
@@ -491,9 +584,61 @@ size: medium
 animation: energetic
 show_history: true
 show_controls: true
+
+# Automatisch erkannte Entities:
+# - Status: sensor.violet_pool_controller_chlor_dosierung_status
+# - Zielwert: number.violet_pool_controller_chlor_sollwert
+# - Kanister: number.violet_pool_controller_chlor_kanister_volumen
 ```
 
-### System-Vollbild
+### Dosierungs-Dashboard - pH+
+
+```yaml
+type: custom:violet-pool-card
+entity: switch.violet_pool_controller_dosierung_ph
+card_type: dosing
+name: "pH+ Dosierung"
+dosing_type: ph_plus
+theme: modern
+size: medium
+
+# Entities:
+# - Status: sensor.violet_pool_controller_ph_dosierung_status
+# - Zielwert: number.violet_pool_controller_ph_sollwert
+```
+
+### Chemie-Überwachung
+
+```yaml
+type: custom:violet-pool-card
+card_type: chemical
+theme: luxury
+size: large
+
+pool_temp_entity: sensor.violet_pool_controller_beckenwasser
+ph_value_entity: sensor.violet_pool_controller_ph_wert
+orp_value_entity: sensor.violet_pool_controller_redoxpotential
+target_ph_entity: number.violet_pool_controller_ph_sollwert
+target_orp_entity: number.violet_pool_controller_redox_sollwert
+```
+
+### Rückspülung & Wartung
+
+```yaml
+type: custom:violet-pool-card
+entity: switch.violet_pool_controller_ruckspulung
+card_type: backwash
+name: "Rückspülung"
+theme: luxury
+size: medium
+
+# Verwandte Entities:
+# - Status: sensor.violet_pool_controller_backwash_state
+# - Runtime: sensor.violet_pool_controller_backwash_runtime
+# - Nachspülung: switch.violet_pool_controller_nachspulung
+```
+
+### System-Vollbild mit allen Modulen
 
 ```yaml
 type: custom:violet-pool-card
@@ -503,9 +648,15 @@ size: fullscreen
 animation: smooth
 show_runtime: true
 show_history: true
+
+# Zeigt alle:
+# - Extension Module 1 & 2 (je 8 Ausgänge)
+# - DMX Szenen (12 Szenen)
+# - Digitale Eingänge (12+ Eingänge)
+# - System Status & Health
 ```
 
-### Multi-Sensor Grid
+### Multi-Sensor Grid - Übersicht
 
 ```yaml
 type: custom:violet-pool-card
@@ -514,6 +665,63 @@ name: "Poolstatus"
 theme: glass
 size: large
 show_detail_status: true
+animation: smooth
+
+# Zeigt zusammengefasste Daten von:
+# - Pumpe, Heizung, Solar, Abdeckung, Licht
+# - Chemie-Werte (pH, ORP, Chlor)
+# - Active Devices & Alerts
+```
+
+### Erweiterungs-Module
+
+```yaml
+# Extension Module 1
+type: custom:violet-pool-card
+card_type: compact
+entities:
+  - switch.violet_pool_controller_extension_1_1
+  - switch.violet_pool_controller_extension_1_2
+  - switch.violet_pool_controller_extension_1_3
+  - switch.violet_pool_controller_extension_1_4
+  - switch.violet_pool_controller_extension_1_5
+  - switch.violet_pool_controller_extension_1_6
+  - switch.violet_pool_controller_extension_1_7
+  - switch.violet_pool_controller_extension_1_8
+
+# Extension Module 2
+type: custom:violet-pool-card
+card_type: compact
+entities:
+  - switch.violet_pool_controller_extension_2_1
+  - switch.violet_pool_controller_extension_2_2
+  - switch.violet_pool_controller_extension_2_3
+  - switch.violet_pool_controller_extension_2_4
+  - switch.violet_pool_controller_extension_2_5
+  - switch.violet_pool_controller_extension_2_6
+  - switch.violet_pool_controller_extension_2_7
+  - switch.violet_pool_controller_extension_2_8
+```
+
+### DMX Szenen-Steuerung
+
+```yaml
+type: custom:violet-pool-card
+card_type: compact
+name: "DMX Szenen"
+entities:
+  - switch.violet_pool_controller_dmx_szene_1
+  - switch.violet_pool_controller_dmx_szene_2
+  - switch.violet_pool_controller_dmx_szene_3
+  - switch.violet_pool_controller_dmx_szene_4
+  - switch.violet_pool_controller_dmx_szene_5
+  - switch.violet_pool_controller_dmx_szene_6
+  - switch.violet_pool_controller_dmx_szene_7
+  - switch.violet_pool_controller_dmx_szene_8
+  - switch.violet_pool_controller_dmx_szene_9
+  - switch.violet_pool_controller_dmx_szene_10
+  - switch.violet_pool_controller_dmx_szene_11
+  - switch.violet_pool_controller_dmx_szene_12
 ```
 
 ---
@@ -588,9 +796,140 @@ MIT License - siehe [LICENSE](LICENSE) Datei
 
 ---
 
+## Vollständige Entity-Referenz
+
+### Hauptsteuerung (Main Control Entities)
+
+| Komponente | Entity ID | Typ |
+|-----------|-----------|-----|
+| Filterpumpe | `switch.violet_pool_controller_filterpumpe` | Switch |
+| Heizung | `climate.violet_pool_controller_heizung` | Climate |
+| Solar/Absorber | `climate.violet_pool_controller_solarabsorber` | Climate |
+| Abdeckung | `cover.violet_pool_controller_abdeckung` | Cover |
+| Beleuchtung | `switch.violet_pool_controller_beleuchtung` | Switch |
+
+### Dosierung & Chemie (Dosing & Chemistry)
+
+| Dosierung | Entity | Status | Zielwert |
+|-----------|--------|--------|----------|
+| Chlor | `switch.violet_pool_controller_chlor_dosierung` | `sensor.violet_pool_controller_chlor_dosierung_status` | `number.violet_pool_controller_chlor_sollwert` |
+| pH+ | `switch.violet_pool_controller_dosierung_ph` | `sensor.violet_pool_controller_ph_dosierung_status` | `number.violet_pool_controller_ph_sollwert` |
+| pH- | `switch.violet_pool_controller_dosierung_ph_2` | `sensor.violet_pool_controller_ph_dosierung_status_2` | — |
+| Flockung | `switch.violet_pool_controller_flockmittel` | `sensor.violet_pool_controller_flockung_status` | — |
+
+### Chemie-Messwerte (Chemistry Values)
+
+| Messwert | Entity | Min/Max | Zielwert |
+|----------|--------|---------|----------|
+| pH | `sensor.violet_pool_controller_ph_wert` | min: `sensor.violet_pool_controller_ph_value_min`, max: `sensor.violet_pool_controller_ph_value_max` | `number.violet_pool_controller_ph_sollwert` |
+| ORP/Redox | `sensor.violet_pool_controller_redoxpotential` | min: `sensor.violet_pool_controller_orp_value_min`, max: `sensor.violet_pool_controller_orp_value_max` | `number.violet_pool_controller_redox_sollwert` |
+| Chlor | `sensor.violet_pool_controller_chlorgehalt` | min: `sensor.violet_pool_controller_pot_value_min`, max: `sensor.violet_pool_controller_pot_value_max` | `number.violet_pool_controller_chlor_sollwert` |
+
+### Temperatur-Sensoren (Temperature Sensors)
+
+| Sensor | Entity ID |
+|--------|-----------|
+| Beckenwasser | `sensor.violet_pool_controller_beckenwasser` |
+| Außentemperatur | `sensor.violet_pool_controller_aussentemperatur` |
+| Solar Absorber | `sensor.violet_pool_controller_solarabsorber` |
+| Absorber Rücklauf | `sensor.violet_pool_controller_absorber_rucklauf` |
+| Wärmetauscher | `sensor.violet_pool_controller_warmetauscher` |
+| Heizungsspeicher | `sensor.violet_pool_controller_heizungs_speicher` |
+| OneWire 7-12 | `sensor.violet_pool_controller_onewire[7-12]_value` |
+
+### Wasser & Durchfluss (Water & Flow)
+
+| Komponente | Entity |
+|-----------|--------|
+| Überlauf-Behälter | `sensor.violet_pool_controller_uberlaufbehalter` |
+| Durchflussmesser | `sensor.violet_pool_controller_pumpen_durchfluss` |
+| Durchflussschalter | `sensor.violet_pool_controller_flow_switch` |
+| Filter-Druck | `sensor.violet_pool_controller_filterdruck` |
+
+### Rückspülung & Wartung (Backwash & Maintenance)
+
+| Komponente | Entity |
+|-----------|--------|
+| Rückspülung | `switch.violet_pool_controller_ruckspulung` |
+| Nachspülung | `switch.violet_pool_controller_nachspulung` |
+| Backwash Status | `sensor.violet_pool_controller_backwash_state` |
+| Backwash Runtime | `sensor.violet_pool_controller_backwash_runtime` |
+| Rückspül Status | `sensor.violet_pool_controller_ruckspul_status` |
+
+### Erweiterungsmodule (Extension Modules)
+
+| Modul | Ausgänge |
+|-------|----------|
+| Extension 1 | `switch.violet_pool_controller_extension_1_[1-8]` |
+| Extension 2 | `switch.violet_pool_controller_extension_2_[1-8]` |
+
+### DMX Szenen (DMX Scenes)
+
+```yaml
+DMX Scenen: switch.violet_pool_controller_dmx_szene_[1-12]
+Sensoren: sensor.violet_pool_controller_dmx_scene[1-12]
+```
+
+### Digitale Eingänge (Digital Inputs)
+
+```yaml
+# Normale Eingänge
+Eingänge 1-12: sensor.violet_pool_controller_input[1-12]
+Binary Sensoren: binary_sensor.violet_pool_controller_digital_input_[1-12]
+
+# Counter/Edge Eingänge
+CE Eingänge: sensor.violet_pool_controller_input_ce[1-4]
+CE Binary: binary_sensor.violet_pool_controller_digital_input_ce[1-4]
+
+# Z1/Z2
+Z1Z2: sensor.violet_pool_controller_inputz1z2
+```
+
+### Analoge Sensoren (Analog Sensors)
+
+| Sensor | Entity |
+|--------|--------|
+| Durchflussmesser 4-20mA | `sensor.violet_pool_controller_durchflussmesser_4_20ma` |
+| Analog Sensor 4-20mA | `sensor.violet_pool_controller_analogsensor_4_4_20ma` |
+| Analog Sensor 0-10V | `sensor.violet_pool_controller_analogsensor_5_0_10v` |
+| ADC6 Value | `sensor.violet_pool_controller_adc6_value` |
+| Pump RS485 Power | `sensor.violet_pool_controller_pump_rs485_pwr` |
+
+### System & Status (System & Status)
+
+| Info | Entity |
+|------|--------|
+| Firmware | `sensor.violet_pool_controller_fw` |
+| Software Version | `sensor.violet_pool_controller_sw_version` |
+| CPU Temp | `sensor.violet_pool_controller_cpu_temp` |
+| CPU Uptime | `sensor.violet_pool_controller_cpu_uptime` |
+| Memory Usage | `sensor.violet_pool_controller_memory_used` |
+| System Date | `sensor.violet_pool_controller_date` |
+| System Time | `sensor.violet_pool_controller_time` |
+
+### Updates & Software Management
+
+| Entity | Type |
+|--------|------|
+| `update.violet_pool_card_update` | Update |
+| `update.violet_pool_controller_update` | Update |
+| `switch.violet_pool_controller_pre_release` | Switch (Pre-Release) |
+
+---
+
 ## Changelog
 
-### v2.0.0 (Aktuell)
+### v2.1.0 (Aktuell)
+- ✨ Vollständige Entity-Referenz dokumentiert (100+ Entities)
+- ✨ dashboard.yaml mit allen Entitäten-Zuordnungen
+- ✨ Unterstützung für alle Violet Controller Module (EXT1, EXT2, DMX, Dosage)
+- ✨ Detaillierte OneWire-Sensor Dokumentation (Temp 1-12)
+- ✨ Digitale Eingänge und Schaltregeln vollständig integriert
+- 🔧 Entity-Mapping für erweiterte Konfiguration
+- 📊 System Health Monitoring erweitert
+- 📋 YAML-Beispiele für alle Kartentypen
+
+### v2.0.0
 - ✨ 5 neue Analytics Card-Typen (Statistics, Weather, Maintenance, Alerts, Comparison)
 - ✨ 25+ neue Keyframe-Animationen
 - ✨ SVG-Animationen für Dosierung, Chemie, Filter
