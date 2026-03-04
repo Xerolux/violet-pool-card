@@ -4,10 +4,18 @@
 <img src="logo.png" width="300" alt="Violet Pool Card Logo">
 <br><br>
 
-[![GitHub Release](https://img.shields.io/github/release/Xerolux/VIOLET_CARD_QUICK.svg?style=flat-square)](https://github.com/Xerolux/VIOLET_CARD_QUICK/releases)
-[![HACS](https://img.shields.io/badge/HACS-Custom-orange.svg?style=flat-square)](https://github.com/hacs/integration)
-[![License](https://img.shields.io/github/license/Xerolux/VIOLET_CARD_QUICK.svg?style=flat-square)](LICENSE)
-[![Validate](https://github.com/Xerolux/VIOLET_CARD_QUICK/actions/workflows/validate.yml/badge.svg)](https://github.com/Xerolux/VIOLET_CARD_QUICK/actions/workflows/validate.yml)
+[![GitHub Release][releases-shield]][releases]
+[![Downloads][downloads-shield]][releases]
+[![GitHub Activity][commits-shield]][commits]
+[![License][license-shield]](LICENSE)
+[![HACS][hacs-badge]][hacs]
+
+[![Discord][discord-shield]][discord]
+[![Community Forum][forum-shield]][forum]
+[![Buy Me A Coffee][buymeacoffee-badge]][buymeacoffee]
+[![Tesla](https://img.shields.io/badge/Tesla-Referral-red?style=for-the-badge&logo=tesla)](https://ts.la/sebastian564489)
+
+[![Validate](https://github.com/Xerolux/violet-pool-card/actions/workflows/validate.yml/badge.svg)](https://github.com/Xerolux/violet-pool-card/actions/workflows/validate.yml)
 
 A premium Lovelace card for the [Violet Pool Controller](https://github.com/Xerolux/violet-hass) Integration in Home Assistant.
 
@@ -670,3 +678,19 @@ Full configuration options, examples, and troubleshooting available above in Ger
 ---
 
 **For support and feature requests, visit the GitHub repository.**
+
+<!-- Badge Links -->
+[releases-shield]: https://img.shields.io/github/release/xerolux/violet-pool-card.svg?style=for-the-badge
+[releases]: https://github.com/xerolux/violet-pool-card/releases
+[downloads-shield]: https://img.shields.io/github/downloads/xerolux/violet-pool-card/latest/total.svg?style=for-the-badge
+[commits-shield]: https://img.shields.io/github/commit-activity/y/xerolux/violet-pool-card.svg?style=for-the-badge
+[commits]: https://github.com/xerolux/violet-pool-card/commits/main
+[license-shield]: https://img.shields.io/github/license/xerolux/violet-pool-card.svg?style=for-the-badge
+[hacs]: https://hacs.xyz
+[hacs-badge]: https://img.shields.io/badge/HACS-Custom-orange.svg?style=for-the-badge
+[discord]: https://discord.gg/Qa5fW2R
+[discord-shield]: https://img.shields.io/discord/330944238910963714.svg?style=for-the-badge
+[forum-shield]: https://img.shields.io/badge/community-forum-brightgreen.svg?style=for-the-badge
+[forum]: https://community.home-assistant.io/
+[buymeacoffee]: https://www.buymeacoffee.com/xerolux
+[buymeacoffee-badge]: https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg?style=for-the-badge
