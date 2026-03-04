@@ -1,11 +1,13 @@
 ## v0.1.1 – Violet Pool Card
 
-🟡 **BETA RELEASE** - Testing phase, may contain bugs
-
----
+✅ **STABLE RELEASE**
 
 ### ✨ New Features | Neue Funktionen
 
+- feat: complete phase 5-6 implementation with digital rules and diagnostics cards (3d47947)
+- feat: enhance pump, solar, light, and dosing cards with full API integration (a3ab4ef)
+- feat: implement comprehensive violet-hass API support with advanced controls (9682fc7)
+- feat: add comprehensive reusable UI components for advanced pool control (2541154)
 - feat: add comprehensive dashboard config using only violet-pool-card (b8c06e0)
 - feat: improve card UIs with missing values and better controls (8406453)
 - feat: generate info.md for cleaner HACS preview (6f8c6a6)
@@ -24,6 +26,9 @@
 
 ### 🚀 Improvements | Verbesserungen
 
+- feat: enhance pump, solar, light, and dosing cards with full API integration (a3ab4ef)
+- refactor: remove problematic cards with mock data and hard-coded content (9caaa73)
+- 📝 Release v0.1.1 - Update changelog, version and info.md (83c3f2a)
 - build: update auto-generated files [skip ci] (e8e1aea)
 - feat: improve card UIs with missing values and better controls (8406453)
 - refactor: improve i18n type safety and efficiency (99654b7)
@@ -126,4 +131,4 @@ Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
 
 ---
 
-_Generated automatically by GitHub Actions on 2026-03-04 07:57:32 UTC_
+_Generated automatically by GitHub Actions on 2026-03-04 08:53:39 UTC_
