@@ -3447,8 +3447,8 @@ ha-card.theme-midnight .chem-metric-track{background:rgba(255,255,255,0.08);}
 /* === SENSOR CARD === */
 .sensor-value-display{background:var(--vpc-surface);border-radius:var(--vpc-inner-radius,12px);padding:18px 16px;display:flex;align-items:center;justify-content:center;position:relative;overflow:visible;}
 .sensor-big-value{display:flex;align-items:baseline;gap:6px;}
-.sensor-num{font-size:56px;font-weight:700;letter-spacing:-2.5px;line-height:1;color:var(--card-accent,var(--vpc-primary));}
-.sensor-unit{font-size:26px;font-weight:400;opacity:0.6;letter-spacing:-0.5px;color:var(--card-accent,var(--vpc-text));}
+.sensor-num{font-size:40px;font-weight:700;letter-spacing:-2.5px;line-height:1;color:var(--card-accent,var(--vpc-primary));}
+.sensor-unit{font-size:18px;font-weight:400;opacity:0.6;letter-spacing:-0.5px;color:var(--card-accent,var(--vpc-text));}
 .sensor-state-text{font-size:28px;font-weight:600;color:var(--vpc-text);}
 /* === DETAIL CARD TOOLTIP FIX === */
 .device-row{overflow:visible;}
