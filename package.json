@@ -20,6 +20,7 @@
   "type": "module",
   "scripts": {
     "build": "node node_modules/rollup/dist/bin/rollup -c rollup.config.mjs",
+    "build:info": "node scripts/generate-hacs-info.js",
     "watch": "node node_modules/rollup/dist/bin/rollup -c rollup.config.mjs --watch",
     "serve": "node node_modules/rollup/dist/bin/rollup -c rollup.config.mjs --watch --environment SERVE",
     "lint": "eslint src --ext .ts"
