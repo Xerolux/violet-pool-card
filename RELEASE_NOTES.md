@@ -6,6 +6,7 @@
 
 ### ✨ New Features | Neue Funktionen
 
+- fix: add missing card_type definitions for digital_rules and diagnostics (da4e60b)
 - Add comprehensive views to dashboard_config.yaml (cbbf79f)
 - Update README with comprehensive entity reference and add dashboard.yaml (b8fd8e8)
 - feat: complete phase 5-6 implementation with digital rules and diagnostics cards (3d47947)
@@ -30,6 +31,7 @@
 
 ### 🚀 Improvements | Verbesserungen
 
+- 📝 Release v0.1.2 - Update changelog, version and info.md (db3806e)
 - update-readme-dashboard (63e80f8)
 - update-readme-dashboard (3a391a9)
 - build: update auto-generated files [skip ci] (0dc6c1c)
@@ -61,6 +63,8 @@
 
 ### 🔧 Bug Fixes | Fehlerbehebungen
 
+- fix-lovelace-card-build (68a8037)
+- fix: add missing card_type definitions for digital_rules and diagnostics (da4e60b)
 - fix-statistics-display (a3c4936)
 - fix: remove unused 'value' variable from color conversion function (83b9edf)
 - fix: reduce statistics display font sizes to prevent text overlap (6484e41)
@@ -143,4 +147,4 @@ Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
 
 ---
 
-_Generated automatically by GitHub Actions on 2026-03-04 09:10:21 UTC_
+_Generated automatically by GitHub Actions on 2026-03-04 09:18:23 UTC_
