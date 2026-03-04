@@ -275,9 +275,8 @@ export class VioletPoolCard extends LitElement {
       }
     }
 
-    // Saturation and Value
+    // Saturation
     const saturation = max === 0 ? 0 : delta / max;
-    const value = max / 255;
 
     // Determine color name based on hue
     if (saturation < 0.1) {
