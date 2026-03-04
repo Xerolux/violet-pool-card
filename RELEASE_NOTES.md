@@ -1,4 +1,4 @@
-## v0.1.1 – Violet Pool Card
+## v0.1.2 – Violet Pool Card
 
 🟡 **BETA RELEASE** - Testing phase, may contain bugs
 
@@ -6,6 +6,8 @@
 
 ### ✨ New Features | Neue Funktionen
 
+- fix: Add missing SVG exports and fix PumpState interface (de176d0)
+- feat: Add 4 new themes and advanced customization options (db841b5)
 - ci: add auto-build workflow to rebuild dist on src changes [skip ci] (745d669)
 - add-hacs-icon-and-logo (2fc8bcb)
 - Add Kelvin Slider to Light Card and Loading Skeleton infrastructure (94856b5)
@@ -17,6 +19,8 @@
 
 ### 🚀 Improvements | Verbesserungen
 
+- fix(package): update repository URL to correctly point to violet-pool-card (f666419)
+- 📝 Release v0.1.1 - Update changelog and version (99cf3a9)
 - 📝 Release v0.1.1 - Update changelog and version (8954bc5)
 - Update README with comprehensive feature documentation (d66166f)
 - Enhance Dosing card with animated SVG droplet visualization (75914fc)
@@ -30,6 +34,12 @@
 
 ### 🔧 Bug Fixes | Fehlerbehebungen
 
+- Merge pull request #42 from Xerolux/fix-package-json-repo-url-15677146840970789807 (cb7664e)
+- fix(package): update repository URL to correctly point to violet-pool-card (f666419)
+- fix: Add missing SVG exports and fix PumpState interface (de176d0)
+- fix: Resolve all 3 high-severity security vulnerabilities (1c45410)
+- fix-build-warnings (216e4e5)
+- Fix TypeScript build warnings (fba7a16)
 - fix-pool-dashboard-cards (4b6dfe8)
 - fix: resolve TypeScript errors and rebuild dist to fix card registration (aa302e1)
 - fix-unused-color-variable (c8a633a)
@@ -70,7 +80,7 @@
 
 ---
 
-📋 [Full changelog: v0.1.3...v0.1.1](https://github.com/Xerolux/violet-pool-card/compare/v0.1.3...v0.1.1)
+📋 [Full changelog: v0.1.3...v0.1.2](https://github.com/Xerolux/violet-pool-card/compare/v0.1.3...v0.1.2)
 
 ---
 
@@ -95,4 +105,4 @@ Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
 
 ---
 
-_Generated automatically by GitHub Actions on 2026-03-03 11:14:37 UTC_
+_Generated automatically by GitHub Actions on 2026-03-04 04:19:02 UTC_
