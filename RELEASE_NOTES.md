@@ -31,6 +31,8 @@
 
 ### 🚀 Improvements | Verbesserungen
 
+- build: update auto-generated files [skip ci] (bf3c070)
+- 📝 Release v0.1.2 - Update changelog, version and info.md (5c80b0b)
 - 📝 Release v0.1.2 - Update changelog, version and info.md (db3806e)
 - update-readme-dashboard (63e80f8)
 - update-readme-dashboard (3a391a9)
@@ -63,6 +65,7 @@
 
 ### 🔧 Bug Fixes | Fehlerbehebungen
 
+- 🔧 Fix TypeScript compilation errors (cc30ac3)
 - fix-lovelace-card-build (68a8037)
 - fix: add missing card_type definitions for digital_rules and diagnostics (da4e60b)
 - fix-statistics-display (a3c4936)
@@ -147,4 +150,4 @@ Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
 
 ---
 
-_Generated automatically by GitHub Actions on 2026-03-04 09:18:23 UTC_
+_Generated automatically by GitHub Actions on 2026-03-04 16:13:21 UTC_
