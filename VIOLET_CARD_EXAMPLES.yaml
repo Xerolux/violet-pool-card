@@ -74,6 +74,102 @@
   show_detail_status: true
   show_controls: true
 
+# --- Abdeckung Card ---
+- type: custom:violet-pool-card
+  entity: cover.violet_pool_cover
+  card_type: cover
+  name: Poolabdeckung
+
+# --- Licht Card ---
+- type: custom:violet-pool-card
+  entity: light.violet_pool_light
+  card_type: light
+  name: Poolbeleuchtung
+
+# --- Filter Card ---
+- type: custom:violet-pool-card
+  entity: sensor.violet_pool_filter_pressure
+  card_type: filter
+  name: Filterdruck
+  filter_entity: switch.violet_pool_filter
+
+# --- Sensor Card ---
+- type: custom:violet-pool-card
+  entity: sensor.violet_pool_temperature
+  card_type: sensor
+  name: Wassertemperatur
+
+# --- Chemie Card ---
+- type: custom:violet-pool-card
+  card_type: chemical
+  name: Wasserchemie
+  chemistry_type: chlorine
+  pool_temp_entity: sensor.violet_pool_pool_temp
+  ph_value_entity: sensor.violet_pool_ph_value
+  orp_value_entity: sensor.violet_pool_orp_value
+
+# --- Rückspülung Card ---
+- type: custom:violet-pool-card
+  entity: switch.violet_pool_backwash
+  card_type: backwash
+  name: Rückspülung
+
+# --- Nachfüllung Card ---
+- type: custom:violet-pool-card
+  entity: sensor.violet_pool_water_level
+  card_type: refill
+  name: Nachfüllung
+  refill_valve_entity: switch.violet_pool_refill_valve
+
+# --- PV Überschuss Card ---
+- type: custom:violet-pool-card
+  entity: sensor.violet_pool_solar_power
+  card_type: solar_surplus
+  name: PV Überschuss
+  export_entity: switch.violet_pool_export
+
+# --- Durchfluss Card ---
+- type: custom:violet-pool-card
+  entity: sensor.violet_pool_flow_rate
+  card_type: flow_rate
+  name: Durchfluss
+
+# --- Anströmung Card ---
+- type: custom:violet-pool-card
+  entity: switch.violet_pool_inlet
+  card_type: inlet
+  name: Anströmung
+
+# --- Gegenstromanlage Card ---
+- type: custom:violet-pool-card
+  entity: switch.violet_pool_counter_current
+  card_type: counter_current
+  name: Gegenstromanlage
+
+# --- Chlor Kanister Card ---
+- type: custom:violet-pool-card
+  entity: sensor.violet_pool_chlorine_level
+  card_type: chlorine_canister
+  name: Chlor Kanister
+
+# --- pH+ Kanister Card ---
+- type: custom:violet-pool-card
+  entity: sensor.violet_pool_ph_plus_level
+  card_type: ph_plus_canister
+  name: pH+ Kanister
+
+# --- pH- Kanister Card ---
+- type: custom:violet-pool-card
+  entity: sensor.violet_pool_ph_minus_level
+  card_type: ph_minus_canister
+  name: pH- Kanister
+
+# --- Flockungsmittel Kanister Card ---
+- type: custom:violet-pool-card
+  entity: sensor.violet_pool_flocculant_level
+  card_type: flocculant_canister
+  name: Flockungsmittel Kanister
+
 # ============================================================================
 # OVERVIEW CARD - Alles auf einen Blick
 # ============================================================================
@@ -94,6 +190,75 @@
     - sensor.violet_pool_ph_value
     - sensor.violet_pool_orp_value
     - sensor.violet_pool_free_chlorine
+
+# --- Statistics Card ---
+- type: custom:violet-pool-card
+  entity: sensor.violet_pool_temperature
+  card_type: statistics
+  name: Temperatur Trend
+
+# --- Wetter Card ---
+- type: custom:violet-pool-card
+  entity: weather.openweathermap
+  card_type: weather
+  name: Pool Wetter
+
+# --- Wartung Card ---
+- type: custom:violet-pool-card
+  card_type: maintenance
+  name: Pool Wartung
+
+# --- Benachrichtigungen Card ---
+- type: custom:violet-pool-card
+  card_type: alerts
+  name: Aktuelle Alarme
+
+# --- Vergleich Card ---
+- type: custom:violet-pool-card
+  entity: sensor.violet_pool_temperature
+  card_type: comparison
+  target_entity: number.violet_pool_target_temp
+  name: Ist/Soll Vergleich
+
+# ============================================================================
+# SYSTEM CARD - Vollbildansicht
+# ============================================================================
+
+- type: custom:violet-pool-card
+  card_type: system
+  size: fullscreen
+  theme: luxury
+  show_runtime: true
+  show_history: true
+
+# --- Statistics Card ---
+- type: custom:violet-pool-card
+  entity: sensor.violet_pool_temperature
+  card_type: statistics
+  name: Temperatur Trend
+
+# --- Wetter Card ---
+- type: custom:violet-pool-card
+  entity: weather.openweathermap
+  card_type: weather
+  name: Pool Wetter
+
+# --- Wartung Card ---
+- type: custom:violet-pool-card
+  card_type: maintenance
+  name: Pool Wartung
+
+# --- Benachrichtigungen Card ---
+- type: custom:violet-pool-card
+  card_type: alerts
+  name: Aktuelle Alarme
+
+# --- Vergleich Card ---
+- type: custom:violet-pool-card
+  entity: sensor.violet_pool_temperature
+  card_type: comparison
+  target_entity: number.violet_pool_target_temp
+  name: Ist/Soll Vergleich
 
 # ============================================================================
 # COMPACT CARDS - Dashboard Übersicht
