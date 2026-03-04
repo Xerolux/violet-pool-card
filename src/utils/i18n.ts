@@ -65,6 +65,22 @@ export const TRANSLATIONS = {
     current: 'Current',
     stale_data: 'Data is stale',
     data_not_available: 'Data not available',
+
+    // Additions
+    devices: 'Devices',
+    all_systems_idle: 'All systems idle',
+    all_systems_normal: 'All systems normal',
+    frost_protection_active: 'Frost protection active',
+    orp_too_low: 'ORP too low - Check chlorine dosing',
+    orp_too_high: 'ORP too high - Stop chlorine dosing',
+    ph_out_of_range: 'pH out of range - Check dosing',
+    device_active: 'device active',
+    devices_active: 'devices active',
+    heater_plus_two: 'Heater +2°',
+    ph_minus: 'pH-',
+    chlorine_short: 'Chlorine',
+    pump_short: 'Pump',
+    heater_short: 'Heater',
   },
   de: {
     // Card Types
@@ -125,6 +141,22 @@ export const TRANSLATIONS = {
     current: 'Aktuell',
     stale_data: 'Daten sind veraltet',
     data_not_available: 'Daten nicht verfügbar',
+
+    // Additions
+    devices: 'Geräte',
+    all_systems_idle: 'Alle Systeme im Ruhezustand',
+    all_systems_normal: 'Alle Systeme normal',
+    frost_protection_active: 'Frostschutz aktiv',
+    orp_too_low: 'ORP zu niedrig - Chlordosierung prüfen',
+    orp_too_high: 'ORP zu hoch - Chlordosierung stoppen',
+    ph_out_of_range: 'pH-Wert außerhalb des Bereichs - Dosierung prüfen',
+    device_active: 'Gerät aktiv',
+    devices_active: 'Geräte aktiv',
+    heater_plus_two: 'Heizung +2°',
+    ph_minus: 'pH-',
+    chlorine_short: 'Chlor',
+    pump_short: 'Pumpe',
+    heater_short: 'Heizung',
   },
 };
 
