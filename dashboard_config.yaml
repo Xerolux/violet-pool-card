@@ -599,3 +599,398 @@ views:
         theme: modern
         animation: smooth
         show_state: true
+
+  - title: Statistiken
+    path: statistiken
+    icon: mdi:chart-line
+    type: masonry
+    cards:
+      - type: custom:violet-pool-card
+        card_type: statistics
+        entity: sensor.violet_pool_controller_beckenwasser
+        name: 📊 Beckenwasser Trends
+        entity_prefix: violet_pool_controller
+        size: large
+        theme: luxury
+        animation: smooth
+
+      - type: custom:violet-pool-card
+        card_type: statistics
+        entity: sensor.violet_pool_controller_ph_wert
+        name: 📊 pH-Wert Trends
+        entity_prefix: violet_pool_controller
+        size: large
+        theme: luxury
+        animation: smooth
+
+      - type: custom:violet-pool-card
+        card_type: statistics
+        entity: sensor.violet_pool_controller_redoxpotential
+        name: 📊 ORP Trends
+        entity_prefix: violet_pool_controller
+        size: large
+        theme: luxury
+        animation: smooth
+
+      - type: custom:violet-pool-card
+        card_type: comparison
+        entity: sensor.violet_pool_controller_beckenwasser
+        target_entity: number.violet_pool_controller_heizung_zieltemperatur
+        name: 🌡️ Ist vs. Soll - Temperatur
+        entity_prefix: violet_pool_controller
+        size: large
+        theme: modern
+        animation: smooth
+
+      - type: custom:violet-pool-card
+        card_type: comparison
+        entity: sensor.violet_pool_controller_ph_wert
+        target_entity: number.violet_pool_controller_ph_sollwert
+        name: 📈 Ist vs. Soll - pH
+        entity_prefix: violet_pool_controller
+        size: large
+        theme: modern
+        animation: smooth
+
+      - type: custom:violet-pool-card
+        card_type: comparison
+        entity: sensor.violet_pool_controller_redoxpotential
+        target_entity: number.violet_pool_controller_redox_sollwert
+        name: ⚡ Ist vs. Soll - ORP
+        entity_prefix: violet_pool_controller
+        size: large
+        theme: modern
+        animation: smooth
+
+  - title: Wartung & Service
+    path: wartung
+    icon: mdi:wrench
+    type: masonry
+    cards:
+      - type: custom:violet-pool-card
+        card_type: maintenance
+        name: 🔧 Wartungsplan
+        entity_prefix: violet_pool_controller
+        size: large
+        theme: modern
+        animation: smooth
+
+      - type: custom:violet-pool-card
+        card_type: backwash
+        entity: switch.violet_pool_controller_ruckspulung
+        name: 🔄 Rückspülung Status
+        entity_prefix: violet_pool_controller
+        size: large
+        theme: modern
+        animation: smooth
+        show_controls: true
+        show_state: true
+        show_detail_status: true
+
+      - type: custom:violet-pool-card
+        card_type: details
+        name: 📋 Rückspül Historie
+        entity_prefix: violet_pool_controller
+        size: large
+        theme: minimalist
+        show_state: true
+        entities:
+          - sensor.violet_pool_controller_backwash_state
+          - sensor.violet_pool_controller_backwash_runtime
+          - sensor.violet_pool_controller_backwash_last_auto_run
+          - sensor.violet_pool_controller_backwash_last_manual_run
+          - sensor.violet_pool_controller_backwash_last_on
+          - sensor.violet_pool_controller_backwash_last_off
+
+      - type: custom:violet-pool-card
+        card_type: details
+        name: 📊 Kanister Status
+        entity_prefix: violet_pool_controller
+        size: large
+        theme: minimalist
+        show_state: true
+        entities:
+          - sensor.violet_pool_controller_dos_1_cl_remaining_range
+          - number.violet_pool_controller_chlor_kanister_volumen
+          - sensor.violet_pool_controller_dos_4_phm_remaining_range
+          - number.violet_pool_controller_ph_kanister_volumen
+          - sensor.violet_pool_controller_dos_6_floc_remaining_range
+          - number.violet_pool_controller_flockulant_kanister_volumen
+
+  - title: Erweiterungen
+    path: erweiterungen
+    icon: mdi:puzzle
+    type: masonry
+    cards:
+      - type: custom:violet-pool-card
+        card_type: details
+        name: 🎛️ Extension Module 1
+        entity_prefix: violet_pool_controller
+        size: large
+        theme: minimalist
+        show_state: true
+        entities:
+          - switch.violet_pool_controller_extension_1_1
+          - switch.violet_pool_controller_extension_1_2
+          - switch.violet_pool_controller_extension_1_3
+          - switch.violet_pool_controller_extension_1_4
+          - switch.violet_pool_controller_extension_1_5
+          - switch.violet_pool_controller_extension_1_6
+          - switch.violet_pool_controller_extension_1_7
+          - switch.violet_pool_controller_extension_1_8
+
+      - type: custom:violet-pool-card
+        card_type: details
+        name: 🎛️ Extension Module 2
+        entity_prefix: violet_pool_controller
+        size: large
+        theme: minimalist
+        show_state: true
+        entities:
+          - switch.violet_pool_controller_extension_2_1
+          - switch.violet_pool_controller_extension_2_2
+          - switch.violet_pool_controller_extension_2_3
+          - switch.violet_pool_controller_extension_2_4
+          - switch.violet_pool_controller_extension_2_5
+          - switch.violet_pool_controller_extension_2_6
+          - switch.violet_pool_controller_extension_2_7
+          - switch.violet_pool_controller_extension_2_8
+
+      - type: custom:violet-pool-card
+        card_type: details
+        name: 🎬 DMX Szenen (1-6)
+        entity_prefix: violet_pool_controller
+        size: large
+        theme: minimalist
+        show_state: true
+        entities:
+          - switch.violet_pool_controller_dmx_szene_1
+          - switch.violet_pool_controller_dmx_szene_2
+          - switch.violet_pool_controller_dmx_szene_3
+          - switch.violet_pool_controller_dmx_szene_4
+          - switch.violet_pool_controller_dmx_szene_5
+          - switch.violet_pool_controller_dmx_szene_6
+
+      - type: custom:violet-pool-card
+        card_type: details
+        name: 🎬 DMX Szenen (7-12)
+        entity_prefix: violet_pool_controller
+        size: large
+        theme: minimalist
+        show_state: true
+        entities:
+          - switch.violet_pool_controller_dmx_szene_7
+          - switch.violet_pool_controller_dmx_szene_8
+          - switch.violet_pool_controller_dmx_szene_9
+          - switch.violet_pool_controller_dmx_szene_10
+          - switch.violet_pool_controller_dmx_szene_11
+          - switch.violet_pool_controller_dmx_szene_12
+
+      - type: custom:violet-pool-card
+        card_type: details
+        name: 🔘 Schaltregeln
+        entity_prefix: violet_pool_controller
+        size: large
+        theme: minimalist
+        show_state: true
+        entities:
+          - switch.violet_pool_controller_schaltregel_1
+          - switch.violet_pool_controller_schaltregel_2
+          - switch.violet_pool_controller_schaltregel_3
+          - switch.violet_pool_controller_schaltregel_4
+          - switch.violet_pool_controller_schaltregel_5
+          - switch.violet_pool_controller_schaltregel_6
+          - switch.violet_pool_controller_schaltregel_7
+
+  - title: Eingänge & Sensoren
+    path: eingaenge
+    icon: mdi:dip-switch
+    type: masonry
+    cards:
+      - type: custom:violet-pool-card
+        card_type: details
+        name: 🔘 Digitale Eingänge (1-6)
+        entity_prefix: violet_pool_controller
+        size: large
+        theme: minimalist
+        show_state: true
+        entities:
+          - binary_sensor.violet_pool_controller_digital_input_1
+          - binary_sensor.violet_pool_controller_digital_input_2
+          - binary_sensor.violet_pool_controller_digital_input_3
+          - binary_sensor.violet_pool_controller_digital_input_4
+          - binary_sensor.violet_pool_controller_digital_input_5
+          - binary_sensor.violet_pool_controller_digital_input_6
+
+      - type: custom:violet-pool-card
+        card_type: details
+        name: 🔘 Digitale Eingänge (7-12)
+        entity_prefix: violet_pool_controller
+        size: large
+        theme: minimalist
+        show_state: true
+        entities:
+          - binary_sensor.violet_pool_controller_digital_input_7
+          - binary_sensor.violet_pool_controller_digital_input_8
+          - binary_sensor.violet_pool_controller_digital_input_9
+          - binary_sensor.violet_pool_controller_digital_input_10
+          - binary_sensor.violet_pool_controller_digital_input_11
+          - binary_sensor.violet_pool_controller_digital_input_12
+
+      - type: custom:violet-pool-card
+        card_type: details
+        name: 🔘 Edge Eingänge (CE1-4)
+        entity_prefix: violet_pool_controller
+        size: large
+        theme: minimalist
+        show_state: true
+        entities:
+          - binary_sensor.violet_pool_controller_digital_input_ce1
+          - binary_sensor.violet_pool_controller_digital_input_ce2
+          - binary_sensor.violet_pool_controller_digital_input_ce3
+          - binary_sensor.violet_pool_controller_digital_input_ce4
+
+      - type: custom:violet-pool-card
+        card_type: details
+        name: 📏 Analoge Sensoren
+        entity_prefix: violet_pool_controller
+        size: large
+        theme: minimalist
+        show_state: true
+        entities:
+          - sensor.violet_pool_controller_durchflussmesser_4_20ma
+          - sensor.violet_pool_controller_analogsensor_4_4_20ma
+          - sensor.violet_pool_controller_analogsensor_5_0_10v
+          - sensor.violet_pool_controller_adc6_value
+
+  - title: OneWire Sensoren
+    path: onewire
+    icon: mdi:thermometer-lines
+    type: masonry
+    cards:
+      - type: custom:violet-pool-card
+        card_type: sensor
+        entity: sensor.violet_pool_controller_beckenwasser
+        name: 🌊 OneWire 1 - Beckenwasser
+        entity_prefix: violet_pool_controller
+        size: medium
+        theme: glass
+        animation: smooth
+
+      - type: custom:violet-pool-card
+        card_type: sensor
+        entity: sensor.violet_pool_controller_aussentemperatur
+        name: 🌡 OneWire 2 - Außentemperatur
+        entity_prefix: violet_pool_controller
+        size: medium
+        theme: glass
+        animation: smooth
+
+      - type: custom:violet-pool-card
+        card_type: sensor
+        entity: sensor.violet_pool_controller_solarabsorber
+        name: ☀️ OneWire 3 - Solar Absorber
+        entity_prefix: violet_pool_controller
+        size: medium
+        theme: glass
+        animation: smooth
+
+      - type: custom:violet-pool-card
+        card_type: sensor
+        entity: sensor.violet_pool_controller_absorber_rucklauf
+        name: 📉 OneWire 4 - Absorber Rücklauf
+        entity_prefix: violet_pool_controller
+        size: medium
+        theme: glass
+        animation: smooth
+
+      - type: custom:violet-pool-card
+        card_type: sensor
+        entity: sensor.violet_pool_controller_warmetauscher
+        name: 🔥 OneWire 5 - Wärmetauscher
+        entity_prefix: violet_pool_controller
+        size: medium
+        theme: glass
+        animation: smooth
+
+      - type: custom:violet-pool-card
+        card_type: sensor
+        entity: sensor.violet_pool_controller_heizungs_speicher
+        name: 🪣 OneWire 6 - Heizungsspeicher
+        entity_prefix: violet_pool_controller
+        size: medium
+        theme: glass
+        animation: smooth
+
+      - type: custom:violet-pool-card
+        card_type: sensor
+        entity: sensor.violet_pool_controller_onewire7_value
+        name: 🌡 OneWire 7
+        entity_prefix: violet_pool_controller
+        size: medium
+        theme: glass
+        animation: smooth
+
+      - type: custom:violet-pool-card
+        card_type: sensor
+        entity: sensor.violet_pool_controller_onewire8_value
+        name: 🌡 OneWire 8
+        entity_prefix: violet_pool_controller
+        size: medium
+        theme: glass
+        animation: smooth
+
+      - type: custom:violet-pool-card
+        card_type: sensor
+        entity: sensor.violet_pool_controller_onewire9_value
+        name: 🌡 OneWire 9
+        entity_prefix: violet_pool_controller
+        size: medium
+        theme: glass
+        animation: smooth
+
+      - type: custom:violet-pool-card
+        card_type: sensor
+        entity: sensor.violet_pool_controller_onewire10_value
+        name: 🌡 OneWire 10
+        entity_prefix: violet_pool_controller
+        size: medium
+        theme: glass
+        animation: smooth
+
+      - type: custom:violet-pool-card
+        card_type: sensor
+        entity: sensor.violet_pool_controller_onewire11_value
+        name: 🌡 OneWire 11
+        entity_prefix: violet_pool_controller
+        size: medium
+        theme: glass
+        animation: smooth
+
+      - type: custom:violet-pool-card
+        card_type: sensor
+        entity: sensor.violet_pool_controller_onewire12_value
+        name: 🌡 OneWire 12
+        entity_prefix: violet_pool_controller
+        size: medium
+        theme: glass
+        animation: smooth
+
+      - type: custom:violet-pool-card
+        card_type: details
+        name: 📊 OneWire Fehler & Freeze
+        entity_prefix: violet_pool_controller
+        size: large
+        theme: minimalist
+        show_state: true
+        entities:
+          - sensor.violet_pool_controller_onewire1_faultcount
+          - sensor.violet_pool_controller_onewire1_freezecount
+          - sensor.violet_pool_controller_onewire2_faultcount
+          - sensor.violet_pool_controller_onewire2_freezecount
+          - sensor.violet_pool_controller_onewire3_faultcount
+          - sensor.violet_pool_controller_onewire3_freezecount
+          - sensor.violet_pool_controller_onewire4_faultcount
+          - sensor.violet_pool_controller_onewire4_freezecount
+          - sensor.violet_pool_controller_onewire10_faultcount
+          - sensor.violet_pool_controller_onewire10_freezecount
