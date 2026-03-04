@@ -398,7 +398,7 @@ export class VioletPoolCard extends LitElement {
           { label: '⚡ Boost', speed: 3, icon: 'mdi:rocket' },
           { label: '⚙️ Normal', speed: 2, icon: 'mdi:speedometer' },
           { label: '🔋 Eco', speed: 1, icon: 'mdi:leaf' },
-          { label: '❌ Off', speed: 0, icon: 'mdi:power-off' },
+          { label: '❌ Aus', speed: 0, icon: 'mdi:power-off' },
         ].map(preset => html`
           <button style="padding: 10px; border: 1px solid var(--vpc-text-secondary); border-radius: 8px; background: transparent; color: var(--vpc-text); font-weight: 600; cursor: pointer; font-size: 12px; transition: all 0.2s;"
                   @click="${(e: Event) => {
@@ -418,7 +418,7 @@ export class VioletPoolCard extends LitElement {
         <!-- Heater Controls -->
         <button style="padding: 10px; border: 1px solid var(--vpc-warning); border-radius: 8px; background: transparent; color: var(--vpc-warning); font-weight: 600; cursor: pointer; font-size: 12px; grid-column: span 2;"
                 @click="${(e: Event) => { e.stopPropagation(); this.hass.callService('climate', 'set_temperature', { entity_id: heaterEntityId, temperature: 26 }); }}">
-          🔥 Heater +2°
+          🔥 Heizung +2°
         </button>
       </div>
     `;
@@ -1182,7 +1182,7 @@ export class VioletPoolCard extends LitElement {
       const parsedPumpState = EntityHelper.parsePumpState(pumpState);
       activeDevices.push({
         icon: 'mdi:pump',
-        name: 'Pump',
+        name: 'Pumpe',
         status: parsedPumpState.status || pumpEntity.state,
         state: pumpEntity.state,
         entityId: pumpEntityId,
@@ -1194,7 +1194,7 @@ export class VioletPoolCard extends LitElement {
       const parsedHeaterState = EntityHelper.parseHeaterState(heaterState);
       activeDevices.push({
         icon: 'mdi:radiator',
-        name: 'Heater',
+        name: 'Heizung',
         status: parsedHeaterState.status || heaterEntity.state,
         state: heaterEntity.state,
         entityId: heaterEntityId,
@@ -1220,7 +1220,7 @@ export class VioletPoolCard extends LitElement {
         : chlorineEntity.state;
       activeDevices.push({
         icon: 'mdi:flask-outline',
-        name: 'Chlorine',
+        name: 'Chlor',
         status: statusText,
         state: chlorineEntity.state,
         entityId: chlorineEntityId,
@@ -1287,13 +1287,13 @@ export class VioletPoolCard extends LitElement {
       });
     }
 
-    if (orpStatus === 'warning') warnings.push('ORP too low - Check chlorine dosing');
-    if (orpStatus === 'high') warnings.push('ORP too high - Stop chlorine dosing');
-    if (phStatus === 'warning') warnings.push('pH out of range - Check dosing');
+    if (orpStatus === 'warning') warnings.push('ORP zu niedrig - Chlordosierung prüfen');
+    if (orpStatus === 'high') warnings.push('ORP zu hoch - Chlordosierung stoppen');
+    if (phStatus === 'warning') warnings.push('pH-Wert außerhalb des Bereichs - Dosierung prüfen');
 
     if ((pumpEntity?.attributes?.PUMPSTATE as string | undefined)?.includes('ANTI_FREEZE')) {
       const outsideTempRaw = heaterEntity?.attributes?.outside_temperature as number | null | undefined;
-      warnings.push(`Frost protection active${outsideTempRaw != null ? ` (${outsideTempRaw.toFixed(1)}°C)` : ''}`);
+      warnings.push(`Frostschutz aktiv${outsideTempRaw != null ? ` (${outsideTempRaw.toFixed(1)}°C)` : ''}`);
     }
 
     const anyActive = activeDevices.some(d => ['on', 'auto', 'heat', 'heating'].includes(d.state));
@@ -1310,7 +1310,7 @@ export class VioletPoolCard extends LitElement {
     const orpIdealStartPct = this._getValuePercent(650, 500, 900);
     const orpIdealEndPct = this._getValuePercent(750, 500, 900);
 
-    return html` <ha-card class="${this._getCardClasses(anyActive, config)}" style="--card-accent: ${accentColor}" ><div class="accent-bar"></div><div class="card-content"><!-- Header --><div class="header"><div class="header-icon ${anyActive ? 'icon-active' : ''}" style="--icon-accent: ${accentColor}"><ha-icon icon="mdi:pool"></ha-icon></div><div class="header-info"><span class="name">${name}</span><span class="header-subtitle"> ${anyActive ? `${activeCount} device${activeCount !== 1 ? 's' : ''} active` : 'All systems idle'}
+    return html` <ha-card class="${this._getCardClasses(anyActive, config)}" style="--card-accent: ${accentColor}" ><div class="accent-bar"></div><div class="card-content"><!-- Header --><div class="header"><div class="header-icon ${anyActive ? 'icon-active' : ''}" style="--icon-accent: ${accentColor}"><ha-icon icon="mdi:pool"></ha-icon></div><div class="header-info"><span class="name">${name}</span><span class="header-subtitle"> ${anyActive ? `${activeCount} Gerät${activeCount !== 1 ? 'e' : ''} aktiv` : 'Alle Systeme im Ruhezustand'}
               </span>
             </div>
             ${warnings.length > 0
@@ -1374,7 +1374,7 @@ export class VioletPoolCard extends LitElement {
 
           <!-- Device List - clean rows -->
           ${activeDevices.length > 0
-            ? html` <div class="overview-section"><div class="section-title"><span>Devices</span><span class="section-count">${activeDevices.length}</span></div><div class="device-list"> ${activeDevices.map( (device) => html`
+            ? html` <div class="overview-section"><div class="section-title"><span>Geräte</span><span class="section-count">${activeDevices.length}</span></div><div class="device-list"> ${activeDevices.map( (device) => html`
                         <div class="device-row"
                           @click="${(e: Event) => { e.stopPropagation(); this._showMoreInfo(device.entityId); }}">
                           <div class="device-icon-wrap ${['on', 'auto', 'heat', 'heating'].includes(device.state) ? 'device-icon-active' : ''}">
@@ -1395,7 +1395,7 @@ export class VioletPoolCard extends LitElement {
 
           <!-- Warnings / All OK -->
           ${warnings.length > 0
-            ? html` <div class="overview-section"><div class="section-title warning-title"><ha-icon icon="mdi:alert-outline" style="--mdc-icon-size: 14px"></ha-icon><span>Alerts</span></div><div class="warning-list"> ${warnings.map( (warning) => html`
+            ? html` <div class="overview-section"><div class="section-title warning-title"><ha-icon icon="mdi:alert-outline" style="--mdc-icon-size: 14px"></ha-icon><span>Alarme</span></div><div class="warning-list"> ${warnings.map( (warning) => html`
                         <div class="warning-row">
                           <ha-icon icon="${warning.includes('Frost') ? 'mdi:snowflake-alert' : 'mdi:alert-circle'}" style="--mdc-icon-size: 16px"></ha-icon>
                           <span>${warning}</span>
@@ -1405,7 +1405,7 @@ export class VioletPoolCard extends LitElement {
                   </div>
                 </div>
               `
-            : html` <div class="all-ok-display"><ha-icon icon="mdi:check-circle" style="--mdc-icon-size: 18px"></ha-icon><span>All systems normal</span></div> `}
+            : html` <div class="all-ok-display"><ha-icon icon="mdi:check-circle" style="--mdc-icon-size: 18px"></ha-icon><span>Alle Systeme normal</span></div> `}
         </div>
       </ha-card>
     `;
