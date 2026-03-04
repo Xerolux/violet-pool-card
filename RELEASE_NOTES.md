@@ -1,4 +1,4 @@
-## v0.1.2 – Violet Pool Card
+## v0.1.3 – Violet Pool Card
 
 🟡 **BETA RELEASE** - Testing phase, may contain bugs
 
@@ -6,6 +6,8 @@
 
 ### ✨ New Features | Neue Funktionen
 
+- docs: Update README and examples with new cards (84640d0)
+- ci: add workflow_dispatch to auto-build.yml (e25738c)
 - fix: Add missing SVG exports and fix PumpState interface (de176d0)
 - feat: Add 4 new themes and advanced customization options (db841b5)
 - ci: add auto-build workflow to rebuild dist on src changes [skip ci] (745d669)
@@ -16,9 +18,14 @@
 - Add 5 new card types and integrate advanced animations (6da6cce)
 - Add icon.png and logo.png to repository root for HACS display (41d9dd4)
 - Add design system, memoization utilities, and performance optimizations (Fixes 10-15) (22d57b1)
+- docs: update README with v0.2.0 features (6 new card types, animated SVG icons, RGB picker, tooltips) (aa06296)
 
 ### 🚀 Improvements | Verbesserungen
 
+- docs: update readme with badges and sponsor links (31c7f2b)
+- docs-update-readme-examples (1b4dfc0)
+- docs: Update README and examples with new cards (84640d0)
+- 📝 Release v0.1.2 - Update changelog and version (6672716)
 - fix(package): update repository URL to correctly point to violet-pool-card (f666419)
 - 📝 Release v0.1.1 - Update changelog and version (99cf3a9)
 - 📝 Release v0.1.1 - Update changelog and version (8954bc5)
@@ -31,6 +38,8 @@
 - 📝 Release v0.1.1 - Update changelog and version (60e2ad7)
 - fix: remove dead code causing TS warning and optimize compilation (36bb7ec)
 - 📝 Release v0.1.3 - Update changelog and version (bb8738d)
+- docs: update README with v0.2.0 features (6 new card types, animated SVG icons, RGB picker, tooltips) (aa06296)
+- 📝 Release v0.1.2 - Update changelog and version (6b93afd)
 
 ### 🔧 Bug Fixes | Fehlerbehebungen
 
@@ -57,7 +66,11 @@
 
 ### 📚 Documentation | Dokumentation
 
+- docs: update readme with badges and sponsor links (31c7f2b)
+- docs-update-readme-examples (1b4dfc0)
+- docs: Update README and examples with new cards (84640d0)
 - Update README with comprehensive feature documentation (d66166f)
+- docs: update README with v0.2.0 features (6 new card types, animated SVG icons, RGB picker, tooltips) (aa06296)
 
 ---
 
@@ -80,7 +93,7 @@
 
 ---
 
-📋 [Full changelog: v0.1.3...v0.1.2](https://github.com/Xerolux/violet-pool-card/compare/v0.1.3...v0.1.2)
+📋 [Full changelog: v0.1.2...v0.1.3](https://github.com/Xerolux/violet-pool-card/compare/v0.1.2...v0.1.3)
 
 ---
 
@@ -105,4 +118,4 @@ Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
 
 ---
 
-_Generated automatically by GitHub Actions on 2026-03-04 04:19:02 UTC_
+_Generated automatically by GitHub Actions on 2026-03-04 05:39:39 UTC_
