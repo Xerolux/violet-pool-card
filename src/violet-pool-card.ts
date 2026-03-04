@@ -31,6 +31,8 @@ interface HassEntity {
 interface HomeAssistant {
   states: { [entity_id: string]: HassEntity };
   callService: (domain: string, service: string, serviceData?: Record<string, unknown>) => Promise<unknown>;
+  locale?: { language: string };
+  language?: string;
 }
 
 interface LovelaceCardConfig {
@@ -115,13 +117,10 @@ export class VioletPoolCard extends LitElement {
   @property({ attribute: false })
   public set hass(hass: HomeAssistant) {
     this._hass = hass;
-    const localeObj = (hass as any).locale;
-    const langStr = (hass as any).language;
-    if (localeObj && localeObj.language) {
+    // Detect language: prefer locale.language, fallback to language property
+    const langStr = hass.locale?.language || hass.language;
+    if (langStr) {
       // Switch i18n to German if language starts with 'de', else fallback to English
-      i18n.setLanguage(localeObj.language.startsWith('de') ? 'de' : 'en');
-    } else if (langStr) {
-      // Fallback for older Home Assistant versions
       i18n.setLanguage(langStr.startsWith('de') ? 'de' : 'en');
     }
   }
