@@ -1,0 +1,601 @@
+title: 🏊 Pool Dashboard
+views:
+  - title: Übersicht
+    path: uebersicht
+    icon: mdi:pool
+    type: masonry
+    cards:
+      - type: custom:violet-pool-card
+        card_type: overview
+        name: 🏊 Pool Status
+        entity_prefix: violet_pool_controller
+        size: large
+        theme: luxury
+        animation: smooth
+        show_state: true
+        show_detail_status: true
+        show_controls: true
+        pool_temp_entity: sensor.violet_pool_controller_beckenwasser
+        ph_value_entity: sensor.violet_pool_controller_ph_wert
+        orp_value_entity: sensor.violet_pool_controller_redoxpotential
+        target_ph_entity: number.violet_pool_controller_ph_sollwert
+        target_orp_entity: number.violet_pool_controller_redox_sollwert
+        pool_level_entity: sensor.violet_pool_controller_pool_level
+        flow_rate_entity: sensor.violet_pool_controller_pumpen_durchfluss
+        inlet_entity: sensor.violet_pool_controller_inlet
+        chlorine_value_entity: sensor.violet_pool_controller_chlorgehalt
+
+      - type: custom:violet-pool-card
+        card_type: chemical
+        name: 💧 Wasserchemie
+        entity_prefix: violet_pool_controller
+        size: large
+        theme: luxury
+        animation: smooth
+        pool_temp_entity: sensor.violet_pool_controller_beckenwasser
+        ph_value_entity: sensor.violet_pool_controller_ph_wert
+        orp_value_entity: sensor.violet_pool_controller_redoxpotential
+        target_ph_entity: number.violet_pool_controller_ph_sollwert
+        target_orp_entity: number.violet_pool_controller_redox_sollwert
+
+      - type: custom:violet-pool-card
+        card_type: compact
+        entity: binary_sensor.violet_pool_controller_pump_state
+        name: 🔌 Pumpe
+        size: medium
+        theme: minimalist
+        show_state: true
+
+      - type: custom:violet-pool-card
+        card_type: compact
+        entity: binary_sensor.violet_pool_controller_heater_state
+        name: 🔥 Heizung
+        size: medium
+        theme: minimalist
+        show_state: true
+
+      - type: custom:violet-pool-card
+        card_type: compact
+        entity: binary_sensor.violet_pool_controller_solar_state
+        name: ☀️ Solar
+        size: medium
+        theme: minimalist
+        show_state: true
+
+      - type: custom:violet-pool-card
+        card_type: compact
+        entity: binary_sensor.violet_pool_controller_light_state
+        name: 💡 Licht
+        size: medium
+        theme: minimalist
+        show_state: true
+
+      - type: custom:violet-pool-card
+        card_type: compact
+        entity: binary_sensor.violet_pool_controller_backwash_state
+        name: 🔄 Rückspülung
+        size: medium
+        theme: minimalist
+        show_state: true
+
+      - type: custom:violet-pool-card
+        card_type: compact
+        entity: binary_sensor.violet_pool_controller_refill_state
+        name: 💧 Nachfüllen
+        size: medium
+        theme: minimalist
+        show_state: true
+
+  - title: Pumpe & Filter
+    path: pumpe-filter
+    icon: mdi:pump
+    type: masonry
+    cards:
+      - type: custom:violet-pool-card
+        card_type: pump
+        entity: switch.violet_pool_controller_filterpumpe
+        name: 💨 Filterpumpe
+        entity_prefix: violet_pool_controller
+        size: large
+        theme: luxury
+        animation: smooth
+        show_runtime: true
+        show_controls: true
+        show_state: true
+        show_detail_status: true
+
+      - type: custom:violet-pool-card
+        card_type: filter
+        entity: sensor.violet_pool_controller_filterdruck
+        name: 🔧 Filterdruck
+        entity_prefix: violet_pool_controller
+        filter_pressure_entity: sensor.violet_pool_controller_filterdruck
+        backwash_entity: switch.violet_pool_controller_ruckspulung
+        size: large
+        theme: luxury
+        animation: smooth
+        show_controls: true
+        show_state: true
+
+      - type: custom:violet-pool-card
+        card_type: backwash
+        entity: switch.violet_pool_controller_ruckspulung
+        name: 🔄 Rückspülung
+        entity_prefix: violet_pool_controller
+        size: large
+        theme: modern
+        animation: smooth
+        show_controls: true
+        show_state: true
+        show_detail_status: true
+
+      - type: custom:violet-pool-card
+        card_type: flow_rate
+        entity: sensor.violet_pool_controller_pumpen_durchfluss
+        name: 💧 Durchfluss
+        entity_prefix: violet_pool_controller
+        size: medium
+        theme: glass
+        animation: smooth
+        show_state: true
+
+      - type: custom:violet-pool-card
+        card_type: details
+        name: 📊 Pumpe Details
+        entity_prefix: violet_pool_controller
+        size: large
+        theme: minimalist
+        show_state: true
+        entities:
+          - select.violet_pool_controller_pumpen_modus
+          - sensor.violet_pool_controller_pumpen_status
+          - sensor.violet_pool_controller_pumpen_detail_status
+          - sensor.violet_pool_controller_pump_runtime
+          - sensor.violet_pool_controller_pump_last_on
+          - sensor.violet_pool_controller_pump_last_off
+
+  - title: Heizung & Solar
+    path: heizung-solar
+    icon: mdi:solar-power
+    type: masonry
+    cards:
+      - type: custom:violet-pool-card
+        card_type: heater
+        entity: climate.violet_pool_controller_heizung
+        name: 🔥 Heizung
+        entity_prefix: violet_pool_controller
+        size: large
+        theme: luxury
+        animation: smooth
+        show_controls: true
+        show_state: true
+        show_detail_status: true
+        pool_temp_entity: sensor.violet_pool_controller_beckenwasser
+
+      - type: custom:violet-pool-card
+        card_type: solar
+        entity: climate.violet_pool_controller_solarabsorber
+        name: ☀️ Solar
+        entity_prefix: violet_pool_controller
+        size: large
+        theme: luxury
+        animation: smooth
+        show_controls: true
+        show_state: true
+        show_detail_status: true
+        pool_temp_entity: sensor.violet_pool_controller_beckenwasser
+
+      - type: custom:violet-pool-card
+        card_type: sensor
+        entity: sensor.violet_pool_controller_beckenwasser
+        name: 🌊 Beckenwasser
+        entity_prefix: violet_pool_controller
+        size: medium
+        theme: glass
+        animation: smooth
+
+      - type: custom:violet-pool-card
+        card_type: sensor
+        entity: sensor.violet_pool_controller_solarabsorber
+        name: ☀️ Solarabsorber
+        entity_prefix: violet_pool_controller
+        size: medium
+        theme: glass
+        animation: smooth
+
+      - type: custom:violet-pool-card
+        card_type: sensor
+        entity: sensor.violet_pool_controller_aussentemperatur
+        name: 🌡 Außentemp.
+        entity_prefix: violet_pool_controller
+        size: medium
+        theme: glass
+        animation: smooth
+
+      - type: custom:violet-pool-card
+        card_type: sensor
+        entity: sensor.violet_pool_controller_absorber_rucklauf
+        name: 📉 Absorber Rücklauf
+        entity_prefix: violet_pool_controller
+        size: medium
+        theme: glass
+        animation: smooth
+
+      - type: custom:violet-pool-card
+        card_type: details
+        name: 📊 Heizung & Solar Details
+        entity_prefix: violet_pool_controller
+        size: large
+        theme: minimalist
+        show_state: true
+        entities:
+          - select.violet_pool_controller_heizungs_modus
+          - number.violet_pool_controller_heizung_zieltemperatur
+          - sensor.violet_pool_controller_heizungs_status
+          - sensor.violet_pool_controller_heater_runtime
+          - select.violet_pool_controller_solar_modus
+          - number.violet_pool_controller_solar_zieltemperatur
+          - sensor.violet_pool_controller_solar_status
+          - sensor.violet_pool_controller_warmetauscher
+          - sensor.violet_pool_controller_heizungs_speicher
+
+  - title: Dosierung
+    path: dosierung
+    icon: mdi:flask
+    type: masonry
+    cards:
+      - type: custom:violet-pool-card
+        card_type: dosing
+        entity: switch.violet_pool_controller_chlor_dosierung
+        name: 🟡 Chlor Dosierung
+        entity_prefix: violet_pool_controller
+        dosing_type: chlorine
+        size: large
+        theme: luxury
+        animation: smooth
+        show_history: true
+        show_controls: true
+        show_state: true
+        show_detail_status: true
+        orp_value_entity: sensor.violet_pool_controller_redoxpotential
+        target_orp_entity: number.violet_pool_controller_redox_sollwert
+
+      - type: custom:violet-pool-card
+        card_type: dosing
+        entity: switch.violet_pool_controller_dosierung_ph
+        name: 📉 pH− Dosierung
+        entity_prefix: violet_pool_controller
+        dosing_type: ph_minus
+        size: medium
+        theme: luxury
+        animation: smooth
+        show_history: true
+        show_state: true
+        show_detail_status: true
+        ph_value_entity: sensor.violet_pool_controller_ph_wert
+        target_ph_entity: number.violet_pool_controller_ph_sollwert
+
+      - type: custom:violet-pool-card
+        card_type: dosing
+        entity: switch.violet_pool_controller_dosierung_ph_plus
+        name: 📈 pH+ Dosierung
+        entity_prefix: violet_pool_controller
+        dosing_type: ph_plus
+        size: medium
+        theme: luxury
+        animation: smooth
+        show_history: true
+        show_state: true
+        show_detail_status: true
+        ph_value_entity: sensor.violet_pool_controller_ph_wert
+        target_ph_entity: number.violet_pool_controller_ph_sollwert
+
+      - type: custom:violet-pool-card
+        card_type: dosing
+        entity: switch.violet_pool_controller_flockmittel
+        name: ✨ Flockung
+        entity_prefix: violet_pool_controller
+        dosing_type: flocculant
+        size: medium
+        theme: luxury
+        animation: smooth
+        show_history: true
+        show_state: true
+
+      - type: custom:violet-pool-card
+        card_type: chemical
+        name: 💧 Chemie Übersicht
+        entity_prefix: violet_pool_controller
+        size: large
+        theme: luxury
+        animation: smooth
+        pool_temp_entity: sensor.violet_pool_controller_beckenwasser
+        ph_value_entity: sensor.violet_pool_controller_ph_wert
+        orp_value_entity: sensor.violet_pool_controller_redoxpotential
+        target_ph_entity: number.violet_pool_controller_ph_sollwert
+        target_orp_entity: number.violet_pool_controller_redox_sollwert
+
+      - type: custom:violet-pool-card
+        card_type: details
+        name: 📊 Dosierung Details
+        entity_prefix: violet_pool_controller
+        size: large
+        theme: minimalist
+        show_state: true
+        entities:
+          - select.violet_pool_controller_chlor_dosierung_modus
+          - sensor.violet_pool_controller_chlor_dosierung_status
+          - number.violet_pool_controller_chlor_sollwert
+          - sensor.violet_pool_controller_chlorgehalt
+          - sensor.violet_pool_controller_dos_1_cl_daily_dosing_amount_ml
+          - sensor.violet_pool_controller_dos_1_cl_remaining_range
+          - select.violet_pool_controller_ph_dosierung_modus
+          - sensor.violet_pool_controller_ph_dosierung_status
+          - number.violet_pool_controller_ph_sollwert
+          - sensor.violet_pool_controller_ph_wert
+          - sensor.violet_pool_controller_dos_4_phm_daily_dosing_amount_ml
+          - sensor.violet_pool_controller_dos_4_phm_remaining_range
+
+  - title: Licht & Abdeckung
+    path: licht-abdeckung
+    icon: mdi:lightbulb
+    type: masonry
+    cards:
+      - type: custom:violet-pool-card
+        card_type: light
+        entity: switch.violet_pool_controller_beleuchtung
+        name: 💡 Poolbeleuchtung
+        light_entity: light.violet_pool_controller_beleuchtung
+        entity_prefix: violet_pool_controller
+        size: large
+        theme: neon
+        animation: energetic
+        show_controls: true
+        show_state: true
+        show_detail_status: true
+
+      - type: custom:violet-pool-card
+        card_type: cover
+        entity: cover.violet_pool_controller_abdeckung
+        name: 🎭 Poolabdeckung
+        entity_prefix: violet_pool_controller
+        size: large
+        theme: modern
+        animation: smooth
+        show_controls: true
+        show_state: true
+        show_detail_status: true
+
+      - type: custom:violet-pool-card
+        card_type: details
+        name: 📊 Beleuchtung Details
+        entity_prefix: violet_pool_controller
+        size: medium
+        theme: minimalist
+        show_state: true
+        entities:
+          - switch.violet_pool_controller_beleuchtung
+          - select.violet_pool_controller_licht_modus
+          - sensor.violet_pool_controller_beleuchtung_status
+          - sensor.violet_pool_controller_light_runtime
+
+      - type: custom:violet-pool-card
+        card_type: details
+        name: 📊 Abdeckung Details
+        entity_prefix: violet_pool_controller
+        size: medium
+        theme: minimalist
+        show_state: true
+        entities:
+          - cover.violet_pool_controller_abdeckung
+          - sensor.violet_pool_controller_cover_state
+          - sensor.violet_pool_controller_last_moving_direction
+
+  - title: Energie & Speicher
+    path: energie
+    icon: mdi:solar-panel
+    type: masonry
+    cards:
+      - type: custom:violet-pool-card
+        card_type: solar_surplus
+        name: ⚡ PV Überschuss
+        entity_prefix: violet_pool_controller
+        size: large
+        theme: modern
+        animation: smooth
+        show_controls: true
+        show_state: true
+        show_detail_status: true
+
+      - type: custom:violet-pool-card
+        card_type: refill
+        entity: switch.violet_pool_controller_nachfullung
+        name: 💧 Nachfüllung
+        entity_prefix: violet_pool_controller
+        size: large
+        theme: modern
+        animation: smooth
+        show_controls: true
+        show_state: true
+        show_detail_status: true
+
+      - type: custom:violet-pool-card
+        card_type: sensor
+        entity: sensor.violet_pool_controller_uberlaufbehalter
+        name: 🪣 Überlaufbehälter
+        entity_prefix: violet_pool_controller
+        size: medium
+        theme: glass
+        animation: smooth
+
+      - type: custom:violet-pool-card
+        card_type: compact
+        entity: binary_sensor.violet_pool_controller_eco_mode
+        name: 🌿 ECO Modus
+        size: medium
+        theme: minimalist
+        show_state: true
+
+      - type: custom:violet-pool-card
+        card_type: details
+        name: 📊 Energie Details
+        entity_prefix: violet_pool_controller
+        size: large
+        theme: minimalist
+        show_state: true
+        entities:
+          - select.violet_pool_controller_pv_uberschuss_modus
+          - sensor.violet_pool_controller_pv_uberschuss_status
+          - binary_sensor.violet_pool_controller_pv_surplus
+          - sensor.violet_pool_controller_refill_state
+          - sensor.violet_pool_controller_refill_runtime
+          - sensor.violet_pool_controller_eco_runtime
+
+  - title: Sensoren
+    path: sensoren
+    icon: mdi:thermometer
+    type: masonry
+    cards:
+      - type: custom:violet-pool-card
+        card_type: sensor
+        entity: sensor.violet_pool_controller_beckenwasser
+        name: 🌊 Beckenwasser
+        entity_prefix: violet_pool_controller
+        size: medium
+        theme: glass
+        animation: smooth
+
+      - type: custom:violet-pool-card
+        card_type: sensor
+        entity: sensor.violet_pool_controller_aussentemperatur
+        name: 🌡 Außentemperatur
+        entity_prefix: violet_pool_controller
+        size: medium
+        theme: glass
+        animation: smooth
+
+      - type: custom:violet-pool-card
+        card_type: sensor
+        entity: sensor.violet_pool_controller_ph_wert
+        name: pH-Wert
+        entity_prefix: violet_pool_controller
+        size: medium
+        theme: glass
+        animation: smooth
+
+      - type: custom:violet-pool-card
+        card_type: sensor
+        entity: sensor.violet_pool_controller_redoxpotential
+        name: ⚡ Redox (ORP)
+        entity_prefix: violet_pool_controller
+        size: medium
+        theme: glass
+        animation: smooth
+
+      - type: custom:violet-pool-card
+        card_type: sensor
+        entity: sensor.violet_pool_controller_chlorgehalt
+        name: 🟡 Chlorgehalt
+        entity_prefix: violet_pool_controller
+        size: medium
+        theme: glass
+        animation: smooth
+
+      - type: custom:violet-pool-card
+        card_type: sensor
+        entity: sensor.violet_pool_controller_filterdruck
+        name: 🔧 Filterdruck
+        entity_prefix: violet_pool_controller
+        size: medium
+        theme: glass
+        animation: smooth
+
+      - type: custom:violet-pool-card
+        card_type: sensor
+        entity: sensor.violet_pool_controller_solarabsorber
+        name: ☀️ Solarabsorber
+        entity_prefix: violet_pool_controller
+        size: medium
+        theme: glass
+        animation: smooth
+
+      - type: custom:violet-pool-card
+        card_type: sensor
+        entity: sensor.violet_pool_controller_absorber_rucklauf
+        name: 📉 Absorber Rücklauf
+        entity_prefix: violet_pool_controller
+        size: medium
+        theme: glass
+        animation: smooth
+
+      - type: custom:violet-pool-card
+        card_type: sensor
+        entity: sensor.violet_pool_controller_warmetauscher
+        name: 🔥 Wärmetauscher
+        entity_prefix: violet_pool_controller
+        size: medium
+        theme: glass
+        animation: smooth
+
+      - type: custom:violet-pool-card
+        card_type: sensor
+        entity: sensor.violet_pool_controller_heizungs_speicher
+        name: 🪣 Heizungsspeicher
+        entity_prefix: violet_pool_controller
+        size: medium
+        theme: glass
+        animation: smooth
+
+      - type: custom:violet-pool-card
+        card_type: sensor
+        entity: sensor.violet_pool_controller_pumpen_durchfluss
+        name: 💧 Durchfluss
+        entity_prefix: violet_pool_controller
+        size: medium
+        theme: glass
+        animation: smooth
+
+  - title: System
+    path: system
+    icon: mdi:cog
+    type: masonry
+    cards:
+      - type: custom:violet-pool-card
+        card_type: system
+        name: 🖥 Pool System
+        entity_prefix: violet_pool_controller
+        size: large
+        theme: premium
+        animation: smooth
+        show_controls: true
+        show_state: true
+        show_detail_status: true
+
+      - type: custom:violet-pool-card
+        card_type: details
+        name: 📊 System Info
+        entity_prefix: violet_pool_controller
+        size: large
+        theme: minimalist
+        show_state: true
+        entities:
+          - sensor.violet_pool_controller_sw_version
+          - sensor.violet_pool_controller_cpu_uptime
+          - sensor.violet_pool_controller_cpu_temp
+          - sensor.violet_pool_controller_cpu_temp_carrier
+          - sensor.violet_pool_controller_memory_used
+          - sensor.violet_pool_controller_load_avg
+          - sensor.violet_pool_controller_date
+          - sensor.violet_pool_controller_time
+          - switch.violet_pool_controller_pre_release
+          - update.violet_pool_controller_update
+          - update.violet_pool_card_update
+
+      - type: custom:violet-pool-card
+        card_type: alerts
+        name: ⚠️ Warnmeldungen
+        entity_prefix: violet_pool_controller
+        size: large
+        theme: modern
+        animation: smooth
+        show_state: true
