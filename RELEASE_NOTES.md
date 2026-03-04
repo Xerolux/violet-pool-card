@@ -1,9 +1,13 @@
-## v0.1.1 – Violet Pool Card
+## v0.1.2 – Violet Pool Card
 
-✅ **STABLE RELEASE**
+🟡 **BETA RELEASE** - Testing phase, may contain bugs
+
+---
 
 ### ✨ New Features | Neue Funktionen
 
+- Add comprehensive views to dashboard_config.yaml (cbbf79f)
+- Update README with comprehensive entity reference and add dashboard.yaml (b8fd8e8)
 - feat: complete phase 5-6 implementation with digital rules and diagnostics cards (3d47947)
 - feat: enhance pump, solar, light, and dosing cards with full API integration (a3ab4ef)
 - feat: implement comprehensive violet-hass API support with advanced controls (9682fc7)
@@ -26,6 +30,11 @@
 
 ### 🚀 Improvements | Verbesserungen
 
+- update-readme-dashboard (63e80f8)
+- update-readme-dashboard (3a391a9)
+- build: update auto-generated files [skip ci] (0dc6c1c)
+- Update README with comprehensive entity reference and add dashboard.yaml (b8fd8e8)
+- 📝 Release v0.1.1 - Update changelog, version and info.md (b47a256)
 - feat: enhance pump, solar, light, and dosing cards with full API integration (a3ab4ef)
 - refactor: remove problematic cards with mock data and hard-coded content (9caaa73)
 - 📝 Release v0.1.1 - Update changelog, version and info.md (83c3f2a)
@@ -80,6 +89,9 @@
 
 ### 📚 Documentation | Dokumentation
 
+- update-readme-dashboard (63e80f8)
+- update-readme-dashboard (3a391a9)
+- Update README with comprehensive entity reference and add dashboard.yaml (b8fd8e8)
 - docs: update readme with badges and sponsor links (31c7f2b)
 - docs-update-readme-examples (1b4dfc0)
 - docs: Update README and examples with new cards (84640d0)
@@ -106,7 +118,7 @@
 
 ---
 
-📋 [Full changelog: v0.1.3...v0.1.1](https://github.com/Xerolux/violet-pool-card/compare/v0.1.3...v0.1.1)
+📋 [Full changelog: v0.1.3...v0.1.2](https://github.com/Xerolux/violet-pool-card/compare/v0.1.3...v0.1.2)
 
 ---
 
@@ -131,4 +143,4 @@ Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
 
 ---
 
-_Generated automatically by GitHub Actions on 2026-03-04 08:53:39 UTC_
+_Generated automatically by GitHub Actions on 2026-03-04 09:10:21 UTC_
