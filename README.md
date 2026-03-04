@@ -27,7 +27,7 @@ A premium Lovelace card for the [Violet Pool Controller](https://github.com/Xero
 - **Dark/Light Mode Support** — Automatische Anpassung ans Home Assistant Theme
 - **Responsive Design** — Optimiert für Desktop, Tablet, Smartphone
 
-### 🎴 Card Types (18 Total)
+### 🎴 Card Types (28 Total)
 
 #### Standard Equipment Cards (13)
 1. **Pumpe** (`pump`) — Geschwindigkeitssteuerung mit ECO/Normal/Boost, RPM-Anzeige, animiertes Icon
@@ -44,12 +44,24 @@ A premium Lovelace card for the [Violet Pool Controller](https://github.com/Xero
 12. **Kompakt** (`compact`) — Platzsparendes Layout mit Icons und Status
 13. **System** (`system`) — Vollbildansicht mit Mehrkanal-Übersicht
 
+#### Neue Zusatz- & Erweiterungskarten (10)
+14. **Rückspülung** (`backwash`) — Status und Steuerung der automatischen Rückspülung
+15. **Nachfüllung** (`refill`) — Füllstandanzeige und Ventilsteuerung
+16. **PV Überschuss** (`solar_surplus`) — Anzeige von Solarüberschuss und Einspeisung
+17. **Durchfluss** (`flow_rate`) — Durchflussrate in m³/h mit Minimal/Maximal-Warnungen
+18. **Anströmung** (`inlet`) — Steuerung und Status der Beckeneinströmung
+19. **Gegenstromanlage** (`counter_current`) — Steuerung der Gegenstromanlage
+20. **Chlor Kanister** (`chlorine_canister`) — Füllstandanzeige des Chlorkanisters
+21. **pH+ Kanister** (`ph_plus_canister`) — Füllstandanzeige des pH+ Kanisters
+22. **pH- Kanister** (`ph_minus_canister`) — Füllstandanzeige des pH- Kanisters
+23. **Flockung Kanister** (`flocculant_canister`) — Füllstandanzeige des Flockungsmittelkanisters
+
 #### New Analysis & Monitoring Cards (5)
-14. **Statistiken** (`statistics`) — Trendanalyse mit Linien-Charts und historische Daten
-15. **Wetter** (`weather`) — Aktuelle Wetterbedingungen und Pool-Auswirkungen
-16. **Wartung** (`maintenance`) — Service-Zeitplan mit Aufgabenverfolgung
-17. **Benachrichtigungen** (`alerts`) — Aktive Alarme und Notifications mit Severity-Levels
-18. **Vergleich** (`comparison`) — Ist-Wert vs. Sollwert mit Delta-Anzeige
+24. **Statistiken** (`statistics`) — Trendanalyse mit Linien-Charts und historische Daten
+25. **Wetter** (`weather`) — Aktuelle Wetterbedingungen und Pool-Auswirkungen
+26. **Wartung** (`maintenance`) — Service-Zeitplan mit Aufgabenverfolgung
+27. **Benachrichtigungen** (`alerts`) — Aktive Alarme und Notifications mit Severity-Levels
+28. **Vergleich** (`comparison`) — Ist-Wert vs. Sollwert mit Delta-Anzeige
 
 ### 🎬 Animations & Visualizations
 - **SVG-Animationen** für Pumpe (rotierend), Heizung (flackernd), Solar (atmend), Abdeckung (Motor), Licht (glühend)
@@ -326,7 +338,7 @@ size: fullscreen
 - Vollbildansicht
 - Optimiert für Tablets
 
-### New Analytics Cards
+### Neue Analytics & Monitoring Karten
 
 #### Statistiken (`statistics`)
 ```yaml
@@ -618,7 +630,7 @@ A premium Lovelace dashboard card for the [Violet Pool Controller](https://githu
 
 ## Key Features
 
-- **18 Card Types** — Standard equipment + new analytics cards
+- **28 Card Types** — Standard equipment + newly added expansion, monitoring, and analytics cards
 - **6 Premium Themes** — Luxury, Modern, Glass, Neon, Premium, Minimalist
 - **4 Sizes** — Small, Medium, Large, Fullscreen
 - **SVG Animations** — Rotating pump, pulsing heater, animated cover, glowing lights
@@ -643,6 +655,9 @@ animation: smooth
 
 ### Standard (13)
 Pump, Heater, Solar, Dosing, Cover, Light, Filter, Chemical, Sensor, Overview, Details, Compact, System
+
+### Erweiterungskarten (10)
+Backwash, Refill, PV Surplus, Flow Rate, Inlet, Counter Current, Chlorine Canister, pH+ Canister, pH- Canister, Flocculant Canister
 
 ### New Analytics (5)
 Statistics (trends), Weather (conditions), Maintenance (schedules), Alerts (notifications), Comparison (actual vs target)
