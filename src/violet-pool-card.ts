@@ -2898,7 +2898,7 @@ export class VioletPoolCard extends LitElement {
         <div class="card-content">
           <div class="header">
             <div class="header-icon ${isFlowing ? 'icon-active' : ''}" style="--icon-accent: ${accentColor}">
-              ${flowRateSVG(isFlowing, accentColor)}
+              ${flowRateSVG(flowRate, 30, accentColor)}
             </div>
             <div class="header-info">
               <span class="name">${name}</span>
@@ -2932,11 +2932,11 @@ export class VioletPoolCard extends LitElement {
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px;">
               <div style="background: var(--vpc-surface); border-radius: 8px; padding: 8px;">
                 <div style="font-size: 11px; color: var(--vpc-text-secondary);">Min Today</div>
-                <div style="font-size: 14px; font-weight: 600;">${(entity.attributes?.min_today || 0).toFixed(2)} ${unit}</div>
+                <div style="font-size: 14px; font-weight: 600;">${((entity.attributes?.min_today as number) || 0).toFixed(2)} ${unit}</div>
               </div>
               <div style="background: var(--vpc-surface); border-radius: 8px; padding: 8px;">
                 <div style="font-size: 11px; color: var(--vpc-text-secondary);">Max Today</div>
-                <div style="font-size: 14px; font-weight: 600;">${(entity.attributes?.max_today || 0).toFixed(2)} ${unit}</div>
+                <div style="font-size: 14px; font-weight: 600;">${((entity.attributes?.max_today as number) || 0).toFixed(2)} ${unit}</div>
               </div>
             </div>
           ` : ''}
