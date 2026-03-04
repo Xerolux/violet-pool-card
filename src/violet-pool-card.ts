@@ -559,30 +559,40 @@ export class VioletPoolCard extends LitElement {
         label: 'OFF',
         action: async () => {
           const serviceCaller = new ServiceCaller(this.hass);
-          await serviceCaller.setControllerMode(config.entity!, 'off');
+          await serviceCaller.forcePumpOff(config.entity!);
         },
         active: currentMode === 'off' || !isRunning,
         color: '#757575',
+      },
+      {
+        icon: 'mdi:leaf',
+        label: 'ECO',
+        action: async () => {
+          const serviceCaller = new ServiceCaller(this.hass);
+          await serviceCaller.setPumpEcoMode(config.entity!);
+        },
+        active: false,
+        color: '#34C759',
+      },
+      {
+        icon: 'mdi:flash',
+        label: 'BOOST',
+        action: async () => {
+          const serviceCaller = new ServiceCaller(this.hass);
+          await serviceCaller.setPumpBoostMode(config.entity!);
+        },
+        active: false,
+        color: '#FF3B30',
       },
       {
         icon: 'mdi:autorenew',
         label: 'AUTO',
         action: async () => {
           const serviceCaller = new ServiceCaller(this.hass);
-          await serviceCaller.setControllerMode(config.entity!, 'auto');
+          await serviceCaller.setPumpAuto(config.entity!);
         },
         active: currentMode === 'auto',
         color: '#2196F3',
-      },
-      {
-        icon: 'mdi:hand-back-up',
-        label: 'MANUAL',
-        action: async () => {
-          const serviceCaller = new ServiceCaller(this.hass);
-          await serviceCaller.setControllerMode(config.entity!, 'manual');
-        },
-        active: currentMode === 'manual',
-        color: '#FF9800',
       },
     ];
 
