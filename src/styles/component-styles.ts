@@ -24,12 +24,32 @@ export const cardBaseStyles = css`
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
+    contain: layout style paint;
+  }
+
+  ha-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: var(--vpc-radius);
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    z-index: 0;
   }
 
   ha-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.11), 0 2px 6px rgba(0, 0, 0, 0.05);
     will-change: transform, box-shadow;
+  }
+
+  ha-card:hover::before {
+    opacity: 1;
   }
 
   ha-card:active {
@@ -53,12 +73,36 @@ export const buttonStyles = css`
     transition: all 0.2s ease;
     min-height: 44px;
     -webkit-tap-highlight-color: transparent;
+    position: relative;
+    overflow: hidden;
+    background: var(--vpc-primary, var(--ds-color-primary));
+    color: white;
+    box-shadow: var(--ds-shadow-sm);
+    contain: layout style paint;
+  }
+
+  button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.4s ease, height 0.4s ease;
   }
 
   button:hover:not(:disabled) {
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     will-change: transform, box-shadow;
+  }
+
+  button:hover:not(:disabled)::before {
+    width: 300px;
+    height: 300px;
   }
 
   button:active:not(:disabled) {
@@ -104,10 +148,12 @@ export const iconAnimationStyles = css`
     100% {
       opacity: 1;
       transform: scale(1);
+      box-shadow: 0 0 10px rgba(0, 122, 255, 0.3);
     }
     50% {
       opacity: 0.65;
       transform: scale(0.95);
+      box-shadow: 0 0 20px rgba(0, 122, 255, 0.5);
     }
   }
 
@@ -137,9 +183,11 @@ export const iconAnimationStyles = css`
     0%,
     100% {
       opacity: 0.8;
+      filter: brightness(1);
     }
     50% {
       opacity: 1;
+      filter: brightness(1.2);
     }
   }
 
@@ -165,6 +213,56 @@ export const iconAnimationStyles = css`
       background-position: 200% 50%;
     }
   }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -1000px 0;
+    }
+    100% {
+      background-position: 1000px 0;
+    }
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  @keyframes ripple {
+    0% {
+      transform: scale(0);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(4);
+      opacity: 0;
+    }
+  }
+
+  @keyframes glow-pulse {
+    0%, 100% {
+      box-shadow: 0 0 5px rgba(0, 122, 255, 0.5);
+    }
+    50% {
+      box-shadow: 0 0 20px rgba(0, 122, 255, 0.8), 0 0 30px rgba(0, 122, 255, 0.6);
+    }
+  }
+
+  @keyframes gradient-shift {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
 `;
 
 /**
@@ -175,6 +273,8 @@ export const headerStyles = css`
     display: flex;
     align-items: center;
     gap: var(--ds-spacing-lg);
+    position: relative;
+    z-index: 1;
   }
 
   .header-icon {
@@ -185,18 +285,40 @@ export const headerStyles = css`
     align-items: center;
     justify-content: center;
     background: color-mix(in srgb, var(--icon-accent, var(--vpc-primary)) 12%, transparent);
-    transition: background 0.25s ease, box-shadow 0.25s ease;
+    transition: all 0.25s cubic-bezier(0.34, 1.4, 0.64, 1);
     flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .header-icon::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: inherit;
+    background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
   }
 
   .header-icon.icon-active {
     background: color-mix(in srgb, var(--icon-accent, var(--vpc-primary)) 18%, transparent);
-    box-shadow: 0 0 0 5px color-mix(in srgb, var(--icon-accent, var(--vpc-primary)) 8%, transparent);
+    box-shadow: 0 0 0 5px color-mix(in srgb, var(--icon-accent, var(--vpc-primary)) 8%, transparent),
+                0 0 20px color-mix(in srgb, var(--icon-accent, var(--vpc-primary)) 20%, transparent);
+  }
+
+  .header-icon.icon-active::before {
+    opacity: 1;
   }
 
   .header-icon ha-icon {
     --mdc-icon-size: 24px;
     color: var(--icon-accent, var(--vpc-primary));
+    position: relative;
+    z-index: 1;
   }
 
   .header-info {
@@ -213,6 +335,7 @@ export const headerStyles = css`
     letter-spacing: -0.3px;
     color: var(--vpc-text);
     line-height: 1.25;
+    transition: color 0.2s ease;
   }
 
   .header-subtitle {
@@ -236,6 +359,8 @@ export const gridLayoutStyles = css`
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 8px;
+    position: relative;
+    z-index: 1;
   }
 
   .chemistry-card {
@@ -247,7 +372,7 @@ export const gridLayoutStyles = css`
     border-radius: var(--ds-radius-md);
     background: var(--vpc-surface);
     cursor: pointer;
-    transition: transform 0.18s ease, background 0.18s ease;
+    transition: all 0.2s cubic-bezier(0.34, 1.4, 0.64, 1);
     position: relative;
     overflow: hidden;
     min-height: 44px;
@@ -264,18 +389,43 @@ export const gridLayoutStyles = css`
     background: var(--chem-color, var(--vpc-primary));
     opacity: 0.6;
     border-radius: 100px;
+    transition: opacity 0.3s ease;
+  }
+
+  .chemistry-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at top, var(--chem-color, var(--vpc-primary)) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
   }
 
   .chemistry-card:hover {
-    transform: scale(1.02);
+    transform: scale(1.02) translateY(-2px);
     background: color-mix(in srgb, var(--chem-color) 8%, var(--vpc-surface));
     will-change: transform, background;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .chemistry-card:hover::before {
+    opacity: 1;
+  }
+
+  .chemistry-card:hover::after {
+    opacity: 0.05;
   }
 
   .device-list {
     display: flex;
     flex-direction: column;
     gap: 3px;
+    position: relative;
+    z-index: 1;
   }
 
   .device-row {
@@ -286,15 +436,33 @@ export const gridLayoutStyles = css`
     border-radius: var(--ds-radius-md);
     background: var(--vpc-surface);
     cursor: pointer;
-    transition: background 0.18s ease, transform 0.15s ease;
+    transition: all 0.18s cubic-bezier(0.34, 1.4, 0.64, 1);
     min-height: 44px;
     contain: layout style paint;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .device-row::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--vpc-primary);
+    transform: scaleY(0);
+    transition: transform 0.2s ease;
   }
 
   .device-row:hover {
     background: color-mix(in srgb, var(--vpc-primary) 6%, var(--vpc-surface));
-    transform: scale(1.005);
+    transform: translateX(4px);
     will-change: transform, background;
+  }
+
+  .device-row:hover::before {
+    transform: scaleY(1);
   }
 
   @media (max-width: 600px) {

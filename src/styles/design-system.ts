@@ -51,7 +51,7 @@ export const ICON_SIZE = {
   '4xl': '32px',
 } as const;
 
-// Color Palette
+// Color Palette - Enhanced
 export const COLORS = {
   // Status Colors
   success: '#34C759',
@@ -78,6 +78,19 @@ export const COLORS = {
   disabled: 'rgba(0, 0, 0, 0.5)',
   hover: 'rgba(0, 0, 0, 0.05)',
   focus: 'rgba(0, 122, 255, 0.1)',
+
+  // Premium Gradients
+  gradientAurora: 'linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%)',
+  gradientSunset: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+  gradientOcean: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+  gradientNeon: 'linear-gradient(135deg, #f093fb 0%, #f5576c 50%, #4facfe 100%)',
+  gradientGlassmorphism: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
+
+  // Glow Effects
+  glowBlue: '0 0 20px rgba(0, 122, 255, 0.3)',
+  glowGreen: '0 0 20px rgba(52, 199, 89, 0.3)',
+  glowOrange: '0 0 20px rgba(255, 159, 10, 0.3)',
+  glowPurple: '0 0 20px rgba(175, 82, 222, 0.3)',
 } as const;
 
 // Transitions
@@ -102,7 +115,7 @@ export const BREAKPOINTS = {
   wide: '1440px',
 } as const;
 
-// Design system CSS custom properties
+// Design system CSS custom properties - Enhanced
 export const designSystemStyles = css`
   :root {
     /* Spacing */
@@ -162,5 +175,23 @@ export const designSystemStyles = css`
     --ds-touch-min: ${unsafeCSS(TOUCH_TARGET.min)};
     --ds-touch-comfortable: ${unsafeCSS(TOUCH_TARGET.comfortable)};
     --ds-touch-large: ${unsafeCSS(TOUCH_TARGET.large)};
+
+    /* Premium Effects */
+    --ds-blur-light: blur(8px);
+    --ds-blur-medium: blur(16px);
+    --ds-blur-heavy: blur(24px);
+    --ds-saturation-boost: saturate(1.2);
+    
+    /* Shadows - Enhanced */
+    --ds-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --ds-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
+    --ds-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.16);
+    --ds-shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.20);
+    --ds-shadow-glow: 0 0 20px rgba(0, 122, 255, 0.3);
+    
+    /* Animation Timing */
+    --ds-ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    --ds-ease-smooth: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --ds-ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
 `;
