@@ -1,4 +1,4 @@
-## v0.1.2 – Violet Pool Card
+## v0.1.3 – Violet Pool Card
 
 🟡 **BETA RELEASE** - Testing phase, may contain bugs
 
@@ -6,6 +6,7 @@
 
 ### ✨ New Features | Neue Funktionen
 
+- feat: enhance visual design with premium themes and improved UI (ff81167)
 - fix: add missing card_type definitions for digital_rules and diagnostics (da4e60b)
 - Add comprehensive views to dashboard_config.yaml (cbbf79f)
 - Update README with comprehensive entity reference and add dashboard.yaml (b8fd8e8)
@@ -28,9 +29,12 @@
 - Add 5 new card types and integrate advanced animations (6da6cce)
 - Add icon.png and logo.png to repository root for HACS display (41d9dd4)
 - Add design system, memoization utilities, and performance optimizations (Fixes 10-15) (22d57b1)
+- docs: update README with v0.2.0 features (6 new card types, animated SVG icons, RGB picker, tooltips) (aa06296)
 
 ### 🚀 Improvements | Verbesserungen
 
+- feat: enhance visual design with premium themes and improved UI (ff81167)
+- 📝 Release v0.1.2 - Update changelog, version and info.md (8bfd2e2)
 - build: update auto-generated files [skip ci] (bf3c070)
 - 📝 Release v0.1.2 - Update changelog, version and info.md (5c80b0b)
 - 📝 Release v0.1.2 - Update changelog, version and info.md (db3806e)
@@ -62,9 +66,12 @@
 - 📝 Release v0.1.1 - Update changelog and version (60e2ad7)
 - fix: remove dead code causing TS warning and optimize compilation (36bb7ec)
 - 📝 Release v0.1.3 - Update changelog and version (bb8738d)
+- docs: update README with v0.2.0 features (6 new card types, animated SVG icons, RGB picker, tooltips) (aa06296)
+- 📝 Release v0.1.2 - Update changelog and version (6b93afd)
 
 ### 🔧 Bug Fixes | Fehlerbehebungen
 
+- 🐛 Fix TypeScript compilation errors in Flow Rate card (5589a98)
 - 🔧 Fix TypeScript compilation errors (cc30ac3)
 - fix-lovelace-card-build (68a8037)
 - fix: add missing card_type definitions for digital_rules and diagnostics (da4e60b)
@@ -103,6 +110,7 @@
 - docs-update-readme-examples (1b4dfc0)
 - docs: Update README and examples with new cards (84640d0)
 - Update README with comprehensive feature documentation (d66166f)
+- docs: update README with v0.2.0 features (6 new card types, animated SVG icons, RGB picker, tooltips) (aa06296)
 
 ---
 
@@ -125,7 +133,7 @@
 
 ---
 
-📋 [Full changelog: v0.1.3...v0.1.2](https://github.com/Xerolux/violet-pool-card/compare/v0.1.3...v0.1.2)
+📋 [Full changelog: v0.1.2...v0.1.3](https://github.com/Xerolux/violet-pool-card/compare/v0.1.2...v0.1.3)
 
 ---
 
@@ -150,4 +158,4 @@ Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
 
 ---
 
-_Generated automatically by GitHub Actions on 2026-03-04 16:13:21 UTC_
+_Generated automatically by GitHub Actions on 2026-03-08 13:53:46 UTC_
