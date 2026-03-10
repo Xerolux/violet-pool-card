@@ -134,6 +134,8 @@ export class ActionSelector extends LitElement {
                       class="action-btn ${this.value === option.value ? 'active' : ''}"
                       @click="${() => this.handleButtonClick(option.value)}"
                       title="${option.description || option.label}"
+                      aria-label="${option.label}"
+                      aria-pressed="${this.value === option.value ? 'true' : 'false'}"
                     >
                       <ha-icon icon="${option.icon}"></ha-icon>
                       <span>${option.label}</span>
@@ -143,7 +145,7 @@ export class ActionSelector extends LitElement {
               </div>
             `
           : html`
-              <select class="dropdown" .value="${this.value}" @change="${this.handleDropdownChange}">
+              <select class="dropdown" .value="${this.value}" @change="${this.handleDropdownChange}" aria-label="${this.label || 'Action'}">
                 <option value="">-- Select --</option>
                 ${this.options.map(
                   option => html`<option value="${option.value}">${option.label}</option>`
