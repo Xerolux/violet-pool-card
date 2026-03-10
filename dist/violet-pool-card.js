@@ -106,13 +106,15 @@ function e(e,t,i,a){var s,o=arguments.length,r=o<3?t:null===a?a=Object.getOwnPro
                       class="action-btn ${this.value===e.value?"active":""}"
                       @click="${()=>this.handleButtonClick(e.value)}"
                       title="${e.description||e.label}"
+                      aria-label="${e.label}"
+                      aria-pressed="${this.value===e.value?"true":"false"}"
                     >
                       <ha-icon icon="${e.icon}"></ha-icon>
                       <span>${e.label}</span>
                     </button>
                   `)}
               </div>
-            `:V` <select class="dropdown" .value="${this.value}" @change="${this.handleDropdownChange}"><option value="">-- Select --</option> ${this.options.map(e=>V`<option value="${e.value}">${e.label}</option>`)}
+            `:V` <select class="dropdown" .value="${this.value}" @change="${this.handleDropdownChange}" aria-label="${this.label||"Action"}"><option value="">-- Select --</option> ${this.options.map(e=>V`<option value="${e.value}">${e.label}</option>`)}
               </select>
             `}
       </div>
