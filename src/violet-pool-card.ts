@@ -198,19 +198,19 @@ export class VioletPoolCard extends LitElement {
    */
   private _getFriendlyState(state: string, cardType?: string): string {
     const map: Record<string, string> = {
-      'on': 'Active',
-      'off': 'Off',
-      'auto': 'Auto',
-      'heat': 'Heating',
-      'heating': 'Heating',
-      'cool': 'Cooling',
-      'cooling': 'Cooling',
-      'idle': 'Idle',
-      'unavailable': 'Unavailable',
-      'unknown': 'Unknown',
-      'manual': 'Manual',
+      'on': i18n.t('active' as any),
+      'off': i18n.t('off'),
+      'auto': i18n.t('auto' as any),
+      'heat': i18n.t('heating' as any),
+      'heating': i18n.t('heating' as any),
+      'cool': i18n.t('cooling' as any),
+      'cooling': i18n.t('cooling' as any),
+      'idle': i18n.t('idle' as any),
+      'unavailable': i18n.t('unavailable' as any),
+      'unknown': i18n.t('unknown'),
+      'manual': i18n.t('manual' as any),
     };
-    if (cardType === 'pump' && state === 'on') return 'Running';
+    if (cardType === 'pump' && state === 'on') return i18n.t('running' as any);
     return map[state] ?? state.charAt(0).toUpperCase() + state.slice(1);
   }
 
@@ -574,7 +574,7 @@ export class VioletPoolCard extends LitElement {
     const dosingConfig = createSubConfig('dosing', dosingEntity, { dosing_type: 'chlorine' });
     const coverConfig = createSubConfig('cover', coverEntitySys);
     const lightConfig = createSubConfig('light', lightEntitySys);
-    const filterConfig = createSubConfig('filter' as any, filterEntitySys);
+    const filterConfig = createSubConfig('filter' as any, filterEntitySys, { filter_pressure_entity: filterEntitySys });
 
     return html` <div class="system-grid"> ${overviewConfig ? this.renderOverviewCard(overviewConfig) : ''} ${pumpConfig ? this.renderPumpCard(pumpConfig) : ''} ${heaterConfig ? this.renderHeaterCard(heaterConfig) : ''} ${solarConfig ? this.renderSolarCard(solarConfig) : ''} ${dosingConfig ? this.renderDosingCard(dosingConfig) : ''} ${coverConfig ? this.renderCoverCard(coverConfig) : ''} ${lightConfig ? this.renderLightCard(lightConfig) : ''} ${filterConfig ? this.renderFilterCard(filterConfig) : ''} </div> `;
   }
@@ -1549,7 +1549,7 @@ export class VioletPoolCard extends LitElement {
                 `
               : ''}
             ${orpValue !== undefined
-              ? html` <div class="chemistry-card tooltip-wrap" style="--chem-color: ${orpColor?.color || '#4CAF50'}" @click="${(e: Event) => { e.stopPropagation(); this._showMoreInfo(orpSensorId); }}"><div class="chem-icon-wrap"><ha-icon icon="mdi:lightning-bolt"></ha-icon></div><span class="chemistry-val">${orpValue.toFixed(0)}</span><span class="chemistry-unit">mV</span><span class="chemistry-label">${orpStatus === 'ok' ? 'Optimal' : orpStatus === 'warning' ? 'Niedrig' : 'Hoch'}</span> ${orpPct !== undefined ? html`
+              ? html` <div class="chemistry-card tooltip-wrap" style="--chem-color: ${orpColor?.color || '#4CAF50'}" @click="${(e: Event) => { e.stopPropagation(); this._showMoreInfo(orpSensorId); }}"><div class="chem-icon-wrap"><ha-icon icon="mdi:lightning-bolt"></ha-icon></div><span class="chemistry-val">${orpValue.toFixed(0)}</span><span class="chemistry-unit">mV</span><span class="chemistry-label">${orpStatus === 'ok' ? i18n.t('optimal' as any) : orpStatus === 'warning' ? i18n.t('low' as any) : 'Hoch'}</span> ${orpPct !== undefined ? html`
                           <div class="chem-mini-bar">
                             <div class="chem-mini-ideal" style="left: ${orpIdealStartPct}%; width: ${orpIdealEndPct - orpIdealStartPct}%"></div>
                             <div class="chem-mini-fill" style="width: ${orpPct}%; background: ${orpColor?.color || '#4CAF50'}"></div>
@@ -1681,7 +1681,7 @@ export class VioletPoolCard extends LitElement {
 
               const isSwitchLike = ['switch', 'light', 'input_boolean'].includes(domain);
               const isBinary = domain === 'binary_sensor';
-              const isOn = stateObj.state === 'on';
+              const isOn = ['on', 'auto', 'heat', 'heating', 'open', 'opening'].includes(stateObj.state);
               const isActionable = isSwitchLike;
 
               let dispState = stateObj.state;
@@ -1838,7 +1838,7 @@ export class VioletPoolCard extends LitElement {
     const poolTempSensorId = showTemp ? this._getEntityId('pool_temp_entity', 'sensor', 'temperature', 5) : null;
     const phSensorId = showPh ? this._getEntityId('ph_value_entity', 'sensor', 'ph_value', 6) : null;
     const orpSensorId = showOrp ? this._getEntityId('orp_value_entity', 'sensor', 'orp_value', 7) : null;
-    const chlorineSensorId = showChlorine ? ((config as any).chlorine_entity || this._buildEntityId('sensor', 'chlorine')) : null;
+    const chlorineSensorId = showChlorine ? ((config as any).chlorine_entity || this._buildEntityId('sensor', 'chlorine_value')) : null;
     const saltSensorId = showSalt ? ((config as any).salt_level_entity || this._buildEntityId('sensor', 'salt_level')) : null;
     const inletEntityId = showInlet ? ((config as any).inlet_entity || this._buildEntityId('switch', 'inlet')) : null;
     const targetPhId = this._getEntityId('target_ph_entity', 'number', 'target_ph');
@@ -1889,28 +1889,28 @@ export class VioletPoolCard extends LitElement {
     };
 
     const getOrpStatus = (orp?: number) => {
-      if (orp === undefined) return 'Unbekannt';
-      if (orp < 600) return 'Zu niedrig';
-      if (orp < 650) return 'Niedrig';
-      if (orp <= 750) return 'Optimal';
+      if (orp === undefined) return i18n.t('unknown');
+      if (orp < 600) return `Zu ${i18n.t('low' as any).toLowerCase()}`;
+      if (orp < 650) return i18n.t('low' as any);
+      if (orp <= 750) return i18n.t('optimal' as any);
       if (orp <= 800) return 'Erhöht';
       return 'Zu hoch';
     };
 
     const getChlorineStatus = (cl?: number) => {
-      if (cl === undefined) return 'Unbekannt';
-      if (cl < 0.3) return 'Zu niedrig';
-      if (cl < 0.5) return 'Niedrig';
-      if (cl <= 1.5) return 'Optimal';
+      if (cl === undefined) return i18n.t('unknown');
+      if (cl < 0.3) return `Zu ${i18n.t('low' as any).toLowerCase()}`;
+      if (cl < 0.5) return i18n.t('low' as any);
+      if (cl <= 1.5) return i18n.t('optimal' as any);
       if (cl <= 2.0) return 'Erhöht';
       return 'Zu hoch';
     };
 
     const getSaltStatus = (salt?: number) => {
-      if (salt === undefined) return 'Unbekannt';
-      if (salt < 2500) return 'Zu niedrig';
-      if (salt < 3000) return 'Niedrig';
-      if (salt <= 4000) return 'Optimal';
+      if (salt === undefined) return i18n.t('unknown');
+      if (salt < 2500) return `Zu ${i18n.t('low' as any).toLowerCase()}`;
+      if (salt < 3000) return i18n.t('low' as any);
+      if (salt <= 4000) return i18n.t('optimal' as any);
       if (salt <= 4500) return 'Erhöht';
       return 'Zu hoch';
     };
@@ -1989,7 +1989,7 @@ export class VioletPoolCard extends LitElement {
             <div class="info-row tooltip-wrap" style="margin-top: 12px;">
               <ha-icon icon="mdi:arrow-right-bold" style="--mdc-icon-size:17px;color:${isInletActive ? '#00BCD4' : 'var(--vpc-text-secondary)'}"></ha-icon>
               <span class="info-label">Anströmung</span>
-              <span class="info-value" style="color:${isInletActive ? '#00BCD4' : 'var(--vpc-text-secondary)'}">${isInletActive ? 'Aktiv' : 'Inaktiv'}</span>
+              <span class="info-value" style="color:${isInletActive ? '#00BCD4' : 'var(--vpc-text-secondary)'}">${isInletActive ? i18n.t('active' as any) : i18n.t('inactive' as any)}</span>
               <div class="t-tip">
                 <div class="t-tip-title"><ha-icon icon="mdi:arrow-right-bold"></ha-icon>Anströmung</div>
                 <div class="t-tip-desc">Wassereinlass in den Pool. Die Anströmung sorgt für Wasserbewegung und Durchmischung des Poolwassers, was für eine effektive Wasserbehandlung wichtig ist.</div>
@@ -2527,8 +2527,8 @@ export class VioletPoolCard extends LitElement {
       : pressure < 1.2 ? 'var(--vpc-success,#34C759)'
       : pressure < 1.6 ? 'var(--vpc-warning,#FF9F0A)'
       : 'var(--vpc-danger,#FF3B30)';
-    const pressureLabel = pressure < 0.5 ? 'Niedrig'
-      : pressure < 1.2 ? 'Normal'
+    const pressureLabel = pressure < 0.5 ? i18n.t('low' as any)
+      : pressure < 1.2 ? i18n.t('normal' as any)
       : pressure < 1.6 ? 'Erhöht – bald rückspülen'
       : 'Kritisch – sofort rückspülen!';
 
@@ -2613,7 +2613,7 @@ export class VioletPoolCard extends LitElement {
             <div class="header-info">
               <span class="name">${name}</span>
               <span class="header-subtitle" style="${isRunning ? 'color:var(--vpc-warning,#FF9F0A)' : ''}">
-                ${isRunning ? 'Rückspülung läuft…' : 'Bereit'}
+                ${isRunning ? 'Rückspülung läuft…' : i18n.t('ready' as any)}
               </span>
             </div>
             ${config.show_state !== false ? html`<vpc-status-badge .state="${isRunning ? 'on' : 'off'}" .pulse="${isRunning}"></vpc-status-badge>` : ''}
@@ -2638,7 +2638,7 @@ export class VioletPoolCard extends LitElement {
           <div class="info-row tooltip-wrap" style="margin-top: 8px;">
             <ha-icon icon="mdi:information-outline" style="--mdc-icon-size:17px"></ha-icon>
             <span class="info-label">Status</span>
-            <span class="info-value">${isRunning ? 'Aktiv' : 'Inaktiv'}</span>
+            <span class="info-value">${isRunning ? i18n.t('active' as any) : i18n.t('inactive' as any)}</span>
             <div class="t-tip">
               <div class="t-tip-title">Rückspülung</div>
               <div class="t-tip-desc">Automatische Rückspülung reinigt den Filter durch umgekehrten Wasserfluss. Dauer: ${duration} min.</div>
@@ -2685,7 +2685,7 @@ export class VioletPoolCard extends LitElement {
 
     const percent = Math.min((level / maxLevel) * 100, 100);
     const levelColor = isLow ? 'var(--vpc-danger,#FF3B30)' : level < maxLevel * 0.7 ? 'var(--vpc-warning,#FF9F0A)' : 'var(--vpc-success,#34C759)';
-    const levelLabel = isLow ? 'Niedrig' : level < maxLevel * 0.7 ? 'Normal' : 'Voll';
+    const levelLabel = isLow ? i18n.t('low' as any) : level < maxLevel * 0.7 ? i18n.t('normal' as any) : i18n.t('full' as any);
 
     return html`
       <ha-card class="${this._getCardClasses(!isLow, config)}"
@@ -2702,7 +2702,7 @@ export class VioletPoolCard extends LitElement {
             <div class="header-info">
               <span class="name">${name}</span>
               <span class="header-subtitle" style="color:${levelColor}">
-                ${isRefilling ? 'Wird nachgefüllt…' : levelLabel}
+                ${isRefilling ? i18n.t('refilling' as any) : levelLabel}
               </span>
             </div>
             ${config.show_state !== false ? html`
@@ -3002,7 +3002,7 @@ export class VioletPoolCard extends LitElement {
           <div class="info-row tooltip-wrap" style="margin-top: 8px;">
             <ha-icon icon="mdi:arrow-right-bold" style="--mdc-icon-size:17px;color:${inflowColor}"></ha-icon>
             <span class="info-label">Status</span>
-            <span class="info-value" style="color:${inflowColor}">${isInflowing ? 'Einströmung aktiv' : 'Ausgeschaltet'}</span>
+            <span class="info-value" style="color:${inflowColor}">${isInflowing ? i18n.t('active' as any) : i18n.t('inactive' as any)}</span>
             <div class="t-tip">
               <div class="t-tip-title">Anströmung</div>
               <div class="t-tip-desc">Wassereinlass in den Pool. Die Anströmung sorgt für Wasserbewegung und Durchmischung des Poolwassers.</div>
@@ -3102,7 +3102,7 @@ export class VioletPoolCard extends LitElement {
           <div class="info-row tooltip-wrap" style="margin-top: 8px;">
             <ha-icon icon="mdi:swap-horizontal" style="--mdc-icon-size:17px;color:${activeColor}"></ha-icon>
             <span class="info-label">Status</span>
-            <span class="info-value" style="color:${activeColor}">${isActive ? 'Gegenstrom aktiv' : 'Ausgeschaltet'}</span>
+            <span class="info-value" style="color:${activeColor}">${isActive ? i18n.t('active' as any) : i18n.t('inactive' as any)}</span>
             <div class="t-tip">
               <div class="t-tip-title">Gegenstromanlage</div>
               <div class="t-tip-desc">Die Gegenstromanlage erzeugt einen künstlichen Wasserstrom im Pool, der zum Schwimmen gegen die Strömung genutzt werden kann. Ideal für Fitnesstraining im eigenen Pool.</div>
@@ -3227,7 +3227,7 @@ export class VioletPoolCard extends LitElement {
     const isLow = fillPercent < 20;
     const isEmpty = fillPercent < 5;
     const statusColor = isEmpty ? 'var(--vpc-danger, #FF3B30)' : isLow ? 'var(--vpc-warning, #FF9F0A)' : accentColor;
-    const statusText = isEmpty ? 'Leer' : isLow ? 'Niedrig' : 'OK';
+    const statusText = isEmpty ? i18n.t('empty' as any) : isLow ? i18n.t('low' as any) : 'OK';
 
     return html`
       <ha-card class="${this._getCardClasses(!isEmpty, config)}"
