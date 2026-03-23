@@ -1,3 +1,11 @@
+/**
+ * Violet Pool Card – Custom Lovelace Card for Home Assistant
+ * © 2026 Xerolux | https://github.com/Xerolux/violet-pool-card
+ *
+ * Utility: Animated Icons – SVG-Animationen für Pumpe, Heizung, Solar und Poolabdeckung
+ * Erstellt von Xerolux | MIT License
+ */
+
 import { html, TemplateResult } from 'lit';
 
 /**

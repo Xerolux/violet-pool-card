@@ -1,3 +1,11 @@
+/**
+ * Violet Pool Card – Custom Lovelace Card for Home Assistant
+ * © 2026 Xerolux | https://github.com/Xerolux/violet-pool-card
+ *
+ * Build Config: Rollup – Bundling und Kompilierung des TypeScript-Projekts
+ * Erstellt von Xerolux | MIT License
+ */
+
 import typescript from '@rollup/plugin-typescript';
 import resolve from '@rollup/plugin-node-resolve';
 import terser from '@rollup/plugin-terser';

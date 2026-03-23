@@ -1,3 +1,11 @@
+/**
+ * Violet Pool Card – Custom Lovelace Card for Home Assistant
+ * © 2026 Xerolux | https://github.com/Xerolux/violet-pool-card
+ *
+ * Styles: Premium Themes – 6 hochwertige Themes (Luxury, Modern, Minimalist, Glass, Neon, Premium)
+ * Erstellt von Xerolux | MIT License
+ */
+
 import { css } from 'lit';
 
 export const premiumThemeStyles = css`

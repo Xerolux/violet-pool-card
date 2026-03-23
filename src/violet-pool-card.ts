@@ -1,3 +1,12 @@
+/**
+ * Violet Pool Card – Custom Lovelace Card for Home Assistant
+ * © 2026 Xerolux | https://github.com/Xerolux/violet-pool-card
+ *
+ * Main Component – Violet Pool Card LitElement
+ * Steuert und visualisiert den Violet Pool Controller in Home Assistant.
+ * Erstellt von Xerolux | MIT License
+ */
+
 import { LitElement, html, css, TemplateResult, CSSResultGroup } from 'lit';
 import { property, state } from 'lit/decorators.js';
 

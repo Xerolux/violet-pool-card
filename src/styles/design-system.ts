@@ -1,9 +1,12 @@
-import { css, unsafeCSS } from 'lit';
-
 /**
- * Violet Pool Card Design System
- * Centralized definitions for spacing, colors, typography, and icon sizes
+ * Violet Pool Card – Custom Lovelace Card for Home Assistant
+ * © 2026 Xerolux | https://github.com/Xerolux/violet-pool-card
+ *
+ * Styles: Design System – Zentrale Design-Tokens für Abstände, Farben und Typografie
+ * Erstellt von Xerolux | MIT License
  */
+
+import { css, unsafeCSS } from 'lit';
 
 // Spacing Scale (8px base unit)
 export const SPACING = {
