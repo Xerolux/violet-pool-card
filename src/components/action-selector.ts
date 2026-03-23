@@ -1,3 +1,11 @@
+/**
+ * Violet Pool Card – Custom Lovelace Card for Home Assistant
+ * © 2026 Xerolux | https://github.com/Xerolux/violet-pool-card
+ *
+ * Component: Action Selector – Auswahl von Pool-Aktionen und Steuerbefehlen
+ * Erstellt von Xerolux | MIT License
+ */
+
 import { LitElement, html, css } from 'lit';
 import { property } from 'lit/decorators.js';
 

@@ -1,3 +1,10 @@
+/**
+ * Violet Pool Card – Custom Lovelace Card for Home Assistant
+ * © 2026 Xerolux | https://github.com/Xerolux/violet-pool-card
+ *
+ * Utility: State Color – Farbzuweisung basierend auf dem Betriebszustand der Pool-Geräte
+ * Erstellt von Xerolux | MIT License
+ */
 
 export interface ColorConfig {
   color: string;

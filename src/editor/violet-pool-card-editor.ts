@@ -1,3 +1,12 @@
+/**
+ * Violet Pool Card – Custom Lovelace Card for Home Assistant
+ * © 2026 Xerolux | https://github.com/Xerolux/violet-pool-card
+ *
+ * Visual Editor – Lovelace Card Konfigurationseditor
+ * Ermöglicht die visuelle Konfiguration der Karte ohne YAML.
+ * Erstellt von Xerolux | MIT License
+ */
+
 import { LitElement, html, css, TemplateResult, CSSResultGroup } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import type { VioletPoolCardConfig } from '../violet-pool-card';

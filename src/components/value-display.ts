@@ -1,3 +1,11 @@
+/**
+ * Violet Pool Card – Custom Lovelace Card for Home Assistant
+ * © 2026 Xerolux | https://github.com/Xerolux/violet-pool-card
+ *
+ * Component: Value Display – Anzeige von Messwerten wie Temperatur, pH-Wert und Chlor
+ * Erstellt von Xerolux | MIT License
+ */
+
 import { LitElement, html, css, TemplateResult, CSSResultGroup } from 'lit';
 import { property } from 'lit/decorators.js';
 

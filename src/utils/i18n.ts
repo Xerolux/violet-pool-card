@@ -1,6 +1,9 @@
 /**
- * Simple Internationalization (i18n) System
- * Supports English (EN) and German (DE)
+ * Violet Pool Card – Custom Lovelace Card for Home Assistant
+ * © 2026 Xerolux | https://github.com/Xerolux/violet-pool-card
+ *
+ * Utility: i18n – Mehrsprachigkeit (Deutsch / Englisch) für alle Kartentexte
+ * Erstellt von Xerolux | MIT License
  */
 
 export type Language = 'en' | 'de';

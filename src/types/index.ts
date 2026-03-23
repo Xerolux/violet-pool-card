@@ -1,6 +1,10 @@
 /**
- * Comprehensive type definitions for Violet Pool Card
- * Ensures type safety across all components
+ * Violet Pool Card – Custom Lovelace Card for Home Assistant
+ * © 2026 Xerolux | https://github.com/Xerolux/violet-pool-card
+ *
+ * Type Definitions – TypeScript Typen für alle Komponenten
+ * Stellt Typsicherheit für den gesamten Violet Pool Card Code sicher.
+ * Erstellt von Xerolux | MIT License
  */
 
 // ============================================================================

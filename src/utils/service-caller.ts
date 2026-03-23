@@ -1,3 +1,11 @@
+/**
+ * Violet Pool Card – Custom Lovelace Card for Home Assistant
+ * © 2026 Xerolux | https://github.com/Xerolux/violet-pool-card
+ *
+ * Utility: Service Caller – Ausführung von Home Assistant Service-Aufrufen (Schalten, Steuern)
+ * Erstellt von Xerolux | MIT License
+ */
+
 import { i18n } from './i18n';
 
 interface HomeAssistant {

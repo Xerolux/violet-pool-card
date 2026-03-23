@@ -1,3 +1,11 @@
+/**
+ * Violet Pool Card – Custom Lovelace Card for Home Assistant
+ * © 2026 Xerolux | https://github.com/Xerolux/violet-pool-card
+ *
+ * Component: Warning Chips – Warnhinweise und Statusmeldungen für den Pool (z.B. pH-Alarm, Frost)
+ * Erstellt von Xerolux | MIT License
+ */
+
 import { LitElement, html, css, TemplateResult, CSSResultGroup } from 'lit';
 import { property, state } from 'lit/decorators.js';
 

@@ -1,3 +1,11 @@
+/**
+ * Violet Pool Card – Custom Lovelace Card for Home Assistant
+ * © 2026 Xerolux | https://github.com/Xerolux/violet-pool-card
+ *
+ * Utility: Action Handler – Verarbeitung und Weiterleitung von Benutzeraktionen
+ * Erstellt von Xerolux | MIT License
+ */
+
 // HomeAssistant interface
 interface HomeAssistant {
   states: { [entity_id: string]: any };

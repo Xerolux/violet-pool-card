@@ -1,8 +1,12 @@
-import { css } from 'lit';
-
 /**
- * Reusable component-specific styles extracted from inline CSS
+ * Violet Pool Card – Custom Lovelace Card for Home Assistant
+ * © 2026 Xerolux | https://github.com/Xerolux/violet-pool-card
+ *
+ * Styles: Component Styles – Wiederverwendbare CSS-Stile für alle Kartenkomponenten
+ * Erstellt von Xerolux | MIT License
  */
+
+import { css } from 'lit';
 
 /**
  * Card base styling - for ha-card elements
