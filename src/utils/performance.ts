@@ -59,13 +59,13 @@ export class PerformanceMonitor {
   }
 
   /**
-   * Get memory usage (if available)
+   * Get memory usage (if available).
+   * The `memory` property is non-standard (Chrome only) — typed via interface extension.
    */
   static getMemoryUsage(): number {
-    if (typeof performance !== 'undefined' && (performance as any).memory) {
-      return (performance as any).memory.usedJSHeapSize / 1048576; // Convert to MB
-    }
-    return 0;
+    if (typeof performance === 'undefined') return 0;
+    const mem = (performance as Performance & { memory?: { usedJSHeapSize: number } }).memory;
+    return mem ? mem.usedJSHeapSize / 1048576 : 0; // Convert to MB
   }
 
   /**
@@ -135,10 +135,14 @@ export class PerformanceMonitor {
 /**
  * Decorator for measuring function performance
  */
-export function measurePerformance(_target: any, propertyKey: string, descriptor: PropertyDescriptor): PropertyDescriptor {
-  const originalMethod = descriptor.value;
+export function measurePerformance(
+  _target: object,
+  propertyKey: string,
+  descriptor: PropertyDescriptor
+): PropertyDescriptor {
+  const originalMethod = descriptor.value as (...args: unknown[]) => unknown;
 
-  descriptor.value = function (...args: any[]) {
+  descriptor.value = function (this: unknown, ...args: unknown[]) {
     PerformanceMonitor.markStart(propertyKey);
     const result = originalMethod.apply(this, args);
     const time = PerformanceMonitor.markEnd(propertyKey);

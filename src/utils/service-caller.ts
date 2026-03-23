@@ -1,3 +1,4 @@
+import { i18n } from './i18n';
 
 interface HomeAssistant {
   callService: (domain: string, service: string, serviceData?: Record<string, unknown>) => Promise<unknown>;
@@ -8,8 +9,14 @@ export interface ServiceCallResult {
   error?: string;
 }
 
+/** Minimum milliseconds between calls to the same domain.service key */
+const RATE_LIMIT_MS = 500;
+
 export class ServiceCaller {
   constructor(private hass: HomeAssistant) {}
+
+  /** Tracks the last call timestamp per "domain.service" key */
+  private _lastCallTs = new Map<string, number>();
 
   private showToast(message: string, duration = 3000) {
     const event = new CustomEvent('hass-notification', {
@@ -20,11 +27,30 @@ export class ServiceCaller {
     window.dispatchEvent(event);
   }
 
+  /**
+   * Returns true if the same domain.service was called too recently.
+   * Prevents accidental call spam from rapid UI interactions.
+   */
+  private _isRateLimited(domain: string, service: string): boolean {
+    const key = `${domain}.${service}`;
+    const last = this._lastCallTs.get(key) ?? 0;
+    const now = Date.now();
+    if (now - last < RATE_LIMIT_MS) {
+      return true;
+    }
+    this._lastCallTs.set(key, now);
+    return false;
+  }
+
   public async callService(
     domain: string,
     service: string,
     serviceData?: Record<string, unknown>
   ): Promise<ServiceCallResult> {
+    if (this._isRateLimited(domain, service)) {
+      return { success: false, error: 'rate_limited' };
+    }
+
     try {
       await this.hass.callService(domain, service, serviceData);
       return { success: true };
@@ -61,16 +87,17 @@ export class ServiceCaller {
     const result = await this.callService('violet_pool_controller', 'control_pump', serviceData);
 
     if (result.success) {
-      const actionLabels: Record<string, string> = {
-        speed_control: 'Speed control',
-        force_off: 'Force OFF',
-        eco_mode: 'ECO Mode',
-        boost_mode: 'BOOST Mode',
-        auto: 'Auto Mode',
+      const actionLabelKeys: Record<string, 'svc_pump_speed_control' | 'svc_pump_force_off' | 'svc_pump_eco_mode' | 'svc_pump_boost_mode' | 'svc_pump_auto'> = {
+        speed_control: 'svc_pump_speed_control',
+        force_off: 'svc_pump_force_off',
+        eco_mode: 'svc_pump_eco_mode',
+        boost_mode: 'svc_pump_boost_mode',
+        auto: 'svc_pump_auto',
       };
-      const speedLabel = speed !== undefined ? ` (Speed ${speed})` : '';
-      const durationLabel = duration !== undefined ? ` für ${duration}s` : '';
-      this.showToast(`${actionLabels[action]}${speedLabel}${durationLabel}`);
+      const label = i18n.t(actionLabelKeys[action]);
+      const speedLabel = speed !== undefined ? ` (${i18n.t('svc_speed_label')} ${speed})` : '';
+      const durationLabel = duration !== undefined ? ` ${i18n.t('svc_duration_label')} ${duration}${i18n.t('svc_seconds_label')}` : '';
+      this.showToast(`${label}${speedLabel}${durationLabel}`);
     }
 
     return result;
@@ -124,13 +151,13 @@ export class ServiceCaller {
     const result = await this.callService('violet_pool_controller', 'smart_dosing', serviceData);
 
     if (result.success) {
-      const actionLabels: Record<string, string> = {
-        manual_dose: 'Manual dosing',
-        auto: 'Auto dosing',
-        stop: 'Stop dosing',
+      const actionLabelKeys: Record<string, 'svc_dosing_manual' | 'svc_dosing_auto' | 'svc_dosing_stop'> = {
+        manual_dose: 'svc_dosing_manual',
+        auto: 'svc_dosing_auto',
+        stop: 'svc_dosing_stop',
       };
-      const durationLabel = duration !== undefined ? ` für ${duration}s` : '';
-      this.showToast(`${dosingType} - ${actionLabels[action]}${durationLabel}`);
+      const durationLabel = duration !== undefined ? ` ${i18n.t('svc_duration_label')} ${duration}${i18n.t('svc_seconds_label')}` : '';
+      this.showToast(`${dosingType} - ${i18n.t(actionLabelKeys[action])}${durationLabel}`);
     }
 
     return result;
@@ -183,13 +210,13 @@ export class ServiceCaller {
     const result = await this.callService('violet_pool_controller', 'manage_pv_surplus', serviceData);
 
     if (result.success) {
-      const modeLabels: Record<string, string> = {
-        activate: 'PV Surplus ACTIVATED',
-        deactivate: 'PV Surplus DEACTIVATED',
-        auto: 'PV Surplus AUTO mode',
+      const modeLabelKeys: Record<string, 'svc_pv_activate' | 'svc_pv_deactivate' | 'svc_pv_auto'> = {
+        activate: 'svc_pv_activate',
+        deactivate: 'svc_pv_deactivate',
+        auto: 'svc_pv_auto',
       };
-      const speedLabel = pumpSpeed !== undefined ? ` (Speed ${pumpSpeed})` : '';
-      this.showToast(`${modeLabels[mode]}${speedLabel}`);
+      const speedLabel = pumpSpeed !== undefined ? ` (${i18n.t('svc_speed_label')} ${pumpSpeed})` : '';
+      this.showToast(`${i18n.t(modeLabelKeys[mode])}${speedLabel}`);
     }
 
     return result;
@@ -211,15 +238,15 @@ export class ServiceCaller {
     const result = await this.callService('violet_pool_controller', 'control_dmx_scenes', serviceData);
 
     if (result.success) {
-      const actionLabels: Record<string, string> = {
-        all_on: 'All Lights ON',
-        all_off: 'All Lights OFF',
-        all_auto: 'All Lights AUTO',
-        sequence: 'Sequence mode',
-        party_mode: 'Party Mode 🎉',
+      const actionLabelKeys: Record<string, 'svc_lights_all_on' | 'svc_lights_all_off' | 'svc_lights_all_auto' | 'svc_lights_sequence' | 'svc_lights_party'> = {
+        all_on: 'svc_lights_all_on',
+        all_off: 'svc_lights_all_off',
+        all_auto: 'svc_lights_all_auto',
+        sequence: 'svc_lights_sequence',
+        party_mode: 'svc_lights_party',
       };
-      const delayLabel = sequenceDelay !== undefined ? ` (Delay: ${sequenceDelay}s)` : '';
-      this.showToast(`${actionLabels[action]}${delayLabel}`);
+      const delayLabel = sequenceDelay !== undefined ? ` (${i18n.t('svc_lights_delay')}: ${sequenceDelay}s)` : '';
+      this.showToast(`${i18n.t(actionLabelKeys[action])}${delayLabel}`);
     }
 
     return result;
@@ -244,7 +271,7 @@ export class ServiceCaller {
     if (result.success) {
       const countLabel = pulseCount !== undefined ? `${pulseCount}x` : '1x';
       const intervalLabel = pulseInterval !== undefined ? ` ${pulseInterval}ms` : '';
-      this.showToast(`Light pulse: ${countLabel}${intervalLabel}`);
+      this.showToast(`${i18n.t('svc_lights_pulse')}: ${countLabel}${intervalLabel}`);
     }
 
     return result;
@@ -263,12 +290,12 @@ export class ServiceCaller {
     });
 
     if (result.success) {
-      const actionLabels: Record<string, string> = {
-        trigger: 'triggered',
-        lock: 'locked',
-        unlock: 'unlocked',
+      const actionLabelKeys: Record<string, 'svc_rule_triggered' | 'svc_rule_locked' | 'svc_rule_unlocked'> = {
+        trigger: 'svc_rule_triggered',
+        lock: 'svc_rule_locked',
+        unlock: 'svc_rule_unlocked',
       };
-      this.showToast(`${ruleKey} ${actionLabels[action]}`);
+      this.showToast(`${ruleKey} ${i18n.t(actionLabelKeys[action])}`);
     }
 
     return result;
@@ -283,7 +310,7 @@ export class ServiceCaller {
     });
 
     if (result.success) {
-      this.showToast('Connection test started');
+      this.showToast(i18n.t('svc_connection_test'));
     }
 
     return result;
@@ -295,7 +322,7 @@ export class ServiceCaller {
     });
 
     if (result.success) {
-      this.showToast('Connection status retrieved');
+      this.showToast(i18n.t('svc_connection_status'));
     }
 
     return result;
@@ -308,7 +335,7 @@ export class ServiceCaller {
     });
 
     if (result.success) {
-      this.showToast('Error summary retrieved');
+      this.showToast(i18n.t('svc_error_summary'));
     }
 
     return result;
@@ -328,7 +355,7 @@ export class ServiceCaller {
     });
 
     if (result.success) {
-      this.showToast(`Diagnostic logs exported (${lines} lines)`);
+      this.showToast(`${i18n.t('svc_logs_exported')} (${lines} ${i18n.t('svc_lines')})`);
     }
 
     return result;
@@ -340,7 +367,7 @@ export class ServiceCaller {
     });
 
     if (result.success) {
-      this.showToast('Error history cleared');
+      this.showToast(i18n.t('svc_error_history_cleared'));
     }
 
     return result;
@@ -356,7 +383,7 @@ export class ServiceCaller {
     });
 
     if (result.success) {
-      this.showToast(`Temperature set to ${temperature}°C`);
+      this.showToast(`${i18n.t('svc_temp_set')} ${temperature}°C`);
     }
 
     return result;
@@ -369,7 +396,7 @@ export class ServiceCaller {
     });
 
     if (result.success) {
-      this.showToast(`HVAC mode set to ${mode.toUpperCase()}`);
+      this.showToast(`${i18n.t('svc_hvac_mode')} ${mode.toUpperCase()}`);
     }
 
     return result;
@@ -382,7 +409,7 @@ export class ServiceCaller {
     });
 
     if (result.success) {
-      this.showToast(`Value set to ${value}`);
+      this.showToast(`${i18n.t('svc_value_set')} ${value}`);
     }
 
     return result;
@@ -395,7 +422,7 @@ export class ServiceCaller {
     });
 
     if (result.success) {
-      this.showToast(`${entity.split('.')[1]} turned ON`);
+      this.showToast(`${entity.split('.')[1]} ${i18n.t('svc_turned_on')}`);
     }
 
     return result;
@@ -408,7 +435,7 @@ export class ServiceCaller {
     });
 
     if (result.success) {
-      this.showToast(`${entity.split('.')[1]} turned OFF`);
+      this.showToast(`${entity.split('.')[1]} ${i18n.t('svc_turned_off')}`);
     }
 
     return result;
@@ -421,7 +448,7 @@ export class ServiceCaller {
     });
 
     if (result.success) {
-      this.showToast(`${entity.split('.')[1]} toggled`);
+      this.showToast(`${entity.split('.')[1]} ${i18n.t('svc_toggled')}`);
     }
 
     return result;
@@ -448,7 +475,7 @@ export class ServiceCaller {
     });
 
     if (result.success) {
-      this.showToast(`Cover position set to ${position}%`);
+      this.showToast(`${i18n.t('svc_cover_position')} ${position}%`);
     }
 
     return result;
@@ -474,7 +501,7 @@ export class ServiceCaller {
     });
 
     if (result.success) {
-      this.showToast(`Light brightness set to ${brightness}%`);
+      this.showToast(`${i18n.t('svc_light_brightness')} ${brightness}%`);
     }
 
     return result;
@@ -488,7 +515,7 @@ export class ServiceCaller {
     });
 
     if (result.success) {
-      this.showToast(`Light color set to RGB(${r}, ${g}, ${b})`);
+      this.showToast(`${i18n.t('svc_light_color')} RGB(${r}, ${g}, ${b})`);
     }
 
     return result;
@@ -501,7 +528,7 @@ export class ServiceCaller {
     });
 
     if (result.success) {
-      this.showToast(`Light temperature set to ${kelvin}K`);
+      this.showToast(`${i18n.t('svc_light_temp')} ${kelvin}K`);
     }
 
     return result;
@@ -515,7 +542,7 @@ export class ServiceCaller {
     });
 
     if (result.success) {
-      this.showToast(`Filter backwash started (${duration}s)`);
+      this.showToast(`${i18n.t('svc_backwash_start')} (${duration}s)`);
     }
 
     return result;
@@ -528,7 +555,7 @@ export class ServiceCaller {
     });
 
     if (result.success) {
-      this.showToast(`Filter rinse started (${duration}s)`);
+      this.showToast(`${i18n.t('svc_rinse_start')} (${duration}s)`);
     }
 
     return result;
@@ -540,7 +567,7 @@ export class ServiceCaller {
     });
 
     if (result.success) {
-      this.showToast('Filter pressure reset');
+      this.showToast(i18n.t('svc_pressure_reset'));
     }
 
     return result;
@@ -555,7 +582,7 @@ export class ServiceCaller {
     });
 
     if (result.success) {
-      this.showToast(`Refill started to ${targetLevel}%`);
+      this.showToast(`${i18n.t('svc_refill_start')} ${targetLevel}%`);
     }
 
     return result;
@@ -567,7 +594,7 @@ export class ServiceCaller {
     });
 
     if (result.success) {
-      this.showToast('Refill stopped');
+      this.showToast(i18n.t('svc_refill_stop'));
     }
 
     return result;
@@ -581,7 +608,7 @@ export class ServiceCaller {
     });
 
     if (result.success) {
-      this.showToast(`${sensorType.toUpperCase()} sensor calibrated to ${calibrationValue}`);
+      this.showToast(`${sensorType.toUpperCase()} ${i18n.t('svc_sensor_calibrated')} ${calibrationValue}`);
     }
 
     return result;
@@ -594,7 +621,7 @@ export class ServiceCaller {
     });
 
     if (result.success) {
-      this.showToast(`${cycleType} cycle started (${Math.round(duration/60)}min)`);
+      this.showToast(`${cycleType} ${i18n.t('svc_cycle_started')} (${Math.round(duration / 60)}min)`);
     }
 
     return result;
@@ -613,7 +640,7 @@ export class ServiceCaller {
     });
 
     if (result.success) {
-      this.showToast(`Schedule "${name}" created`);
+      this.showToast(`"${name}" ${i18n.t('svc_schedule_created')}`);
     }
 
     return result;
@@ -625,7 +652,7 @@ export class ServiceCaller {
     });
 
     if (result.success) {
-      this.showToast(`Schedule deleted`);
+      this.showToast(i18n.t('svc_schedule_deleted'));
     }
 
     return result;
@@ -641,7 +668,7 @@ export class ServiceCaller {
     const result = await this.callService('violet_pool_controller', 'update_weather_settings', settings);
 
     if (result.success) {
-      this.showToast('Weather settings updated');
+      this.showToast(i18n.t('svc_weather_updated'));
     }
 
     return result;
@@ -654,7 +681,7 @@ export class ServiceCaller {
     });
 
     if (result.success) {
-      this.showToast(`Energy profile set to ${profile}`);
+      this.showToast(`${i18n.t('svc_energy_profile')} ${profile}`);
     }
 
     return result;
@@ -666,7 +693,7 @@ export class ServiceCaller {
     });
 
     if (result.success) {
-      this.showToast(`Energy report for ${timeframe} generated`);
+      this.showToast(`${i18n.t('svc_energy_report')} ${timeframe} ${i18n.t('svc_energy_generated')}`);
     }
 
     return result;
