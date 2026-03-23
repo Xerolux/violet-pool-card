@@ -18,6 +18,12 @@ export class QuickActions extends LitElement {
   @property({ type: Boolean }) public compact = false;
   @state() private loadingStates: Map<number, boolean> = new Map();
 
+  public disconnectedCallback(): void {
+    super.disconnectedCallback();
+    // Clear any pending loading states when removed from DOM
+    this.loadingStates.clear();
+  }
+
   private async handleActionClick(action: QuickAction, index: number) {
     if (action.disabled || this.loadingStates.get(index)) {
       return;
@@ -72,61 +78,65 @@ export class QuickActions extends LitElement {
 
       const dialog = document.createElement('div');
       dialog.className = 'confirmation-dialog';
-      dialog.innerHTML = `
-        <div class="confirmation-content">
-          <p class="confirmation-message">${message}</p>
-          <div class="confirmation-buttons">
-            <button class="btn-cancel" aria-label="Cancel">Cancel</button>
-            <button class="btn-confirm" aria-label="Confirm">Confirm</button>
-          </div>
-        </div>
-      `;
 
+      // Build DOM safely — no innerHTML to prevent XSS
+      const content = document.createElement('div');
+      content.className = 'confirmation-content';
+
+      const msgEl = document.createElement('p');
+      msgEl.className = 'confirmation-message';
+      msgEl.textContent = message; // safe: textContent, not innerHTML
+
+      const buttons = document.createElement('div');
+      buttons.className = 'confirmation-buttons';
+
+      const cancelBtn = document.createElement('button');
+      cancelBtn.className = 'btn-cancel';
+      cancelBtn.setAttribute('aria-label', 'Cancel');
+      cancelBtn.textContent = 'Cancel';
+
+      const confirmBtn = document.createElement('button');
+      confirmBtn.className = 'btn-confirm';
+      confirmBtn.setAttribute('aria-label', 'Confirm');
+      confirmBtn.textContent = 'Confirm';
+
+      buttons.appendChild(cancelBtn);
+      buttons.appendChild(confirmBtn);
+      content.appendChild(msgEl);
+      content.appendChild(buttons);
+      dialog.appendChild(content);
       overlay.appendChild(dialog);
       document.body.appendChild(overlay);
 
       const cleanup = () => {
+        document.removeEventListener('keydown', handleKeydown);
         overlay.remove();
       };
 
-      const cancelBtn = dialog.querySelector('.btn-cancel') as HTMLButtonElement;
-      const confirmBtn = dialog.querySelector('.btn-confirm') as HTMLButtonElement;
-
-      cancelBtn?.addEventListener('click', () => {
-        resolve(false);
+      const handleResolve = (value: boolean) => {
         cleanup();
-      });
+        resolve(value);
+      };
 
-      confirmBtn?.addEventListener('click', () => {
-        resolve(true);
-        cleanup();
-      });
+      cancelBtn.addEventListener('click', () => handleResolve(false));
+      confirmBtn.addEventListener('click', () => handleResolve(true));
 
       overlay.addEventListener('click', (e) => {
         if (e.target === overlay) {
-          resolve(false);
-          cleanup();
+          handleResolve(false);
         }
       });
 
       // Keyboard support
       const handleKeydown = (e: KeyboardEvent) => {
-        if (e.key === 'Escape') {
-          resolve(false);
-          cleanup();
-          document.removeEventListener('keydown', handleKeydown);
-        }
-        if (e.key === 'Enter') {
-          resolve(true);
-          cleanup();
-          document.removeEventListener('keydown', handleKeydown);
-        }
+        if (e.key === 'Escape') handleResolve(false);
+        if (e.key === 'Enter') handleResolve(true);
       };
 
       document.addEventListener('keydown', handleKeydown);
 
-      // Focus confirm button
-      confirmBtn?.focus();
+      // Focus confirm button for accessibility
+      confirmBtn.focus();
     });
   }
 

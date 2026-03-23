@@ -172,6 +172,14 @@ export class VioletPoolCard extends LitElement {
   private _cardClassCache = new Map<string, string>();
   private _cardStyleCache = new Map<string, string>();
 
+  public disconnectedCallback(): void {
+    super.disconnectedCallback();
+    // Clear render caches to free memory when card is removed from DOM
+    this._cardClassCache.clear();
+    this._cardStyleCache.clear();
+    PerformanceMonitor.clearMetrics();
+  }
+
   private _buildEntityId(domain: string, suffix: string): string {
     const prefix = this.config.entity_prefix || 'violet_pool';
     return `${domain}.${prefix}_${suffix}`;
@@ -312,7 +320,6 @@ export class VioletPoolCard extends LitElement {
       return html``;
     }
 
-    // Performance monitoring
     PerformanceMonitor.markStart('card-render');
 
     if (this.config.entity) {
@@ -322,66 +329,68 @@ export class VioletPoolCard extends LitElement {
       }
     }
 
+    let result: TemplateResult;
     switch (this.config.card_type) {
       case 'pump':
-        return this.renderPumpCard();
+        result = this.renderPumpCard(); break;
       case 'heater':
-        return this.renderHeaterCard();
+        result = this.renderHeaterCard(); break;
       case 'solar':
-        return this.renderSolarCard();
+        result = this.renderSolarCard(); break;
       case 'dosing':
-        return this.renderDosingCard();
+        result = this.renderDosingCard(); break;
       case 'overview':
-        return this.renderOverviewCard();
+        result = this.renderOverviewCard(); break;
       case 'compact':
-        return this.renderCompactCard();
+        result = this.renderCompactCard(); break;
       case 'system':
-        return this.renderSystemCard();
+        result = this.renderSystemCard(); break;
       case 'details':
-        return this.renderDetailsCard();
+        result = this.renderDetailsCard(); break;
       case 'chemical':
-        return this.renderChemicalCard();
+        result = this.renderChemicalCard(); break;
       case 'sensor':
-        return this.renderSensorCard();
+        result = this.renderSensorCard(); break;
       case 'cover':
-        return this.renderCoverCard();
+        result = this.renderCoverCard(); break;
       case 'light':
-        return this.renderLightCard();
+        result = this.renderLightCard(); break;
       case 'filter':
-        return this.renderFilterCard();
+        result = this.renderFilterCard(); break;
       case 'backwash':
-        return this.renderBackwashCard();
+        result = this.renderBackwashCard(); break;
       case 'refill':
-        return this.renderRefillCard();
+        result = this.renderRefillCard(); break;
       case 'solar_surplus':
-        return this.renderSolarSurplusCard();
+        result = this.renderSolarSurplusCard(); break;
       case 'flow_rate':
-        return this.renderFlowRateCard();
+        result = this.renderFlowRateCard(); break;
       case 'inlet':
-        return this.renderInletCard();
+        result = this.renderInletCard(); break;
       case 'counter_current':
-        return this.renderCounterCurrentCard();
+        result = this.renderCounterCurrentCard(); break;
       case 'chlorine_canister':
-        return this.renderChlorineCanisterCard();
+        result = this.renderChlorineCanisterCard(); break;
       case 'ph_plus_canister':
-        return this.renderPhPlusCanisterCard();
+        result = this.renderPhPlusCanisterCard(); break;
       case 'ph_minus_canister':
-        return this.renderPhMinusCanisterCard();
+        result = this.renderPhMinusCanisterCard(); break;
       case 'flocculant_canister':
-        return this.renderFlocculantCanisterCard();
+        result = this.renderFlocculantCanisterCard(); break;
       case 'digital_rules':
-        return this.renderDigitalRulesCard();
+        result = this.renderDigitalRulesCard(); break;
       case 'diagnostics':
-        return this.renderDiagnosticsCard();
+        result = this.renderDiagnosticsCard(); break;
       default:
-        return html` <ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">Unknown Card Type</span><span class="error-entity">${this.config.card_type}</span></div></div></ha-card> `;
+        result = html` <ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">Unknown Card Type</span><span class="error-entity">${this.config.card_type}</span></div></div></ha-card> `;
     }
-    
-    // End performance monitoring
+
     const renderTime = PerformanceMonitor.markEnd('card-render');
     if (renderTime > 0) {
       PerformanceMonitor.logCardMetrics(this.config.card_type, renderTime);
     }
+
+    return result;
   }
 
   private _getCardClasses(isActive: boolean, config: VioletPoolCardConfig): string {
@@ -3520,7 +3529,9 @@ ha-card.theme-midnight .chem-metric-track{background:rgba(255,255,255,0.08);}
 }
 
 if (!customElements.get('violet-pool-card')) {
-  // Inject modal styles globally
+  // Inject modal styles globally — only once, identified by id to avoid duplicates
+  const MODAL_STYLE_ID = 'vpc-modal-styles';
+  if (!document.getElementById(MODAL_STYLE_ID)) {
   const modalStyles = `
     .confirmation-overlay {
       position: fixed;
@@ -3603,9 +3614,11 @@ if (!customElements.get('violet-pool-card')) {
     }
   `;
 
-  const styleElement = document.createElement('style');
-  styleElement.textContent = modalStyles;
-  document.head.appendChild(styleElement);
+    const styleElement = document.createElement('style');
+    styleElement.id = MODAL_STYLE_ID;
+    styleElement.textContent = modalStyles;
+    document.head.appendChild(styleElement);
+  }
 
   customElements.define('violet-pool-card', VioletPoolCard);
 }

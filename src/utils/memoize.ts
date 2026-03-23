@@ -3,6 +3,23 @@
  * Caches function results based on arguments
  */
 
+const MAX_CACHE_SIZE = 100;
+
+/**
+ * Safely serialize cache arguments. Falls back to a unique sentinel
+ * when JSON.stringify fails (e.g. circular references or BigInt values).
+ */
+function serializeArgs(args: unknown[]): string {
+  try {
+    return JSON.stringify(args);
+  } catch {
+    // Non-serializable arguments — use identity-based key via WeakMap is
+    // not possible for primitives, so we fall back to a unique symbol per
+    // call, effectively disabling caching for that call (correct behaviour).
+    return `__non_serializable_${Date.now()}_${Math.random()}`;
+  }
+}
+
 export function memoize<T extends (...args: unknown[]) => unknown>(
   fn: T,
   resolver?: (...args: Parameters<T>) => string
@@ -10,7 +27,7 @@ export function memoize<T extends (...args: unknown[]) => unknown>(
   const cache = new Map<string, unknown>();
 
   return ((...args: Parameters<T>) => {
-    const key = resolver ? resolver(...args) : JSON.stringify(args);
+    const key = resolver ? resolver(...args) : serializeArgs(args as unknown[]);
 
     if (cache.has(key)) {
       return cache.get(key);
@@ -19,10 +36,12 @@ export function memoize<T extends (...args: unknown[]) => unknown>(
     const result = fn(...args);
     cache.set(key, result);
 
-    // Limit cache size to prevent memory leaks
-    if (cache.size > 100) {
-      const firstKey = cache.keys().next().value as string;
-      cache.delete(firstKey);
+    // FIFO eviction: keep cache bounded to MAX_CACHE_SIZE
+    if (cache.size > MAX_CACHE_SIZE) {
+      const firstKey = cache.keys().next().value;
+      if (firstKey !== undefined) {
+        cache.delete(firstKey as string);
+      }
     }
 
     return result;
@@ -30,14 +49,14 @@ export function memoize<T extends (...args: unknown[]) => unknown>(
 }
 
 /**
- * Creates a memoized version of a function that only recalculates
- * when dependencies change
+ * Creates a memoized value that only recalculates when dependencies change.
+ * Dependencies are compared by reference (Object.is).
  */
 export function createMemo<T>(
   fn: () => T,
   deps: unknown[] = []
 ): { value: T; isDirty: boolean; update: () => void } {
-  let cachedValue: T;
+  let cachedValue: T | undefined;
   let cachedDeps: unknown[] = [];
   let isDirty = true;
 
@@ -48,7 +67,7 @@ export function createMemo<T>(
         cachedDeps = [...deps];
         isDirty = false;
       }
-      return cachedValue;
+      return cachedValue as T;
     },
     get isDirty(): boolean {
       return isDirty || !areDepsEqual(cachedDeps, deps);
