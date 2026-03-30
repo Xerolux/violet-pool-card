@@ -92,6 +92,7 @@
   card_type: filter
   name: Filterdruck
   filter_entity: switch.violet_pool_filter
+  show_history: true
 
 # --- Sensor Card ---
 - type: custom:violet-pool-card
@@ -176,6 +177,8 @@
 
 - type: custom:violet-pool-card
   card_type: overview
+  layout_variant: glass
+  alarm_style: pulse
   entities:
     # Hauptgeräte
     - switch.violet_pool_pump
@@ -230,6 +233,33 @@
   theme: luxury
   show_runtime: true
   show_history: true
+  layout_variant: dashboard
+  dashboard_mode: operations
+
+# --- Alarm Center System ---
+- type: custom:violet-pool-card
+  card_type: system
+  theme: midnight
+  layout_variant: focus
+  dashboard_mode: alarm_center
+  alarm_style: outline
+  accessibility_mode: high_contrast
+
+# --- Chemistry Focus System ---
+- type: custom:violet-pool-card
+  card_type: system
+  theme: frost
+  layout_variant: glass
+  dashboard_mode: chemistry
+  alarm_style: soft
+
+# --- Compact Mobile System ---
+- type: custom:violet-pool-card
+  card_type: system
+  size: fullscreen
+  layout_variant: glass
+  dashboard_mode: compact_mobile
+  accessibility_mode: reduced_motion
 
 # --- Statistics Card ---
 - type: custom:violet-pool-card

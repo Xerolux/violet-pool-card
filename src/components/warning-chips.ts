@@ -51,6 +51,7 @@ export class WarningChips extends LitElement {
   @property({ type: Array }) public warnings: Warning[] | string[] = [];
   @property() public defaultType: ChipType = 'warning';
   @property({ type: Boolean }) public dismissable = false;
+  @property() public styleVariant: 'soft' | 'outline' | 'pulse' = 'soft';
   @state() private dismissedWarnings: Set<string> = new Set();
 
   private normalizeWarnings(): Warning[] {
@@ -121,7 +122,7 @@ export class WarningChips extends LitElement {
       return html``;
     }
 
-    return html` <div class="warning-chips"> ${normalizedWarnings.map((warning) => this.renderChip(warning))} </div> `;
+    return html` <div class="warning-chips variant-${this.styleVariant}"> ${normalizedWarnings.map((warning) => this.renderChip(warning))} </div> `;
   }
 
   private renderChip(warning: Warning): TemplateResult {
@@ -144,7 +145,7 @@ export class WarningChips extends LitElement {
   }
 
   static get styles(): CSSResultGroup {
-    return css`:host{display:block}.warning-chips{display:flex;flex-wrap:wrap;gap:8px}.chip{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:16px;background:var(--chip-bg);color:var(--chip-color);font-size:13px;font-weight:500;line-height:1.2;border:1px solid var(--chip-color);transition:all 0.2s ease}.chip:hover{transform:translateY(-1px);box-shadow:0 2px 4px rgba(0,0,0,0.1)}.chip ha-icon{--mdc-icon-size:16px;flex-shrink:0}    .chip-text{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}.dismiss-button{display:flex;align-items:center;justify-content:center;padding:0;margin:0;border:none;background:none;color:var(--chip-color);cursor:pointer;opacity:0.7;transition:opacity 0.2s ease}.dismiss-button:hover{opacity:1}.dismiss-button ha-icon{--mdc-icon-size:14px}.chip.error{animation:pulse-error 2s ease-in-out infinite}@keyframes pulse-error{0%,100%{opacity:1}50%{opacity:0.85}}@media(max-width:600px){.warning-chips{flex-direction:column}.chip{width:100%;box-sizing:border-box}.chip-text{white-space:normal;overflow:visible}}`;
+    return css`:host{display:block}.warning-chips{display:flex;flex-wrap:wrap;gap:8px}.chip{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:16px;background:var(--chip-bg);color:var(--chip-color);font-size:13px;font-weight:500;line-height:1.2;border:1px solid var(--chip-color);transition:all 0.2s ease;position:relative;overflow:hidden}.chip:hover{transform:translateY(-1px);box-shadow:0 2px 4px rgba(0,0,0,0.1)}.chip ha-icon{--mdc-icon-size:16px;flex-shrink:0}.chip-text{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}.dismiss-button{display:flex;align-items:center;justify-content:center;padding:0;margin:0;border:none;background:none;color:var(--chip-color);cursor:pointer;opacity:0.7;transition:opacity 0.2s ease}.dismiss-button:hover{opacity:1}.dismiss-button ha-icon{--mdc-icon-size:14px}.variant-outline .chip{background:transparent;border-width:1.5px;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--chip-color) 24%,transparent)}.variant-pulse .chip.error,.variant-pulse .chip.warning{animation:pulse-error 1.6s ease-in-out infinite}.variant-pulse .chip.error::after,.variant-pulse .chip.warning::after{content:'';position:absolute;inset:0;border-radius:inherit;border:1px solid color-mix(in srgb,var(--chip-color) 55%,transparent);animation:chip-ring 1.6s ease-out infinite}.chip.error{animation:pulse-error 2s ease-in-out infinite}@keyframes pulse-error{0%,100%{opacity:1;transform:translateY(0)}50%{opacity:0.9;transform:translateY(-1px)}}@keyframes chip-ring{0%{opacity:0.75;transform:scale(1)}100%{opacity:0;transform:scale(1.04)}}@media(max-width:600px){.warning-chips{flex-direction:column}.chip{width:100%;box-sizing:border-box}.chip-text{white-space:normal;overflow:visible}}`;
   }
 }
 

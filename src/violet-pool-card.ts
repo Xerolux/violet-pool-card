@@ -29,7 +29,9 @@ import { EntityHelper } from './utils/entity-helper';
 import { StateColorHelper } from './utils/state-color';
 import { i18n } from './utils/i18n';
 import { PerformanceMonitor } from './utils/performance';
-import { pumpSVG, heaterSVG, solarSVG, coverSVG, lightSVG, dosingDropletSVG, gaugeNeedleSVG, filterGaugeSVG, chartSVG, backwashSVG, refillSVG, solarSurplusSVG, flowRateSVG, inletSVG, counterCurrentSVG, chlorineCanisterSVG, phPlusCanisterSVG, phMinusCanisterSVG, flocculantCanisterSVG } from './utils/animated-icons';
+import { pumpSVG, heaterSVG, solarSVG, coverSVG, lightSVG, gaugeNeedleSVG, filterGaugeSVG, chartSVG, backwashSVG, refillSVG, solarSurplusSVG, flowRateSVG, inletSVG, counterCurrentSVG, chlorineCanisterSVG, phPlusCanisterSVG, phMinusCanisterSVG, flocculantCanisterSVG, waterThermometerSVG, phOrbSVG, chlorineOrbSVG, saltCrystalSVG, orpEnergySVG, automationRulesSVG, diagnosticsPulseSVG } from './utils/animated-icons';
+import { SeverityModel, type SeverityAlert } from './utils/severity-model';
+import { TrendHelper } from './utils/trend-helper';
 
 
 // HomeAssistant types
@@ -70,6 +72,10 @@ interface LovelaceCardConfig {
   size?: 'small' | 'medium' | 'large' | 'fullscreen';
   theme?: 'classic' | 'midnight' | 'elegance' | 'vibrant' | 'pure' | 'frost' | 'glow' | 'metallic' | 'ocean' | 'sunset' | 'forest' | 'aurora';
   animation?: 'none' | 'subtle' | 'smooth' | 'energetic';
+  layout_variant?: 'standard' | 'glass' | 'dashboard' | 'focus';
+  alarm_style?: 'soft' | 'outline' | 'pulse';
+  accessibility_mode?: 'standard' | 'high_contrast' | 'reduced_motion';
+  dashboard_mode?: 'default' | 'operations' | 'chemistry' | 'maintenance' | 'compact_mobile' | 'alarm_center';
 
   // Legacy (backward compatible)
   style?: 'standard' | 'modern' | 'luxury';
@@ -169,6 +175,10 @@ export class VioletPoolCard extends LitElement {
       size: 'medium',
       theme: 'classic',
       animation: 'smooth',
+      layout_variant: 'glass',
+      alarm_style: 'pulse',
+      accessibility_mode: 'standard',
+      dashboard_mode: 'default',
       blur_intensity: 10,
       style: 'standard',
       show_flow_animation: false,
@@ -237,6 +247,95 @@ export class VioletPoolCard extends LitElement {
   private _getValuePercent(value: number, min: number, max: number): number {
     if (max <= min) return 0;
     return Math.min(100, Math.max(0, ((value - min) / (max - min)) * 100));
+  }
+
+  private _getEffectiveAlarmStyle(config: VioletPoolCardConfig = this.config): 'soft' | 'outline' | 'pulse' {
+    if (config.accessibility_mode === 'reduced_motion' && config.alarm_style === 'pulse') {
+      return 'outline';
+    }
+    return config.alarm_style || 'soft';
+  }
+
+  private _renderRecommendationList(recommendations: SeverityAlert[], title = 'Empfehlungen'): TemplateResult {
+    if (recommendations.length === 0) return html``;
+
+    return html`
+      <div class="recommendation-panel">
+        <div class="section-title">
+          <ha-icon icon="mdi:lightbulb-on-outline" style="--mdc-icon-size: 14px"></ha-icon>
+          <span>${title}</span>
+          <span class="section-count">${recommendations.length}</span>
+        </div>
+        <div class="recommendation-list">
+          ${recommendations.map((item) => html`
+            <div class="recommendation-row severity-${item.severity}">
+              <div class="recommendation-icon">
+                <ha-icon icon="${item.icon}" style="--mdc-icon-size: 16px"></ha-icon>
+              </div>
+              <div class="recommendation-copy">
+                <span class="recommendation-title">${item.text}</span>
+                <span>${item.recommendation || item.text}</span>
+              </div>
+            </div>
+          `)}
+        </div>
+      </div>
+    `;
+  }
+
+  private _renderSparkline(values: number[], color = 'var(--card-accent,var(--vpc-primary))', ariaLabel = 'Trend'): TemplateResult {
+    if (values.length < 2) return html``;
+
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const range = max - min || 1;
+    const points = values.map((value, index) => {
+      const x = (index / Math.max(values.length - 1, 1)) * 100;
+      const y = 100 - (((value - min) / range) * 100);
+      return `${x},${y}`;
+    }).join(' ');
+
+    return html`
+      <div class="sparkline-wrap" role="img" aria-label="${ariaLabel}">
+        <svg viewBox="0 0 100 100" preserveAspectRatio="none" class="sparkline-svg">
+          <polyline points="${points}" class="sparkline-line" style="--sparkline-color:${color}"></polyline>
+        </svg>
+      </div>
+    `;
+  }
+
+  private _renderChemIcon(kind: 'temperature' | 'ph' | 'orp' | 'chlorine' | 'salt', color: string, active = true): TemplateResult {
+    const icon = kind === 'temperature'
+      ? waterThermometerSVG(active, color)
+      : kind === 'ph'
+        ? phOrbSVG(active, color)
+        : kind === 'orp'
+          ? orpEnergySVG(active, color)
+          : kind === 'salt'
+            ? saltCrystalSVG(active, color)
+            : chlorineOrbSVG(active, color);
+
+    return html`<span class="chem-svg-icon" aria-hidden="true">${icon}</span>`;
+  }
+
+  private _renderDosingVisual(dosingType: string, color: string, currentValue?: number, maxValue?: number): TemplateResult {
+    const level = currentValue ?? maxValue ?? 66;
+    const capacity = maxValue || 100;
+
+    if (dosingType === 'chlorine') {
+      return html`<span class="chem-svg-icon" aria-hidden="true">${chlorineCanisterSVG(level, capacity, color)}</span>`;
+    }
+    if (dosingType === 'ph_plus') {
+      return html`<span class="chem-svg-icon" aria-hidden="true">${phPlusCanisterSVG(level, capacity, color)}</span>`;
+    }
+    if (dosingType === 'ph_minus') {
+      return html`<span class="chem-svg-icon" aria-hidden="true">${phMinusCanisterSVG(level, capacity, color)}</span>`;
+    }
+    if (dosingType === 'flocculant') {
+      return html`<span class="chem-svg-icon" aria-hidden="true">${flocculantCanisterSVG(level, capacity, color)}</span>`;
+    }
+
+    return html`<ha-icon icon="${this._getDosingIcon(dosingType)}"></ha-icon>`;
   }
 
   /**
@@ -403,7 +502,7 @@ export class VioletPoolCard extends LitElement {
   }
 
   private _getCardClasses(isActive: boolean, config: VioletPoolCardConfig): string {
-    const cacheKey = `${isActive}-${config.size || 'medium'}-${config.theme || config.style}-${config.animation}-${config.show_flow_animation}`;
+    const cacheKey = `${isActive}-${config.size || 'medium'}-${config.theme || config.style}-${config.animation}-${config.show_flow_animation}-${config.layout_variant || 'standard'}-${config.alarm_style || 'soft'}-${config.accessibility_mode || 'standard'}-${config.dashboard_mode || 'default'}`;
     
     if (this._cardClassCache.has(cacheKey)) {
       return this._cardClassCache.get(cacheKey)!;
@@ -419,8 +518,26 @@ export class VioletPoolCard extends LitElement {
       classes.push(config.style || 'standard');
     }
 
-    if (config.animation && config.animation !== 'none') {
+    if (config.accessibility_mode) {
+      classes.push(`a11y-${config.accessibility_mode.replace('_', '-')}`);
+    }
+
+    if (config.animation && config.animation !== 'none' && config.accessibility_mode !== 'reduced_motion') {
       classes.push(`animation-${config.animation}`);
+    } else if (config.accessibility_mode === 'reduced_motion') {
+      classes.push('animation-none');
+    }
+
+    if (config.layout_variant) {
+      classes.push(`layout-${config.layout_variant}`);
+    }
+
+    if (config.alarm_style) {
+      classes.push(`alarm-${config.alarm_style}`);
+    }
+
+    if (config.dashboard_mode) {
+      classes.push(`mode-${config.dashboard_mode}`);
     }
 
     if ((config.show_flow_animation || config.animation === 'energetic') && isActive) {
@@ -568,9 +685,11 @@ export class VioletPoolCard extends LitElement {
     const heaterEntity = this._getEntityId('heater_entity', 'climate', 'heater', 1);
     const solarEntity = this._getEntityId('solar_entity', 'climate', 'solar', 2);
     const dosingEntity = this._getEntityId('chlorine_entity', 'switch', 'dos_1_cl', 3);
+    const layoutVariant = this.config.layout_variant || 'glass';
+    const dashboardMode = this.config.dashboard_mode || 'default';
 
     const createSubConfig = (type: string, entity: string, extra: any = {}): VioletPoolCardConfig | null => {
-      if (type !== 'overview' && !this.hass.states[entity]) return null;
+      if (!['overview', 'chemical', 'details'].includes(type) && !this.hass.states[entity]) return null;
       return {
         ...this.config,
         card_type: type as any,
@@ -593,8 +712,86 @@ export class VioletPoolCard extends LitElement {
     const coverConfig = createSubConfig('cover', coverEntitySys);
     const lightConfig = createSubConfig('light', lightEntitySys);
     const filterConfig = createSubConfig('filter' as any, filterEntitySys);
+    const chemicalConfig = createSubConfig('chemical', '', { name: 'Water Chemistry', show_controls: false });
+    let controlCards = [pumpConfig, heaterConfig, solarConfig, dosingConfig].filter(Boolean);
+    let utilityCards = [coverConfig, lightConfig, filterConfig].filter(Boolean);
 
-    return html` <div class="system-grid"> ${overviewConfig ? this.renderOverviewCard(overviewConfig) : ''} ${pumpConfig ? this.renderPumpCard(pumpConfig) : ''} ${heaterConfig ? this.renderHeaterCard(heaterConfig) : ''} ${solarConfig ? this.renderSolarCard(solarConfig) : ''} ${dosingConfig ? this.renderDosingCard(dosingConfig) : ''} ${coverConfig ? this.renderCoverCard(coverConfig) : ''} ${lightConfig ? this.renderLightCard(lightConfig) : ''} ${filterConfig ? this.renderFilterCard(filterConfig) : ''} </div> `;
+    if (dashboardMode === 'maintenance') {
+      utilityCards = [filterConfig, coverConfig, lightConfig].filter(Boolean);
+    }
+    if (dashboardMode === 'alarm_center') {
+      utilityCards = [filterConfig, dosingConfig, coverConfig].filter(Boolean);
+      controlCards = [heaterConfig, pumpConfig, solarConfig].filter(Boolean);
+    }
+
+    const totalCards = [overviewConfig, chemicalConfig, ...controlCards, ...utilityCards].filter(Boolean).length;
+
+    return html`
+      <div class="system-shell layout-${layoutVariant} mode-${dashboardMode}">
+        <div class="system-hero-panel">
+          <div class="system-hero-copy">
+            <span class="system-kicker">Violet Control Center</span>
+            <h2>${this.config.name || 'Pool Dashboard'}</h2>
+            <p>${totalCards} Karten mit Steuerung, Wasserwerten und Alarmstatus im Modus ${dashboardMode.replace('_', ' ')}.</p>
+          </div>
+          <div class="system-hero-pills">
+            <span class="system-pill">Layout: ${layoutVariant}</span>
+            <span class="system-pill">Mode: ${dashboardMode.replace('_', ' ')}</span>
+            <span class="system-pill">Theme: ${this.config.theme || this.config.style || 'classic'}</span>
+            <span class="system-pill">Animation: ${this.config.animation || 'smooth'}</span>
+          </div>
+        </div>
+
+        ${overviewConfig ? html`<div class="system-overview-slot">${this.renderOverviewCard(overviewConfig)}</div>` : ''}
+        ${dashboardMode === 'chemistry' && chemicalConfig ? html`<div class="system-overview-slot">${this.renderChemicalCard(chemicalConfig)}</div>` : ''}
+        ${dashboardMode === 'alarm_center' && chemicalConfig ? html`<div class="system-overview-slot">${this.renderChemicalCard(chemicalConfig)}</div>` : ''}
+
+        ${controlCards.length > 0 ? html`
+          <div class="system-section-block">
+            <div class="system-section-header">
+              <div>
+                <span class="system-section-kicker">Steuerung</span>
+                <h3>Aktive Technik</h3>
+              </div>
+              <span class="system-section-count">${controlCards.length} Karten</span>
+            </div>
+            <div class="system-grid system-grid-primary">
+              ${controlCards.map((card) => {
+                switch (card!.card_type) {
+                  case 'pump': return this.renderPumpCard(card!);
+                  case 'heater': return this.renderHeaterCard(card!);
+                  case 'solar': return this.renderSolarCard(card!);
+                  case 'dosing': return this.renderDosingCard(card!);
+                  default: return html``;
+                }
+              })}
+            </div>
+          </div>
+        ` : ''}
+
+        ${utilityCards.length > 0 ? html`
+          <div class="system-section-block">
+            <div class="system-section-header">
+              <div>
+                <span class="system-section-kicker">Peripherie</span>
+                <h3>Komfort und Wartung</h3>
+              </div>
+              <span class="system-section-count">${utilityCards.length} Karten</span>
+            </div>
+            <div class="system-grid system-grid-secondary">
+              ${utilityCards.map((card) => {
+                switch (card!.card_type) {
+                  case 'cover': return this.renderCoverCard(card!);
+                  case 'light': return this.renderLightCard(card!);
+                  case 'filter': return this.renderFilterCard(card!);
+                  default: return html``;
+                }
+              })}
+            </div>
+          </div>
+        ` : ''}
+      </div>
+    `;
   }
 
   private renderPumpCard(config: VioletPoolCardConfig = this.config): TemplateResult {
@@ -625,6 +822,12 @@ export class VioletPoolCard extends LitElement {
 
     const speedColor = StateColorHelper.getPumpSpeedColor(currentSpeed);
     const isRunning = state === 'on' || currentSpeed > 0;
+    const pumpRecommendations = SeverityModel.getPumpRecommendations(currentSpeed, isRunning, currentMode).map((text) => ({
+      text,
+      severity: currentSpeed >= 3 ? 'warning' as const : 'info' as const,
+      icon: currentSpeed >= 3 ? 'mdi:flash-alert' : 'mdi:leaf-circle',
+      recommendation: text,
+    }));
     const speedLabels = ['OFF', 'ECO', 'Normal', 'Boost'];
     const speedColors = ['#8E8E93', '#34C759', '#FF9F0A', '#FF3B30'];
     const speedIcons = ['mdi:power-off', 'mdi:speedometer-slow', 'mdi:speedometer-medium', 'mdi:speedometer'];
@@ -728,6 +931,21 @@ export class VioletPoolCard extends LitElement {
               : ''}
           </div>
 
+          <div class="insight-grid insight-grid-pump">
+            <div class="insight-card">
+              <span class="insight-label">Modus</span>
+              <span class="insight-value">${currentMode.toUpperCase()}</span>
+            </div>
+            <div class="insight-card">
+              <span class="insight-label">Leistung</span>
+              <span class="insight-value" style="color:${speedColor.color}">${speedLabels[currentSpeed]}</span>
+            </div>
+            <div class="insight-card">
+              <span class="insight-label">RPM</span>
+              <span class="insight-value">${currentRPM || 0}</span>
+            </div>
+          </div>
+
           <!-- Speed Segments Visual Indicator -->
           <div class="speed-segments-container">
             <div class="speed-segments">
@@ -777,13 +995,14 @@ export class VioletPoolCard extends LitElement {
             : ''}
 
           ${config.show_detail_status && pumpState
-            ? html`<vpc-detail-status .raw="${pumpState}"></vpc-detail-status>`
+            ? html`<vpc-detail-status .raw="${pumpState}" alertStyle="${this._getEffectiveAlarmStyle(config)}"></vpc-detail-status>`
             : ''}
 
 
           ${config.show_runtime && runtimeSeconds > 0
             ? html` <div class="info-row"><ha-icon icon="mdi:timer-outline"></ha-icon><span class="info-label">Runtime</span><span class="info-value">${runtimeDisplay}</span></div> `
             : ''}
+          ${this._renderRecommendationList(pumpRecommendations, 'Betriebshinweise')}
         </div>
       </ha-card>
     `;
@@ -850,6 +1069,13 @@ export class VioletPoolCard extends LitElement {
     ];
 
     const isHeating = state === 'heating' || state === 'heat';
+    const heaterRecommendations = SeverityModel.getHeaterRecommendations({
+      currentTemp,
+      targetTemp,
+      outsideTemp,
+      minOutsideTemp,
+      isBlockedByOutsideTemp,
+    });
     const tempPct = currentTemp !== undefined
       ? this._getValuePercent(currentTemp, minTemp, maxTemp)
       : undefined;
@@ -859,6 +1085,21 @@ export class VioletPoolCard extends LitElement {
 
     return html` <ha-card class="${this._getCardClasses(isHeating, config)}" style="--card-accent: ${accentColor}" @click="${() => this._showMoreInfo(config.entity!)}" ><div class="accent-bar"></div><div class="card-content"><div class="header"><div class="header-icon ${isHeating ? 'icon-active' : ''}" style="--icon-accent: ${accentColor}">${config.icon ? html`<ha-icon icon="${config.icon}" class="${isHeating ? 'heater-active' : ''}"></ha-icon>` : heaterSVG(isHeating, accentColor)}</div><div class="header-info"><span class="name">${name}</span><span class="header-subtitle">${this._getFriendlyState(state)}</span></div> ${config.show_state ? html`<vpc-status-badge .state="${state}"></vpc-status-badge>`
               : ''}
+          </div>
+
+          <div class="insight-grid">
+            <div class="insight-card">
+              <span class="insight-label">Ist</span>
+              <span class="insight-value">${currentTemp !== undefined ? `${currentTemp.toFixed(1)}°C` : 'n/a'}</span>
+            </div>
+            <div class="insight-card">
+              <span class="insight-label">Ziel</span>
+              <span class="insight-value">${targetTemp !== undefined ? `${targetTemp.toFixed(1)}°C` : 'n/a'}</span>
+            </div>
+            <div class="insight-card">
+              <span class="insight-label">Außen</span>
+              <span class="insight-value">${outsideTemp != null ? `${outsideTemp.toFixed(1)}°C` : 'n/a'}</span>
+            </div>
           </div>
 
           ${currentTemp !== undefined
@@ -890,7 +1131,7 @@ export class VioletPoolCard extends LitElement {
             : ''}
 
           ${config.show_detail_status && heaterState
-            ? html`<vpc-detail-status .raw="${heaterState}"></vpc-detail-status>`
+            ? html`<vpc-detail-status .raw="${heaterState}" alertStyle="${this._getEffectiveAlarmStyle(config)}"></vpc-detail-status>`
             : ''}
 
           ${outsideTemp != null
@@ -922,6 +1163,7 @@ export class VioletPoolCard extends LitElement {
                 <vpc-quick-actions .actions="${quickActions}"></vpc-quick-actions>
               `
             : ''}
+          ${this._renderRecommendationList(heaterRecommendations)}
         </div>
       </ha-card>
     `;
@@ -998,6 +1240,12 @@ export class VioletPoolCard extends LitElement {
     ];
 
     const isSolarActive = state === 'heating' || state === 'heat';
+    const solarRecommendations = SeverityModel.getSolarRecommendations({
+      poolTemp,
+      targetTemp,
+      absorberTemp,
+      tempDelta,
+    });
     const poolTempPct = poolTemp !== undefined
       ? this._getValuePercent(poolTemp, minTemp, maxTemp)
       : undefined;
@@ -1009,8 +1257,23 @@ export class VioletPoolCard extends LitElement {
               : ''}
           </div>
 
+          <div class="insight-grid">
+            <div class="insight-card">
+              <span class="insight-label">Pool</span>
+              <span class="insight-value">${poolTemp !== undefined ? `${poolTemp.toFixed(1)}°C` : 'n/a'}</span>
+            </div>
+            <div class="insight-card">
+              <span class="insight-label">Absorber</span>
+              <span class="insight-value">${absorberTemp != null ? `${absorberTemp.toFixed(1)}°C` : 'n/a'}</span>
+            </div>
+            <div class="insight-card">
+              <span class="insight-label">Delta</span>
+              <span class="insight-value">${tempDelta !== undefined ? `${tempDelta > 0 ? '+' : ''}${tempDelta.toFixed(1)}°C` : 'n/a'}</span>
+            </div>
+          </div>
+
           ${config.show_detail_status && solarState
-            ? html`<vpc-detail-status .raw="${solarState}"></vpc-detail-status>`
+            ? html`<vpc-detail-status .raw="${solarState}" alertStyle="${this._getEffectiveAlarmStyle(config)}"></vpc-detail-status>`
             : ''}
 
           <div class="solar-temps">
@@ -1065,6 +1328,7 @@ export class VioletPoolCard extends LitElement {
                 <vpc-quick-actions .actions="${quickActions}"></vpc-quick-actions>
               `
             : ''}
+          ${this._renderRecommendationList(solarRecommendations)}
         </div>
       </ha-card>
     `;
@@ -1192,9 +1456,30 @@ export class VioletPoolCard extends LitElement {
           ? (currentValue! < (targetValue ?? 650) ? 'Low' : currentValue! > (targetValue ?? 750) ? 'High' : 'Optimal')
           : (currentValue! < 7.0 ? 'Acidic' : currentValue! > 7.4 ? 'Alkaline' : 'Optimal'))
       : '';
+    const dosingRecommendations = SeverityModel.getDosingRecommendations({
+      dosingType,
+      currentValue,
+      targetValue,
+      dosingState: Array.isArray(dosingState) ? dosingState as string[] : [],
+    });
 
-    return html` <ha-card class="${this._getCardClasses(isDosing, config)}" style="--card-accent: ${accentColor}" @click="${() => this._showMoreInfo(config.entity!)}" ><div class="accent-bar"></div><div class="card-content"><div class="header"><div class="header-icon ${isDosing ? 'icon-active' : ''}" style="--icon-accent: ${accentColor}">${isDosing ? dosingDropletSVG(isDosing, currentValue ? (currentValue / (maxValue || 100)) * 100 : 50, accentColor) : html`<ha-icon icon="${config.icon || this._getDosingIcon(dosingType)}" class="${isDosing ? 'dosing-active' : ''}" ></ha-icon>`}</div><div class="header-info"><span class="name">${name}</span><span class="header-subtitle">${this._getFriendlyState(state)}</span></div> ${config.show_state ? html`<vpc-status-badge .state="${state}" .pulse="${isDosing}"></vpc-status-badge>`
+    return html` <ha-card class="${this._getCardClasses(isDosing, config)}" style="--card-accent: ${accentColor}" @click="${() => this._showMoreInfo(config.entity!)}" ><div class="accent-bar"></div><div class="card-content"><div class="header"><div class="header-icon ${isDosing ? 'icon-active' : ''}" style="--icon-accent: ${accentColor}">${config.icon ? html`<ha-icon icon="${config.icon}" class="${isDosing ? 'dosing-active' : ''}" ></ha-icon>` : this._renderDosingVisual(dosingType, accentColor, currentValue, maxValue)}</div><div class="header-info"><span class="name">${name}</span><span class="header-subtitle">${this._getFriendlyState(state)}</span></div> ${config.show_state ? html`<vpc-status-badge .state="${state}" .pulse="${isDosing}"></vpc-status-badge>`
               : ''}
+          </div>
+
+          <div class="insight-grid">
+            <div class="insight-card">
+              <span class="insight-label">Typ</span>
+              <span class="insight-value">${dosingType.replace('_', ' ').toUpperCase()}</span>
+            </div>
+            <div class="insight-card">
+              <span class="insight-label">Soll</span>
+              <span class="insight-value">${targetValue !== undefined ? `${targetValue.toFixed(decimals)}${unit}` : 'n/a'}</span>
+            </div>
+            <div class="insight-card">
+              <span class="insight-label">24h</span>
+              <span class="insight-value">${typeof dosingVolume24h === 'number' ? `${dosingVolume24h.toFixed(0)} ml` : 'n/a'}</span>
+            </div>
           </div>
 
           ${currentValue !== undefined
@@ -1223,7 +1508,7 @@ export class VioletPoolCard extends LitElement {
             : ''}
 
           ${config.show_detail_status && Array.isArray(dosingState) && dosingState.length > 0
-            ? html`<vpc-warning-chips .warnings="${dosingState}" defaultType="warning"></vpc-warning-chips>`
+            ? html`<vpc-warning-chips .warnings="${dosingState}" defaultType="warning" styleVariant="${this._getEffectiveAlarmStyle(config)}"></vpc-warning-chips>`
             : ''}
 
           ${config.show_controls
@@ -1260,6 +1545,7 @@ export class VioletPoolCard extends LitElement {
           ${config.show_history && dosingVolume24h !== undefined
             ? html` <div class="info-row"><ha-icon icon="mdi:chart-line"></ha-icon><span class="info-label">Last 24h</span><span class="info-value">${dosingVolume24h}ml</span></div> `
             : ''}
+          ${this._renderRecommendationList(dosingRecommendations)}
         </div>
       </ha-card>
     `;
@@ -1286,6 +1572,8 @@ export class VioletPoolCard extends LitElement {
   private renderOverviewCard(config: VioletPoolCardConfig = this.config): TemplateResult {
     const name = config.name || 'Pool Status';
     const accentColor = this._getAccentColor('overview', config);
+    const layoutVariant = config.layout_variant || 'glass';
+    const alarmStyle = this._getEffectiveAlarmStyle(config);
 
     const pumpEntityId = this._getEntityId('pump_entity', 'switch', 'pump', 0);
     const heaterEntityId = this._getEntityId('heater_entity', 'climate', 'heater', 1);
@@ -1428,7 +1716,7 @@ export class VioletPoolCard extends LitElement {
       });
     }
 
-    const warnings: string[] = [];
+    const alertEntries: Array<{ text: string; severity: 'warning' | 'critical'; icon: string }> = [];
 
     // Filter entity
     const filterEntityId = this._getEntityId('filter_entity' as any, 'sensor', 'filter_pressure');
@@ -1503,17 +1791,44 @@ export class VioletPoolCard extends LitElement {
       });
     }
 
-    if (orpStatus === 'warning') warnings.push(i18n.t('orp_too_low'));
-    if (orpStatus === 'high') warnings.push(i18n.t('orp_too_high'));
-    if (phStatus === 'warning') warnings.push(i18n.t('ph_out_of_range'));
+    if (orpStatus === 'warning') alertEntries.push({ text: i18n.t('orp_too_low'), severity: 'warning', icon: 'mdi:lightning-bolt' });
+    if (orpStatus === 'high') alertEntries.push({ text: i18n.t('orp_too_high'), severity: 'warning', icon: 'mdi:lightning-bolt' });
+    if (phStatus === 'warning') alertEntries.push({ text: i18n.t('ph_out_of_range'), severity: 'warning', icon: 'mdi:ph' });
 
     if ((pumpEntity?.attributes?.PUMPSTATE as string | undefined)?.includes('ANTI_FREEZE')) {
       const outsideTempRaw = heaterEntity?.attributes?.outside_temperature as number | null | undefined;
-      warnings.push(`${i18n.t('frost_protection_active')}${outsideTempRaw != null ? ` (${outsideTempRaw.toFixed(1)}°C)` : ''}`);
+      alertEntries.push({
+        text: `${i18n.t('frost_protection_active')}${outsideTempRaw != null ? ` (${outsideTempRaw.toFixed(1)}°C)` : ''}`,
+        severity: 'critical',
+        icon: 'mdi:snowflake-alert',
+      });
     }
 
     const anyActive = activeDevices.some(d => ['on', 'auto', 'heat', 'heating'].includes(d.state));
     const activeCount = activeDevices.filter(d => ['on', 'auto', 'heat', 'heating'].includes(d.state)).length;
+    const idleCount = Math.max(activeDevices.length - activeCount, 0);
+    const alertCount = alertEntries.length;
+    const criticalAlerts = alertEntries.filter((entry) => entry.severity === 'critical').length;
+    const heroTone = criticalAlerts > 0 ? 'critical' : alertCount > 0 ? 'warning' : anyActive ? 'active' : 'calm';
+    const heroTitle = criticalAlerts > 0
+      ? 'Sofort prüfen'
+      : alertCount > 0
+      ? 'Aufmerksamkeit empfohlen'
+      : anyActive
+      ? 'Anlage arbeitet stabil'
+      : 'Anlage im Ruhemodus';
+    const heroMessage = criticalAlerts > 0
+      ? `${criticalAlerts} kritische Alarm${criticalAlerts === 1 ? '' : 'e'} mit Priorität.`
+      : alertCount > 0
+      ? `${alertCount} Hinweis${alertCount === 1 ? '' : 'e'} erkannt.`
+      : anyActive
+      ? `${activeCount} aktive Funktion${activeCount === 1 ? '' : 'en'} laufen aktuell.`
+      : 'Keine aktiven Verbraucher und keine Störungen erkannt.';
+    const quickFacts = [
+      { label: 'Aktiv', value: String(activeCount), tone: anyActive ? 'success' : 'muted' },
+      { label: 'Idle', value: String(idleCount), tone: idleCount > 0 ? 'muted' : 'success' },
+      { label: 'Alarme', value: String(alertCount), tone: alertCount > 0 ? (criticalAlerts > 0 ? 'danger' : 'warning') : 'success' },
+    ];
 
     // Progress percentages for chemistry tiles
     const tempPct = poolTemp !== undefined ? this._getValuePercent(poolTemp, 18, 35) : undefined;
@@ -1525,21 +1840,81 @@ export class VioletPoolCard extends LitElement {
     const phIdealEndPct = this._getValuePercent(7.4, 6.5, 8.0);
     const orpIdealStartPct = this._getValuePercent(650, 500, 900);
     const orpIdealEndPct = this._getValuePercent(750, 500, 900);
+    const metricSnapshot = [
+      {
+        label: 'Wassertemp.',
+        value: poolTemp !== undefined ? `${poolTemp.toFixed(1)}°C` : 'Keine Daten',
+        tone: tempColor?.color || 'var(--vpc-text-secondary)',
+        trend: TrendHelper.getEntityTrend(poolTempSensor),
+      },
+      {
+        label: 'pH',
+        value: phValue !== undefined ? phValue.toFixed(1) : 'Keine Daten',
+        tone: phColor?.color || 'var(--vpc-text-secondary)',
+        trend: TrendHelper.getEntityTrend(phSensor),
+      },
+      {
+        label: 'ORP',
+        value: orpValue !== undefined ? `${orpValue.toFixed(0)} mV` : 'Keine Daten',
+        tone: orpColor?.color || 'var(--vpc-text-secondary)',
+        trend: TrendHelper.getEntityTrend(orpSensor),
+      },
+    ];
 
-    return html` <ha-card class="${this._getCardClasses(anyActive, config)}" style="--card-accent: ${accentColor}" ><div class="accent-bar"></div><div class="card-content"><!-- Header --><div class="header"><div class="header-icon ${anyActive ? 'icon-active' : ''}" style="--icon-accent: ${accentColor}"><ha-icon icon="mdi:pool"></ha-icon></div><div class="header-info"><span class="name">${name}</span><span class="header-subtitle"> ${anyActive ? `${activeCount} ${activeCount === 1 ? i18n.t('device_active') : i18n.t('devices_active')}` : i18n.t('all_systems_idle')}
+    return html`
+      <ha-card class="${this._getCardClasses(anyActive, config)}" style="--card-accent: ${accentColor}">
+        <div class="accent-bar"></div>
+        <div class="card-content">
+          <div class="header">
+            <div class="header-icon ${anyActive ? 'icon-active' : ''}" style="--icon-accent: ${accentColor}">
+              <ha-icon icon="mdi:pool"></ha-icon>
+            </div>
+            <div class="header-info">
+              <span class="name">${name}</span>
+              <span class="header-subtitle">
+                ${anyActive ? `${activeCount} ${activeCount === 1 ? i18n.t('device_active') : i18n.t('devices_active')}` : i18n.t('all_systems_idle')}
               </span>
             </div>
-            ${warnings.length > 0
-              ? html`<div class="overview-warning-badge">${warnings.length}</div>`
+            ${alertCount > 0
+              ? html`<div class="overview-warning-badge">${alertCount}</div>`
               : anyActive
               ? html`<div class="overview-active-dot"></div>`
               : ''}
           </div>
 
+          <div class="overview-hero overview-hero-${heroTone} layout-${layoutVariant}">
+            <div class="overview-hero-main">
+              <span class="overview-kicker">Live Snapshot</span>
+              <div class="overview-hero-title-row">
+                <h3>${heroTitle}</h3>
+                ${alertCount > 0 ? html`<span class="overview-alert-chip ${alarmStyle}">${criticalAlerts > 0 ? 'Kritischer Alarm' : 'Alarm aktiv'}</span>` : ''}
+              </div>
+              <p>${heroMessage}</p>
+            </div>
+            <div class="overview-facts">
+              ${quickFacts.map((fact) => html`
+                <div class="overview-fact tone-${fact.tone}">
+                  <span class="overview-fact-label">${fact.label}</span>
+                  <span class="overview-fact-value">${fact.value}</span>
+                </div>
+              `)}
+            </div>
+          </div>
+
+          <div class="overview-snapshot-grid">
+            ${metricSnapshot.map((metric) => html`
+              <div class="snapshot-card">
+                <span class="snapshot-label">${metric.label}</span>
+                <span class="snapshot-value" style="color:${metric.tone}">${metric.value}</span>
+                ${metric.trend.length > 1 ? this._renderSparkline(metric.trend, metric.tone, `${metric.label} Trend`) : ''}
+              </div>
+            `)}
+          </div>
+
           <!-- Water Chemistry - Apple Health style metric tiles -->
           <div class="chemistry-grid">
             ${poolTemp !== undefined
-              ? html` <div class="chemistry-card tooltip-wrap" style="--chem-color: ${tempColor?.color || '#4CAF50'}" @click="${(e: Event) => { e.stopPropagation(); this._showMoreInfo(poolTempSensorId); }}"><div class="chem-icon-wrap"><ha-icon icon="mdi:thermometer-water"></ha-icon></div><span class="chemistry-val">${poolTemp.toFixed(1)}°</span><span class="chemistry-unit">°C</span><span class="chemistry-label">${poolTemp < 22 ? 'Kalt' : poolTemp < 26 ? 'OK' : poolTemp <= 30 ? 'Ideal' : 'Warm'}</span> ${tempPct !== undefined ? html`<div class="chem-mini-bar"><div class="chem-mini-ideal" style="left:${this._getValuePercent(24,18,35)}%;width:${this._getValuePercent(30,18,35)-this._getValuePercent(24,18,35)}%"></div><div class="chem-mini-fill" style="width: ${tempPct}%; background: ${tempColor?.color || '#4CAF50'}"></div></div>`
+              ? html` <div class="chemistry-card tooltip-wrap" style="--chem-color: ${tempColor?.color || '#4CAF50'}" @click="${(e: Event) => { e.stopPropagation(); this._showMoreInfo(poolTempSensorId); }}"><div class="chem-icon-wrap">${this._renderChemIcon('temperature', tempColor?.color || '#4CAF50', true)}</div><span class="chemistry-val">${poolTemp.toFixed(1)}°</span><span class="chemistry-unit">°C</span><span class="chemistry-label">${poolTemp < 22 ? 'Kalt' : poolTemp < 26 ? 'OK' : poolTemp <= 30 ? 'Ideal' : 'Warm'}</span> ${tempPct !== undefined ? html`<div class="chem-mini-bar"><div class="chem-mini-ideal" style="left:${this._getValuePercent(24,18,35)}%;width:${this._getValuePercent(30,18,35)-this._getValuePercent(24,18,35)}%"></div><div class="chem-mini-fill" style="width: ${tempPct}%; background: ${tempColor?.color || '#4CAF50'}"></div></div>`
                       : ''}
                   <div class="t-tip">
                     <div class="t-tip-title"><ha-icon icon="mdi:thermometer-water"></ha-icon>Wassertemperatur</div>
@@ -1550,7 +1925,7 @@ export class VioletPoolCard extends LitElement {
                 `
               : ''}
             ${phValue !== undefined
-              ? html` <div class="chemistry-card tooltip-wrap" style="--chem-color: ${phColor?.color || '#4CAF50'}" @click="${(e: Event) => { e.stopPropagation(); this._showMoreInfo(phSensorId); }}"><div class="chem-icon-wrap"><ha-icon icon="mdi:ph"></ha-icon></div><span class="chemistry-val">${phValue.toFixed(1)}</span><span class="chemistry-unit">pH</span><span class="chemistry-label">${phStatus === 'ok' ? 'Optimal' : 'Achtung'}</span> ${phPct !== undefined ? html`
+              ? html` <div class="chemistry-card tooltip-wrap" style="--chem-color: ${phColor?.color || '#4CAF50'}" @click="${(e: Event) => { e.stopPropagation(); this._showMoreInfo(phSensorId); }}"><div class="chem-icon-wrap">${this._renderChemIcon('ph', phColor?.color || '#4CAF50', phStatus === 'ok')}</div><span class="chemistry-val">${phValue.toFixed(1)}</span><span class="chemistry-unit">pH</span><span class="chemistry-label">${phStatus === 'ok' ? 'Optimal' : 'Achtung'}</span> ${phPct !== undefined ? html`
                           <div class="chem-mini-bar">
                             <div class="chem-mini-ideal" style="left: ${phIdealStartPct}%; width: ${phIdealEndPct - phIdealStartPct}%"></div>
                             <div class="chem-mini-fill" style="width: ${phPct}%; background: ${phColor?.color || '#4CAF50'}"></div>
@@ -1567,7 +1942,7 @@ export class VioletPoolCard extends LitElement {
                 `
               : ''}
             ${orpValue !== undefined
-              ? html` <div class="chemistry-card tooltip-wrap" style="--chem-color: ${orpColor?.color || '#4CAF50'}" @click="${(e: Event) => { e.stopPropagation(); this._showMoreInfo(orpSensorId); }}"><div class="chem-icon-wrap"><ha-icon icon="mdi:lightning-bolt"></ha-icon></div><span class="chemistry-val">${orpValue.toFixed(0)}</span><span class="chemistry-unit">mV</span><span class="chemistry-label">${orpStatus === 'ok' ? 'Optimal' : orpStatus === 'warning' ? 'Niedrig' : 'Hoch'}</span> ${orpPct !== undefined ? html`
+              ? html` <div class="chemistry-card tooltip-wrap" style="--chem-color: ${orpColor?.color || '#4CAF50'}" @click="${(e: Event) => { e.stopPropagation(); this._showMoreInfo(orpSensorId); }}"><div class="chem-icon-wrap">${this._renderChemIcon('orp', orpColor?.color || '#4CAF50', orpStatus === 'ok')}</div><span class="chemistry-val">${orpValue.toFixed(0)}</span><span class="chemistry-unit">mV</span><span class="chemistry-label">${orpStatus === 'ok' ? 'Optimal' : orpStatus === 'warning' ? 'Niedrig' : 'Hoch'}</span> ${orpPct !== undefined ? html`
                           <div class="chem-mini-bar">
                             <div class="chem-mini-ideal" style="left: ${orpIdealStartPct}%; width: ${orpIdealEndPct - orpIdealStartPct}%"></div>
                             <div class="chem-mini-fill" style="width: ${orpPct}%; background: ${orpColor?.color || '#4CAF50'}"></div>
@@ -1609,15 +1984,25 @@ export class VioletPoolCard extends LitElement {
               `
             : ''}
 
-          <!-- Warnings / All OK -->
-          ${warnings.length > 0
-            ? html` <div class="overview-section"><div class="section-title warning-title"><ha-icon icon="mdi:alert-outline" style="--mdc-icon-size: 14px"></ha-icon><span>${i18n.t('alerts')}</span></div><div class="warning-list"> ${warnings.map( (warning) => html`
-                        <div class="warning-row">
-                          <ha-icon icon="${warning.includes('Frost') ? 'mdi:snowflake-alert' : 'mdi:alert-circle'}" style="--mdc-icon-size: 16px"></ha-icon>
-                          <span>${warning}</span>
+          ${alertEntries.length > 0
+            ? html`
+                <div class="overview-section">
+                  <div class="section-title warning-title">
+                    <ha-icon icon="mdi:alert-outline" style="--mdc-icon-size: 14px"></ha-icon>
+                    <span>${i18n.t('alerts')}</span>
+                  </div>
+                  <div class="warning-list alarm-style-${alarmStyle}">
+                    ${alertEntries.map((alert) => html`
+                      <div class="warning-row severity-${alert.severity}">
+                        <div class="warning-row-icon">
+                          <ha-icon icon="${alert.icon}" style="--mdc-icon-size: 16px"></ha-icon>
                         </div>
-                      `
-                    )}
+                        <div class="warning-row-copy">
+                          <span class="warning-row-title">${alert.severity === 'critical' ? 'Kritischer Alarm' : 'Hinweis'}</span>
+                          <span>${alert.text}</span>
+                        </div>
+                      </div>
+                    `)}
                   </div>
                 </div>
               `
@@ -1959,7 +2344,7 @@ export class VioletPoolCard extends LitElement {
         <div class="card-content">
           <div class="header">
             <div class="header-icon" style="--icon-accent: ${accentColor}">
-              <ha-icon icon="${config.icon || (chemistryType === 'salt' ? 'mdi:shaker' : 'mdi:water-check')}"></ha-icon>
+              ${config.icon ? html`<ha-icon icon="${config.icon}"></ha-icon>` : this._renderChemIcon(chemistryType === 'salt' ? 'salt' : 'chlorine', accentColor, issuesCount === 0)}
             </div>
             <div class="header-info">
               <span class="name">${name}</span>
@@ -1974,7 +2359,7 @@ export class VioletPoolCard extends LitElement {
           ${poolTemp !== undefined ? html`
             <div class="chem-section tooltip-wrap">
               <div class="chem-section-header">
-                <ha-icon icon="mdi:thermometer-water" style="--mdc-icon-size: 15px; color: ${tempColor?.color || 'var(--vpc-text-secondary)'}"></ha-icon>
+                <span class="chem-inline-icon">${this._renderChemIcon('temperature', tempColor?.color || 'var(--vpc-text-secondary)', true)}</span>
                 <span>Wassertemperatur</span>
                 <span class="chem-section-status" style="color: ${tempColor?.color}">${getTempStatus(poolTemp)}</span>
               </div>
@@ -2020,7 +2405,7 @@ export class VioletPoolCard extends LitElement {
             ${phValue !== undefined ? html`
               <div class="chem-metric-card tooltip-wrap" style="--chem-color: ${phColor?.color || '#4CAF50'}" @click="${(e: Event) => { e.stopPropagation(); this._showMoreInfo(phSensorId!); }}">
                 <div class="chem-metric-header">
-                  <ha-icon icon="mdi:ph"></ha-icon>
+                  <span class="chem-inline-icon">${this._renderChemIcon('ph', phColor?.color || '#4CAF50', phOk)}</span>
                   <span>pH-Wert</span>
                 </div>
                 <div style="height: 80px; padding: 8px 0; display: flex; align-items: center; justify-content: center;">
@@ -2039,7 +2424,7 @@ export class VioletPoolCard extends LitElement {
             ${orpValue !== undefined ? html`
               <div class="chem-metric-card tooltip-wrap" style="--chem-color: ${orpColor?.color || '#4CAF50'}" @click="${(e: Event) => { e.stopPropagation(); this._showMoreInfo(orpSensorId!); }}">
                 <div class="chem-metric-header">
-                  <ha-icon icon="mdi:lightning-bolt"></ha-icon>
+                  <span class="chem-inline-icon">${this._renderChemIcon('orp', orpColor?.color || '#4CAF50', orpOk)}</span>
                   <span>Redoxwert</span>
                 </div>
                 <div style="height: 80px; padding: 8px 0; display: flex; align-items: center; justify-content: center;">
@@ -2059,7 +2444,7 @@ export class VioletPoolCard extends LitElement {
           ${chlorineValue !== undefined ? html`
             <div class="chem-section tooltip-wrap" style="margin-top: 12px;">
               <div class="chem-section-header">
-                <ha-icon icon="mdi:flask" style="--mdc-icon-size: 15px; color: ${chlorineOk ? '#4CAF50' : 'var(--vpc-warning)'}"></ha-icon>
+                <span class="chem-inline-icon">${this._renderChemIcon('chlorine', chlorineOk ? '#4CAF50' : 'var(--vpc-warning)', chlorineOk)}</span>
                 <span>Chlorgehalt</span>
                 <span class="chem-section-status" style="color: ${chlorineOk ? '#4CAF50' : 'var(--vpc-warning)'}">${getChlorineStatus(chlorineValue)}</span>
               </div>
@@ -2079,7 +2464,7 @@ export class VioletPoolCard extends LitElement {
           ${saltValue !== undefined ? html`
             <div class="chem-section tooltip-wrap" style="margin-top: 12px;">
               <div class="chem-section-header">
-                <ha-icon icon="mdi:shaker" style="--mdc-icon-size: 15px; color: ${saltOk ? '#4CAF50' : 'var(--vpc-warning)'}"></ha-icon>
+                <span class="chem-inline-icon">${this._renderChemIcon('salt', saltOk ? '#4CAF50' : 'var(--vpc-warning)', saltOk)}</span>
                 <span>Salzgehalt</span>
                 <span class="chem-section-status" style="color: ${saltOk ? '#4CAF50' : 'var(--vpc-warning)'}">${getSaltStatus(saltValue)}</span>
               </div>
@@ -2104,25 +2489,25 @@ export class VioletPoolCard extends LitElement {
               </div>
               ${phValue !== undefined && !phOk ? html`
                 <div style="padding: 6px 0; font-size: 13px; color: var(--vpc-text);">
-                  <ha-icon icon="mdi:ph" style="--mdc-icon-size: 14px; color: ${phColor?.color || 'var(--vpc-warning)'}"></ha-icon>
+                  <span class="chem-inline-icon chem-inline-icon-small">${this._renderChemIcon('ph', phColor?.color || 'var(--vpc-warning)', false)}</span>
                   <span>pH-Wert außerhalb des optimalen Bereichs (${phValue.toFixed(1)})</span>
                 </div>
               ` : ''}
               ${orpValue !== undefined && !orpOk ? html`
                 <div style="padding: 6px 0; font-size: 13px; color: var(--vpc-text);">
-                  <ha-icon icon="mdi:lightning-bolt" style="--mdc-icon-size: 14px; color: ${orpColor?.color || 'var(--vpc-warning)'}"></ha-icon>
+                  <span class="chem-inline-icon chem-inline-icon-small">${this._renderChemIcon('orp', orpColor?.color || 'var(--vpc-warning)', false)}</span>
                   <span>Redoxwert außerhalb des optimalen Bereichs (${orpValue.toFixed(0)} mV)</span>
                 </div>
               ` : ''}
               ${chlorineValue !== undefined && !chlorineOk ? html`
                 <div style="padding: 6px 0; font-size: 13px; color: var(--vpc-text);">
-                  <ha-icon icon="mdi:flask" style="--mdc-icon-size: 14px; color: var(--vpc-warning)"></ha-icon>
+                  <span class="chem-inline-icon chem-inline-icon-small">${this._renderChemIcon('chlorine', 'var(--vpc-warning)', false)}</span>
                   <span>Chlorgehalt außerhalb des optimalen Bereichs (${chlorineValue.toFixed(2)} mg/l)</span>
                 </div>
               ` : ''}
               ${saltValue !== undefined && !saltOk ? html`
                 <div style="padding: 6px 0; font-size: 13px; color: var(--vpc-text);">
-                  <ha-icon icon="mdi:shaker" style="--mdc-icon-size: 14px; color: var(--vpc-warning)"></ha-icon>
+                  <span class="chem-inline-icon chem-inline-icon-small">${this._renderChemIcon('salt', 'var(--vpc-warning)', false)}</span>
                   <span>Salzgehalt außerhalb des optimalen Bereichs (${saltValue.toFixed(0)} ppm)</span>
                 </div>
               ` : ''}
@@ -2539,6 +2924,7 @@ export class VioletPoolCard extends LitElement {
 
     const backwashEntity = backwashEntityId ? this.hass.states[backwashEntityId] : undefined;
     const isBackwashing = backwashEntity ? backwashEntity.state === 'on' : false;
+    const pressureTrend = TrendHelper.getEntityTrend(pressureEntity);
 
     // Pressure zones: 0-0.5 low, 0.5-1.2 normal, 1.2-1.6 elevated, >1.6 critical
     const pressureColor = pressure < 0.5 ? 'var(--vpc-text-secondary)'
@@ -2549,6 +2935,13 @@ export class VioletPoolCard extends LitElement {
       : pressure < 1.2 ? 'Normal'
       : pressure < 1.6 ? 'Erhöht – bald rückspülen'
       : 'Kritisch – sofort rückspülen!';
+    const maintenanceLevel = pressure < 1.2 ? 'Wartung ok' : pressure < 1.6 ? 'Service bald' : 'Sofort handeln';
+    const filterRecommendations: SeverityAlert[] = pressure < 1.2
+      ? [{ text: 'Filter arbeitet im Sollbereich', severity: 'ok', icon: 'mdi:check-circle', recommendation: 'Keine Maßnahme nötig, Druckentwicklung weiter beobachten.' }]
+      : pressure < 1.6
+      ? [{ text: 'Filterdruck erhöht', severity: 'warning', icon: 'mdi:filter-alert', recommendation: 'Rückspülung einplanen und Filtermedium kontrollieren.' }]
+      : [{ text: 'Filterdruck kritisch', severity: 'critical', icon: 'mdi:alert-octagon', recommendation: 'Rückspülung sofort starten und Pumpe nur mit Kontrolle weiterbetreiben.' }];
+    const trendDelta = TrendHelper.getTrendDelta(pressureTrend);
 
 
     return html`
@@ -2576,6 +2969,23 @@ export class VioletPoolCard extends LitElement {
             ${filterGaugeSVG(pressure, 3)}
           </div>
 
+          <div class="insight-grid">
+            <div class="insight-card">
+              <span class="insight-label">Druck</span>
+              <span class="insight-value" style="color:${pressureColor}">${pressure.toFixed(2)} bar</span>
+            </div>
+            <div class="insight-card">
+              <span class="insight-label">Wartung</span>
+              <span class="insight-value">${maintenanceLevel}</span>
+            </div>
+            <div class="insight-card">
+              <span class="insight-label">Trend</span>
+              <span class="insight-value">${trendDelta !== undefined ? `${trendDelta > 0 ? '+' : ''}${trendDelta.toFixed(2)} bar` : 'n/a'}</span>
+            </div>
+          </div>
+
+          ${pressureTrend.length > 1 ? this._renderSparkline(pressureTrend, pressureColor, 'Filterdruck Trend') : ''}
+
           <!-- Detailed status row -->
           <div class="info-row ${pressure >= 1.6 ? 'info-row-warning' : ''}" style="margin-top: 8px;">
             <ha-icon icon="mdi:gauge" style="--mdc-icon-size:16px;color:${pressureColor}"></ha-icon>
@@ -2593,6 +3003,7 @@ export class VioletPoolCard extends LitElement {
               </button>
             </div>
           ` : ''}
+          ${this._renderRecommendationList(filterRecommendations, 'Wartung')}
         </div>
       </ha-card>`;
   }
@@ -2615,6 +3026,32 @@ export class VioletPoolCard extends LitElement {
     // Get optional duration info
     const duration = Number(entity.attributes?.duration || 0); // in minutes
     const remaining = Number(entity.attributes?.remaining || 0); // in minutes
+    const progressPct = duration > 0 ? Math.min(100, Math.max(0, ((duration - remaining) / duration) * 100)) : 0;
+    const backwashRecommendations: SeverityAlert[] = [];
+
+    if (isRunning) {
+      backwashRecommendations.push({
+        severity: 'info',
+        icon: 'mdi:progress-clock',
+        text: 'Rueckspuelung aktiv',
+        recommendation: remaining > 0 ? `${remaining} min verbleibend. Nach Abschluss Filterdruck erneut pruefen.` : 'Laufenden Zyklus beobachten und anschliessend klares Wasserbild kontrollieren.',
+      });
+      if (duration > 20) {
+        backwashRecommendations.push({
+          severity: 'warning',
+          icon: 'mdi:timer-alert-outline',
+          text: 'Langer Rueckspuelzyklus',
+          recommendation: 'Hauefige oder lange Zyklen koennen auf hohen Schmutzeintrag oder einen zugesetzten Filter hinweisen.',
+        });
+      }
+    } else {
+      backwashRecommendations.push({
+        severity: 'info',
+        icon: 'mdi:check-circle-outline',
+        text: 'Rueckspuelung bereit',
+        recommendation: 'Nur bei erhoehtem Filterdruck oder als Teil der Wartung starten.',
+      });
+    }
 
     return html`
       <ha-card class="${this._getCardClasses(isRunning, config)}"
@@ -2637,20 +3074,30 @@ export class VioletPoolCard extends LitElement {
             ${config.show_state !== false ? html`<vpc-status-badge .state="${isRunning ? 'on' : 'off'}" .pulse="${isRunning}"></vpc-status-badge>` : ''}
           </div>
 
-          ${isRunning ? html`
-            <!-- Progress indicator -->
-            <div style="margin: 12px 0; padding: 12px; background: var(--vpc-surface); border-radius: 12px;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <span style="font-size: 12px; font-weight: 600; color: var(--vpc-text);">Fortschritt</span>
-                <span style="font-size: 12px; color: var(--vpc-text-secondary);">
-                  ${remaining > 0 ? `${remaining} min verbleibend` : 'Läuft…'}
-                </span>
-              </div>
-              <div style="width: 100%; height: 8px; background: var(--vpc-bg); border-radius: 4px; overflow: hidden;">
-                <div style="height: 100%; background: ${accentColor}; width: ${duration > 0 ? ((duration - remaining) / duration * 100) : 0}%; transition: width 1s linear;"></div>
-              </div>
+          <div class="insight-grid">
+            <div class="insight-card">
+              <span class="insight-label">Zyklus</span>
+              <span class="insight-value">${duration > 0 ? `${duration} min` : 'Auto'}</span>
             </div>
-          ` : ''}
+            <div class="insight-card">
+              <span class="insight-label">Verbleibend</span>
+              <span class="insight-value">${isRunning ? (remaining > 0 ? `${remaining} min` : 'Laeuft') : 'Standby'}</span>
+            </div>
+            <div class="insight-card">
+              <span class="insight-label">Fortschritt</span>
+              <span class="insight-value">${isRunning ? `${progressPct.toFixed(0)}%` : '0%'}</span>
+            </div>
+          </div>
+
+          <div style="margin: 2px 0 0; padding: 12px; background: var(--vpc-surface); border-radius: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span style="font-size: 12px; font-weight: 600; color: var(--vpc-text);">Rueckspuelzyklus</span>
+              <span style="font-size: 12px; color: var(--vpc-text-secondary);">${isRunning ? `${remaining > 0 ? `${remaining} min offen` : 'Laeuft'}` : 'Bereit'}</span>
+            </div>
+            <div style="width: 100%; height: 10px; background: var(--vpc-bg); border-radius: 6px; overflow: hidden;">
+              <div style="height: 100%; background: linear-gradient(90deg, ${accentColor} 0%, color-mix(in srgb, ${accentColor} 70%, white) 100%); width: ${isRunning ? progressPct : 0}%; transition: width 1s linear;"></div>
+            </div>
+          </div>
 
           <!-- Backwash info -->
           <div class="info-row tooltip-wrap" style="margin-top: 8px;">
@@ -2676,6 +3123,7 @@ export class VioletPoolCard extends LitElement {
               </button>
             </div>
           ` : ''}
+          ${this._renderRecommendationList(backwashRecommendations, 'Rueckspuel-Hinweise')}
         </div>
       </ha-card>`;
   }
@@ -2704,6 +3152,33 @@ export class VioletPoolCard extends LitElement {
     const percent = Math.min((level / maxLevel) * 100, 100);
     const levelColor = isLow ? 'var(--vpc-danger,#FF3B30)' : level < maxLevel * 0.7 ? 'var(--vpc-warning,#FF9F0A)' : 'var(--vpc-success,#34C759)';
     const levelLabel = isLow ? 'Niedrig' : level < maxLevel * 0.7 ? 'Normal' : 'Voll';
+    const levelTrend = TrendHelper.getEntityTrend(levelSensor);
+    const levelDelta = TrendHelper.getTrendDelta(levelTrend) ?? 0;
+    const refillRecommendations: SeverityAlert[] = [];
+
+    if (isLow) {
+      refillRecommendations.push({
+        severity: 'critical',
+        icon: 'mdi:water-alert',
+        text: 'Wasserstand niedrig',
+        recommendation: isRefilling ? 'Nachfuellung laeuft. Pegel und Ueberlauf beobachten.' : 'Nachfuellung starten oder Wasserverlust pruefen.',
+      });
+    } else if (isRefilling) {
+      refillRecommendations.push({
+        severity: 'info',
+        icon: 'mdi:water-plus',
+        text: 'Nachfuellung aktiv',
+        recommendation: 'Nach Abschluss Endstand kontrollieren, damit nicht ueberfuellt wird.',
+      });
+    }
+    if (levelDelta < -2) {
+      refillRecommendations.push({
+        severity: 'warning',
+        icon: 'mdi:trending-down',
+        text: 'Pegel sinkt',
+        recommendation: 'Rueckspuelung, Undichtigkeiten oder Verdunstungsverlust im Blick behalten.',
+      });
+    }
 
     return html`
       <ha-card class="${this._getCardClasses(!isLow, config)}"
@@ -2730,8 +3205,22 @@ export class VioletPoolCard extends LitElement {
             ` : ''}
           </div>
 
-          <!-- Level visualization -->
-          <div style="margin: 12px 0; padding: 12px; background: var(--vpc-surface); border-radius: 12px;">
+          <div class="insight-grid">
+            <div class="insight-card">
+              <span class="insight-label">Fuellstand</span>
+              <span class="insight-value">${percent.toFixed(0)}%</span>
+            </div>
+            <div class="insight-card">
+              <span class="insight-label">Trend</span>
+              <span class="insight-value">${levelTrend.length > 1 ? `${levelDelta >= 0 ? '+' : ''}${levelDelta.toFixed(1)}` : 'n/a'}</span>
+            </div>
+            <div class="insight-card">
+              <span class="insight-label">Ventil</span>
+              <span class="insight-value">${valveEntity ? (isRefilling ? 'Offen' : 'Zu') : 'n/a'}</span>
+            </div>
+          </div>
+
+          <div style="margin: 2px 0 0; padding: 12px; background: var(--vpc-surface); border-radius: 12px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
               <span style="font-size: 12px; font-weight: 600; color: var(--vpc-text);">Füllstand</span>
               <span style="font-size: 12px; color: var(--vpc-text-secondary);">${level.toFixed(1)} / ${maxLevel}</span>
@@ -2745,6 +3234,7 @@ export class VioletPoolCard extends LitElement {
               <!-- Percentage text on bar -->
               <span style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 11px; font-weight: bold; color: ${percent > 50 ? 'white' : 'var(--vpc-text)'}; text-shadow: 0 0 2px rgba(0,0,0,0.3); z-index: 1; pointer-events: none;">${percent.toFixed(0)}%</span>
             </div>
+            ${levelTrend.length > 1 ? this._renderSparkline(levelTrend, levelColor, 'Wasserstand Trend') : ''}
           </div>
 
           <!-- Info rows -->
@@ -2772,6 +3262,7 @@ export class VioletPoolCard extends LitElement {
               </button>
             </div>
           ` : ''}
+          ${this._renderRecommendationList(refillRecommendations, 'Nachfuell-Hinweise')}
         </div>
       </ha-card>`;
   }
@@ -2885,8 +3376,35 @@ export class VioletPoolCard extends LitElement {
 
     const isFlowing = flowRate > 0;
     const flowColor = isFlowing ? StateColorHelper.getFlowRateColor(flowRate) : undefined;
+    const flowTrend = TrendHelper.getEntityTrend(entity);
+    const flowDelta = TrendHelper.getTrendDelta(flowTrend) ?? 0;
+    const minToday = ((entity.attributes?.min_today as number) || 0);
+    const maxToday = ((entity.attributes?.max_today as number) || 0);
+    const flowRecommendations: SeverityAlert[] = [];
+
+    if (!isFlowing) {
+      flowRecommendations.push({
+        severity: 'critical',
+        icon: 'mdi:water-off-outline',
+        text: 'Kein Durchfluss erkannt',
+        recommendation: 'Pumpe, Ventile und Filterweg pruefen. Ohne Durchfluss leidet die Wasseraufbereitung.',
+      });
+    } else if (flowRate < 10) {
+      flowRecommendations.push({
+        severity: 'warning',
+        icon: 'mdi:trending-down',
+        text: 'Durchfluss niedrig',
+        recommendation: 'Filterdruck, Pumpendrehzahl und Engstellen kontrollieren.',
+      });
+    } else if (flowRate > 25) {
+      flowRecommendations.push({
+        severity: 'info',
+        icon: 'mdi:trending-up',
+        text: 'Durchfluss hoch',
+        recommendation: 'Fuer Boost-Betrieb ok, aber auf Energiebedarf und Leitungsgeraeusche achten.',
+      });
+    }
     
-    // Enhanced controls for flow rate
     const quickActions: QuickAction[] = [
       {
         icon: 'mdi:water-pump',
@@ -2925,6 +3443,21 @@ export class VioletPoolCard extends LitElement {
             ${config.show_state ? html`<vpc-status-badge .state="${isFlowing ? 'on' : 'off'}"></vpc-status-badge>` : ''}
           </div>
 
+          <div class="insight-grid">
+            <div class="insight-card">
+              <span class="insight-label">Jetzt</span>
+              <span class="insight-value">${flowRate.toFixed(1)} ${unit}</span>
+            </div>
+            <div class="insight-card">
+              <span class="insight-label">Min/Max</span>
+              <span class="insight-value">${minToday.toFixed(1)} / ${maxToday.toFixed(1)}</span>
+            </div>
+            <div class="insight-card">
+              <span class="insight-label">Trend</span>
+              <span class="insight-value">${flowTrend.length > 1 ? `${flowDelta >= 0 ? '+' : ''}${flowDelta.toFixed(1)}` : 'n/a'}</span>
+            </div>
+          </div>
+
           <div class="info-row tooltip-wrap" style="margin-top: 12px;">
             <ha-icon icon="mdi:water"></ha-icon>
             <span class="info-label">Current Flow</span>
@@ -2936,7 +3469,6 @@ export class VioletPoolCard extends LitElement {
             </div>
           </div>
 
-          <!-- Flow visualization -->
           <div style="width: 100%; height: 24px; background: var(--vpc-surface); border-radius: 12px; overflow: hidden; position: relative; margin-top: 12px;">
             <div style="height: 100%; background: linear-gradient(90deg, ${flowColor?.color || accentColor} 0%, ${flowColor?.color || accentColor}dd 100%); width: ${Math.min(100, Math.max(0, (flowRate / 30) * 100))}%; transition: width 0.5s ease; position: relative;">
               ${isFlowing ? html`
@@ -2945,16 +3477,17 @@ export class VioletPoolCard extends LitElement {
             </div>
             <span style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 11px; font-weight: bold; color: var(--vpc-text); z-index: 1;">${Math.round((flowRate / 30) * 100)}%</span>
           </div>
+          ${flowTrend.length > 1 ? this._renderSparkline(flowTrend, flowColor?.color || accentColor, 'Durchfluss Trend') : ''}
 
           ${config.show_detail_status ? html`
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px;">
               <div style="background: var(--vpc-surface); border-radius: 8px; padding: 8px;">
                 <div style="font-size: 11px; color: var(--vpc-text-secondary);">Min Today</div>
-                <div style="font-size: 14px; font-weight: 600;">${((entity.attributes?.min_today as number) || 0).toFixed(2)} ${unit}</div>
+                <div style="font-size: 14px; font-weight: 600;">${minToday.toFixed(2)} ${unit}</div>
               </div>
               <div style="background: var(--vpc-surface); border-radius: 8px; padding: 8px;">
                 <div style="font-size: 11px; color: var(--vpc-text-secondary);">Max Today</div>
-                <div style="font-size: 14px; font-weight: 600;">${((entity.attributes?.max_today as number) || 0).toFixed(2)} ${unit}</div>
+                <div style="font-size: 14px; font-weight: 600;">${maxToday.toFixed(2)} ${unit}</div>
               </div>
             </div>
           ` : ''}
@@ -2964,6 +3497,7 @@ export class VioletPoolCard extends LitElement {
               <vpc-quick-actions .actions="${quickActions}"></vpc-quick-actions>
             </div>
           ` : ''}
+          ${this._renderRecommendationList(flowRecommendations, 'Flow-Hinweise')}
         </div>
       </ha-card>
     `;
@@ -2990,6 +3524,32 @@ export class VioletPoolCard extends LitElement {
     const flowSensorId = (config as any).flow_rate_entity || this._buildEntityId('sensor', 'inlet_flow');
     const flowSensor = this.hass.states[flowSensorId];
     const flow = flowSensor ? parseFloat(flowSensor.state) || 0 : undefined;
+    const inletTrend = flowSensor ? TrendHelper.getEntityTrend(flowSensor) : [];
+    const inletDelta = TrendHelper.getTrendDelta(inletTrend) ?? 0;
+    const inletRecommendations: SeverityAlert[] = [];
+
+    if (isInflowing && (!flow || flow <= 0)) {
+      inletRecommendations.push({
+        severity: 'critical',
+        icon: 'mdi:pipe-disconnected',
+        text: 'Anstroemung aktiv ohne Flow',
+        recommendation: 'Einlass, Ventilstellung und zugehoerigen Sensor pruefen.',
+      });
+    } else if (!isInflowing && flow && flow > 0.3) {
+      inletRecommendations.push({
+        severity: 'warning',
+        icon: 'mdi:water-sync',
+        text: 'Restdurchfluss trotz Aus-Zustand',
+        recommendation: 'Moeglichen Nachlauf oder eine undichte Ventilstellung kontrollieren.',
+      });
+    } else if (isInflowing) {
+      inletRecommendations.push({
+        severity: 'info',
+        icon: 'mdi:check-circle-outline',
+        text: 'Einstroemung stabil',
+        recommendation: 'Gute Beckendurchmischung unterstuetzt Temperatur- und Chemieverteilung.',
+      });
+    }
 
     return html`
       <ha-card class="${this._getCardClasses(isInflowing, config)}"
@@ -3016,6 +3576,21 @@ export class VioletPoolCard extends LitElement {
             ` : ''}
           </div>
 
+          <div class="insight-grid">
+            <div class="insight-card">
+              <span class="insight-label">Status</span>
+              <span class="insight-value">${isInflowing ? 'On' : 'Off'}</span>
+            </div>
+            <div class="insight-card">
+              <span class="insight-label">Flow</span>
+              <span class="insight-value">${flow !== undefined ? `${flow.toFixed(1)} m³/h` : 'n/a'}</span>
+            </div>
+            <div class="insight-card">
+              <span class="insight-label">Trend</span>
+              <span class="insight-value">${inletTrend.length > 1 ? `${inletDelta >= 0 ? '+' : ''}${inletDelta.toFixed(1)}` : 'n/a'}</span>
+            </div>
+          </div>
+
           <!-- Info rows -->
           <div class="info-row tooltip-wrap" style="margin-top: 8px;">
             <ha-icon icon="mdi:arrow-right-bold" style="--mdc-icon-size:17px;color:${inflowColor}"></ha-icon>
@@ -3029,16 +3604,20 @@ export class VioletPoolCard extends LitElement {
           </div>
 
           ${flow !== undefined ? html`
-            <div class="info-row tooltip-wrap" style="margin-top: 8px;">
-              <ha-icon icon="mdi:speedometer" style="--mdc-icon-size:17px"></ha-icon>
-              <span class="info-label">Durchfluss</span>
-              <span class="info-value">${flow.toFixed(1)} m³/h</span>
+            <div class="info-row tooltip-wrap" style="margin-top: 8px; flex-direction: column; align-items: stretch;">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <ha-icon icon="mdi:speedometer" style="--mdc-icon-size:17px"></ha-icon>
+                <span class="info-label">Durchfluss</span>
+                <span class="info-value">${flow.toFixed(1)} m³/h</span>
+              </div>
+              ${inletTrend.length > 1 ? this._renderSparkline(inletTrend, inflowColor, 'Anstroemung Trend') : ''}
               <div class="t-tip">
                 <div class="t-tip-title">Einström-Durchfluss</div>
                 <div class="t-tip-desc">Aktuelle Durchflussrate der Anströmung.</div>
               </div>
             </div>
           ` : ''}
+          ${this._renderRecommendationList(inletRecommendations, 'Anstroem-Hinweise')}
 
           ${config.show_controls !== false ? html`
             <div class="cover-controls" style="margin-top: 12px;">
@@ -3077,6 +3656,18 @@ export class VioletPoolCard extends LitElement {
     // Check for speed/power level
     const speedLevel = entity.attributes?.speed_level as number | undefined || entity.attributes?.power_level as number | undefined;
     const speedPercent = speedLevel !== undefined ? (speedLevel / 10) * 100 : undefined;
+    const performanceLabel = speedLevel === undefined ? 'Manuell' : speedLevel <= 3 ? 'Soft' : speedLevel <= 7 ? 'Sport' : 'Power';
+    const currentRecommendations: SeverityAlert[] = [];
+
+    if (isActive && speedLevel !== undefined && speedLevel <= 3) {
+      currentRecommendations.push({ severity: 'info', icon: 'mdi:swim', text: 'Sanfter Gegenstrom', recommendation: 'Ideal fuer lockeres Schwimmen oder Techniktraining.' });
+    }
+    if (isActive && speedLevel !== undefined && speedLevel >= 8) {
+      currentRecommendations.push({ severity: 'warning', icon: 'mdi:lightning-bolt-outline', text: 'Hohe Gegenstromleistung', recommendation: 'Nur kurzzeitig auf hohen Stufen fahren und Motorlast beobachten.' });
+    }
+    if (!isActive) {
+      currentRecommendations.push({ severity: 'info', icon: 'mdi:power-standby', text: 'Gegenstrom bereit', recommendation: 'Vor dem Start passende Leistungsstufe fuer Training oder Spielbetrieb festlegen.' });
+    }
 
     return html`
       <ha-card class="${this._getCardClasses(isActive, config)}"
@@ -3101,6 +3692,21 @@ export class VioletPoolCard extends LitElement {
                 <span style="font-size: 18px; font-weight: bold; color: ${activeColor};">Stufe ${speedLevel}</span>
               </div>
             ` : ''}
+          </div>
+
+          <div class="insight-grid">
+            <div class="insight-card">
+              <span class="insight-label">Leistung</span>
+              <span class="insight-value">${speedLevel !== undefined ? `Stufe ${speedLevel}` : 'n/a'}</span>
+            </div>
+            <div class="insight-card">
+              <span class="insight-label">Profil</span>
+              <span class="insight-value">${performanceLabel}</span>
+            </div>
+            <div class="insight-card">
+              <span class="insight-label">Status</span>
+              <span class="insight-value">${isActive ? 'Training' : 'Standby'}</span>
+            </div>
           </div>
 
           ${speedPercent !== undefined ? html`
@@ -3153,6 +3759,7 @@ export class VioletPoolCard extends LitElement {
               </button>
             </div>
           ` : ''}
+          ${this._renderRecommendationList(currentRecommendations, 'Gegenstrom-Hinweise')}
         </div>
       </ha-card>`;
   }
@@ -3237,15 +3844,28 @@ export class VioletPoolCard extends LitElement {
     }
 
     const currentLevel = parseFloat(sensorEntity.state) || 0;
-    const maxLevel = (config as any).max_level || 5000; // Default 5000ml
+    const maxLevel = (config as any).max_level || 5000;
     const name = config.name || sensorEntity.attributes.friendly_name || defaultName;
     const accentColor = this._getAccentColor(cardType, config);
-
     const fillPercent = Math.min((currentLevel / maxLevel) * 100, 100);
     const isLow = fillPercent < 20;
     const isEmpty = fillPercent < 5;
     const statusColor = isEmpty ? 'var(--vpc-danger, #FF3B30)' : isLow ? 'var(--vpc-warning, #FF9F0A)' : accentColor;
     const statusText = isEmpty ? 'Leer' : isLow ? 'Niedrig' : 'OK';
+    const canisterTrend = TrendHelper.getEntityTrend(sensorEntity);
+    const canisterDelta = TrendHelper.getTrendDelta(canisterTrend) ?? 0;
+    const usagePerDay = Number(sensorEntity.attributes?.daily_usage_ml || 0);
+    const estimatedDays = usagePerDay > 0 ? currentLevel / usagePerDay : undefined;
+    const canisterRecommendations: SeverityAlert[] = [];
+
+    if (isEmpty) {
+      canisterRecommendations.push({ severity: 'critical', icon: 'mdi:cup-off', text: `${shortLabel} fast leer`, recommendation: 'Kanister sofort tauschen oder nachfuellen, damit die Wasserpflege nicht aussetzt.' });
+    } else if (isLow) {
+      canisterRecommendations.push({ severity: 'warning', icon: 'mdi:cup-water', text: `${shortLabel} knapp`, recommendation: estimatedDays !== undefined ? `Voraussichtliche Reserve: ${estimatedDays.toFixed(1)} Tage.` : 'Ersatzkanister bereitlegen.' });
+    }
+    if (canisterDelta < -50) {
+      canisterRecommendations.push({ severity: 'info', icon: 'mdi:trending-down', text: 'Verbrauch sichtbar', recommendation: 'Trend mit Sollwerten und Dosierintervallen abgleichen.' });
+    }
 
     return html`
       <ha-card class="${this._getCardClasses(!isEmpty, config)}"
@@ -3272,8 +3892,22 @@ export class VioletPoolCard extends LitElement {
             ` : ''}
           </div>
 
-          <!-- Fill level visualization -->
-          <div style="margin: 12px 0; padding: 12px; background: var(--vpc-surface); border-radius: 12px;">
+          <div class="insight-grid">
+            <div class="insight-card">
+              <span class="insight-label">Fuellung</span>
+              <span class="insight-value">${fillPercent.toFixed(0)}%</span>
+            </div>
+            <div class="insight-card">
+              <span class="insight-label">Trend</span>
+              <span class="insight-value">${canisterTrend.length > 1 ? `${canisterDelta >= 0 ? '+' : ''}${canisterDelta.toFixed(0)} ml` : 'n/a'}</span>
+            </div>
+            <div class="insight-card">
+              <span class="insight-label">Reserve</span>
+              <span class="insight-value">${estimatedDays !== undefined ? `${estimatedDays.toFixed(1)} d` : 'n/a'}</span>
+            </div>
+          </div>
+
+          <div style="margin: 2px 0 0; padding: 12px; background: var(--vpc-surface); border-radius: 12px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
               <span style="font-size: 12px; font-weight: 600; color: var(--vpc-text);">Füllstand</span>
               <span style="font-size: 12px; color: var(--vpc-text-secondary);">Max: ${maxLevel} ml</span>
@@ -3285,9 +3919,9 @@ export class VioletPoolCard extends LitElement {
               <ha-icon icon="mdi:cup" style="--mdc-icon-size:12px"></ha-icon>
               ${fillPercent.toFixed(0)}% gefüllt
             </div>
+            ${canisterTrend.length > 1 ? this._renderSparkline(canisterTrend, statusColor, `${shortLabel} Trend`) : ''}
           </div>
 
-          <!-- Info rows -->
           <div class="info-row tooltip-wrap" style="margin-top: 8px;">
             <ha-icon icon="${defaultIcon}" style="--mdc-icon-size:17px;color:${statusColor}"></ha-icon>
             <span class="info-label">Status</span>
@@ -3305,6 +3939,7 @@ export class VioletPoolCard extends LitElement {
               <span style="vertical-align:middle;">Noch ${currentLevel.toFixed(0)} ml verfügbar. Empfehlung: Neuen Kanister bereithalten.</span>
             </div>
           ` : ''}
+          ${this._renderRecommendationList(canisterRecommendations, `${shortLabel}-Hinweise`)}
         </div>
       </ha-card>`;
   }
@@ -3313,6 +3948,17 @@ export class VioletPoolCard extends LitElement {
 
   static get styles(): CSSResultGroup {
     return css`:host{--vpc-font:-apple-system, 'SF Pro Display', 'SF Pro Text', system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;--vpc-spacing:18px;--vpc-radius:20px;--vpc-inner-radius:12px;--vpc-bg:var(--ha-card-background, var(--card-background-color, #ffffff));--vpc-surface:rgba(120,120,128,0.06);--vpc-border:none;--vpc-shadow:0 2px 20px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.04);--vpc-backdrop:none;--vpc-primary:var(--primary-color, #007AFF);--vpc-success:#34C759;--vpc-warning:#FF9F0A;--vpc-danger:#FF3B30;--vpc-purple:#AF52DE;--vpc-teal:#5AC8FA;--vpc-orange:#FF9500;--vpc-indigo:#5856D6;--vpc-text:var(--primary-text-color, #1C1C1E);--vpc-text-secondary:var(--secondary-text-color, #6D6D72);--vpc-text-tertiary:rgba(60,60,67,0.45);--vpc-icon-size:22px;--vpc-transition:all 0.28s cubic-bezier(0.34, 1.4, 0.64, 1);--vpc-transition-fast:all 0.18s ease;--card-accent:var(--primary-color, #007AFF);--icon-accent:var(--card-accent);display:block;font-family:var(--vpc-font);}ha-card.theme-classic{--vpc-bg:#ffffff;--vpc-shadow:0 2px 20px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04);--vpc-radius:22px;--vpc-inner-radius:13px;--vpc-surface:rgba(120,120,128,0.06);--vpc-primary:#007AFF;}ha-card.theme-midnight{--vpc-bg:#1C1C1E;--vpc-surface:rgba(255,255,255,0.06);--vpc-border:1px solid rgba(255,255,255,0.08);--vpc-shadow:0 4px 30px rgba(0,0,0,0.4);--vpc-radius:22px;--vpc-text:#FFFFFF;--vpc-text-secondary:#8E8E93;--vpc-text-tertiary:rgba(255,255,255,0.25);--vpc-primary:#0A84FF;--vpc-success:#30D158;--vpc-warning:#FFD60A;--vpc-danger:#FF453A;}ha-card.theme-elegance, ha-card.theme-frost{--vpc-bg:rgba(255,255,255,0.72);--vpc-backdrop:blur(24px) saturate(180%);--vpc-radius:26px;--vpc-border:1px solid rgba(255,255,255,0.4);--vpc-shadow:0 8px 40px rgba(31,38,135,0.12), 0 2px 8px rgba(0,0,0,0.06);}ha-card.theme-vibrant{--vpc-radius:18px;--vpc-spacing:20px;--vpc-shadow:0 1px 3px rgba(0,0,0,0.05), 0 0 0 1px rgba(0,0,0,0.04);}ha-card.theme-pure{--vpc-radius:14px;--vpc-shadow:none;--vpc-border:1px solid rgba(0,0,0,0.07);--vpc-surface:transparent;}ha-card.theme-glow{--vpc-bg:#0D0D14;--vpc-border:1px solid rgba(0,212,255,0.2);--vpc-shadow:0 0 30px rgba(0,212,255,0.07);--vpc-radius:14px;--vpc-primary:#00D4FF;--vpc-text:#E8E8F0;--vpc-text-secondary:#6E6E80;--vpc-surface:rgba(0,212,255,0.04);--vpc-success:#00E676;--vpc-warning:#FFEA00;--vpc-danger:#FF1744;}ha-card.theme-metallic{--vpc-bg:linear-gradient(145deg, rgba(255,255,255,0.96) 0%, rgba(248,248,255,0.96) 100%);--vpc-radius:24px;--vpc-shadow:0 12px 50px -8px rgba(80,80,160,0.15), 0 0 0 1px rgba(255,255,255,0.9);--vpc-border:1px solid rgba(255,255,255,0.7);}ha-card.theme-ocean{--vpc-bg:#0077BE;--vpc-primary:#00A8E8;--vpc-surface:rgba(0,168,232,0.12);--vpc-text:#FFFFFF;--vpc-text-secondary:rgba(255,255,255,0.75);--vpc-shadow:0 6px 28px rgba(0,119,190,0.3);--vpc-radius:20px;}ha-card.theme-sunset{--vpc-bg:linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);--vpc-primary:#FFF8DC;--vpc-surface:rgba(255,248,220,0.18);--vpc-text:#FFFFFF;--vpc-text-secondary:rgba(255,255,255,0.8);--vpc-shadow:0 8px 32px rgba(255,107,53,0.35);--vpc-radius:22px;}ha-card.theme-forest{--vpc-bg:#228B22;--vpc-primary:#90EE90;--vpc-surface:rgba(144,238,144,0.15);--vpc-text:#FFFFFF;--vpc-text-secondary:rgba(255,255,255,0.75);--vpc-shadow:0 6px 28px rgba(34,139,34,0.35);--vpc-radius:20px;}ha-card.theme-aurora{--vpc-bg:linear-gradient(135deg, #00C9FF 0%, #92FE9D 50%, #5EE7DF 100%);--vpc-primary:#FFFFFF;--vpc-surface:rgba(255,255,255,0.16);--vpc-text:#FFFFFF;--vpc-text-secondary:rgba(255,255,255,0.8);--vpc-shadow:0 10px 40px rgba(0,201,255,0.25);--vpc-radius:24px;}@media (prefers-color-scheme:dark){ha-card.theme-classic{--vpc-bg:#1C1C1E;--vpc-surface:rgba(255,255,255,0.06);--vpc-border:1px solid rgba(255,255,255,0.08);--vpc-text:#FFFFFF;--vpc-text-secondary:#8E8E93;--vpc-primary:#0A84FF;--vpc-success:#30D158;--vpc-warning:#FFD60A;--vpc-danger:#FF453A;}ha-card.theme-elegance, ha-card.theme-frost{--vpc-bg:rgba(18,18,30,0.80);--vpc-border:1px solid rgba(255,255,255,0.09);--vpc-shadow:0 8px 40px rgba(0,0,0,0.45);}ha-card.theme-metallic{--vpc-bg:linear-gradient(145deg, rgba(28,28,38,0.97) 0%, rgba(20,20,32,0.97) 100%);--vpc-border:1px solid rgba(255,255,255,0.07);}ha-card.theme-pure{--vpc-border:1px solid rgba(255,255,255,0.07);}ha-card.theme-vibrant{--vpc-shadow:0 1px 3px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.04);}ha-card.theme-ocean{--vpc-bg:#005A8F;--vpc-primary:#6DD5FA;--vpc-surface:rgba(109,213,250,0.10);--vpc-shadow:0 8px 32px rgba(0,90,143,0.5);}ha-card.theme-sunset{--vpc-bg:linear-gradient(135deg, #D4502D 0%, #C7761A 100%);--vpc-primary:#FFE4B5;--vpc-surface:rgba(255,228,181,0.12);--vpc-shadow:0 8px 32px rgba(212,80,45,0.5);}ha-card.theme-forest{--vpc-bg:#1A5C1A;--vpc-primary:#98FB98;--vpc-surface:rgba(152,251,152,0.10);--vpc-shadow:0 8px 32px rgba(26,92,26,0.5);}}ha-card{font-family:var(--vpc-font);padding:var(--vpc-spacing);background:var(--vpc-bg);border-radius:var(--vpc-radius);box-shadow:var(--vpc-shadow);border:var(--vpc-border);backdrop-filter:var(--vpc-backdrop);-webkit-backdrop-filter:var(--vpc-backdrop);transition:transform 0.22s cubic-bezier(0.34,1.4,0.64,1), box-shadow 0.22s ease;overflow:visible;position:relative;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;}ha-card:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,0,0,0.11), 0 2px 6px rgba(0,0,0,0.05);}ha-card:active{transform:scale(0.985);box-shadow:0 2px 8px rgba(0,0,0,0.07);transition:transform 0.1s ease, box-shadow 0.1s ease;}ha-card.theme-midnight:hover{box-shadow:0 8px 30px rgba(0,0,0,0.5);}ha-card.theme-glow:hover{box-shadow:0 0 40px rgba(0,212,255,0.12), 0 4px 20px rgba(0,0,0,0.3);}ha-card.theme-glow.is-active{box-shadow:0 0 50px rgba(0,212,255,0.2), inset 0 0 20px rgba(0,212,255,0.04);border-color:rgba(0,212,255,0.35);}.accent-bar{position:absolute;top:0;left:0;right:0;height:3px;background:var(--card-accent);opacity:0.65;transition:opacity 0.3s ease, height 0.3s ease;}ha-card.is-active .accent-bar{height:4px;opacity:1;}ha-card.theme-glow .accent-bar{background:linear-gradient(90deg, #00D4FF, #7C4DFF, #00D4FF);box-shadow:0 0 12px rgba(0,212,255,0.5);height:2px;animation:neon-flow 3s linear infinite;}ha-card.theme-pure .accent-bar{height:2px;opacity:0.45;}@keyframes neon-flow{0%{background-position:0% 50%;}100%{background-position:200% 50%;}}.card-content{display:flex;flex-direction:column;gap:14px;}.card-content.compact{flex-direction:row;align-items:center;gap:14px;}.header{display:flex;align-items:center;gap:14px;}.header-icon{width:46px;height:46px;border-radius:15px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb, var(--icon-accent, var(--vpc-primary)) 12%, transparent);transition:background 0.25s ease, box-shadow 0.25s ease;flex-shrink:0;}.header-icon.icon-active{background:color-mix(in srgb, var(--icon-accent, var(--vpc-primary)) 18%, transparent);box-shadow:0 0 0 5px color-mix(in srgb, var(--icon-accent, var(--vpc-primary)) 8%, transparent);}ha-card.theme-glow .header-icon{background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.18);}ha-card.theme-glow .header-icon.icon-active{box-shadow:0 0 16px rgba(0,212,255,0.25);}.header-icon ha-icon{--mdc-icon-size:24px;color:var(--icon-accent, var(--vpc-primary));}.header-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}.name{font-family:var(--vpc-font);font-size:16px;font-weight:600;letter-spacing:-0.3px;color:var(--vpc-text);line-height:1.25;}.header-subtitle{font-family:var(--vpc-font);font-size:13px;font-weight:400;color:var(--vpc-text-secondary);line-height:1.2;}ha-icon{--mdc-icon-size:var(--vpc-icon-size);color:var(--vpc-primary);transition:color 0.2s ease;}@keyframes rotate{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}@keyframes pulse-glow{0%, 100%{opacity:1;transform:scale(1);}50%{opacity:0.65;transform:scale(0.95);}}@keyframes breathe{0%, 100%{transform:scale(1);opacity:1;}50%{transform:scale(1.08);opacity:0.85;}}@keyframes spin-slow{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}.pump-running{animation:rotate 1.8s linear infinite;}.heater-active{animation:breathe 2.5s ease-in-out infinite;color:var(--vpc-danger, #FF3B30);}.solar-active{animation:breathe 3s ease-in-out infinite;color:var(--vpc-warning, #FF9F0A);}.dosing-active{animation:pulse-glow 2s ease-in-out infinite;color:var(--vpc-success, #34C759);}.speed-segments-container{display:flex;align-items:center;gap:8px;}.speed-segments{display:flex;flex:1;gap:6px;}.speed-segment{flex:1;display:flex;align-items:center;justify-content:center;gap:4px;padding:9px 6px;border-radius:var(--vpc-inner-radius, 12px);border:none;background:var(--vpc-surface, rgba(120,120,128,0.06));color:var(--vpc-text-secondary);font-family:var(--vpc-font);font-size:12px;font-weight:500;cursor:pointer;transition:all 0.18s ease;-webkit-tap-highlight-color:transparent;letter-spacing:-0.2px;position:relative;overflow:visible;}.speed-segment:hover{background:color-mix(in srgb, var(--seg-color) 10%, transparent);color:var(--seg-color);}.speed-segment.seg-active{background:color-mix(in srgb, var(--seg-color) 15%, transparent);color:var(--seg-color);font-weight:600;box-shadow:inset 0 0 0 1.5px color-mix(in srgb, var(--seg-color) 40%, transparent);}.speed-segment.seg-past{background:color-mix(in srgb, var(--seg-color) 08%, transparent);color:color-mix(in srgb, var(--seg-color) 70%, var(--vpc-text-secondary));}.speed-off-btn{width:38px;height:38px;border-radius:12px;border:none;background:var(--vpc-surface);color:var(--vpc-text-secondary);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.18s ease;flex-shrink:0;-webkit-tap-highlight-color:transparent;}.speed-off-btn:hover{background:rgba(255,59,48,0.1);color:var(--vpc-danger, #FF3B30);}.speed-off-btn.seg-active{background:rgba(255,59,48,0.12);color:var(--vpc-danger, #FF3B30);box-shadow:inset 0 0 0 1.5px rgba(255,59,48,0.3);}ha-card.theme-glow .speed-segment{border:1px solid rgba(0,212,255,0.1);}ha-card.theme-glow .speed-segment.seg-active{box-shadow:0 0 12px color-mix(in srgb, var(--seg-color) 50%, transparent);}.temp-hero{display:flex;align-items:center;gap:12px;padding:6px 0 4px;}.temp-hero-main{display:flex;align-items:baseline;gap:4px;}.temp-hero-value{font-family:var(--vpc-font);font-size:44px;font-weight:700;line-height:1;letter-spacing:-2px;color:var(--temp-color, var(--vpc-text));}.temp-hero-unit{font-size:22px;font-weight:400;color:var(--temp-color, var(--vpc-text));opacity:0.65;letter-spacing:-0.5px;}.temp-hero-target-pill{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:100px;background:var(--vpc-surface);font-size:13px;font-weight:500;color:var(--vpc-text-secondary);white-space:nowrap;}.temp-range-bar, .chem-range-bar{display:flex;flex-direction:column;gap:5px;}.temp-range-track, .chem-range-track{height:6px;background:var(--vpc-surface);border-radius:100px;position:relative;overflow:visible;}.temp-range-fill, .chem-range-fill{height:100%;border-radius:100px;transition:width 0.5s cubic-bezier(0.34,1.4,0.64,1);}.temp-range-target{position:absolute;top:50%;transform:translate(-50%, -50%);width:3px;height:14px;background:var(--vpc-text-secondary);border-radius:2px;opacity:0.7;}.temp-range-labels, .chem-range-labels{display:flex;justify-content:space-between;font-size:11px;font-weight:400;color:var(--vpc-text-tertiary, rgba(60,60,67,0.45));letter-spacing:0px;}.dosing-value-block{display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:var(--vpc-inner-radius, 12px);background:var(--vpc-surface);}ha-card.theme-glow .dosing-value-block{background:rgba(0,212,255,0.04);border:1px solid rgba(0,212,255,0.08);}.dosing-value-row{display:flex;align-items:center;justify-content:space-between;gap:10px;}.dosing-value-main{display:flex;align-items:baseline;gap:6px;}.dosing-label-tag{font-size:12px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;color:var(--vpc-text-secondary);}.dosing-current-value{font-family:var(--vpc-font);font-size:32px;font-weight:700;line-height:1;letter-spacing:-1px;}.dosing-current-unit{font-size:15px;font-weight:400;opacity:0.65;}.dosing-status-pill{padding:4px 10px;border-radius:100px;font-size:12px;font-weight:600;white-space:nowrap;}.chem-range-target{position:absolute;top:50%;transform:translate(-50%, -50%);display:flex;flex-direction:column;align-items:center;gap:2px;}.chem-target-line{width:2px;height:14px;background:var(--vpc-text);border-radius:2px;opacity:0.5;}.chem-target-label{position:absolute;top:16px;font-size:9px;font-weight:600;color:var(--vpc-text-secondary);white-space:nowrap;transform:translateX(-50%);}.chem-mini-bar{width:100%;height:4px;background:var(--vpc-surface, rgba(120,120,128,0.1));border-radius:100px;overflow:hidden;position:relative;margin-top:4px;}.chem-mini-fill{height:100%;border-radius:100px;transition:width 0.5s cubic-bezier(0.34,1.4,0.64,1);}.chem-mini-ideal{position:absolute;top:0;height:100%;background:rgba(52,199,89,0.18);border-radius:2px;}.solar-temp-comparison{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px;background:var(--vpc-surface);border-radius:var(--vpc-inner-radius, 12px);}ha-card.theme-glow .solar-temp-comparison{background:rgba(0,212,255,0.04);border:1px solid rgba(0,212,255,0.08);}.solar-temp-tile{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;}.solar-temp-tile ha-icon{--mdc-icon-size:18px;color:var(--vpc-text-secondary);}.solar-temp-tile-val{font-size:20px;font-weight:700;letter-spacing:-0.5px;color:var(--vpc-text);line-height:1;}.solar-temp-tile-label{font-size:11px;font-weight:500;color:var(--vpc-text-secondary);text-transform:uppercase;letter-spacing:0.3px;}.solar-delta-badge{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 12px;border-radius:100px;font-size:12px;font-weight:700;}.delta-great{background:rgba(52,199,89,0.12);color:var(--vpc-success, #34C759);}.delta-ok{background:rgba(255,159,10,0.12);color:var(--vpc-warning, #FF9F0A);}.delta-low{background:rgba(255,59,48,0.10);color:var(--vpc-danger, #FF3B30);}.delta-hint-text{font-size:12px;font-weight:400;color:var(--vpc-text-secondary);padding:2px 0;}.chemistry-grid{display:grid;grid-template-columns:repeat(3, 1fr);gap:8px;}.chemistry-card{display:flex;flex-direction:column;align-items:center;gap:2px;padding:14px 8px 12px;border-radius:var(--vpc-inner-radius, 12px);background:var(--vpc-surface);cursor:pointer;transition:transform 0.18s ease, background 0.18s ease;position:relative;overflow:visible;}.chemistry-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--chem-color, var(--vpc-primary));opacity:0.6;border-radius:100px;}.chemistry-card:hover{transform:scale(1.02);background:color-mix(in srgb, var(--chem-color) 8%, var(--vpc-surface));}ha-card.theme-glow .chemistry-card{background:rgba(0,212,255,0.04);border:1px solid rgba(0,212,255,0.08);}.chem-icon-wrap{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb, var(--chem-color, var(--vpc-primary)) 12%, transparent);margin-bottom:4px;}.chem-icon-wrap ha-icon{--mdc-icon-size:16px;color:var(--chem-color, var(--vpc-primary));}.chemistry-val{font-family:var(--vpc-font);font-size:18px;font-weight:700;letter-spacing:-0.5px;color:var(--chem-color, var(--vpc-text));line-height:1;}.chemistry-unit{font-size:11px;font-weight:500;color:var(--vpc-text-secondary);letter-spacing:0.2px;}.chemistry-label{font-size:10px;font-weight:500;color:var(--vpc-text-secondary);text-transform:uppercase;letter-spacing:0.4px;}.overview-warning-badge{width:22px;height:22px;border-radius:50%;background:var(--vpc-danger, #FF3B30);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}.overview-active-dot{width:10px;height:10px;border-radius:50%;background:var(--vpc-success, #34C759);box-shadow:0 0 8px rgba(52,199,89,0.5);flex-shrink:0;animation:pulse-glow 2s ease-in-out infinite;}.overview-section{display:flex;flex-direction:column;gap:6px;}.section-title{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--vpc-text-secondary);text-transform:uppercase;letter-spacing:0.6px;padding:0 2px;}.section-count{margin-left:auto;font-size:11px;font-weight:500;color:var(--vpc-text-tertiary);}.warning-title ha-icon{color:var(--vpc-warning, #FF9F0A);}.warning-title{color:var(--vpc-warning, #FF9F0A);}.temp-hero{display:flex;align-items:baseline;gap:4px;padding:8px 0;}.temp-hero-value{font-size:42px;font-weight:800;line-height:1;color:var(--temp-color, var(--vpc-text));letter-spacing:-1px;}.temp-hero-unit{font-size:22px;font-weight:500;color:var(--temp-color, var(--vpc-text));opacity:0.7;}.temp-hero-target{font-size:16px;font-weight:500;color:var(--vpc-text-secondary);margin-left:12px;}.info-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:var(--vpc-inner-radius, 12px);background:var(--vpc-surface);font-size:14px;color:var(--vpc-text);font-family:var(--vpc-font);}ha-card.theme-glow .info-row{background:rgba(0,212,255,0.04);border:1px solid rgba(0,212,255,0.08);}.info-row ha-icon{--mdc-icon-size:17px;color:var(--vpc-text-secondary);flex-shrink:0;}.info-label{flex:1;font-weight:400;color:var(--vpc-text-secondary);}.info-value{font-weight:600;color:var(--vpc-text);letter-spacing:-0.2px;}.info-badge{padding:3px 9px;border-radius:100px;font-size:11px;font-weight:600;}.info-badge.warning{background:color-mix(in srgb, var(--vpc-warning, #FF9F0A) 12%, transparent);color:var(--vpc-warning, #FF9F0A);}.info-row-warning{background:color-mix(in srgb, var(--vpc-warning, #FF9F0A) 06%, transparent);border:1px solid color-mix(in srgb, var(--vpc-warning, #FF9F0A) 18%, transparent);}.solar-temps{display:flex;flex-direction:column;gap:8px;}.chemistry-grid{display:grid;grid-template-columns:repeat(3, 1fr);gap:10px;}.chemistry-card{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px;border-radius:14px;background:rgba(var(--rgb-primary-text-color, 0,0,0), 0.03);cursor:pointer;transition:var(--vpc-transition);border:1px solid transparent;}.chemistry-card:hover{background:rgba(var(--rgb-primary-text-color, 0,0,0), 0.06);transform:translateY(-1px);}ha-card.theme-glow .chemistry-card{background:rgba(0, 255, 255, 0.04);border:1px solid rgba(0, 255, 255, 0.08);}.chemistry-card ha-icon{--mdc-icon-size:20px;color:var(--chem-color, var(--vpc-primary));}.chemistry-val{font-size:16px;font-weight:700;color:var(--chem-color, var(--vpc-text));line-height:1;}.chemistry-label{font-size:11px;font-weight:500;color:var(--vpc-text-secondary);text-transform:uppercase;letter-spacing:0.3px;}.overview-section{display:flex;flex-direction:column;gap:8px;}.section-title{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--vpc-text-secondary);text-transform:uppercase;letter-spacing:0.5px;padding:0 2px;}.section-title ha-icon{--mdc-icon-size:16px;color:var(--vpc-text-secondary);}.warning-title ha-icon{color:#ef6c00;}.warning-title{color:#ef6c00;}.device-list{display:flex;flex-direction:column;gap:3px;}.device-row{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:var(--vpc-inner-radius, 12px);background:var(--vpc-surface);cursor:pointer;transition:background 0.18s ease, transform 0.15s ease;}.device-row:hover{background:color-mix(in srgb, var(--vpc-primary) 6%, var(--vpc-surface));transform:scale(1.005);}ha-card.theme-glow .device-row{background:rgba(0,212,255,0.04);border:1px solid rgba(0,212,255,0.06);}.device-icon-wrap{width:32px;height:32px;border-radius:9px;background:var(--vpc-surface);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background 0.2s ease;}.device-icon-wrap ha-icon{--mdc-icon-size:18px;color:var(--vpc-text-secondary);}.device-icon-active{background:color-mix(in srgb, var(--vpc-primary) 12%, transparent);}.device-icon-active ha-icon{color:var(--vpc-primary) !important;}.device-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;}.device-name{font-weight:500;font-size:14px;letter-spacing:-0.1px;color:var(--vpc-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.device-status{color:var(--vpc-text-secondary);font-size:12px;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.device-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}.dot-active{background:var(--vpc-success, #34C759);box-shadow:0 0 6px rgba(52,199,89,0.5);}.dot-inactive{background:var(--vpc-text-secondary);opacity:0.25;}.warning-list{display:flex;flex-direction:column;gap:5px;}.warning-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--vpc-inner-radius, 12px);background:color-mix(in srgb, var(--vpc-warning, #FF9F0A) 8%, transparent);border:1px solid color-mix(in srgb, var(--vpc-warning, #FF9F0A) 20%, transparent);font-size:13px;font-weight:500;color:var(--vpc-warning, #FF9F0A);}.warning-row ha-icon{color:var(--vpc-warning, #FF9F0A);flex-shrink:0;}.all-ok-display{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;border-radius:var(--vpc-inner-radius, 12px);background:color-mix(in srgb, var(--vpc-success, #34C759) 8%, transparent);border:1px solid color-mix(in srgb, var(--vpc-success, #34C759) 18%, transparent);color:var(--vpc-success, #34C759);font-weight:500;font-size:14px;}.all-ok-display ha-icon{color:var(--vpc-success, #34C759);}ha-card.compact-card{padding:12px 14px;}.compact-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:var(--vpc-surface);flex-shrink:0;transition:background 0.2s ease;}.compact-icon-active{background:color-mix(in srgb, var(--vpc-primary) 12%, transparent);}.compact-icon ha-icon{--mdc-icon-size:20px;}.compact-icon ha-icon.active{color:var(--vpc-primary);}.compact-icon ha-icon.inactive{color:var(--vpc-text-secondary);opacity:0.45;}.compact-info{flex:1;min-width:0;}.compact-details{display:flex;gap:8px;font-size:12px;margin-top:2px;align-items:center;}.compact-value{font-weight:600;color:var(--vpc-text);letter-spacing:-0.2px;}.compact-detail{color:var(--vpc-text-secondary);font-size:11px;}.system-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));gap:20px;}.error-state{display:flex;align-items:center;gap:14px;padding:20px;}.error-icon{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:rgba(244, 67, 54, 0.1);}.error-icon ha-icon{--mdc-icon-size:24px;color:#d32f2f;}.error-info{display:flex;flex-direction:column;gap:2px;}.error-title{font-size:14px;font-weight:600;color:#d32f2f;}.error-entity{font-size:12px;color:var(--vpc-text-secondary);font-family:monospace;}ha-card.size-small{--vpc-spacing:12px;--vpc-icon-size:20px;--vpc-radius:16px;}ha-card.size-small .header-icon{width:38px;height:38px;border-radius:11px;}ha-card.size-small .name{font-size:14px;}ha-card.size-small .temp-hero-value{font-size:34px;letter-spacing:-1.5px;}ha-card.size-large{--vpc-spacing:22px;--vpc-icon-size:28px;--vpc-radius:26px;}ha-card.size-large .header-icon{width:54px;height:54px;border-radius:17px;}ha-card.size-large .name{font-size:18px;}ha-card.size-large .temp-hero-value{font-size:56px;letter-spacing:-3px;}ha-card.size-fullscreen{--vpc-spacing:28px;--vpc-icon-size:32px;--vpc-radius:28px;height:100%;min-height:80vh;}ha-card.size-fullscreen .header-icon{width:60px;height:60px;border-radius:19px;}ha-card.size-fullscreen .name{font-size:20px;}ha-card.size-fullscreen .temp-hero-value{font-size:68px;letter-spacing:-4px;}ha-card.animation-none{transition:none !important;}ha-card.animation-none:hover, ha-card.animation-none:active{transform:none !important;}ha-card.animation-subtle{transition:transform 0.15s ease, box-shadow 0.15s ease;}ha-card.animation-subtle:hover{transform:translateY(-1px);}ha-card.animation-smooth{transition:transform 0.25s cubic-bezier(0.34,1.4,0.64,1), box-shadow 0.25s ease;}ha-card.animation-energetic{transition:transform 0.2s cubic-bezier(0.34,1.6,0.64,1), box-shadow 0.2s ease;}ha-card.animation-energetic:hover{transform:translateY(-4px) scale(1.008);}@keyframes flow-gradient{0%{background-position:0% 50%;}100%{background-position:200% 50%;}}ha-card.flow-active .accent-bar{background:linear-gradient(90deg, var(--card-accent), color-mix(in srgb, var(--card-accent) 60%, white), var(--card-accent));background-size:200% 100%;animation:flow-gradient 2.5s linear infinite;}.error-state{display:flex;align-items:center;gap:14px;padding:20px;}.error-icon{width:46px;height:46px;border-radius:15px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb, var(--vpc-danger, #FF3B30) 10%, transparent);flex-shrink:0;}.error-icon ha-icon{--mdc-icon-size:24px;color:var(--vpc-danger, #FF3B30);}.error-info{display:flex;flex-direction:column;gap:3px;}.error-title{font-size:15px;font-weight:600;color:var(--vpc-danger, #FF3B30);letter-spacing:-0.2px;}.error-entity{font-size:12px;color:var(--vpc-text-secondary);font-family:'SF Mono', 'Fira Code', 'Cascadia Code', ui-monospace, monospace;opacity:0.7;}.system-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));gap:16px;}@media (max-width:600px){.chemistry-grid{grid-template-columns:repeat(3, 1fr);gap:6px;}.chemistry-card{padding:11px 6px 10px;}.chemistry-val{font-size:16px;}.system-grid{grid-template-columns:1fr;}.temp-hero-value{font-size:38px;letter-spacing:-1.5px;}.dosing-current-value{font-size:28px;}.speed-segment{font-size:11px;padding:8px 4px;}}@media (pointer:coarse){.speed-segment, .speed-off-btn, .device-row, .chemistry-card{min-height:44px;}}.speed-segment{min-width:0;}.speed-segment span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+  .chem-svg-icon{display:inline-flex;align-items:center;justify-content:center;width:100%;height:100%;}
+  .chem-svg-icon svg{width:100%;height:100%;display:block;}
+  .header-icon .chem-svg-icon{width:28px;height:28px;}
+  .header-icon.icon-active .chem-svg-icon{filter:drop-shadow(0 0 10px color-mix(in srgb, var(--icon-accent, var(--vpc-primary)) 26%, transparent));}
+  .chem-icon-wrap .chem-svg-icon{width:18px;height:18px;}
+  .chem-inline-icon{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;flex-shrink:0;}
+  .chem-inline-icon .chem-svg-icon{width:16px;height:16px;}
+  .chem-inline-icon-small{width:14px;height:14px;}
+  .chem-inline-icon-small .chem-svg-icon{width:14px;height:14px;}
+  .chem-metric-header .chem-inline-icon{width:15px;height:15px;}
+  @keyframes wave-drift{0%,100%{transform:translateX(0px);}50%{transform:translateX(1.5px);}}
 /* === TOOLTIP SYSTEM === */
   .tooltip-wrap{position:relative;z-index:1;contain:layout style paint;}
   .t-tip{position:absolute;top:calc(100% + 7px);left:50%;transform:translateX(-50%) translateY(-4px) scale(0.94);transform-origin:top center;z-index:99999;min-width:148px;max-width:250px;padding:9px 12px;background:rgba(18,18,26,0.94);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border:1px solid rgba(255,255,255,0.11);border-radius:11px;box-shadow:0 8px 28px rgba(0,0,0,0.4),0 2px 6px rgba(0,0,0,0.25);opacity:0;pointer-events:none;transition:opacity 0.13s ease,transform 0.17s cubic-bezier(0.34,1.4,0.64,1),transition-delay 0s;white-space:normal;text-align:left;will-change:transform,opacity;word-wrap:break-word;overflow-wrap:break-word;}
@@ -3392,6 +4038,76 @@ ha-card.theme-midnight .chem-metric-track{background:rgba(255,255,255,0.08);}
 .light-color-hint{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:10.5px;font-weight:600;color:rgba(255,255,255,0.65);pointer-events:none;}
 /* === FILTER CARD === */
 .filter-gauge-wrap{display:flex;justify-content:center;padding:4px 0 0;}
+.overview-hero{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(220px,1fr);gap:14px;padding:16px;border-radius:20px;margin:14px 0 12px;background:linear-gradient(135deg,rgba(255,255,255,0.16),rgba(255,255,255,0.06));border:1px solid rgba(255,255,255,0.18);box-shadow:0 16px 40px rgba(15,23,42,0.12);backdrop-filter:blur(calc(var(--vpc-blur,10px) * 1.4)) saturate(145%);-webkit-backdrop-filter:blur(calc(var(--vpc-blur,10px) * 1.4)) saturate(145%);}
+.overview-hero-main{display:flex;flex-direction:column;gap:7px;min-width:0;}
+.overview-kicker,.system-kicker,.system-section-kicker{font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--vpc-text-secondary);}
+.overview-hero-title-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.overview-hero h3,.system-section-header h3{margin:0;font-size:24px;line-height:1.1;letter-spacing:-0.03em;color:var(--vpc-text);}
+.overview-hero p,.system-hero-copy p{margin:0;color:var(--vpc-text-secondary);font-size:13px;line-height:1.5;}
+.overview-hero-warning{background:linear-gradient(135deg,rgba(255,159,10,0.16),rgba(255,159,10,0.05));border-color:rgba(255,159,10,0.34);}
+.overview-hero-critical{background:linear-gradient(135deg,rgba(255,59,48,0.18),rgba(255,59,48,0.05));border-color:rgba(255,59,48,0.34);}
+.overview-hero-active{background:linear-gradient(135deg,rgba(0,122,255,0.16),rgba(90,200,250,0.05));border-color:rgba(90,200,250,0.28);}
+.overview-alert-chip{display:inline-flex;align-items:center;padding:5px 10px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:var(--vpc-danger,#FF3B30);background:rgba(255,59,48,0.12);}
+.overview-alert-chip.outline{background:transparent;border:1px solid rgba(255,59,48,0.4);}
+.overview-alert-chip.pulse{animation:alert-chip-pulse 1.4s ease-in-out infinite;box-shadow:0 0 0 0 rgba(255,59,48,0.35);}
+.overview-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;}
+.overview-fact,.snapshot-card,.system-pill{padding:12px 14px;border-radius:16px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);display:flex;flex-direction:column;gap:4px;min-width:0;}
+.overview-fact-label,.snapshot-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--vpc-text-secondary);}
+.overview-fact-value,.snapshot-value{font-size:20px;font-weight:700;letter-spacing:-0.03em;color:var(--vpc-text);}
+.tone-success .overview-fact-value{color:var(--vpc-success,#34C759);}
+.tone-warning .overview-fact-value{color:var(--vpc-warning,#FF9F0A);}
+.tone-danger .overview-fact-value{color:var(--vpc-danger,#FF3B30);}
+.tone-muted .overview-fact-value{color:var(--vpc-text-secondary);}
+.overview-snapshot-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:14px;}
+.alarm-style-outline .warning-row,.alarm-style-outline .warning-row.severity-critical{background:transparent;border-width:1.5px;}
+.alarm-style-pulse .warning-row{animation:warning-pulse 1.8s ease-in-out infinite;}
+.warning-row{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:var(--vpc-inner-radius,12px);background:color-mix(in srgb,var(--vpc-warning,#FF9F0A) 10%,transparent);border:1px solid color-mix(in srgb,var(--vpc-warning,#FF9F0A) 22%,transparent);font-size:13px;font-weight:500;color:var(--vpc-warning,#FF9F0A);position:relative;overflow:hidden;}
+.warning-row.severity-critical{background:color-mix(in srgb,var(--vpc-danger,#FF3B30) 12%,transparent);border-color:color-mix(in srgb,var(--vpc-danger,#FF3B30) 28%,transparent);color:var(--vpc-danger,#FF3B30);box-shadow:0 0 0 1px color-mix(in srgb,var(--vpc-danger,#FF3B30) 18%,transparent),0 0 24px rgba(255,59,48,0.12);}
+.warning-row-icon{width:28px;height:28px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.12);flex-shrink:0;}
+.warning-row-copy{display:flex;flex-direction:column;gap:2px;min-width:0;}
+.warning-row-title{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;opacity:0.86;}
+.system-shell{display:flex;flex-direction:column;gap:18px;}
+.system-hero-panel{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;padding:18px 20px;border-radius:22px;background:linear-gradient(135deg,rgba(255,255,255,0.14),rgba(255,255,255,0.05));border:1px solid rgba(255,255,255,0.14);box-shadow:0 18px 44px rgba(15,23,42,0.12);backdrop-filter:blur(16px) saturate(145%);-webkit-backdrop-filter:blur(16px) saturate(145%);}
+.system-hero-copy{display:flex;flex-direction:column;gap:8px;min-width:0;}
+.system-hero-copy h2{margin:0;font-size:28px;line-height:1.05;letter-spacing:-0.04em;color:var(--vpc-text);}
+.system-hero-pills{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px;}
+.system-pill{font-size:12px;font-weight:600;color:var(--vpc-text);}
+.system-overview-slot{display:block;}
+.system-section-block{display:flex;flex-direction:column;gap:12px;}
+.system-section-header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding:0 4px;}
+.system-section-count{font-size:12px;font-weight:700;color:var(--vpc-text-secondary);text-transform:uppercase;letter-spacing:0.08em;}
+.system-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;}
+.system-grid-secondary{grid-template-columns:repeat(auto-fit,minmax(280px,1fr));}
+.layout-dashboard .system-grid-primary{grid-template-columns:repeat(auto-fit,minmax(360px,1fr));}
+.mode-compact_mobile .system-grid,.mode-compact_mobile .system-grid-secondary,.mode-compact_mobile .system-grid-primary{grid-template-columns:1fr;}
+.mode-compact_mobile .system-hero-pills{display:none;}
+.mode-alarm_center .system-overview-slot:first-of-type .overview-hero{border-width:2px;}
+.mode-maintenance .recommendation-panel .recommendation-row.severity-warning,.mode-maintenance .recommendation-panel .recommendation-row.severity-critical{box-shadow:0 0 0 1px rgba(255,159,10,0.12);}
+.layout-focus .warning-row.severity-critical,.layout-focus .overview-alert-chip{animation:alert-chip-pulse 1.2s ease-in-out infinite;}
+.layout-standard .overview-hero,.layout-standard .system-hero-panel{backdrop-filter:none;-webkit-backdrop-filter:none;background:var(--vpc-surface);}
+@keyframes warning-pulse{0%,100%{transform:translateY(0)}50%{transform:translateY(-1px)}}
+@keyframes alert-chip-pulse{0%{box-shadow:0 0 0 0 rgba(255,59,48,0.35)}70%{box-shadow:0 0 0 10px rgba(255,59,48,0)}100%{box-shadow:0 0 0 0 rgba(255,59,48,0)}}
+.insight-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0;}
+.insight-card{display:flex;flex-direction:column;gap:4px;padding:12px 14px;border-radius:16px;background:var(--vpc-surface);border:1px solid rgba(255,255,255,0.08);}
+.insight-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--vpc-text-secondary);}
+.insight-value{font-size:18px;font-weight:700;letter-spacing:-0.03em;color:var(--vpc-text);}
+.recommendation-panel{display:flex;flex-direction:column;gap:8px;margin-top:12px;}
+.recommendation-list{display:flex;flex-direction:column;gap:8px;}
+.recommendation-row{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);}
+.recommendation-row.severity-warning{background:color-mix(in srgb,var(--vpc-warning,#FF9F0A) 8%,transparent);border-color:color-mix(in srgb,var(--vpc-warning,#FF9F0A) 20%,transparent);}
+.recommendation-row.severity-critical{background:color-mix(in srgb,var(--vpc-danger,#FF3B30) 8%,transparent);border-color:color-mix(in srgb,var(--vpc-danger,#FF3B30) 20%,transparent);}
+.recommendation-row.severity-info{background:color-mix(in srgb,var(--card-accent,var(--vpc-primary)) 8%,transparent);border-color:color-mix(in srgb,var(--card-accent,var(--vpc-primary)) 18%,transparent);}
+.recommendation-icon{width:28px;height:28px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.14);color:inherit;flex-shrink:0;}
+.recommendation-copy{display:flex;flex-direction:column;gap:2px;min-width:0;color:var(--vpc-text);}
+.recommendation-title{font-size:12px;font-weight:700;color:inherit;}
+.sparkline-wrap{width:100%;height:36px;margin-top:6px;}
+.sparkline-svg{width:100%;height:100%;overflow:visible;}
+.sparkline-line{fill:none;stroke:var(--sparkline-color);stroke-width:4;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke;opacity:0.9;}
+.a11y-high-contrast{--vpc-surface:rgba(255,255,255,0.14) !important;--vpc-text-secondary:color-mix(in srgb,var(--vpc-text) 72%,white) !important;}
+.a11y-high-contrast .warning-row,.a11y-high-contrast .recommendation-row{border-width:2px;}
+.a11y-reduced-motion *, .a11y-reduced-motion *::before, .a11y-reduced-motion *::after{animation:none !important;transition:none !important;scroll-behavior:auto !important;}
+@media (max-width:900px){.overview-hero,.system-hero-panel{grid-template-columns:1fr;display:grid;align-items:flex-start;}.overview-snapshot-grid,.overview-facts{grid-template-columns:1fr;}.system-hero-pills{justify-content:flex-start;}}
+@media (max-width:600px){.insight-grid{grid-template-columns:1fr;}}
 `;
 
   }
@@ -3421,13 +4137,18 @@ ha-card.theme-midnight .chem-metric-track{background:rgba(255,255,255,0.08);}
     const accentColor = this._getAccentColor('digital_rules', config);
 
     const rules = [
-      { id: 'DIRULE_1', label: 'Rule 1', icon: 'mdi:toggle-switch' },
-      { id: 'DIRULE_2', label: 'Rule 2', icon: 'mdi:toggle-switch' },
-      { id: 'DIRULE_3', label: 'Rule 3', icon: 'mdi:toggle-switch' },
-      { id: 'DIRULE_4', label: 'Rule 4', icon: 'mdi:toggle-switch' },
-      { id: 'DIRULE_5', label: 'Rule 5', icon: 'mdi:toggle-switch' },
-      { id: 'DIRULE_6', label: 'Rule 6', icon: 'mdi:toggle-switch' },
-      { id: 'DIRULE_7', label: 'Rule 7', icon: 'mdi:toggle-switch' },
+      { id: 'DIRULE_1', label: 'Rule 1', tone: '#34C759', summary: 'Automatischer Trigger' },
+      { id: 'DIRULE_2', label: 'Rule 2', tone: '#00BCD4', summary: 'Eingangslogik / Freigabe' },
+      { id: 'DIRULE_3', label: 'Rule 3', tone: '#FF9F0A', summary: 'Wartungsroutine' },
+      { id: 'DIRULE_4', label: 'Rule 4', tone: '#AF52DE', summary: 'Zeit- oder Modusprofil' },
+      { id: 'DIRULE_5', label: 'Rule 5', tone: '#5AC8FA', summary: 'Energieoptimierung' },
+      { id: 'DIRULE_6', label: 'Rule 6', tone: '#FF6B35', summary: 'Sicherheitslogik' },
+      { id: 'DIRULE_7', label: 'Rule 7', tone: '#5856D6', summary: 'Fallback / Override' },
+    ];
+    const activeRules = rules.length;
+    const ruleRecommendations: SeverityAlert[] = [
+      { severity: 'info', icon: 'mdi:flash-outline', text: 'Rules direkt aus der Karte steuerbar', recommendation: 'Trigger ist gut fuer Tests, Lock/Unlock fuer kontrollierte Wartung oder Eingriffs-Schutz.' },
+      { severity: 'warning', icon: 'mdi:shield-lock-outline', text: 'Regeln bewusst sperren', recommendation: 'Nur waehrend Wartung oder Fehlersuche locken, damit Automationen nicht unbeabsichtigt blockiert bleiben.' },
     ];
 
     return html`
@@ -3436,18 +4157,37 @@ ha-card.theme-midnight .chem-metric-track{background:rgba(255,255,255,0.08);}
         <div class="card-content">
           <div class="header">
             <div class="header-icon" style="--icon-accent: ${accentColor}">
-              <ha-icon icon="mdi:auto-fix"></ha-icon>
+              ${config.icon ? html`<ha-icon icon="${config.icon}"></ha-icon>` : automationRulesSVG(activeRules, accentColor)}
             </div>
             <div class="header-info">
               <span class="name">${config.name || 'Digital Rules'}</span>
-              <span class="header-subtitle">7 Automation Rules</span>
+              <span class="header-subtitle">${activeRules} Automation Rules</span>
             </div>
           </div>
 
-          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 16px;">
+          <div class="insight-grid">
+            <div class="insight-card">
+              <span class="insight-label">Rules</span>
+              <span class="insight-value">${activeRules}</span>
+            </div>
+            <div class="insight-card">
+              <span class="insight-label">Aktionen</span>
+              <span class="insight-value">Trigger / Lock</span>
+            </div>
+            <div class="insight-card">
+              <span class="insight-label">Rolle</span>
+              <span class="insight-value">Automation</span>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 4px;">
             ${rules.map(rule => html`
-              <div style="background: var(--vpc-surface); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 6px;">
-                <div style="font-size: 12px; font-weight: 600; color: var(--vpc-text-secondary);">${rule.label}</div>
+              <div style="background: color-mix(in srgb, ${rule.tone} 10%, var(--vpc-surface)); border: 1px solid color-mix(in srgb, ${rule.tone} 18%, transparent); border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 8px;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="width:10px;height:10px;border-radius:50%;background:${rule.tone};box-shadow:0 0 10px color-mix(in srgb, ${rule.tone} 40%, transparent);"></span>
+                  <div style="font-size: 12px; font-weight: 700; color: var(--vpc-text);">${rule.label}</div>
+                </div>
+                <div style="font-size:11px;color:var(--vpc-text-secondary);">${rule.summary}</div>
                 <div style="display: flex; gap: 4px; flex-wrap: wrap;">
                   <button style="flex: 1; padding: 6px; border: none; border-radius: 6px; background: ${accentColor}; color: white; font-size: 10px; font-weight: 600; cursor: pointer;"
                           @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).manageDigitalRules(rule.id as any, 'trigger'); }}">
@@ -3465,6 +4205,7 @@ ha-card.theme-midnight .chem-metric-track{background:rgba(255,255,255,0.08);}
               </div>
             `)}
           </div>
+          ${this._renderRecommendationList(ruleRecommendations, 'Rule-Hinweise')}
         </div>
       </ha-card>
     `;
@@ -3473,6 +4214,11 @@ ha-card.theme-midnight .chem-metric-track{background:rgba(255,255,255,0.08);}
   private renderDiagnosticsCard(config: VioletPoolCardConfig = this.config): TemplateResult {
     const accentColor = this._getAccentColor('diagnostics', config);
     const deviceId = config.entity || 'violet_pool_controller';
+    const diagnosticsActive = true;
+    const diagnosticRecommendations: SeverityAlert[] = [
+      { severity: 'info', icon: 'mdi:wifi-check', text: 'Verbindung zuerst pruefen', recommendation: 'Mit Connection Test schnell zwischen Integrationsproblem und reiner Sensorabweichung unterscheiden.' },
+      { severity: 'warning', icon: 'mdi:file-document-outline', text: 'Logs bei Fehlern exportieren', recommendation: 'Vor Reset oder Verlauf-Loeschung immer erst Logs sichern, damit Ursachen sauber nachvollziehbar bleiben.' },
+    ];
 
     return html`
       <ha-card class="${this._getCardClasses(true, config)}" style="--card-accent: ${accentColor}">
@@ -3480,11 +4226,26 @@ ha-card.theme-midnight .chem-metric-track{background:rgba(255,255,255,0.08);}
         <div class="card-content">
           <div class="header">
             <div class="header-icon" style="--icon-accent: ${accentColor}">
-              <ha-icon icon="mdi:hospital-box"></ha-icon>
+              ${config.icon ? html`<ha-icon icon="${config.icon}"></ha-icon>` : diagnosticsPulseSVG(diagnosticsActive, accentColor)}
             </div>
             <div class="header-info">
               <span class="name">${config.name || 'Diagnostics'}</span>
               <span class="header-subtitle">System Health & Logs</span>
+            </div>
+          </div>
+
+          <div class="insight-grid">
+            <div class="insight-card">
+              <span class="insight-label">Scope</span>
+              <span class="insight-value">Controller</span>
+            </div>
+            <div class="insight-card">
+              <span class="insight-label">Tools</span>
+              <span class="insight-value">4 Aktionen</span>
+            </div>
+            <div class="insight-card">
+              <span class="insight-label">Modus</span>
+              <span class="insight-value">Support</span>
             </div>
           </div>
 
@@ -3517,6 +4278,7 @@ ha-card.theme-midnight .chem-metric-track{background:rgba(255,255,255,0.08);}
               <span>Clear Error History</span>
             </button>
           </div>
+          ${this._renderRecommendationList(diagnosticRecommendations, 'Diagnose-Hinweise')}
         </div>
       </ha-card>
     `;

@@ -27,6 +27,27 @@ A premium Lovelace card for the [Violet Pool Controller](https://github.com/Xero
 
 ## Funktionen
 
+### Neu im aktuellen UI-Ausbau
+- **Severity-Modell** mit `ok`, `info`, `warning`, `critical` für konsistentere Alarm-Priorisierung
+- **Empfehlungs-Engine** für Pumpe, Heizung, Solar, Dosierung und Filter
+- **Dashboard-Modi**: `default`, `operations`, `chemistry`, `maintenance`, `compact_mobile`, `alarm_center`
+- **Editor-Presets**: Modern Glass, Alarm Focus, Technikraum, Familienansicht
+- **Accessibility-Modi**: `standard`, `high_contrast`, `reduced_motion`
+- **Trend-Sparklines** für Snapshot-Kacheln und Filterdruck, wenn Sensoren Werte-Arrays mitliefern
+- **Spezialkarten verfeinert**: Rückspülung, Nachfüllung, Durchfluss, Anströmung, Gegenstrom, Kanister, Digital Rules und Diagnostics mit stärker differenzierten Layouts
+- **Themenbezogene Symbolsprache** für Pooltechnik und Chemie statt generischer Platzhalter-Icons
+- **Handlungshinweise auch für Support- und Wartungskarten**, nicht nur für Chemie und Alarme
+
+### Spezialkarten mit eigener Rolle
+- **Backwash / Rückspülung**: Zyklus-Fortschritt, Restzeit und Wartungshinweise
+- **Refill / Nachfüllung**: Füllstand, Trend, Ventilstatus und Pegelwarnungen
+- **Flow Rate / Durchfluss**: Trend, Min/Max-Werte, Kalibrierung und Durchflusswarnungen
+- **Inlet / Anströmung**: Einström-Status, Trendprüfung und Flow-Plausibilität
+- **Counter Current / Gegenstrom**: Leistungsprofil für Training, Soft- und Power-Betrieb
+- **Canister Cards**: Reserveabschätzung, Verbrauchstrend und Nachfüllhinweise
+- **Digital Rules**: Regelübersicht mit visuellen Rollen und direkten Trigger/Lock/Unlock-Aktionen
+- **Diagnostics**: Support-Panel mit Schnellaktionen, Logik-Hinweisen und klarerem Health-Fokus
+
 ### 🎨 Design & Themes
 - **6 Premium-Themes** — Luxury (Glassmorphism), Modern, Minimalist, Glass, Neon, Premium
 - **8 vorgesetzte Farbkombinationen** — Apple, Dark, Luxury, Modern, Minimalist, Glass, Neon, Premium
@@ -434,6 +455,10 @@ target_entity: number.violet_pool_target_temp
 | `theme` | apple/dark/luxury/modern/minimalist/glass/neon/premium | apple | Design-Theme |
 | `size` | small/medium/large/fullscreen | medium | Karten-Größe |
 | `animation` | none/subtle/smooth/energetic | smooth | Animations-Stil |
+| `layout_variant` | standard/glass/dashboard/focus | glass | Visuelle Kartenhierarchie |
+| `dashboard_mode` | default/operations/chemistry/maintenance/compact_mobile/alarm_center | default | System-/Dashboard-Anordnung |
+| `alarm_style` | soft/outline/pulse | pulse | Warn- und Alarmdarstellung |
+| `accessibility_mode` | standard/high_contrast/reduced_motion | standard | Kontrast- und Bewegungsmodus |
 | `accent_color` | HEX | Auto | Akzentfarbe |
 | `icon_color` | HEX | Auto | Icon-Farbe |
 | `blur_intensity` | 0-100 | 10 | Backdrop-Blur |
@@ -447,6 +472,27 @@ target_entity: number.violet_pool_target_temp
 | `show_controls` | boolean | true | Control-Buttons anzeigen |
 | `show_runtime` | boolean | false | Betriebsstunden anzeigen |
 | `show_history` | boolean | false | Historie anzeigen |
+
+### Trenddaten für Sparklines
+
+Wenn ein Sensor in seinen Attributen eines dieser Arrays mitliefert, zeichnet die Karte automatisch einen Mini-Trend:
+
+- `history`
+- `values`
+- `recent_values`
+- `trend`
+- `samples`
+- `sparkline`
+
+Diese Trenddaten werden inzwischen nicht nur in `overview` und `filter`, sondern auch in spezialisierten Karten wie `refill`, `flow_rate`, `inlet` und den Chemie-Kanistern genutzt, sofern passende Attribut-Arrays vorhanden sind.
+
+Beispiel:
+
+```yaml
+sensor.violet_pool_filter_pressure:
+  attributes:
+    recent_values: [0.82, 0.85, 0.87, 0.93, 1.01, 1.08]
+```
 
 ### Entity-Mappings
 
@@ -688,6 +734,29 @@ animation: smooth
 # - Active Devices & Alerts
 ```
 
+### Alarm Center Preset
+
+```yaml
+type: custom:violet-pool-card
+card_type: system
+theme: midnight
+layout_variant: focus
+dashboard_mode: alarm_center
+alarm_style: outline
+accessibility_mode: high_contrast
+```
+
+### Compact Mobile Preset
+
+```yaml
+type: custom:violet-pool-card
+card_type: system
+size: fullscreen
+layout_variant: glass
+dashboard_mode: compact_mobile
+accessibility_mode: reduced_motion
+```
+
 ### Erweiterungs-Module
 
 ```yaml
@@ -716,6 +785,44 @@ entities:
   - switch.violet_pool_controller_extension_2_6
   - switch.violet_pool_controller_extension_2_7
   - switch.violet_pool_controller_extension_2_8
+```
+
+### Wartung, Support und Spezialkarten
+
+```yaml
+type: custom:violet-pool-card
+card_type: refill
+name: "Nachfuellung"
+layout_variant: glass
+show_controls: true
+water_level_entity: sensor.violet_pool_controller_wasserstand
+refill_valve_entity: switch.violet_pool_controller_nachspulung
+max_level: 100
+```
+
+```yaml
+type: custom:violet-pool-card
+card_type: flow_rate
+name: "Durchfluss"
+layout_variant: dashboard
+show_detail_status: true
+entity: sensor.violet_pool_controller_pumpen_durchfluss
+```
+
+```yaml
+type: custom:violet-pool-card
+card_type: digital_rules
+name: "Digitale Regeln"
+layout_variant: focus
+theme: glow
+```
+
+```yaml
+type: custom:violet-pool-card
+card_type: diagnostics
+name: "Diagnose"
+layout_variant: dashboard
+theme: metallic
 ```
 
 ### DMX Szenen-Steuerung

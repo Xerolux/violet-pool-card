@@ -122,6 +122,10 @@ export type Theme =
   | 'aurora';
 
 export type Animation = 'none' | 'subtle' | 'smooth' | 'energetic';
+export type LayoutVariant = 'standard' | 'glass' | 'dashboard' | 'focus';
+export type AlarmStyle = 'soft' | 'outline' | 'pulse';
+export type AccessibilityMode = 'standard' | 'high_contrast' | 'reduced_motion';
+export type DashboardMode = 'default' | 'operations' | 'chemistry' | 'maintenance' | 'compact_mobile' | 'alarm_center';
 
 export type DosingType = 'chlorine' | 'ph_minus' | 'ph_plus' | 'flocculant';
 
@@ -194,6 +198,10 @@ export interface VioletPoolCardConfig {
   size?: CardSize;
   theme?: Theme;
   animation?: Animation;
+  layout_variant?: LayoutVariant;
+  alarm_style?: AlarmStyle;
+  accessibility_mode?: AccessibilityMode;
+  dashboard_mode?: DashboardMode;
   accent_color?: string;
   icon_color?: string;
   gradient?: string;

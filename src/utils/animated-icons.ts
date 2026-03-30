@@ -8,6 +8,10 @@
 
 import { html, TemplateResult } from 'lit';
 
+function clamp01(value: number): number {
+  return Math.max(0, Math.min(1, value));
+}
+
 /**
  * Animated spinning pump impeller SVG
  * speed: 0=off, 1=ECO(slow), 2=Normal(medium), 3=Boost(fast)
@@ -179,6 +183,105 @@ export function dosingDropletSVG(active: boolean, level: number, color: string):
 }
 
 /**
+ * Animated water temperature glyph with wave motion
+ */
+export function waterThermometerSVG(active: boolean, color: string): TemplateResult {
+  return html`
+    <svg viewBox="0 0 48 48" style="width:100%;height:100%;display:block;overflow:visible" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="24" cy="24" r="22" fill="${color}" fill-opacity="${active ? 0.14 : 0.07}"/>
+      <circle cx="24" cy="24" r="21" fill="none" stroke="${color}" stroke-width="1.5" stroke-opacity="0.34"/>
+      <path d="M15,29 C18,26 20,20 20,14 C20,11.3 22.2,9 25,9 C27.8,9 30,11.3 30,14 C30,20 32,26 35,29"
+            fill="none" stroke="${color}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="23" y="14" width="4" height="15" rx="2" fill="${color}" fill-opacity="${active ? 0.75 : 0.5}"/>
+      <circle cx="25" cy="33" r="6" fill="${color}" fill-opacity="${active ? 0.88 : 0.55}"/>
+      <path d="M9,37 C13,34 17,40 21,37 C25,34 29,40 33,37 C36,35 39,37 41,37"
+            fill="none" stroke="${color}" stroke-width="1.8" stroke-linecap="round" stroke-opacity="${active ? 0.6 : 0.35}"
+            style="${active ? 'animation:wave-drift 2.2s ease-in-out infinite' : ''}"/>
+      <path d="M9,41 C13,38 17,44 21,41 C25,38 29,44 33,41 C36,39 39,41 41,41"
+            fill="none" stroke="${color}" stroke-width="1.2" stroke-linecap="round" stroke-opacity="${active ? 0.3 : 0.18}"
+            style="${active ? 'animation:wave-drift 2.2s ease-in-out infinite 0.4s' : ''}"/>
+    </svg>`;
+}
+
+/**
+ * Animated pH chemistry icon
+ */
+export function phOrbSVG(active: boolean, color: string): TemplateResult {
+  return html`
+    <svg viewBox="0 0 48 48" style="width:100%;height:100%;display:block;overflow:visible" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="24" cy="24" r="22" fill="${color}" fill-opacity="${active ? 0.13 : 0.06}"/>
+      <circle cx="24" cy="24" r="21" fill="none" stroke="${color}" stroke-width="1.5" stroke-opacity="0.34"/>
+      <circle cx="24" cy="24" r="12.5" fill="${color}" fill-opacity="${active ? 0.18 : 0.1}"
+              style="${active ? 'animation:breathe 2.6s ease-in-out infinite' : ''}"/>
+      <path d="M14,25 C18,20 21,15 24,10 C27,15 30,20 34,25 C34,31 29.5,36 24,36 C18.5,36 14,31 14,25Z"
+            fill="${color}" fill-opacity="${active ? 0.82 : 0.58}"/>
+      <path d="M17,26 C19.7,22.4 21.7,18.5 24,14.7 C26.3,18.5 28.3,22.4 31,26"
+            fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-opacity="${active ? 0.8 : 0.55}"/>
+      <text x="24" y="30.2" text-anchor="middle" font-size="8.5" font-weight="700" fill="white" opacity="0.92">pH</text>
+      ${active ? html`
+        <circle cx="15.5" cy="17" r="1.5" fill="white" fill-opacity="0.55" style="animation:bubble-float 1.9s ease-in-out infinite"/>
+        <circle cx="33" cy="18.5" r="1.2" fill="white" fill-opacity="0.4" style="animation:bubble-float 2.2s ease-in-out infinite 0.35s"/>
+      ` : ''}
+    </svg>`;
+}
+
+/**
+ * Animated chlorine chemistry icon
+ */
+export function chlorineOrbSVG(active: boolean, color: string): TemplateResult {
+  return html`
+    <svg viewBox="0 0 48 48" style="width:100%;height:100%;display:block;overflow:visible" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="24" cy="24" r="22" fill="${color}" fill-opacity="${active ? 0.13 : 0.06}"/>
+      <circle cx="24" cy="24" r="21" fill="none" stroke="${color}" stroke-width="1.5" stroke-opacity="0.34"/>
+      <path d="M24,10 C18,16 14,20.5 14,27 C14,33 18.4,38 24,38 C29.6,38 34,33 34,27 C34,20.5 30,16 24,10Z"
+            fill="${color}" fill-opacity="${active ? 0.84 : 0.58}"/>
+      <text x="24" y="28.5" text-anchor="middle" font-size="8.5" font-weight="700" fill="white" opacity="0.94">Cl</text>
+      <path d="M19.5,17.5 C21.8,15.7 26.2,15.7 28.5,17.5" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity="0.65"/>
+      ${active ? html`
+        <circle cx="16" cy="19" r="1.4" fill="white" fill-opacity="0.52" style="animation:bubble-float 1.8s ease-in-out infinite"/>
+        <circle cx="31.5" cy="16.5" r="1.3" fill="white" fill-opacity="0.42" style="animation:bubble-float 2s ease-in-out infinite 0.45s"/>
+        <circle cx="35" cy="24" r="3.5" fill="none" stroke="${color}" stroke-width="1.2" stroke-opacity="0.35"
+                style="animation:ring-pulse 2s ease-out infinite"/>
+      ` : ''}
+    </svg>`;
+}
+
+/**
+ * Animated salt crystal icon
+ */
+export function saltCrystalSVG(active: boolean, color: string): TemplateResult {
+  return html`
+    <svg viewBox="0 0 48 48" style="width:100%;height:100%;display:block;overflow:visible" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="24" cy="24" r="22" fill="${color}" fill-opacity="${active ? 0.12 : 0.06}"/>
+      <circle cx="24" cy="24" r="21" fill="none" stroke="${color}" stroke-width="1.5" stroke-opacity="0.34"/>
+      <polygon points="24,10 31,16 31,26 24,32 17,26 17,16" fill="${color}" fill-opacity="${active ? 0.86 : 0.58}"/>
+      <polygon points="24,15 27.8,18.2 27.8,23.8 24,27 20.2,23.8 20.2,18.2" fill="white" fill-opacity="${active ? 0.34 : 0.18}"/>
+      <path d="M10,35 L16,28 M38,35 L32,28 M24,37 L24,31" fill="none" stroke="${color}" stroke-width="1.6" stroke-linecap="round" stroke-opacity="${active ? 0.68 : 0.35}"/>
+      ${active ? html`
+        <path d="M24,7 L24,11 M14,14 L17,17 M34,14 L31,17" fill="none" stroke="${color}" stroke-width="1.4" stroke-linecap="round" stroke-opacity="0.55"
+              style="animation:light-glow 2.4s ease-in-out infinite"/>
+      ` : ''}
+    </svg>`;
+}
+
+/**
+ * Animated ORP / redox icon
+ */
+export function orpEnergySVG(active: boolean, color: string): TemplateResult {
+  return html`
+    <svg viewBox="0 0 48 48" style="width:100%;height:100%;display:block;overflow:visible" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="24" cy="24" r="22" fill="${color}" fill-opacity="${active ? 0.12 : 0.06}"/>
+      <circle cx="24" cy="24" r="21" fill="none" stroke="${color}" stroke-width="1.5" stroke-opacity="0.34"/>
+      <path d="M26,9 L16,26 H23 L21,39 L32,21 H25 Z"
+            fill="${color}" fill-opacity="${active ? 0.9 : 0.62}"/>
+      ${active ? html`
+        <circle cx="24" cy="24" r="14.5" fill="none" stroke="${color}" stroke-width="1.2" stroke-opacity="0.28"
+                style="animation:ring-pulse 1.9s ease-out infinite"/>
+      ` : ''}
+    </svg>`;
+}
+
+/**
  * Animated gauge needle for chemistry/sensor readings
  */
 export function gaugeNeedleSVG(value: number, min: number, max: number, color: string): TemplateResult {
@@ -337,10 +440,13 @@ export function backwashSVG(active: boolean, color: string): TemplateResult {
     <svg viewBox="0 0 48 48" style="width:100%;height:100%;display:block;overflow:visible" xmlns="http://www.w3.org/2000/svg">
       <circle cx="24" cy="24" r="22" fill="${color}" fill-opacity="${active ? 0.15 : 0.07}"/>
       <circle cx="24" cy="24" r="21" fill="none" stroke="${color}" stroke-width="1.5" stroke-opacity="0.38"/>
+      <circle cx="24" cy="24" r="10" fill="none" stroke="${color}" stroke-width="1.4" stroke-opacity="0.24"/>
       <!-- Arrows forming a circle to represent backwash -->
-      <path d="M24,12 A12,12 0 1,1 12,24" fill="none" stroke="${color}" stroke-width="3" stroke-linecap="round"/>
+      <path d="M24,12 A12,12 0 1,1 12,24" fill="none" stroke="${color}" stroke-width="3" stroke-linecap="round"
+            style="${active ? 'animation:spin-slow 3.2s linear infinite;transform-origin:24px 24px' : ''}"/>
       <polygon points="12,24 8,18 16,18" fill="${color}" />
-      <path d="M24,36 A12,12 0 1,1 36,24" fill="none" stroke="${color}" stroke-width="3" stroke-linecap="round"/>
+      <path d="M24,36 A12,12 0 1,1 36,24" fill="none" stroke="${color}" stroke-width="3" stroke-linecap="round"
+            style="${active ? 'animation:spin-slow 3.2s linear infinite reverse;transform-origin:24px 24px' : ''}"/>
       <polygon points="36,24 40,30 32,30" fill="${color}" />
     </svg>`;
 }
@@ -352,9 +458,17 @@ export function refillSVG(level: number, maxLevel: number, color: string): Templ
   const percent = Math.min(level / maxLevel, 1);
   return html`
     <svg viewBox="0 0 48 48" style="width:100%;height:100%;display:block;overflow:visible" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="24" cy="24" r="22" fill="${color}" fill-opacity="0.1"/>
-      <rect x="18" y="14" width="12" height="20" rx="2" fill="none" stroke="${color}" stroke-width="2"/>
-      <rect x="18" y="${34 - 20 * percent}" width="12" height="${20 * percent}" rx="2" fill="${color}" fill-opacity="0.7"/>
+      <circle cx="24" cy="24" r="22" fill="${color}" fill-opacity="0.12"/>
+      <circle cx="24" cy="24" r="21" fill="none" stroke="${color}" stroke-width="1.5" stroke-opacity="0.32"/>
+      <rect x="17" y="14" width="14" height="20" rx="4" fill="none" stroke="${color}" stroke-width="2"/>
+      <rect x="18.5" y="${34 - 18 * percent}" width="11" height="${18 * percent}" rx="3" fill="${color}" fill-opacity="0.72"/>
+      <path d="M34,14 C37,16 39,18 39,22 C39,25.8 36.5,28.5 33.5,29.5"
+            fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round"/>
+      <path d="M35,15 L39,14 L38,18" fill="none" stroke="${color}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      ${percent < 0.45 ? html`
+        <path d="M12,37 C15,34 18,40 21,37 C24,34 27,40 30,37" fill="none" stroke="${color}" stroke-width="1.5" stroke-linecap="round" stroke-opacity="0.55"
+              style="animation:wave-drift 2.1s ease-in-out infinite"/>
+      ` : ''}
     </svg>`;
 }
 
@@ -377,11 +491,20 @@ export function solarSurplusSVG(hasSurplus: boolean, _isExporting: boolean, colo
  * Flow rate icon
  */
 export function flowRateSVG(_flow: number, _maxFlow: number, color: string): TemplateResult {
-
+  const active = _flow > 0;
+  const waveOpacity = active ? 0.95 : 0.45;
   return html`
     <svg viewBox="0 0 48 48" style="width:100%;height:100%;display:block;overflow:visible" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="24" cy="24" r="22" fill="${color}" fill-opacity="0.1"/>
-      <path d="M12,24 Q18,16 24,24 T36,24" fill="none" stroke="${color}" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="24" cy="24" r="22" fill="${color}" fill-opacity="${active ? 0.12 : 0.07}"/>
+      <circle cx="24" cy="24" r="21" fill="none" stroke="${color}" stroke-width="1.5" stroke-opacity="0.3"/>
+      <path d="M9,22 C13,18 17,26 21,22 C25,18 29,26 33,22 C36,20 38,22 39,22" fill="none" stroke="${color}" stroke-width="2.4" stroke-linecap="round" stroke-opacity="${waveOpacity}"
+            style="${active ? 'animation:wave-drift 1.6s ease-in-out infinite' : ''}"/>
+      <path d="M9,28 C13,24 17,32 21,28 C25,24 29,32 33,28 C36,26 38,28 39,28" fill="none" stroke="${color}" stroke-width="2.4" stroke-linecap="round" stroke-opacity="${active ? 0.7 : 0.3}"
+            style="${active ? 'animation:wave-drift 1.6s ease-in-out infinite 0.25s' : ''}"/>
+      ${active ? html`
+        <circle cx="15" cy="17" r="1.4" fill="white" fill-opacity="0.55" style="animation:bubble-float 1.7s ease-in-out infinite"/>
+        <circle cx="31" cy="16" r="1.2" fill="white" fill-opacity="0.4" style="animation:bubble-float 2s ease-in-out infinite 0.35s"/>
+      ` : ''}
     </svg>`;
 }
 
@@ -392,9 +515,14 @@ export function inletSVG(isInflowing: boolean, color: string): TemplateResult {
   return html`
     <svg viewBox="0 0 48 48" style="width:100%;height:100%;display:block;overflow:visible" xmlns="http://www.w3.org/2000/svg">
       <circle cx="24" cy="24" r="22" fill="${color}" fill-opacity="${isInflowing ? 0.15 : 0.07}"/>
-      <!-- Pipe symbol -->
-      <rect x="16" y="16" width="16" height="8" fill="${color}" />
-      <polygon points="24,32 16,24 32,24" fill="${color}" />
+      <circle cx="24" cy="24" r="21" fill="none" stroke="${color}" stroke-width="1.5" stroke-opacity="0.3"/>
+      <rect x="9" y="20" width="16" height="8" rx="4" fill="${color}" fill-opacity="0.72" />
+      <path d="M25,24 H38" fill="none" stroke="${color}" stroke-width="3" stroke-linecap="round"/>
+      <path d="M33,18 L39,24 L33,30" fill="none" stroke="${color}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+      ${isInflowing ? html`
+        <circle cx="15" cy="24" r="2" fill="white" fill-opacity="0.75" style="animation:flow-dot 1.1s ease-in-out infinite"/>
+        <circle cx="22" cy="24" r="2" fill="white" fill-opacity="0.6" style="animation:flow-dot 1.1s ease-in-out infinite 0.25s"/>
+      ` : ''}
     </svg>`;
 }
 
@@ -405,9 +533,47 @@ export function counterCurrentSVG(isActive: boolean, color: string): TemplateRes
   return html`
     <svg viewBox="0 0 48 48" style="width:100%;height:100%;display:block;overflow:visible" xmlns="http://www.w3.org/2000/svg">
       <circle cx="24" cy="24" r="22" fill="${color}" fill-opacity="${isActive ? 0.15 : 0.07}"/>
+      <circle cx="24" cy="24" r="21" fill="none" stroke="${color}" stroke-width="1.5" stroke-opacity="0.3"/>
       <!-- Two opposite arrows -->
-      <path d="M16,20 L32,20 M32,20 L28,16 M32,20 L28,24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round"/>
-      <path d="M32,28 L16,28 M16,28 L20,24 M16,28 L20,32" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round"/>
+      <path d="M14,18 H32 M32,18 L27.5,13.5 M32,18 L27.5,22.5" fill="none" stroke="${color}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"
+            style="${isActive ? 'animation:wave-drift 1.4s ease-in-out infinite' : ''}"/>
+      <path d="M34,30 H16 M16,30 L20.5,25.5 M16,30 L20.5,34.5" fill="none" stroke="${color}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"
+            style="${isActive ? 'animation:wave-drift 1.4s ease-in-out infinite reverse' : ''}"/>
+      ${isActive ? html`<circle cx="24" cy="24" r="4.5" fill="${color}" fill-opacity="0.18" style="animation:breathe 1.8s ease-in-out infinite"/>` : ''}
+    </svg>`;
+}
+
+/**
+ * Automation / rules icon
+ */
+export function automationRulesSVG(activeCount: number, color: string): TemplateResult {
+  const intensity = clamp01(activeCount / 7);
+  return html`
+    <svg viewBox="0 0 48 48" style="width:100%;height:100%;display:block;overflow:visible" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="24" cy="24" r="22" fill="${color}" fill-opacity="${0.07 + intensity * 0.08}"/>
+      <circle cx="24" cy="24" r="21" fill="none" stroke="${color}" stroke-width="1.5" stroke-opacity="0.32"/>
+      <rect x="10" y="13" width="10" height="8" rx="3" fill="${color}" fill-opacity="0.86"/>
+      <rect x="28" y="13" width="10" height="8" rx="3" fill="${color}" fill-opacity="0.86"/>
+      <rect x="19" y="27" width="10" height="8" rx="3" fill="${color}" fill-opacity="0.86"/>
+      <path d="M20,17 H28 M24,17 V27" fill="none" stroke="${color}" stroke-width="2.2" stroke-linecap="round" stroke-opacity="0.9"/>
+      ${activeCount > 0 ? html`
+        <circle cx="24" cy="24" r="15" fill="none" stroke="${color}" stroke-width="1.1" stroke-opacity="0.24" style="animation:ring-pulse 2.2s ease-out infinite"/>
+      ` : ''}
+    </svg>`;
+}
+
+/**
+ * Diagnostics / health icon
+ */
+export function diagnosticsPulseSVG(active: boolean, color: string): TemplateResult {
+  return html`
+    <svg viewBox="0 0 48 48" style="width:100%;height:100%;display:block;overflow:visible" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="24" cy="24" r="22" fill="${color}" fill-opacity="${active ? 0.12 : 0.07}"/>
+      <circle cx="24" cy="24" r="21" fill="none" stroke="${color}" stroke-width="1.5" stroke-opacity="0.32"/>
+      <rect x="11" y="12" width="26" height="24" rx="6" fill="none" stroke="${color}" stroke-width="2"/>
+      <path d="M14,25 H19 L22,19 L26,29 L29,23 H34" fill="none" stroke="${color}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"
+            style="${active ? 'animation:breathe 1.8s ease-in-out infinite' : ''}"/>
+      <circle cx="34.5" cy="14.5" r="2.5" fill="${color}" fill-opacity="${active ? 0.88 : 0.45}"/>
     </svg>`;
 }
 
@@ -415,11 +581,17 @@ export function counterCurrentSVG(isActive: boolean, color: string): TemplateRes
  * Chlorine Canister icon
  */
 export function chlorineCanisterSVG(_level: number, _maxLevel: number, color: string): TemplateResult {
+  const fill = clamp01((_maxLevel > 0 ? _level / _maxLevel : 0.66));
+  const fillY = 34 - (18 * fill);
   return html`
     <svg viewBox="0 0 48 48" style="width:100%;height:100%;display:block;overflow:visible" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="24" cy="24" r="22" fill="${color}" fill-opacity="0.1"/>
-      <rect x="18" y="12" width="12" height="24" rx="2" fill="none" stroke="${color}" stroke-width="2"/>
-      <text x="24" y="28" text-anchor="middle" font-size="10" fill="${color}">Cl</text>
+      <circle cx="24" cy="24" r="22" fill="${color}" fill-opacity="0.11"/>
+      <rect x="16" y="10" width="16" height="28" rx="4" fill="none" stroke="${color}" stroke-width="2"/>
+      <rect x="19" y="8" width="10" height="4" rx="1.8" fill="${color}" fill-opacity="0.78"/>
+      <rect x="17.5" y="${fillY}" width="13" height="${18 * fill}" rx="3" fill="${color}" fill-opacity="0.55"/>
+      <path d="M18.5,24 C21,21 23.5,17 24,15.5 C24.5,17 27,21 29.5,24 C29.5,27.3 27,30 24,30 C21,30 18.5,27.3 18.5,24Z"
+            fill="${color}" fill-opacity="0.82"/>
+      <text x="24" y="35" text-anchor="middle" font-size="7.4" font-weight="700" fill="${color}">Cl</text>
     </svg>`;
 }
 
@@ -427,11 +599,17 @@ export function chlorineCanisterSVG(_level: number, _maxLevel: number, color: st
  * pH Plus Canister icon
  */
 export function phPlusCanisterSVG(_level: number, _maxLevel: number, color: string): TemplateResult {
+  const fill = clamp01((_maxLevel > 0 ? _level / _maxLevel : 0.66));
+  const fillY = 34 - (18 * fill);
   return html`
     <svg viewBox="0 0 48 48" style="width:100%;height:100%;display:block;overflow:visible" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="24" cy="24" r="22" fill="${color}" fill-opacity="0.1"/>
-      <rect x="18" y="12" width="12" height="24" rx="2" fill="none" stroke="${color}" stroke-width="2"/>
-      <text x="24" y="28" text-anchor="middle" font-size="10" fill="${color}">pH+</text>
+      <circle cx="24" cy="24" r="22" fill="${color}" fill-opacity="0.11"/>
+      <rect x="16" y="10" width="16" height="28" rx="4" fill="none" stroke="${color}" stroke-width="2"/>
+      <rect x="19" y="8" width="10" height="4" rx="1.8" fill="${color}" fill-opacity="0.78"/>
+      <rect x="17.5" y="${fillY}" width="13" height="${18 * fill}" rx="3" fill="${color}" fill-opacity="0.52"/>
+      <path d="M24,16 C21.8,19.6 19.8,22.2 18.5,25 C18.5,28.1 20.9,30.5 24,30.5 C27.1,30.5 29.5,28.1 29.5,25 C28.2,22.2 26.2,19.6 24,16Z"
+            fill="${color}" fill-opacity="0.78"/>
+      <path d="M24,20 L24,27 M20.5,23.5 L27.5,23.5" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
     </svg>`;
 }
 
@@ -439,11 +617,17 @@ export function phPlusCanisterSVG(_level: number, _maxLevel: number, color: stri
  * pH Minus Canister icon
  */
 export function phMinusCanisterSVG(_level: number, _maxLevel: number, color: string): TemplateResult {
+  const fill = clamp01((_maxLevel > 0 ? _level / _maxLevel : 0.66));
+  const fillY = 34 - (18 * fill);
   return html`
     <svg viewBox="0 0 48 48" style="width:100%;height:100%;display:block;overflow:visible" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="24" cy="24" r="22" fill="${color}" fill-opacity="0.1"/>
-      <rect x="18" y="12" width="12" height="24" rx="2" fill="none" stroke="${color}" stroke-width="2"/>
-      <text x="24" y="28" text-anchor="middle" font-size="10" fill="${color}">pH-</text>
+      <circle cx="24" cy="24" r="22" fill="${color}" fill-opacity="0.11"/>
+      <rect x="16" y="10" width="16" height="28" rx="4" fill="none" stroke="${color}" stroke-width="2"/>
+      <rect x="19" y="8" width="10" height="4" rx="1.8" fill="${color}" fill-opacity="0.78"/>
+      <rect x="17.5" y="${fillY}" width="13" height="${18 * fill}" rx="3" fill="${color}" fill-opacity="0.52"/>
+      <path d="M24,16 C21.8,19.6 19.8,22.2 18.5,25 C18.5,28.1 20.9,30.5 24,30.5 C27.1,30.5 29.5,28.1 29.5,25 C28.2,22.2 26.2,19.6 24,16Z"
+            fill="${color}" fill-opacity="0.78"/>
+      <path d="M20.5,23.5 L27.5,23.5" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
     </svg>`;
 }
 
@@ -451,10 +635,16 @@ export function phMinusCanisterSVG(_level: number, _maxLevel: number, color: str
  * Flocculant Canister icon
  */
 export function flocculantCanisterSVG(_level: number, _maxLevel: number, color: string): TemplateResult {
+  const fill = clamp01((_maxLevel > 0 ? _level / _maxLevel : 0.66));
+  const fillY = 34 - (18 * fill);
   return html`
     <svg viewBox="0 0 48 48" style="width:100%;height:100%;display:block;overflow:visible" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="24" cy="24" r="22" fill="${color}" fill-opacity="0.1"/>
-      <rect x="18" y="12" width="12" height="24" rx="2" fill="none" stroke="${color}" stroke-width="2"/>
-      <text x="24" y="28" text-anchor="middle" font-size="10" fill="${color}">Floc</text>
+      <circle cx="24" cy="24" r="22" fill="${color}" fill-opacity="0.11"/>
+      <rect x="16" y="10" width="16" height="28" rx="4" fill="none" stroke="${color}" stroke-width="2"/>
+      <rect x="19" y="8" width="10" height="4" rx="1.8" fill="${color}" fill-opacity="0.78"/>
+      <rect x="17.5" y="${fillY}" width="13" height="${18 * fill}" rx="3" fill="${color}" fill-opacity="0.5"/>
+      <circle cx="20" cy="23" r="2.1" fill="${color}" fill-opacity="0.82"/>
+      <circle cx="28" cy="21.5" r="1.8" fill="${color}" fill-opacity="0.72"/>
+      <circle cx="24.5" cy="27" r="2.6" fill="${color}" fill-opacity="0.9"/>
     </svg>`;
 }
