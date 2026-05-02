@@ -32,6 +32,7 @@ import { PerformanceMonitor } from './utils/performance';
 import { pumpSVG, heaterSVG, solarSVG, coverSVG, lightSVG, gaugeNeedleSVG, filterGaugeSVG, chartSVG, backwashSVG, refillSVG, solarSurplusSVG, flowRateSVG, inletSVG, counterCurrentSVG, chlorineCanisterSVG, phPlusCanisterSVG, phMinusCanisterSVG, flocculantCanisterSVG, waterThermometerSVG, phOrbSVG, chlorineOrbSVG, saltCrystalSVG, orpEnergySVG, automationRulesSVG, diagnosticsPulseSVG } from './utils/animated-icons';
 import { SeverityModel, type SeverityAlert } from './utils/severity-model';
 import { TrendHelper } from './utils/trend-helper';
+import { getSystemCardGroups } from './utils/system-dashboard';
 
 
 // HomeAssistant types
@@ -131,6 +132,17 @@ export interface VioletPoolCardConfig extends LovelaceCardConfig {
   filter_entity?: string;
   filter_pressure_entity?: string;
   backwash_entity?: string;
+  refill_entity?: string;
+  solar_surplus_entity?: string;
+  flow_rate_entity?: string;
+  inlet_entity?: string;
+  counter_current_entity?: string;
+  chlorine_level_entity?: string;
+  ph_plus_level_entity?: string;
+  ph_minus_level_entity?: string;
+  flocculant_level_entity?: string;
+  digital_rules_entity?: string;
+  diagnostics_entity?: string;
 }
 
 export class VioletPoolCard extends LitElement {
@@ -703,6 +715,18 @@ export class VioletPoolCard extends LitElement {
     const coverEntitySys = this._getEntityId('cover_entity', 'cover', 'cover');
     const lightEntitySys = this._getEntityId('light_entity', 'light', 'light');
     const filterEntitySys = this._getEntityId('filter_entity' as any, 'sensor', 'filter_pressure');
+    const backwashEntitySys = this._getEntityId('backwash_entity', 'switch', 'backwash');
+    const refillEntitySys = this._getEntityId('refill_entity', 'sensor', 'water_level');
+    const solarSurplusEntitySys = this._getEntityId('solar_surplus_entity', 'sensor', 'pv_power');
+    const flowRateEntitySys = this._getEntityId('flow_rate_entity', 'sensor', 'flow_rate');
+    const inletEntitySys = this._getEntityId('inlet_entity', 'sensor', 'inlet_status');
+    const counterCurrentEntitySys = this._getEntityId('counter_current_entity', 'switch', 'counter_current');
+    const chlorineCanisterEntitySys = this._getEntityId('chlorine_level_entity', 'sensor', 'chlorine_level');
+    const phPlusCanisterEntitySys = this._getEntityId('ph_plus_level_entity', 'sensor', 'ph_plus_level');
+    const phMinusCanisterEntitySys = this._getEntityId('ph_minus_level_entity', 'sensor', 'ph_minus_level');
+    const flocculantCanisterEntitySys = this._getEntityId('flocculant_level_entity', 'sensor', 'flocculant_level');
+    const digitalRulesEntitySys = this._getEntityId('digital_rules_entity', 'sensor', 'digital_rules_status');
+    const diagnosticsEntitySys = this._getEntityId('diagnostics_entity', 'sensor', 'diagnostics_status');
 
     const overviewConfig = createSubConfig('overview', '', { name: 'Pool Overview' });
     const pumpConfig = createSubConfig('pump', pumpEntity, { show_runtime: true });
@@ -712,17 +736,29 @@ export class VioletPoolCard extends LitElement {
     const coverConfig = createSubConfig('cover', coverEntitySys);
     const lightConfig = createSubConfig('light', lightEntitySys);
     const filterConfig = createSubConfig('filter' as any, filterEntitySys);
+    const backwashConfig = createSubConfig('backwash', backwashEntitySys);
+    const refillConfig = createSubConfig('refill', refillEntitySys);
+    const solarSurplusConfig = createSubConfig('solar_surplus', solarSurplusEntitySys);
+    const flowRateConfig = createSubConfig('flow_rate', flowRateEntitySys);
+    const inletConfig = createSubConfig('inlet', inletEntitySys);
+    const counterCurrentConfig = createSubConfig('counter_current', counterCurrentEntitySys);
+    const chlorineCanisterConfig = createSubConfig('chlorine_canister', chlorineCanisterEntitySys);
+    const phPlusCanisterConfig = createSubConfig('ph_plus_canister', phPlusCanisterEntitySys);
+    const phMinusCanisterConfig = createSubConfig('ph_minus_canister', phMinusCanisterEntitySys);
+    const flocculantCanisterConfig = createSubConfig('flocculant_canister', flocculantCanisterEntitySys);
+    const digitalRulesConfig = createSubConfig('digital_rules', digitalRulesEntitySys, { name: 'Digital Rules' });
+    const diagnosticsConfig = createSubConfig('diagnostics', diagnosticsEntitySys, { name: 'Diagnostics' });
     const chemicalConfig = createSubConfig('chemical', '', { name: 'Water Chemistry', show_controls: false });
-    let controlCards = [pumpConfig, heaterConfig, solarConfig, dosingConfig].filter(Boolean);
-    let utilityCards = [coverConfig, lightConfig, filterConfig].filter(Boolean);
-
-    if (dashboardMode === 'maintenance') {
-      utilityCards = [filterConfig, coverConfig, lightConfig].filter(Boolean);
-    }
-    if (dashboardMode === 'alarm_center') {
-      utilityCards = [filterConfig, dosingConfig, coverConfig].filter(Boolean);
-      controlCards = [heaterConfig, pumpConfig, solarConfig].filter(Boolean);
-    }
+    const groups = getSystemCardGroups(
+      dashboardMode,
+      [pumpConfig, heaterConfig, solarConfig, dosingConfig, counterCurrentConfig],
+      [coverConfig, lightConfig, filterConfig, flowRateConfig, inletConfig, solarSurplusConfig, backwashConfig, refillConfig, chlorineCanisterConfig, phPlusCanisterConfig, phMinusCanisterConfig, flocculantCanisterConfig, digitalRulesConfig, diagnosticsConfig],
+      [filterConfig, backwashConfig, refillConfig, coverConfig, lightConfig, diagnosticsConfig],
+      [heaterConfig, pumpConfig, solarConfig, counterCurrentConfig],
+      [filterConfig, dosingConfig, solarSurplusConfig, coverConfig, diagnosticsConfig]
+    );
+    const controlCards = groups.controlCards;
+    const utilityCards = groups.utilityCards;
 
     const totalCards = [overviewConfig, chemicalConfig, ...controlCards, ...utilityCards].filter(Boolean).length;
 
@@ -756,15 +792,7 @@ export class VioletPoolCard extends LitElement {
               <span class="system-section-count">${controlCards.length} Karten</span>
             </div>
             <div class="system-grid system-grid-primary">
-              ${controlCards.map((card) => {
-                switch (card!.card_type) {
-                  case 'pump': return this.renderPumpCard(card!);
-                  case 'heater': return this.renderHeaterCard(card!);
-                  case 'solar': return this.renderSolarCard(card!);
-                  case 'dosing': return this.renderDosingCard(card!);
-                  default: return html``;
-                }
-              })}
+              ${controlCards.map((card) => this._renderCardByType(card!))}
             </div>
           </div>
         ` : ''}
@@ -779,19 +807,37 @@ export class VioletPoolCard extends LitElement {
               <span class="system-section-count">${utilityCards.length} Karten</span>
             </div>
             <div class="system-grid system-grid-secondary">
-              ${utilityCards.map((card) => {
-                switch (card!.card_type) {
-                  case 'cover': return this.renderCoverCard(card!);
-                  case 'light': return this.renderLightCard(card!);
-                  case 'filter': return this.renderFilterCard(card!);
-                  default: return html``;
-                }
-              })}
+              ${utilityCards.map((card) => this._renderCardByType(card!))}
             </div>
           </div>
         ` : ''}
       </div>
     `;
+  }
+
+  private _renderCardByType(card: VioletPoolCardConfig): TemplateResult {
+    switch (card.card_type) {
+      case 'pump': return this.renderPumpCard(card);
+      case 'heater': return this.renderHeaterCard(card);
+      case 'solar': return this.renderSolarCard(card);
+      case 'dosing': return this.renderDosingCard(card);
+      case 'cover': return this.renderCoverCard(card);
+      case 'light': return this.renderLightCard(card);
+      case 'filter': return this.renderFilterCard(card);
+      case 'backwash': return this.renderBackwashCard(card);
+      case 'refill': return this.renderRefillCard(card);
+      case 'solar_surplus': return this.renderSolarSurplusCard(card);
+      case 'flow_rate': return this.renderFlowRateCard(card);
+      case 'inlet': return this.renderInletCard(card);
+      case 'counter_current': return this.renderCounterCurrentCard(card);
+      case 'chlorine_canister': return this.renderChlorineCanisterCard(card);
+      case 'ph_plus_canister': return this.renderPhPlusCanisterCard(card);
+      case 'ph_minus_canister': return this.renderPhMinusCanisterCard(card);
+      case 'flocculant_canister': return this.renderFlocculantCanisterCard(card);
+      case 'digital_rules': return this.renderDigitalRulesCard(card);
+      case 'diagnostics': return this.renderDiagnosticsCard(card);
+      default: return html``;
+    }
   }
 
   private renderPumpCard(config: VioletPoolCardConfig = this.config): TemplateResult {
@@ -4108,6 +4154,14 @@ ha-card.theme-midnight .chem-metric-track{background:rgba(255,255,255,0.08);}
 .a11y-reduced-motion *, .a11y-reduced-motion *::before, .a11y-reduced-motion *::after{animation:none !important;transition:none !important;scroll-behavior:auto !important;}
 @media (max-width:900px){.overview-hero,.system-hero-panel{grid-template-columns:1fr;display:grid;align-items:flex-start;}.overview-snapshot-grid,.overview-facts{grid-template-columns:1fr;}.system-hero-pills{justify-content:flex-start;}}
 @media (max-width:600px){.insight-grid{grid-template-columns:1fr;}}
+ha-card{will-change:transform,box-shadow;}
+ha-card::before{content:'';position:absolute;inset:-1px;border-radius:inherit;pointer-events:none;opacity:0;background:radial-gradient(120% 90% at 15% 0%,color-mix(in srgb,var(--card-accent,var(--vpc-primary)) 20%,transparent),transparent 56%);transition:opacity .24s ease;}
+ha-card:hover::before,ha-card.is-active::before{opacity:.9;}
+ha-card.theme-glass .header-icon,ha-card.layout-glass .header-icon{box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 10px 22px color-mix(in srgb,var(--icon-accent,var(--vpc-primary)) 16%,transparent);}
+.temp-range-fill,.chem-range-fill,.chem-metric-fill,.cover-pos-fill{position:relative;overflow:hidden;}
+.temp-range-fill::after,.chem-range-fill::after,.chem-metric-fill::after,.cover-pos-fill::after{content:'';position:absolute;inset:0;transform:translateX(-120%);background:linear-gradient(90deg,transparent,rgba(255,255,255,.34),transparent);animation:vpc-shine 2.8s ease-in-out infinite;}
+@keyframes vpc-shine{0%,65%{transform:translateX(-120%);}100%{transform:translateX(130%);}}
+@media (prefers-reduced-motion:reduce){ha-card,ha-card *{animation:none !important;transition:none !important;}ha-card:hover{transform:none;}}
 `;
 
   }
@@ -4414,4 +4468,3 @@ window.customCards.push({
   preview: true,
   // Add icon for Card Picker if missing. This is ignored by HACS list but useful for HA Add Card UI.
 });
-
