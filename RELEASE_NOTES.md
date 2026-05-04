@@ -1,4 +1,4 @@
-## v0.1.2 – Violet Pool Card
+## v0.1.4 – Violet Pool Card
 
 ✅ **STABLE RELEASE**
 
@@ -34,6 +34,7 @@
 
 ### 🚀 Improvements | Verbesserungen
 
+- 📝 Release v0.1.2 - Update changelog, version and info.md (90b3ef5)
 - /optimize-and-improve-the-code-and-graphics (95096cb)
 - build: update auto-generated files [skip ci] (40bf302)
 - build: update auto-generated files [skip ci] (f329813)
@@ -137,7 +138,7 @@
 
 ---
 
-📋 [Full changelog: v0.1.3...v0.1.2](https://github.com/Xerolux/violet-pool-card/compare/v0.1.3...v0.1.2)
+📋 [Full changelog: v0.1.3...v0.1.4](https://github.com/Xerolux/violet-pool-card/compare/v0.1.3...v0.1.4)
 
 ---
 
@@ -162,4 +163,4 @@ Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
 
 ---
 
-_Generated automatically by GitHub Actions on 2026-05-04 07:51:43 UTC_
+_Generated automatically by GitHub Actions on 2026-05-04 07:52:50 UTC_
