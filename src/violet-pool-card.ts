@@ -194,7 +194,7 @@ export class VioletPoolCard extends LitElement {
       blur_intensity: 10,
       style: 'standard',
       show_flow_animation: false,
-      entity_prefix: 'violet_pool',
+      entity_prefix: 'violet_pool_controller',
       ...config,
     };
   }
@@ -212,7 +212,7 @@ export class VioletPoolCard extends LitElement {
   }
 
   private _buildEntityId(domain: string, suffix: string): string {
-    const prefix = this.config.entity_prefix || 'violet_pool';
+    const prefix = this.config.entity_prefix || 'violet_pool_controller';
     return `${domain}.${prefix}_${suffix}`;
   }
 
@@ -649,7 +649,7 @@ export class VioletPoolCard extends LitElement {
    * Render Quick-Settings Panel with common pool actions
    */
   private _renderQuickSettingsPanel(): TemplateResult {
-    const heaterEntityId = this._getEntityId('heater_entity', 'climate', 'heater', 1);
+    const heaterEntityId = this._getEntityId('heater_entity', 'climate', 'heizung', 1);
 
     return html`
       <div style="display: grid; gap: 8px; padding: 12px; background: var(--vpc-surface); border-radius: 12px; margin-top: 12px;">
@@ -693,10 +693,10 @@ export class VioletPoolCard extends LitElement {
   }
 
   private renderSystemCard(): TemplateResult {
-    const pumpEntity = this._getEntityId('pump_entity', 'switch', 'pump', 0);
-    const heaterEntity = this._getEntityId('heater_entity', 'climate', 'heater', 1);
-    const solarEntity = this._getEntityId('solar_entity', 'climate', 'solar', 2);
-    const dosingEntity = this._getEntityId('chlorine_entity', 'switch', 'dos_1_cl', 3);
+    const pumpEntity = this._getEntityId('pump_entity', 'switch', 'filterpumpe', 0);
+    const heaterEntity = this._getEntityId('heater_entity', 'climate', 'heizung', 1);
+    const solarEntity = this._getEntityId('solar_entity', 'climate', 'solarabsorber', 2);
+    const dosingEntity = this._getEntityId('chlorine_entity', 'switch', 'chlor_dosierung', 3);
     const layoutVariant = this.config.layout_variant || 'glass';
     const dashboardMode = this.config.dashboard_mode || 'default';
 
@@ -707,25 +707,25 @@ export class VioletPoolCard extends LitElement {
         card_type: type as any,
         entity: entity,
         // Ensure entity_prefix is always propagated to sub-cards (bug fix)
-        entity_prefix: this.config.entity_prefix || 'violet_pool',
+        entity_prefix: this.config.entity_prefix || 'violet_pool_controller',
         ...extra
       };
     };
 
-    const coverEntitySys = this._getEntityId('cover_entity', 'cover', 'cover');
-    const lightEntitySys = this._getEntityId('light_entity', 'light', 'light');
-    const filterEntitySys = this._getEntityId('filter_entity' as any, 'sensor', 'filter_pressure');
-    const backwashEntitySys = this._getEntityId('backwash_entity', 'switch', 'backwash');
-    const refillEntitySys = this._getEntityId('refill_entity', 'sensor', 'water_level');
-    const solarSurplusEntitySys = this._getEntityId('solar_surplus_entity', 'sensor', 'pv_power');
-    const flowRateEntitySys = this._getEntityId('flow_rate_entity', 'sensor', 'flow_rate');
+    const coverEntitySys = this._getEntityId('cover_entity', 'cover', 'abdeckung');
+    const lightEntitySys = this._getEntityId('light_entity', 'switch', 'beleuchtung');
+    const filterEntitySys = this._getEntityId('filter_entity' as any, 'sensor', 'filterdruck');
+    const backwashEntitySys = this._getEntityId('backwash_entity', 'switch', 'ruckspulung');
+    const refillEntitySys = this._getEntityId('refill_entity', 'sensor', 'uberlaufbehalter');
+    const solarSurplusEntitySys = this._getEntityId('solar_surplus_entity', 'sensor', 'pv_uberschuss_status');
+    const flowRateEntitySys = this._getEntityId('flow_rate_entity', 'sensor', 'pumpen_durchfluss');
     const inletEntitySys = this._getEntityId('inlet_entity', 'sensor', 'inlet_status');
     const counterCurrentEntitySys = this._getEntityId('counter_current_entity', 'switch', 'counter_current');
-    const chlorineCanisterEntitySys = this._getEntityId('chlorine_level_entity', 'sensor', 'chlorine_level');
-    const phPlusCanisterEntitySys = this._getEntityId('ph_plus_level_entity', 'sensor', 'ph_plus_level');
-    const phMinusCanisterEntitySys = this._getEntityId('ph_minus_level_entity', 'sensor', 'ph_minus_level');
-    const flocculantCanisterEntitySys = this._getEntityId('flocculant_level_entity', 'sensor', 'flocculant_level');
-    const digitalRulesEntitySys = this._getEntityId('digital_rules_entity', 'sensor', 'digital_rules_status');
+    const chlorineCanisterEntitySys = this._getEntityId('chlorine_level_entity', 'sensor', 'dos_1_cl_remaining_range');
+    const phPlusCanisterEntitySys = this._getEntityId('ph_plus_level_entity', 'sensor', 'dos_5_php_remaining_range');
+    const phMinusCanisterEntitySys = this._getEntityId('ph_minus_level_entity', 'sensor', 'dos_4_phm_remaining_range');
+    const flocculantCanisterEntitySys = this._getEntityId('flocculant_level_entity', 'sensor', 'dos_6_floc_remaining_range');
+    const digitalRulesEntitySys = this._getEntityId('digital_rules_entity', 'switch', 'schaltregel_1');
     const diagnosticsEntitySys = this._getEntityId('diagnostics_entity', 'sensor', 'diagnostics_status');
 
     const overviewConfig = createSubConfig('overview', '', { name: 'Pool Overview' });
@@ -1401,20 +1401,20 @@ export class VioletPoolCard extends LitElement {
     let unit = '';
 
     if (dosingType === 'chlorine') {
-      const orpSensorId = this._getEntityId('orp_value_entity', 'sensor', 'orp_value');
+      const orpSensorId = this._getEntityId('orp_value_entity', 'sensor', 'redoxpotential');
       const orpSensor = this.hass.states[orpSensorId];
       currentValue = orpSensor ? parseFloat(orpSensor.state) : undefined;
-      const targetOrpId = this._getEntityId('target_orp_entity', 'number', 'target_orp');
+      const targetOrpId = this._getEntityId('target_orp_entity', 'number', 'redox_sollwert');
       const targetEntity = this.hass.states[targetOrpId];
       targetValue = targetEntity ? parseFloat(targetEntity.state) : undefined;
       minValue = Number(targetEntity?.attributes?.min) || 600;
       maxValue = Number(targetEntity?.attributes?.max) || 800;
       unit = 'mV';
     } else if (dosingType === 'ph_minus' || dosingType === 'ph_plus') {
-      const phSensorId = this._getEntityId('ph_value_entity', 'sensor', 'ph_value');
+      const phSensorId = this._getEntityId('ph_value_entity', 'sensor', 'ph_wert');
       const phSensor = this.hass.states[phSensorId];
       currentValue = phSensor ? parseFloat(phSensor.state) : undefined;
-      const targetPhId = this._getEntityId('target_ph_entity', 'number', 'target_ph');
+      const targetPhId = this._getEntityId('target_ph_entity', 'number', 'ph_sollwert');
       const targetEntity = this.hass.states[targetPhId];
       targetValue = targetEntity ? parseFloat(targetEntity.state) : undefined;
       minValue = Number(targetEntity?.attributes?.min) || 6.8;
@@ -1621,11 +1621,11 @@ export class VioletPoolCard extends LitElement {
     const layoutVariant = config.layout_variant || 'glass';
     const alarmStyle = this._getEffectiveAlarmStyle(config);
 
-    const pumpEntityId = this._getEntityId('pump_entity', 'switch', 'pump', 0);
-    const heaterEntityId = this._getEntityId('heater_entity', 'climate', 'heater', 1);
-    const solarEntityId = this._getEntityId('solar_entity', 'climate', 'solar', 2);
-    const chlorineEntityId = this._getEntityId('chlorine_entity', 'switch', 'dos_1_cl', 3);
-    const phEntityId = this._getEntityId('ph_minus_entity', 'switch', 'dos_2_phm', 4);
+    const pumpEntityId = this._getEntityId('pump_entity', 'switch', 'filterpumpe', 0);
+    const heaterEntityId = this._getEntityId('heater_entity', 'climate', 'heizung', 1);
+    const solarEntityId = this._getEntityId('solar_entity', 'climate', 'solarabsorber', 2);
+    const chlorineEntityId = this._getEntityId('chlorine_entity', 'switch', 'chlor_dosierung', 3);
+    const phEntityId = this._getEntityId('ph_minus_entity', 'switch', 'dosierung_ph_2', 4);
 
     const pumpEntity = this.hass.states[pumpEntityId];
     const heaterEntity = this.hass.states[heaterEntityId];
@@ -1633,9 +1633,9 @@ export class VioletPoolCard extends LitElement {
     const chlorineEntity = this.hass.states[chlorineEntityId];
     const phEntity = this.hass.states[phEntityId];
 
-    const poolTempSensorId = this._getEntityId('pool_temp_entity', 'sensor', 'temperature', 5);
-    const phSensorId = this._getEntityId('ph_value_entity', 'sensor', 'ph_value', 6);
-    const orpSensorId = this._getEntityId('orp_value_entity', 'sensor', 'orp_value', 7);
+    const poolTempSensorId = this._getEntityId('pool_temp_entity', 'sensor', 'beckenwasser', 5);
+    const phSensorId = this._getEntityId('ph_value_entity', 'sensor', 'ph_wert', 6);
+    const orpSensorId = this._getEntityId('orp_value_entity', 'sensor', 'redoxpotential', 7);
 
     const poolTempSensor = this.hass.states[poolTempSensorId];
     const phSensor = this.hass.states[phSensorId];
@@ -1733,7 +1733,7 @@ export class VioletPoolCard extends LitElement {
     }
 
     // Cover entity
-    const coverEntityId = this._getEntityId('cover_entity', 'cover', 'cover');
+    const coverEntityId = this._getEntityId('cover_entity', 'cover', 'abdeckung');
     const coverEntity = this.hass.states[coverEntityId];
     if (coverEntity) {
       const pos = coverEntity.attributes?.current_position;
@@ -1748,7 +1748,7 @@ export class VioletPoolCard extends LitElement {
     }
 
     // Light entity
-    const lightEntityId = this._getEntityId('light_entity', 'light', 'light');
+    const lightEntityId = this._getEntityId('light_entity', 'switch', 'beleuchtung');
     const lightEntity = this.hass.states[lightEntityId];
     if (lightEntity) {
       const br = lightEntity.attributes?.brightness as number | undefined;
@@ -1765,7 +1765,7 @@ export class VioletPoolCard extends LitElement {
     const alertEntries: Array<{ text: string; severity: 'warning' | 'critical'; icon: string }> = [];
 
     // Filter entity
-    const filterEntityId = this._getEntityId('filter_entity' as any, 'sensor', 'filter_pressure');
+    const filterEntityId = this._getEntityId('filter_entity' as any, 'sensor', 'filterdruck');
     const filterEntity = this.hass.states[filterEntityId];
     if (filterEntity) {
       const pressureVal = parseFloat(filterEntity.state);
@@ -1779,7 +1779,7 @@ export class VioletPoolCard extends LitElement {
     }
 
     // Pool level / Füllstand
-    const poolLevelEntityId = this._getEntityId('pool_level_entity' as any, 'sensor', 'pool_level');
+    const poolLevelEntityId = this._getEntityId('pool_level_entity' as any, 'sensor', 'uberlaufbehalter');
     const poolLevelEntity = this.hass.states[poolLevelEntityId];
     if (poolLevelEntity) {
       const levelVal = parseFloat(poolLevelEntity.state);
@@ -1793,7 +1793,7 @@ export class VioletPoolCard extends LitElement {
     }
 
     // Flow rate / Durchfluss
-    const flowRateEntityId = this._getEntityId('flow_rate_entity' as any, 'sensor', 'flow_rate');
+    const flowRateEntityId = this._getEntityId('flow_rate_entity' as any, 'sensor', 'pumpen_durchfluss');
     const flowRateEntity = this.hass.states[flowRateEntityId];
     if (flowRateEntity) {
       const flowVal = parseFloat(flowRateEntity.state);
@@ -1823,7 +1823,7 @@ export class VioletPoolCard extends LitElement {
     }
 
     // Chlorine value / Chlor-Wert (sensor)
-    const chlorineValueEntityId = this._getEntityId('chlorine_value_entity' as any, 'sensor', 'chlorine_value');
+    const chlorineValueEntityId = this._getEntityId('chlorine_value_entity' as any, 'sensor', 'chlorgehalt');
     const chlorineValueEntity = this.hass.states[chlorineValueEntityId];
     if (chlorineValueEntity) {
       const clVal = parseFloat(chlorineValueEntity.state);
@@ -2231,13 +2231,13 @@ export class VioletPoolCard extends LitElement {
 
       const dosingType = this._detectDosingType(config.entity!);
       if (dosingType === 'chlorine') {
-        const orpSensorId = this._getEntityId('orp_value_entity', 'sensor', 'orp_value');
+        const orpSensorId = this._getEntityId('orp_value_entity', 'sensor', 'redoxpotential');
         const orpSensor = this.hass.states[orpSensorId];
         if (orpSensor) {
           currentValue = `${parseFloat(orpSensor.state).toFixed(0)}mV`;
         }
       } else if (dosingType === 'ph_minus' || dosingType === 'ph_plus') {
-        const phSensorId = this._getEntityId('ph_value_entity', 'sensor', 'ph_value');
+        const phSensorId = this._getEntityId('ph_value_entity', 'sensor', 'ph_wert');
         const phSensor = this.hass.states[phSensorId];
         if (phSensor) {
           currentValue = `pH ${parseFloat(phSensor.state).toFixed(1)}`;
@@ -2284,14 +2284,14 @@ export class VioletPoolCard extends LitElement {
     const showInlet = config.show_inlet === true;
 
     // Get sensor entities
-    const poolTempSensorId = showTemp ? this._getEntityId('pool_temp_entity', 'sensor', 'temperature', 5) : null;
-    const phSensorId = showPh ? this._getEntityId('ph_value_entity', 'sensor', 'ph_value', 6) : null;
-    const orpSensorId = showOrp ? this._getEntityId('orp_value_entity', 'sensor', 'orp_value', 7) : null;
-    const chlorineSensorId = showChlorine ? ((config as any).chlorine_entity || this._buildEntityId('sensor', 'chlorine')) : null;
-    const saltSensorId = showSalt ? ((config as any).salt_level_entity || this._buildEntityId('sensor', 'salt_level')) : null;
+    const poolTempSensorId = showTemp ? this._getEntityId('pool_temp_entity', 'sensor', 'beckenwasser', 5) : null;
+    const phSensorId = showPh ? this._getEntityId('ph_value_entity', 'sensor', 'ph_wert', 6) : null;
+    const orpSensorId = showOrp ? this._getEntityId('orp_value_entity', 'sensor', 'redoxpotential', 7) : null;
+    const chlorineSensorId = showChlorine ? ((config as any).chlorine_entity || this._buildEntityId('sensor', 'chlorgehalt')) : null;
+    const saltSensorId = showSalt ? ((config as any).salt_level_entity || this._buildEntityId('sensor', 'salzgehalt')) : null;
     const inletEntityId = showInlet ? ((config as any).inlet_entity || this._buildEntityId('switch', 'inlet')) : null;
-    const targetPhId = this._getEntityId('target_ph_entity', 'number', 'target_ph');
-    const targetOrpId = showOrp ? this._getEntityId('target_orp_entity', 'number', 'target_orp') : null;
+    const targetPhId = this._getEntityId('target_ph_entity', 'number', 'ph_sollwert');
+    const targetOrpId = showOrp ? this._getEntityId('target_orp_entity', 'number', 'redox_sollwert') : null;
 
     // Get sensor states
     const poolTempSensor = poolTempSensorId ? this.hass.states[poolTempSensorId] : undefined;
@@ -2670,7 +2670,7 @@ export class VioletPoolCard extends LitElement {
   }
 
   private renderCoverCard(config: VioletPoolCardConfig = this.config): TemplateResult {
-    const entityId = config.cover_entity || config.entity || this._buildEntityId('cover', 'cover');
+    const entityId = config.cover_entity || config.entity || this._buildEntityId('cover', 'abdeckung');
     const entity = this.hass.states[entityId];
     if (!entity) {
       return html`<ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">Cover nicht gefunden</span><span class="error-entity">${entityId}</span></div></div></ha-card>`;
@@ -2748,7 +2748,7 @@ export class VioletPoolCard extends LitElement {
   }
 
   private renderLightCard(config: VioletPoolCardConfig = this.config): TemplateResult {
-    const entityId = config.light_entity || config.entity || this._buildEntityId('light', 'light');
+    const entityId = config.light_entity || config.entity || this._buildEntityId('switch', 'beleuchtung');
     const entity = this.hass.states[entityId];
     if (!entity) {
       return html`<ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">Licht nicht gefunden</span><span class="error-entity">${entityId}</span></div></div></ha-card>`;
@@ -2820,7 +2820,7 @@ export class VioletPoolCard extends LitElement {
                        let angle = Math.atan2(dy, dx) * (180 / Math.PI);
                        angle = (angle + 360) % 360;
                        const rgb = this._hsvToRgb(angle / 360, 1, 1);
-                       this.hass.callService('light', 'turn_on', { entity_id: entityId, rgb_color: rgb });
+                       this.hass.callService(entityId.startsWith('light.') ? 'light' : 'switch', 'turn_on', { entity_id: entityId, rgb_color: rgb });
                      }
                    }}">
                 <svg viewBox="0 0 200 200" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" xmlns="http://www.w3.org/2000/svg">
@@ -2862,7 +2862,7 @@ export class VioletPoolCard extends LitElement {
                 { label: 'Weiß', rgb: [255, 255, 255], icon: '⚪' },
               ].map(preset => html`
                 <button style="padding: 6px; border: 2px solid ${rgb && rgb[0] === preset.rgb[0] && rgb[1] === preset.rgb[1] && rgb[2] === preset.rgb[2] ? accentColor : 'transparent'}; border-radius: 8px; background: rgb(${preset.rgb[0]}, ${preset.rgb[1]}, ${preset.rgb[2]}); color: white; font-weight: 600; cursor: pointer; transition: all 0.2s; font-size: 10px; text-shadow: 0 1px 2px rgba(0,0,0,0.3);"
-                        @click="${(e: Event) => { e.stopPropagation(); this.hass.callService('light', 'turn_on', { entity_id: entityId, rgb_color: preset.rgb }); }}"
+                        @click="${(e: Event) => { e.stopPropagation(); this.hass.callService(entityId.startsWith('light.') ? 'light' : 'switch', 'turn_on', { entity_id: entityId, rgb_color: preset.rgb }); }}"
                         @mouseover="${(e: Event) => (e.target as HTMLElement).style.transform = 'scale(1.05)'}"
                         @mouseout="${(e: Event) => (e.target as HTMLElement).style.transform = 'scale(1)'}">
                   ${preset.icon}
@@ -2880,7 +2880,7 @@ export class VioletPoolCard extends LitElement {
                     <input type="range" min="154" max="500" value="${colorTemp || 250}" style="flex: 1; height: 6px; cursor: pointer;"
                            @change="${(e: Event) => {
                              const mirek = parseInt((e.target as HTMLInputElement).value);
-                             this.hass.callService('light', 'turn_on', { entity_id: entityId, color_temp: mirek });
+                             this.hass.callService(entityId.startsWith('light.') ? 'light' : 'switch', 'turn_on', { entity_id: entityId, color_temp: mirek });
                            }}"/>
                     <div style="width: 25px; text-align: center; font-size: 10px; color: var(--vpc-text-secondary);">🟠<br/>2000K</div>
                   </div>
@@ -2907,7 +2907,7 @@ export class VioletPoolCard extends LitElement {
                   .value="${brightnessPercent}" unit="%"
                   @value-changed="${(e: CustomEvent) => {
                     e.stopPropagation();
-                    this.hass.callService('light', 'turn_on', { entity_id: entityId, brightness_pct: e.detail.value });
+                    this.hass.callService(entityId.startsWith('light.') ? 'light' : 'switch', 'turn_on', { entity_id: entityId, brightness_pct: e.detail.value });
                   }}"
                 ></vpc-slider-control>
               </div>
@@ -2938,12 +2938,12 @@ export class VioletPoolCard extends LitElement {
             <div class="cover-controls">
               <button class="cover-btn cover-btn-open ${isOn ? 'cvr-active' : ''}"
                       style="--cvr-btn-color:${accentColor}"
-                      @click="${(e: Event) => { e.stopPropagation(); this.hass.callService('light', 'turn_on', { entity_id: entityId }); }}">
+                      @click="${(e: Event) => { e.stopPropagation(); this.hass.callService(entityId.startsWith('light.') ? 'light' : 'switch', 'turn_on', { entity_id: entityId }); }}">
                 <ha-icon icon="mdi:lightbulb-on" style="--mdc-icon-size:17px"></ha-icon>
                 <span>An</span>
               </button>
               <button class="cover-btn cover-btn-close ${!isOn ? 'cvr-active' : ''}"
-                      @click="${(e: Event) => { e.stopPropagation(); this.hass.callService('light', 'turn_off', { entity_id: entityId }); }}">
+                      @click="${(e: Event) => { e.stopPropagation(); this.hass.callService(entityId.startsWith('light.') ? 'light' : 'switch', 'turn_off', { entity_id: entityId }); }}">
                 <ha-icon icon="mdi:lightbulb-off" style="--mdc-icon-size:17px"></ha-icon>
                 <span>Aus</span>
               </button>
@@ -2954,7 +2954,7 @@ export class VioletPoolCard extends LitElement {
   }
 
   private renderFilterCard(config: VioletPoolCardConfig = this.config): TemplateResult {
-    const pressureEntityId = (config as any).filter_pressure_entity || config.entity || this._buildEntityId('sensor', 'filter_pressure');
+    const pressureEntityId = (config as any).filter_pressure_entity || config.entity || this._buildEntityId('sensor', 'filterdruck');
     const backwashEntityId = (config as any).backwash_entity;
 
     const pressureEntity = this.hass.states[pressureEntityId];
@@ -3058,7 +3058,7 @@ export class VioletPoolCard extends LitElement {
    * Render Backwash Card - shows backwash status and controls
    */
   private renderBackwashCard(config: VioletPoolCardConfig = this.config): TemplateResult {
-    const entityId = (config as any).backwash_entity || config.entity || this._buildEntityId('switch', 'backwash');
+    const entityId = (config as any).backwash_entity || config.entity || this._buildEntityId('switch', 'ruckspulung');
     const entity = this.hass.states[entityId];
     if (!entity) {
       return html`<ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">Rückspülung nicht gefunden</span><span class="error-entity">${entityId}</span></div></div></ha-card>`;
@@ -3178,7 +3178,7 @@ export class VioletPoolCard extends LitElement {
    * Render Refill Card - shows water level and refill status
    */
   private renderRefillCard(config: VioletPoolCardConfig = this.config): TemplateResult {
-    const levelSensorId = (config as any).water_level_entity || config.entity || this._buildEntityId('sensor', 'water_level');
+    const levelSensorId = (config as any).water_level_entity || config.entity || this._buildEntityId('sensor', 'uberlaufbehalter');
     const valveEntityId = (config as any).refill_valve_entity;
 
     const levelSensor = this.hass.states[levelSensorId];
@@ -3317,7 +3317,7 @@ export class VioletPoolCard extends LitElement {
    * Render PV Surplus Card - shows solar energy surplus and export status
    */
   private renderSolarSurplusCard(config: VioletPoolCardConfig = this.config): TemplateResult {
-    const powerSensorId = (config as any).solar_power_entity || config.entity || this._buildEntityId('sensor', 'solar_power');
+    const powerSensorId = (config as any).solar_power_entity || config.entity || this._buildEntityId('sensor', 'pv_uberschuss_status');
     const exportEntityId = (config as any).export_entity;
 
     const powerSensor = this.hass.states[powerSensorId];
@@ -3567,7 +3567,7 @@ export class VioletPoolCard extends LitElement {
     const inflowColor = isInflowing ? accentColor : 'var(--vpc-text-secondary)';
 
     // Check for flow rate sensor
-    const flowSensorId = (config as any).flow_rate_entity || this._buildEntityId('sensor', 'inlet_flow');
+    const flowSensorId = (config as any).flow_rate_entity || this._buildEntityId('sensor', 'pumpen_durchfluss');
     const flowSensor = this.hass.states[flowSensorId];
     const flow = flowSensor ? parseFloat(flowSensor.state) || 0 : undefined;
     const inletTrend = flowSensor ? TrendHelper.getEntityTrend(flowSensor) : [];
@@ -4341,8 +4341,8 @@ ha-card.theme-glass .header-icon,ha-card.layout-glass .header-icon{box-shadow:in
   public static getStubConfig(): VioletPoolCardConfig {
     return {
       type: 'custom:violet-pool-card',
-      entity_prefix: 'violet_pool',
-      entity: 'switch.violet_pool_pump',
+      entity_prefix: 'violet_pool_controller',
+      entity: 'switch.violet_pool_controller_filterpumpe',
       card_type: 'pump',
     };
   }
