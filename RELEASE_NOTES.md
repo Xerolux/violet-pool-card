@@ -1,14 +1,16 @@
-## v0.1.5 – Violet Pool Card
+## v0.1.6 – Violet Pool Card
 
 ✅ **STABLE RELEASE**
 
 ### ✨ New Features | Neue Funktionen
 
-- Enhanced Violet Pool Card functionality
+- feat: Update default entities to match German Violet Pool Controller add-on (d427595)
 
 ### 🚀 Improvements | Verbesserungen
 
-- 📝 Release v0.1.4 - Update changelog, version and info.md (fd0272d)
+- update-entity-defaults (c4df97a)
+- feat: Update default entities to match German Violet Pool Controller add-on (d427595)
+- 📝 Release v0.1.5 - Update changelog, version and info.md (94a18d5)
 
 ### 🔧 Bug Fixes | Fehlerbehebungen
 
@@ -35,7 +37,7 @@
 
 ---
 
-📋 [Full changelog: v0.1.4...v0.1.5](https://github.com/Xerolux/violet-pool-card/compare/v0.1.4...v0.1.5)
+📋 [Full changelog: v0.1.5...v0.1.6](https://github.com/Xerolux/violet-pool-card/compare/v0.1.5...v0.1.6)
 
 ---
 
@@ -60,4 +62,4 @@ Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
 
 ---
 
-_Generated automatically by GitHub Actions on 2026-05-04 09:51:25 UTC_
+_Generated automatically by GitHub Actions on 2026-05-07 06:20:28 UTC_
