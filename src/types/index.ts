@@ -411,7 +411,7 @@ export function isTemperatureEntity(obj: unknown): obj is TemperatureEntity {
 export function isLightEntity(obj: unknown): obj is LightEntity {
   return (
     isHassEntity(obj) &&
-    obj.state in ['on', 'off'] &&
+    (['on', 'off'] as string[]).includes(obj.state) &&
     ('brightness' in obj.attributes || 'rgb_color' in obj.attributes)
   );
 }
@@ -439,6 +439,16 @@ export function isValidCardType(value: unknown): value is CardType {
     'cover',
     'light',
     'filter',
+    'backwash',
+    'refill',
+    'solar_surplus',
+    'flow_rate',
+    'inlet',
+    'counter_current',
+    'chlorine_canister',
+    'ph_plus_canister',
+    'ph_minus_canister',
+    'flocculant_canister',
   ];
   return typeof value === 'string' && validTypes.includes(value as CardType);
 }

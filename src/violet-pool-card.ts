@@ -52,10 +52,22 @@ interface HomeAssistant {
   language?: string;
 }
 
+// ─────────────────────────── Exported helper types ───────────────────────────
+export type CardSize = 'small' | 'medium' | 'large' | 'fullscreen';
+export type Theme = 'classic' | 'midnight' | 'elegance' | 'vibrant' | 'pure' | 'frost' | 'glow' | 'metallic' | 'ocean' | 'sunset' | 'forest' | 'aurora';
+export type Animation = 'none' | 'subtle' | 'smooth' | 'energetic';
+
+/** Per-entity config for the details card — either a bare entity ID or a structured object. */
+interface EntityConfig {
+  entity: string;
+  name?: string;
+  icon?: string;
+}
+
 interface LovelaceCardConfig {
   type: string;
   entity?: string;
-  entities?: string[];
+  entities?: (string | EntityConfig)[];
   card_type: 'pump' | 'heater' | 'solar' | 'dosing' | 'overview' | 'details' | 'sensor' | 'cover' | 'light' | 'compact' | 'system' | 'chemical' | 'filter' | 'backwash' | 'refill' | 'solar_surplus' | 'flow_rate' | 'inlet' | 'counter_current' | 'chlorine_canister' | 'ph_plus_canister' | 'ph_minus_canister' | 'flocculant_canister' | 'digital_rules' | 'diagnostics';
   name?: string;
   icon?: string;
@@ -70,9 +82,9 @@ interface LovelaceCardConfig {
   show_inlet?: boolean;
 
   // PREMIUM DESIGN SYSTEM
-  size?: 'small' | 'medium' | 'large' | 'fullscreen';
-  theme?: 'classic' | 'midnight' | 'elegance' | 'vibrant' | 'pure' | 'frost' | 'glow' | 'metallic' | 'ocean' | 'sunset' | 'forest' | 'aurora';
-  animation?: 'none' | 'subtle' | 'smooth' | 'energetic';
+  size?: CardSize;
+  theme?: Theme;
+  animation?: Animation;
   layout_variant?: 'standard' | 'glass' | 'dashboard' | 'focus';
   alarm_style?: 'soft' | 'outline' | 'pulse';
   accessibility_mode?: 'standard' | 'high_contrast' | 'reduced_motion';
@@ -143,6 +155,21 @@ export interface VioletPoolCardConfig extends LovelaceCardConfig {
   flocculant_level_entity?: string;
   digital_rules_entity?: string;
   diagnostics_entity?: string;
+
+  // Extended entity overrides for specialised card types
+  pool_level_entity?: string;
+  water_level_entity?: string;
+  refill_valve_entity?: string;
+  chlorine_value_entity?: string;
+  solar_power_entity?: string;
+  export_entity?: string;
+  surplus_threshold?: number;
+  title?: string;
+
+  // Canister / level card helpers
+  salt_level_entity?: string;
+  level_entity?: string;
+  max_level?: number;
 }
 
 export class VioletPoolCard extends LitElement {
@@ -227,7 +254,8 @@ export class VioletPoolCard extends LitElement {
       return configValue;
     }
     if (entitiesIndex !== undefined && this.config.entities && this.config.entities[entitiesIndex]) {
-      return this.config.entities[entitiesIndex];
+      const entry = this.config.entities[entitiesIndex];
+      return typeof entry === 'string' ? entry : entry.entity;
     }
     return this._buildEntityId(domain, suffix);
   }
@@ -700,11 +728,11 @@ export class VioletPoolCard extends LitElement {
     const layoutVariant = this.config.layout_variant || 'glass';
     const dashboardMode = this.config.dashboard_mode || 'default';
 
-    const createSubConfig = (type: string, entity: string, extra: any = {}): VioletPoolCardConfig | null => {
+    const createSubConfig = (type: string, entity: string, extra: Partial<VioletPoolCardConfig> = {}): VioletPoolCardConfig | null => {
       if (!['overview', 'chemical', 'details'].includes(type) && !this.hass.states[entity]) return null;
       return {
         ...this.config,
-        card_type: type as any,
+        card_type: type as VioletPoolCardConfig['card_type'],
         entity: entity,
         // Ensure entity_prefix is always propagated to sub-cards (bug fix)
         entity_prefix: this.config.entity_prefix || 'violet_pool_controller',
@@ -714,7 +742,7 @@ export class VioletPoolCard extends LitElement {
 
     const coverEntitySys = this._getEntityId('cover_entity', 'cover', 'abdeckung');
     const lightEntitySys = this._getEntityId('light_entity', 'switch', 'beleuchtung');
-    const filterEntitySys = this._getEntityId('filter_entity' as any, 'sensor', 'filterdruck');
+    const filterEntitySys = this._getEntityId('filter_entity', 'sensor', 'filterdruck');
     const backwashEntitySys = this._getEntityId('backwash_entity', 'switch', 'ruckspulung');
     const refillEntitySys = this._getEntityId('refill_entity', 'sensor', 'uberlaufbehalter');
     const solarSurplusEntitySys = this._getEntityId('solar_surplus_entity', 'sensor', 'pv_uberschuss_status');
@@ -735,7 +763,7 @@ export class VioletPoolCard extends LitElement {
     const dosingConfig = createSubConfig('dosing', dosingEntity, { dosing_type: 'chlorine' });
     const coverConfig = createSubConfig('cover', coverEntitySys);
     const lightConfig = createSubConfig('light', lightEntitySys);
-    const filterConfig = createSubConfig('filter' as any, filterEntitySys);
+    const filterConfig = createSubConfig('filter', filterEntitySys);
     const backwashConfig = createSubConfig('backwash', backwashEntitySys);
     const refillConfig = createSubConfig('refill', refillEntitySys);
     const solarSurplusConfig = createSubConfig('solar_surplus', solarSurplusEntitySys);
@@ -1388,6 +1416,8 @@ export class VioletPoolCard extends LitElement {
     const accentColor = this._getAccentColor('dosing', config);
 
     const dosingType = config.dosing_type || this._detectDosingType(config.entity!);
+    /** Map from config dosing_type to the service-layer literal expected by ServiceCaller. */
+    const dosName = (dosingType === 'chlorine' ? 'Chlor' : dosingType === 'ph_minus' ? 'pH-' : dosingType === 'ph_plus' ? 'pH+' : 'Flockmittel') as 'Chlor' | 'pH-' | 'pH+' | 'Flockmittel';
 
     const dosingStateKey = Object.keys(entity.attributes || {}).find(
       (key) => key.includes('DOS_') && key.includes('_STATE')
@@ -1470,8 +1500,8 @@ export class VioletPoolCard extends LitElement {
         label: 'STOP',
         action: async () => {
           const serviceCaller = new ServiceCaller(this.hass);
-          const dosType = dosingType === 'chlorine' ? 'Chlor' : dosingType === 'ph_minus' ? 'pH-' : dosingType === 'ph_plus' ? 'pH+' : 'Flockmittel';
-          await serviceCaller.stopDosing(dosType as any);
+          const dosType = (dosingType === 'chlorine' ? 'Chlor' : dosingType === 'ph_minus' ? 'pH-' : dosingType === 'ph_plus' ? 'pH+' : 'Flockmittel') as 'Chlor' | 'pH-' | 'pH+' | 'Flockmittel';
+          await serviceCaller.stopDosing(dosType);
         },
         color: '#FF3B30',
         confirmMessage: 'Stop current dosing?',
@@ -1566,19 +1596,19 @@ export class VioletPoolCard extends LitElement {
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
                   <button style="padding: 8px; border: none; border-radius: 6px; background: ${accentColor}; color: white; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
-                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).manualDose(dosingType === 'chlorine' ? 'Chlor' : dosingType === 'ph_minus' ? 'pH-' : dosingType === 'ph_plus' ? 'pH+' : 'Flockmittel' as any, 30, false); }}">
+                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).manualDose(dosName, 30, false); }}">
                     <ha-icon icon="mdi:play" style="--mdc-icon-size: 14px;"></ha-icon> 30s
                   </button>
                   <button style="padding: 8px; border: none; border-radius: 6px; background: ${accentColor}; color: white; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
-                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).manualDose(dosingType === 'chlorine' ? 'Chlor' : dosingType === 'ph_minus' ? 'pH-' : dosingType === 'ph_plus' ? 'pH+' : 'Flockmittel' as any, 60, false); }}">
+                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).manualDose(dosName, 60, false); }}">
                     <ha-icon icon="mdi:play" style="--mdc-icon-size: 14px;"></ha-icon> 60s
                   </button>
                   <button style="padding: 8px; border: none; border-radius: 6px; background: #34C759; color: white; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
-                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).autoDose(dosingType === 'chlorine' ? 'Chlor' : dosingType === 'ph_minus' ? 'pH-' : dosingType === 'ph_plus' ? 'pH+' : 'Flockmittel' as any); }}">
+                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).autoDose(dosName); }}">
                     <ha-icon icon="mdi:auto-fix" style="--mdc-icon-size: 14px;"></ha-icon> Auto
                   </button>
                   <button style="padding: 8px; border: none; border-radius: 6px; background: #FF3B30; color: white; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
-                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).stopDosing(dosingType === 'chlorine' ? 'Chlor' : dosingType === 'ph_minus' ? 'pH-' : dosingType === 'ph_plus' ? 'pH+' : 'Flockmittel' as any); }}">
+                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).stopDosing(dosName); }}">
                     <ha-icon icon="mdi:stop" style="--mdc-icon-size: 14px;"></ha-icon> Stop
                   </button>
                 </div>
@@ -1765,7 +1795,7 @@ export class VioletPoolCard extends LitElement {
     const alertEntries: Array<{ text: string; severity: 'warning' | 'critical'; icon: string }> = [];
 
     // Filter entity
-    const filterEntityId = this._getEntityId('filter_entity' as any, 'sensor', 'filterdruck');
+    const filterEntityId = this._getEntityId('filter_entity', 'sensor', 'filterdruck');
     const filterEntity = this.hass.states[filterEntityId];
     if (filterEntity) {
       const pressureVal = parseFloat(filterEntity.state);
@@ -1779,7 +1809,7 @@ export class VioletPoolCard extends LitElement {
     }
 
     // Pool level / Füllstand
-    const poolLevelEntityId = this._getEntityId('pool_level_entity' as any, 'sensor', 'uberlaufbehalter');
+    const poolLevelEntityId = this._getEntityId('pool_level_entity', 'sensor', 'uberlaufbehalter');
     const poolLevelEntity = this.hass.states[poolLevelEntityId];
     if (poolLevelEntity) {
       const levelVal = parseFloat(poolLevelEntity.state);
@@ -1793,7 +1823,7 @@ export class VioletPoolCard extends LitElement {
     }
 
     // Flow rate / Durchfluss
-    const flowRateEntityId = this._getEntityId('flow_rate_entity' as any, 'sensor', 'pumpen_durchfluss');
+    const flowRateEntityId = this._getEntityId('flow_rate_entity', 'sensor', 'pumpen_durchfluss');
     const flowRateEntity = this.hass.states[flowRateEntityId];
     if (flowRateEntity) {
       const flowVal = parseFloat(flowRateEntity.state);
@@ -1808,7 +1838,7 @@ export class VioletPoolCard extends LitElement {
     }
 
     // Inlet / Anströmung
-    const inletEntityId = this._getEntityId('inlet_entity' as any, 'sensor', 'inlet');
+    const inletEntityId = this._getEntityId('inlet_entity', 'sensor', 'inlet');
     const inletEntity = this.hass.states[inletEntityId];
     if (inletEntity) {
       const inletVal = parseFloat(inletEntity.state);
@@ -1823,7 +1853,7 @@ export class VioletPoolCard extends LitElement {
     }
 
     // Chlorine value / Chlor-Wert (sensor)
-    const chlorineValueEntityId = this._getEntityId('chlorine_value_entity' as any, 'sensor', 'chlorgehalt');
+    const chlorineValueEntityId = this._getEntityId('chlorine_value_entity', 'sensor', 'chlorgehalt');
     const chlorineValueEntity = this.hass.states[chlorineValueEntityId];
     if (chlorineValueEntity) {
       const clVal = parseFloat(chlorineValueEntity.state);
@@ -2059,7 +2089,7 @@ export class VioletPoolCard extends LitElement {
   }
 
   private renderDetailsCard(config: VioletPoolCardConfig = this.config): TemplateResult {
-    const title = config.name || (config as any).title || 'Details';
+    const title = config.name || config.title || 'Details';
     const entities = config.entities || [];
     const icon = config.icon;
 
@@ -2095,9 +2125,9 @@ export class VioletPoolCard extends LitElement {
               if (typeof entityConf === 'string') {
                 entityId = entityConf;
               } else {
-                entityId = (entityConf as any).entity;
-                entityName = (entityConf as any).name;
-                entityIcon = (entityConf as any).icon;
+                entityId = entityConf.entity;
+                entityName = entityConf.name ?? '';
+                entityIcon = entityConf.icon ?? '';
               }
 
               const stateObj = this.hass.states[entityId];
@@ -2142,8 +2172,11 @@ export class VioletPoolCard extends LitElement {
                 if (isActionable) {
                   this.hass.callService('homeassistant', 'toggle', { entity_id: entityId });
                 } else {
-                  const event = new Event('hass-more-info', { bubbles: true, composed: true });
-                  (event as any).detail = { entityId: entityId };
+                  const event = new CustomEvent('hass-more-info', {
+                    detail: { entityId: entityId },
+                    bubbles: true,
+                    composed: true,
+                  });
                   this.dispatchEvent(event);
                 }
               };
@@ -2287,9 +2320,9 @@ export class VioletPoolCard extends LitElement {
     const poolTempSensorId = showTemp ? this._getEntityId('pool_temp_entity', 'sensor', 'beckenwasser', 5) : null;
     const phSensorId = showPh ? this._getEntityId('ph_value_entity', 'sensor', 'ph_wert', 6) : null;
     const orpSensorId = showOrp ? this._getEntityId('orp_value_entity', 'sensor', 'redoxpotential', 7) : null;
-    const chlorineSensorId = showChlorine ? ((config as any).chlorine_entity || this._buildEntityId('sensor', 'chlorgehalt')) : null;
-    const saltSensorId = showSalt ? ((config as any).salt_level_entity || this._buildEntityId('sensor', 'salzgehalt')) : null;
-    const inletEntityId = showInlet ? ((config as any).inlet_entity || this._buildEntityId('switch', 'inlet')) : null;
+    const chlorineSensorId = showChlorine ? (config.chlorine_entity || this._buildEntityId('sensor', 'chlorgehalt')) : null;
+    const saltSensorId = showSalt ? (config.salt_level_entity || this._buildEntityId('sensor', 'salzgehalt')) : null;
+    const inletEntityId = showInlet ? (config.inlet_entity || this._buildEntityId('switch', 'inlet')) : null;
     const targetPhId = this._getEntityId('target_ph_entity', 'number', 'ph_sollwert');
     const targetOrpId = showOrp ? this._getEntityId('target_orp_entity', 'number', 'redox_sollwert') : null;
 
@@ -2954,8 +2987,8 @@ export class VioletPoolCard extends LitElement {
   }
 
   private renderFilterCard(config: VioletPoolCardConfig = this.config): TemplateResult {
-    const pressureEntityId = (config as any).filter_pressure_entity || config.entity || this._buildEntityId('sensor', 'filterdruck');
-    const backwashEntityId = (config as any).backwash_entity;
+    const pressureEntityId = config.filter_pressure_entity || config.entity || this._buildEntityId('sensor', 'filterdruck');
+    const backwashEntityId = config.backwash_entity;
 
     const pressureEntity = this.hass.states[pressureEntityId];
     if (!pressureEntity) {
@@ -3058,7 +3091,7 @@ export class VioletPoolCard extends LitElement {
    * Render Backwash Card - shows backwash status and controls
    */
   private renderBackwashCard(config: VioletPoolCardConfig = this.config): TemplateResult {
-    const entityId = (config as any).backwash_entity || config.entity || this._buildEntityId('switch', 'ruckspulung');
+    const entityId = config.backwash_entity || config.entity || this._buildEntityId('switch', 'ruckspulung');
     const entity = this.hass.states[entityId];
     if (!entity) {
       return html`<ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">Rückspülung nicht gefunden</span><span class="error-entity">${entityId}</span></div></div></ha-card>`;
@@ -3178,8 +3211,8 @@ export class VioletPoolCard extends LitElement {
    * Render Refill Card - shows water level and refill status
    */
   private renderRefillCard(config: VioletPoolCardConfig = this.config): TemplateResult {
-    const levelSensorId = (config as any).water_level_entity || config.entity || this._buildEntityId('sensor', 'uberlaufbehalter');
-    const valveEntityId = (config as any).refill_valve_entity;
+    const levelSensorId = config.water_level_entity || config.entity || this._buildEntityId('sensor', 'uberlaufbehalter');
+    const valveEntityId = config.refill_valve_entity;
 
     const levelSensor = this.hass.states[levelSensorId];
     if (!levelSensor) {
@@ -3187,7 +3220,7 @@ export class VioletPoolCard extends LitElement {
     }
 
     const level = parseFloat(levelSensor.state) || 0;
-    const maxLevel = (config as any).max_level || 100;
+    const maxLevel = config.max_level || 100;
     const name = config.name || levelSensor.attributes.friendly_name || 'Wasserstand';
     const accentColor = this._getAccentColor('refill', config);
 
@@ -3317,8 +3350,8 @@ export class VioletPoolCard extends LitElement {
    * Render PV Surplus Card - shows solar energy surplus and export status
    */
   private renderSolarSurplusCard(config: VioletPoolCardConfig = this.config): TemplateResult {
-    const powerSensorId = (config as any).solar_power_entity || config.entity || this._buildEntityId('sensor', 'pv_uberschuss_status');
-    const exportEntityId = (config as any).export_entity;
+    const powerSensorId = config.solar_power_entity || config.entity || this._buildEntityId('sensor', 'pv_uberschuss_status');
+    const exportEntityId = config.export_entity;
 
     const powerSensor = this.hass.states[powerSensorId];
     if (!powerSensor) {
@@ -3326,7 +3359,7 @@ export class VioletPoolCard extends LitElement {
     }
 
     const power = parseFloat(powerSensor.state) || 0;
-    const threshold = (config as any).surplus_threshold || 0;
+    const threshold = config.surplus_threshold || 0;
     const name = config.name || powerSensor.attributes.friendly_name || 'PV Überschuss';
     const accentColor = this._getAccentColor('solar', config);
 
@@ -3567,7 +3600,7 @@ export class VioletPoolCard extends LitElement {
     const inflowColor = isInflowing ? accentColor : 'var(--vpc-text-secondary)';
 
     // Check for flow rate sensor
-    const flowSensorId = (config as any).flow_rate_entity || this._buildEntityId('sensor', 'pumpen_durchfluss');
+    const flowSensorId = config.flow_rate_entity || this._buildEntityId('sensor', 'pumpen_durchfluss');
     const flowSensor = this.hass.states[flowSensorId];
     const flow = flowSensor ? parseFloat(flowSensor.state) || 0 : undefined;
     const inletTrend = flowSensor ? TrendHelper.getEntityTrend(flowSensor) : [];
@@ -3882,7 +3915,7 @@ export class VioletPoolCard extends LitElement {
     defaultIcon: string,
     svgFunction: (fillLevel: number, maxLevel: number, color: string) => TemplateResult
   ): TemplateResult {
-    const sensorEntityId = (config as any).level_entity || config.entity || this._buildEntityId('sensor', `${entitySuffix}_level`);
+    const sensorEntityId = config.level_entity || config.entity || this._buildEntityId('sensor', `${entitySuffix}_level`);
     const sensorEntity = this.hass.states[sensorEntityId];
 
     if (!sensorEntity) {
@@ -3890,7 +3923,7 @@ export class VioletPoolCard extends LitElement {
     }
 
     const currentLevel = parseFloat(sensorEntity.state) || 0;
-    const maxLevel = (config as any).max_level || 5000;
+    const maxLevel = config.max_level || 5000;
     const name = config.name || sensorEntity.attributes.friendly_name || defaultName;
     const accentColor = this._getAccentColor(cardType, config);
     const fillPercent = Math.min((currentLevel / maxLevel) * 100, 100);
@@ -4190,7 +4223,8 @@ ha-card.theme-glass .header-icon,ha-card.layout-glass .header-icon{box-shadow:in
   private renderDigitalRulesCard(config: VioletPoolCardConfig = this.config): TemplateResult {
     const accentColor = this._getAccentColor('digital_rules', config);
 
-    const rules = [
+    type DigitalRuleKey = 'DIRULE_1' | 'DIRULE_2' | 'DIRULE_3' | 'DIRULE_4' | 'DIRULE_5' | 'DIRULE_6' | 'DIRULE_7';
+    const rules: Array<{ id: DigitalRuleKey; label: string; tone: string; summary: string }> = [
       { id: 'DIRULE_1', label: 'Rule 1', tone: '#34C759', summary: 'Automatischer Trigger' },
       { id: 'DIRULE_2', label: 'Rule 2', tone: '#00BCD4', summary: 'Eingangslogik / Freigabe' },
       { id: 'DIRULE_3', label: 'Rule 3', tone: '#FF9F0A', summary: 'Wartungsroutine' },
@@ -4244,15 +4278,15 @@ ha-card.theme-glass .header-icon,ha-card.layout-glass .header-icon{box-shadow:in
                 <div style="font-size:11px;color:var(--vpc-text-secondary);">${rule.summary}</div>
                 <div style="display: flex; gap: 4px; flex-wrap: wrap;">
                   <button style="flex: 1; padding: 6px; border: none; border-radius: 6px; background: ${accentColor}; color: white; font-size: 10px; font-weight: 600; cursor: pointer;"
-                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).manageDigitalRules(rule.id as any, 'trigger'); }}">
+                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).manageDigitalRules(rule.id, 'trigger'); }}">
                     Trigger
                   </button>
                   <button style="flex: 1; padding: 6px; border: none; border-radius: 6px; background: #FF9F0A; color: white; font-size: 10px; font-weight: 600; cursor: pointer;"
-                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).manageDigitalRules(rule.id as any, 'lock'); }}">
+                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).manageDigitalRules(rule.id, 'lock'); }}">
                     Lock
                   </button>
                   <button style="flex: 1; padding: 6px; border: none; border-radius: 6px; background: #34C759; color: white; font-size: 10px; font-weight: 600; cursor: pointer;"
-                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).manageDigitalRules(rule.id as any, 'unlock'); }}">
+                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).manageDigitalRules(rule.id, 'unlock'); }}">
                     Unlock
                   </button>
                 </div>
