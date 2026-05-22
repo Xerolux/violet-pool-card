@@ -47,7 +47,7 @@ export class SliderControl extends LitElement {
     }
   }
 
-  updated(changedProperties: Map<string, any>) {
+  updated(changedProperties: Map<string | symbol, unknown>) {
     if (changedProperties.has('value') && !this.isDragging) {
       this.localValue = this.value;
     }
@@ -195,7 +195,7 @@ export class SliderControl extends LitElement {
                       class="label-item ${this.localValue === item.value ? 'active' : ''}"
                       style="left: ${item.position}%"
                       title="${item.label}"
-                      @click="${() => !this.disabled && this.handleChange({ target: { value: item.value } } as any)}"
+                      @click="${() => !this.disabled && this.handleChange({ target: { value: item.value } } as unknown as Event)}"
                     >
                       ${item.label}
                     </span>

@@ -9,7 +9,7 @@
 export interface EntityState {
   entity_id: string;
   state: string;
-  attributes: Record<string, any>;
+  attributes: Record<string, unknown>;
   last_changed: string;
   last_updated: string;
 }
@@ -63,21 +63,21 @@ export class EntityHelper {
 
   static getCurrentTemperature(entity: EntityState): number | undefined {
     const temp = entity?.attributes?.current_temperature;
-    return temp !== undefined ? Number(temp) : undefined;
+    return temp != null ? Number(temp) : undefined;
   }
 
   static getTargetTemperature(entity: EntityState): number | undefined {
     const temp = entity?.attributes?.temperature;
-    return temp !== undefined ? Number(temp) : undefined;
+    return temp != null ? Number(temp) : undefined;
   }
 
   static getMinTemperature(entity: EntityState): number | undefined {
     const temp = entity?.attributes?.min_temp;
-    return temp !== undefined ? Number(temp) : undefined;
+    return temp != null ? Number(temp) : undefined;
   }
 
   static getMaxTemperature(entity: EntityState): number | undefined {
     const temp = entity?.attributes?.max_temp;
-    return temp !== undefined ? Number(temp) : undefined;
+    return temp != null ? Number(temp) : undefined;
   }
 }
