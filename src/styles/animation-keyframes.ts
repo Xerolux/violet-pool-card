@@ -348,34 +348,19 @@ export const advancedAnimationStyles = css`
   .animate-glow {
     animation: glow-pulse 2s ease-in-out infinite;
   }
-`;
 
-/**
- * Export individual animation definitions for use in SVG components
- */
-export const SVG_ANIMATIONS = {
-  dropletPulse: 'droplet-pulse',
-  fillRise: 'fill-rise',
-  bubbleFloat: 'bubble-float',
-  gaugeFill: 'gauge-fill',
-  lineDraw: 'line-draw',
-  alertPulse: 'alert-pulse',
-  ringPulse: 'ring-pulse',
-  spinnerRotate: 'spinner-rotate',
-  skeletonLoading: 'skeleton-loading',
-  slideInTop: 'slide-in-top',
-  slideInBottom: 'slide-in-bottom',
-  fadeIn: 'fade-in',
-  chartBarGrow: 'chart-bar-grow',
-  valueCount: 'value-count',
-  buttonRipple: 'button-ripple',
-  shake: 'shake',
-  successCheckmark: 'success-checkmark',
-  focusRing: 'focus-ring',
-  shimmer: 'shimmer',
-  cardEntrance: 'card-entrance',
-  bounceIn: 'bounce-in',
-  glowPulse: 'glow-pulse',
-  colorShift: 'color-shift',
-  rainbowBorder: 'rainbow-border',
-} as const;
+  /* Respect user preference for reduced motion (accessibility / battery) */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-pulse,
+    .animate-spin,
+    .animate-bounce,
+    .animate-shake,
+    .animate-fade-in,
+    .animate-slide-in,
+    .animate-loading,
+    .animate-shimmer,
+    .animate-glow {
+      animation: none;
+    }
+  }
+`;

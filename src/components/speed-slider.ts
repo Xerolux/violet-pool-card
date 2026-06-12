@@ -56,21 +56,38 @@ export class SpeedSlider extends LitElement {
     .slider-track {
       display: flex;
       gap: 8px;
+      align-items: stretch;
+      height: 44px;
+    }
+
+    /* Full-height button so even the small Eco bar has a 44px touch target */
+    .segment-btn {
+      flex: 1;
+      display: flex;
       align-items: flex-end;
-      height: 40px;
+      background: none;
+      border: none;
+      padding: 0;
+      margin: 0;
+      cursor: pointer;
+      border-radius: 6px;
+    }
+
+    .segment-btn:focus-visible {
+      outline: 2px solid var(--vpc-primary);
+      outline-offset: 2px;
     }
 
     .slider-segment {
-      flex: 1;
+      width: 100%;
       background: var(--vpc-surface);
       border-radius: 6px;
-      cursor: pointer;
       transition: all 0.2s ease;
       min-height: 12px;
       border: 1px solid transparent;
     }
 
-    .slider-segment:hover {
+    .segment-btn:hover .slider-segment {
       background: color-mix(in srgb, var(--vpc-primary) 10%, var(--vpc-surface));
     }
 
@@ -84,11 +101,11 @@ export class SpeedSlider extends LitElement {
     }
 
     .speed-1 {
-      height: 20%;
+      height: 25%;
     }
 
     .speed-2 {
-      height: 50%;
+      height: 55%;
     }
 
     .speed-3 {
@@ -130,22 +147,31 @@ export class SpeedSlider extends LitElement {
     this.dispatchEvent(new CustomEvent('value-changed', { detail: { value: speed } }));
   }
 
+  private getSpeedLabel(speed: number): string {
+    return this.speedLabels[speed - 1] ?? `${speed}`;
+  }
+
   render() {
     return html`
       <div class="container">
         <div class="header">
           <span class="label">${this.label}</span>
-          <span class="value-display">${this.speedLabels[this.value - 1]}</span>
+          <span class="value-display">${this.getSpeedLabel(this.value)}</span>
         </div>
 
-        <div class="slider-track">
+        <div class="slider-track" role="group" aria-label="${this.label}">
           ${[1, 2, 3].map(
             speed => html`
-              <div
-                class="slider-segment speed-${speed} ${this.value === speed ? 'active' : this.value > speed ? 'past' : ''}"
+              <button
+                type="button"
+                class="segment-btn"
                 @click="${() => this.handleSegmentClick(speed)}"
                 title="${this.speedDescriptions[speed - 1]}"
-              ></div>
+                aria-label="${this.speedDescriptions[speed - 1]}"
+                aria-pressed="${this.value === speed ? 'true' : 'false'}"
+              >
+                <div class="slider-segment speed-${speed} ${this.value === speed ? 'active' : this.value > speed ? 'past' : ''}"></div>
+              </button>
             `
           )}
         </div>
