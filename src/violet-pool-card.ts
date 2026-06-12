@@ -1089,7 +1089,7 @@ export class VioletPoolCard extends LitElement {
           ${config.show_runtime && runtimeSeconds > 0
             ? html` <div class="info-row"><ha-icon icon="mdi:timer-outline"></ha-icon><span class="info-label">Runtime</span><span class="info-value">${runtimeDisplay}</span></div> `
             : ''}
-          ${this._renderRecommendationList(pumpRecommendations, 'Betriebshinweise')}
+          ${this._renderRecommendationList(pumpRecommendations)}
         </div>
       </ha-card>
     `;
@@ -3101,7 +3101,7 @@ export class VioletPoolCard extends LitElement {
               </button>
             </div>
           ` : ''}
-          ${this._renderRecommendationList(filterRecommendations, 'Wartung')}
+          ${this._renderRecommendationList(filterRecommendations, i18n.t('maintenance'))}
         </div>
       </ha-card>`;
   }
@@ -3221,7 +3221,7 @@ export class VioletPoolCard extends LitElement {
               </button>
             </div>
           ` : ''}
-          ${this._renderRecommendationList(backwashRecommendations, 'Rückspül-Hinweise')}
+          ${this._renderRecommendationList(backwashRecommendations)}
         </div>
       </ha-card>`;
   }
@@ -3360,7 +3360,7 @@ export class VioletPoolCard extends LitElement {
               </button>
             </div>
           ` : ''}
-          ${this._renderRecommendationList(refillRecommendations, 'Nachfüll-Hinweise')}
+          ${this._renderRecommendationList(refillRecommendations)}
         </div>
       </ha-card>`;
   }
@@ -3595,7 +3595,7 @@ export class VioletPoolCard extends LitElement {
               <vpc-quick-actions .actions="${quickActions}"></vpc-quick-actions>
             </div>
           ` : ''}
-          ${this._renderRecommendationList(flowRecommendations, 'Flow-Hinweise')}
+          ${this._renderRecommendationList(flowRecommendations)}
         </div>
       </ha-card>
     `;
@@ -3715,7 +3715,7 @@ export class VioletPoolCard extends LitElement {
               </div>
             </div>
           ` : ''}
-          ${this._renderRecommendationList(inletRecommendations, 'Anström-Hinweise')}
+          ${this._renderRecommendationList(inletRecommendations)}
 
           ${config.show_controls !== false ? html`
             <div class="cover-controls" style="margin-top: 12px;">
@@ -3857,7 +3857,7 @@ export class VioletPoolCard extends LitElement {
               </button>
             </div>
           ` : ''}
-          ${this._renderRecommendationList(currentRecommendations, 'Gegenstrom-Hinweise')}
+          ${this._renderRecommendationList(currentRecommendations)}
         </div>
       </ha-card>`;
   }
@@ -4329,7 +4329,7 @@ ha-card.theme-glass .header-icon,ha-card.layout-glass .header-icon{box-shadow:in
               </div>
             `)}
           </div>
-          ${this._renderRecommendationList(ruleRecommendations, 'Rule-Hinweise')}
+          ${this._renderRecommendationList(ruleRecommendations)}
         </div>
       </ha-card>
     `;
@@ -4402,7 +4402,7 @@ ha-card.theme-glass .header-icon,ha-card.layout-glass .header-icon{box-shadow:in
               <span>Clear Error History</span>
             </button>
           </div>
-          ${this._renderRecommendationList(diagnosticRecommendations, 'Diagnose-Hinweise')}
+          ${this._renderRecommendationList(diagnosticRecommendations)}
         </div>
       </ha-card>
     `;

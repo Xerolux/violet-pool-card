@@ -147,14 +147,13 @@ export class QuickActions extends LitElement {
         }
       });
 
-      // Keyboard support incl. simple focus trap between the two buttons
+      // Keyboard support incl. simple focus trap between the two buttons.
+      // Enter is intentionally not handled here: the browser already
+      // "clicks" the focused button, so Enter on Cancel must cancel.
       const handleKeydown = (e: KeyboardEvent) => {
         if (e.key === 'Escape') {
           e.preventDefault();
           handleResolve(false);
-        } else if (e.key === 'Enter') {
-          e.preventDefault();
-          handleResolve(true);
         } else if (e.key === 'Tab') {
           e.preventDefault();
           const next = document.activeElement === confirmBtn ? cancelBtn : confirmBtn;
