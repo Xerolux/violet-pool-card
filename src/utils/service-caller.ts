@@ -706,4 +706,68 @@ export class ServiceCaller {
 
     return result;
   }
+
+  // Water Level Management – Refill & Overflow Protection
+  async configureRefill(deviceId: string, refillType: 1 | 2 | 3, enabled = true, maxFillTime?: number, targetLevel?: number, blocksDosing = false): Promise<ServiceCallResult> {
+    const payload: Record<string, unknown> = {
+      device_id: deviceId,
+      refill_type: refillType,
+      enabled,
+      blocks_dosing: blocksDosing,
+    };
+
+    if (maxFillTime) payload.max_fill_time = maxFillTime;
+    if (targetLevel !== undefined) payload.target_level = targetLevel;
+
+    const result = await this.callService('violet_pool_controller', 'configure_refill', payload);
+
+    if (result.success) {
+      this.showToast(`${i18n.t('svc_refill_configured')} – Type ${refillType}`);
+    }
+
+    return result;
+  }
+
+  async configureOverflow(deviceId: string, enabled = true, overflowLevel?: number, dryrunLevel?: number, bathingAiEnabled = true): Promise<ServiceCallResult> {
+    const payload: Record<string, unknown> = {
+      device_id: deviceId,
+      enabled,
+      bathing_ai_enabled: bathingAiEnabled,
+    };
+
+    if (overflowLevel !== undefined) payload.overflow_level = overflowLevel;
+    if (dryrunLevel !== undefined) payload.dryrun_level = dryrunLevel;
+
+    const result = await this.callService('violet_pool_controller', 'configure_overflow', payload);
+
+    if (result.success) {
+      this.showToast(`${i18n.t('svc_overflow_protection')} ${enabled ? i18n.t('svc_enabled') : i18n.t('svc_disabled')}`);
+    }
+
+    return result;
+  }
+
+  async getRefillStatus(deviceId: string): Promise<ServiceCallResult> {
+    const result = await this.callService('violet_pool_controller', 'get_refill_status', {
+      device_id: deviceId,
+    });
+
+    if (result.success) {
+      this.showToast(`${i18n.t('svc_refill_status_retrieved')}`);
+    }
+
+    return result;
+  }
+
+  async getOverflowStatus(deviceId: string): Promise<ServiceCallResult> {
+    const result = await this.callService('violet_pool_controller', 'get_overflow_status', {
+      device_id: deviceId,
+    });
+
+    if (result.success) {
+      this.showToast(`${i18n.t('svc_overflow_status_retrieved')}`);
+    }
+
+    return result;
+  }
 }

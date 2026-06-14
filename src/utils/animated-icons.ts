@@ -473,6 +473,34 @@ export function refillSVG(level: number, maxLevel: number, color: string): Templ
 }
 
 /**
+ * Overflow protection icon – alerts when water level exceeds threshold
+ */
+export function overflowSVG(waterLevel: number, maxLevel: number, overflowEnabled: boolean, color: string): TemplateResult {
+  const percent = Math.min(waterLevel / maxLevel, 1.2);
+  const isOverflowing = percent > 1;
+  return html`
+    <svg viewBox="0 0 48 48" style="width:100%;height:100%;display:block;overflow:visible" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="24" cy="24" r="22" fill="${color}" fill-opacity="${isOverflowing ? 0.25 : 0.12}"/>
+      <circle cx="24" cy="24" r="21" fill="none" stroke="${color}" stroke-width="1.5" stroke-opacity="0.32"/>
+      <!-- Container -->
+      <rect x="16" y="12" width="16" height="24" rx="3" fill="none" stroke="${color}" stroke-width="2"/>
+      <!-- Water level indicator -->
+      <rect x="17.5" y="${35 - 22 * Math.min(percent, 1)}" width="13" height="${22 * Math.min(percent, 1)}" rx="2" fill="${color}" fill-opacity="0.65"/>
+      <!-- Warning triangle for overflow -->
+      ${isOverflowing ? html`
+        <path d="M24,8 L28,14 L20,14 Z" fill="${color}" fill-opacity="0.9"/>
+        <circle cx="24" cy="10" r="1.2" fill="white" fill-opacity="0.8"/>
+        <path d="M24,11 L24,12.5" stroke="white" stroke-width="0.8" stroke-opacity="0.8"/>
+      ` : ''}
+      <!-- Overflow waves animation when enabled -->
+      ${overflowEnabled && isOverflowing ? html`
+        <path d="M16,12 C19,10 22,14 25,12 C28,10 31,14 34,12" fill="none" stroke="${color}" stroke-width="1.5" stroke-linecap="round" stroke-opacity="0.7"
+              style="animation:wave-pulse 0.8s ease-in-out infinite"/>
+      ` : ''}
+    </svg>`;
+}
+
+/**
  * Solar surplus icon
  */
 export function solarSurplusSVG(hasSurplus: boolean, _isExporting: boolean, color: string): TemplateResult {

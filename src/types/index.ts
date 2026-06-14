@@ -96,6 +96,7 @@ export type CardType =
   | 'filter'
   | 'backwash'
   | 'refill'
+  | 'overflow'
   | 'solar_surplus'
   | 'flow_rate'
   | 'inlet'
