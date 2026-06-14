@@ -1,4 +1,4 @@
-## v0.1.7 – Violet Pool Card
+## v0.1.8 – Violet Pool Card
 
 ✅ **STABLE RELEASE**
 
@@ -8,11 +8,12 @@
 
 ### 🚀 Improvements | Verbesserungen
 
-- 📝 Release v0.1.6 - Update changelog, version and info.md (0d9fc82)
+- 📝 Release v0.1.7 - Update changelog, version and info.md (70569f3)
 
 ### 🔧 Bug Fixes | Fehlerbehebungen
 
-- fix: bugs, dependency updates, and type-safety improvements (d78f146)
+- fix: address review feedback on dialog Enter handling and i18n titles (3489975)
+- fix: bugs, accessibility, i18n and mobile design improvements (33afaaf)
 
 ---
 
@@ -35,7 +36,7 @@
 
 ---
 
-📋 [Full changelog: v0.1.6...v0.1.7](https://github.com/Xerolux/violet-pool-card/compare/v0.1.6...v0.1.7)
+📋 [Full changelog: v0.1.7...v0.1.8](https://github.com/Xerolux/violet-pool-card/compare/v0.1.7...v0.1.8)
 
 ---
 
@@ -60,4 +61,4 @@ Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
 
 ---
 
-_Generated automatically by GitHub Actions on 2026-05-22 21:05:30 UTC_
+_Generated automatically by GitHub Actions on 2026-06-14 07:00:41 UTC_
