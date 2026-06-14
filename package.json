@@ -1,6 +1,6 @@
 {
   "name": "violet-pool-card",
-  "version": "0.1.8",
+  "version": "2.0.0-beta.1",
   "description": "Custom Lovelace card for Violet Pool Controller",
   "main": "dist/violet-pool-card.js",
   "repository": {
