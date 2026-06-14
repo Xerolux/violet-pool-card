@@ -218,6 +218,56 @@ animation: smooth
 
 - **Small**: Perfect for mobile, compact layouts
 - **Medium**: Works everywhere, default choice
+
+---
+
+## 🧭 System Mode Matrix (What is shown)
+
+### `dashboard_mode: default`
+- **Steuerung**: `pump`, `heater`, `solar`, `dosing`, `counter_current`
+- **Peripherie**: `cover`, `light`, `filter`, `flow_rate`, `inlet`, `solar_surplus`, `backwash`, `refill`, `chlorine_canister`, `ph_plus_canister`, `ph_minus_canister`, `flocculant_canister`, `digital_rules`, `diagnostics`
+
+### `dashboard_mode: maintenance`
+- **Steuerung**: `pump`, `heater`, `solar`, `dosing`, `counter_current`
+- **Peripherie**: `filter`, `backwash`, `refill`, `cover`, `light`, `diagnostics`
+
+### `dashboard_mode: alarm_center`
+- **Steuerung**: `heater`, `pump`, `solar`, `counter_current`
+- **Peripherie**: `filter`, `dosing`, `solar_surplus`, `cover`, `diagnostics`
+
+---
+
+## 🧩 Entity Overrides for System Dashboard (Recommended)
+
+```yaml
+# Existing overrides
+pump_entity: switch.my_pool_pump
+heater_entity: climate.my_pool_heater
+solar_entity: climate.my_pool_solar
+chlorine_entity: switch.my_pool_dosing_chlorine
+cover_entity: cover.my_pool_cover
+light_entity: light.my_pool_light
+filter_entity: sensor.my_pool_filter_pressure
+backwash_entity: switch.my_pool_backwash
+
+# New extended overrides
+refill_entity: sensor.my_pool_water_level
+solar_surplus_entity: sensor.my_pv_power
+flow_rate_entity: sensor.my_pool_flow_rate
+inlet_entity: sensor.my_pool_inlet_status
+counter_current_entity: switch.my_pool_counter_current
+chlorine_level_entity: sensor.my_chlorine_canister_level
+ph_plus_level_entity: sensor.my_ph_plus_canister_level
+ph_minus_level_entity: sensor.my_ph_minus_canister_level
+flocculant_level_entity: sensor.my_flocculant_canister_level
+digital_rules_entity: sensor.my_pool_digital_rules_status
+diagnostics_entity: sensor.my_pool_diagnostics_status
+```
+
+---
+
+## 📱 Responsive Behavior (continued)
+
 - **Large**: Best on tablets, large screens
 - **Fullscreen**: Wall tablets, dedicated displays only
 

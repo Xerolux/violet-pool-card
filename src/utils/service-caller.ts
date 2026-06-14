@@ -177,21 +177,26 @@ export class ServiceCaller {
 
   // Legacy support: extract dosing type from entity name
   async manualDosing(entity: string, duration = 30): Promise<ServiceCallResult> {
-    const dosingTypeMatch = entity.match(/dos_\d+_(cl|phm|php|floc)/);
+    const dosingTypeMatch = entity.match(/(?:dos_\d+_(cl|phm|php|floc))|(chlor_dosierung|dosierung_ph_2|dosierung_ph|flockmittel)/);
     if (!dosingTypeMatch) {
       return { success: false, error: 'Could not determine dosing type from entity' };
     }
 
     const dosingTypeMap: Record<string, 'pH-' | 'pH+' | 'Chlor' | 'Flockmittel'> = {
+      'chlor_dosierung': 'Chlor',
+      'dosierung_ph': 'pH+',
+      'dosierung_ph_2': 'pH-',
+      'flockmittel': 'Flockmittel',
       cl: 'Chlor',
       phm: 'pH-',
       php: 'pH+',
       floc: 'Flockmittel',
     };
 
-    const dosingType = dosingTypeMap[dosingTypeMatch[1]];
+    const matchedValue = dosingTypeMatch[1] || dosingTypeMatch[2];
+    const dosingType = dosingTypeMap[matchedValue];
     if (!dosingType) {
-      return { success: false, error: `Unknown dosing type: ${dosingTypeMatch[1]}` };
+      return { success: false, error: `Unknown dosing type: ${matchedValue}` };
     }
 
     return this.manualDose(dosingType, duration);

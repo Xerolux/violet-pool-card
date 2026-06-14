@@ -9,7 +9,7 @@
 
 import { LitElement, html, css, TemplateResult, CSSResultGroup } from 'lit';
 import { property, state } from 'lit/decorators.js';
-import type { VioletPoolCardConfig } from '../violet-pool-card';
+import type { VioletPoolCardConfig, CardSize, Theme, Animation } from '../violet-pool-card';
 
 // HomeAssistant types
 interface HassEntity {
@@ -29,6 +29,12 @@ interface HomeAssistant {
 interface LovelaceCardEditor extends HTMLElement {
   hass?: HomeAssistant;
   setConfig(config: VioletPoolCardConfig): void;
+}
+
+/** Minimal interface for HA custom elements (ha-select, ha-checkbox, etc.) */
+interface HaElement extends EventTarget {
+  value?: string;
+  checked?: boolean;
 }
 
 export class VioletPoolCardEditor extends LitElement implements LovelaceCardEditor {
@@ -60,7 +66,7 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
     };
     const includeDomains = domainFilter[this._config.card_type] || [];
 
-    return html` <div class="card-config"><!-- Card Type Selection --><div class="config-section"><div class="section-header"><ha-icon icon="mdi:card-outline"></ha-icon><span>Card Type</span></div><ha-select label="Card Type" .value="${this._config.card_type}" @selected="${this._cardTypeChanged}" @closed="${(e: Event) => e.stopPropagation()}" ><mwc-list-item value="pump">🔵 Pump</mwc-list-item><mwc-list-item value="heater">🔥 Heater</mwc-list-item><mwc-list-item value="solar">☀️ Solar</mwc-list-item><mwc-list-item value="dosing">💧 Dosing</mwc-list-item><mwc-list-item value="cover">🪟 Cover</mwc-list-item><mwc-list-item value="light">💡 Light</mwc-list-item><mwc-list-item value="filter">⏰ Filter</mwc-list-item><mwc-list-item value="backwash">🔄 Backwash</mwc-list-item><mwc-list-item value="refill">💧 Refill</mwc-list-item><mwc-list-item value="overflow">⚠️ Overflow</mwc-list-item><mwc-list-item value="solar_surplus">☀️ PV Surplus</mwc-list-item><mwc-list-item value="flow_rate">💨 Flow Rate</mwc-list-item><mwc-list-item value="inlet">➡️ Inlet</mwc-list-item><mwc-list-item value="counter_current">🏊 Counter Current</mwc-list-item><mwc-list-item value="chlorine_canister">🧪 Chlorine Canister</mwc-list-item><mwc-list-item value="ph_plus_canister">➕ pH Plus Canister</mwc-list-item><mwc-list-item value="ph_minus_canister">➖ pH Minus Canister</mwc-list-item><mwc-list-item value="flocculant_canister">✨ Flocculant Canister</mwc-list-item><mwc-list-item value="overview">📊 Overview</mwc-list-item><mwc-list-item value="compact">📋 Compact</mwc-list-item><mwc-list-item value="system">🖥️ System Dashboard</mwc-list-item><mwc-list-item value="details">📝 Details</mwc-list-item><mwc-list-item value="chemical">🧪 Chemistry</mwc-list-item><mwc-list-item value="sensor">📡 Sensor</mwc-list-item></ha-select></div><!-- Controller Configuration --><div class="config-section"><div class="section-header"><ha-icon icon="mdi:chip"></ha-icon><span>Controller Configuration</span></div><ha-textfield label="Entity Prefix" .value="${this._config.entity_prefix || 'violet_pool'}" @input="${this._entityPrefixChanged}" helper="Name of your pool controller (e.g., 'violet_pool', 'pool_1', 'garden_pool')" ></ha-textfield><div class="prefix-info"><ha-icon icon="mdi:information-outline"></ha-icon><span> The entity prefix should match your Violet Pool Controller name in Home Assistant. All entities will be automatically discovered based on this prefix. </span></div></div><!-- Entity Selection -->
+    return html` <div class="card-config"><!-- Card Type Selection --><div class="config-section"><div class="section-header"><ha-icon icon="mdi:card-outline"></ha-icon><span>Card Type</span></div><ha-select label="Card Type" .value="${this._config.card_type}" @selected="${this._cardTypeChanged}" @closed="${(e: Event) => e.stopPropagation()}" ><mwc-list-item value="pump">🔵 Pump</mwc-list-item><mwc-list-item value="heater">🔥 Heater</mwc-list-item><mwc-list-item value="solar">☀️ Solar</mwc-list-item><mwc-list-item value="dosing">💧 Dosing</mwc-list-item><mwc-list-item value="cover">🪟 Cover</mwc-list-item><mwc-list-item value="light">💡 Light</mwc-list-item><mwc-list-item value="filter">⏰ Filter</mwc-list-item><mwc-list-item value="backwash">🔄 Backwash</mwc-list-item><mwc-list-item value="refill">💧 Refill</mwc-list-item><mwc-list-item value="solar_surplus">☀️ PV Surplus</mwc-list-item><mwc-list-item value="flow_rate">💨 Flow Rate</mwc-list-item><mwc-list-item value="inlet">➡️ Inlet</mwc-list-item><mwc-list-item value="counter_current">🏊 Counter Current</mwc-list-item><mwc-list-item value="chlorine_canister">🧪 Chlorine Canister</mwc-list-item><mwc-list-item value="ph_plus_canister">➕ pH Plus Canister</mwc-list-item><mwc-list-item value="ph_minus_canister">➖ pH Minus Canister</mwc-list-item><mwc-list-item value="flocculant_canister">✨ Flocculant Canister</mwc-list-item><mwc-list-item value="overview">📊 Overview</mwc-list-item><mwc-list-item value="compact">📋 Compact</mwc-list-item><mwc-list-item value="system">🖥️ System Dashboard</mwc-list-item><mwc-list-item value="details">📝 Details</mwc-list-item><mwc-list-item value="chemical">🧪 Chemistry</mwc-list-item><mwc-list-item value="sensor">📡 Sensor</mwc-list-item></ha-select></div><!-- Controller Configuration --><div class="config-section"><div class="section-header"><ha-icon icon="mdi:chip"></ha-icon><span>Controller Configuration</span></div><ha-textfield label="Entity Prefix" .value="${this._config.entity_prefix || 'violet_pool_controller'}" @input="${this._entityPrefixChanged}" helper="Name of your pool controller (e.g., 'violet_pool_controller', 'pool_1', 'garden_pool')" ></ha-textfield><div class="prefix-info"><ha-icon icon="mdi:information-outline"></ha-icon><span> The entity prefix should match your Violet Pool Controller name in Home Assistant. All entities will be automatically discovered based on this prefix. </span></div></div><!-- Entity Selection -->
         ${needsEntity || coverOrLight ? html`
           <div class="config-section">
             <div class="section-header">
@@ -113,7 +119,7 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
                 { value: 'forest', icon: '', label: 'Forest', desc: 'Natural Green', preview: '#228B22' },
                 { value: 'aurora', icon: '', label: 'Aurora', desc: 'Northern Lights', preview: 'linear-gradient(45deg, #00C9FF 0%, #92FE9D 100%)' },
               ].map(
-                (theme) => html` <button class="theme-button ${this._config.theme === theme.value || (!this._config.theme && theme.value === 'classic') ? 'active' : ''}" @click="${() => this._themeChanged(theme.value)}" ><div class="theme-preview theme-${theme.value}"><div class="theme-dot" style="background:${(theme as any).preview}"></div></div><div class="theme-info"><span class="theme-label">${theme.label}</span><span class="theme-desc">${theme.desc}</span></div></button> `
+                (theme) => html` <button class="theme-button ${this._config.theme === theme.value || (!this._config.theme && theme.value === 'classic') ? 'active' : ''}" @click="${() => this._themeChanged(theme.value)}" ><div class="theme-preview theme-${theme.value}"><div class="theme-dot" style="background:${theme.preview}"></div></div><div class="theme-info"><span class="theme-label">${theme.label}</span><span class="theme-desc">${theme.desc}</span></div></button> `
               )}
             </div>
           </div>
@@ -402,23 +408,23 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
             </summary>
             <div class="advanced-content">
               ${this._config.card_type === 'pump' || this._config.card_type === 'overview' || this._config.card_type === 'system' ? html`
-                <ha-entity-picker label="Pumpe (override)" .hass="${this.hass}" .value="${(this._config as any).pump_entity || ''}" .includeDomains="${['switch']}" @value-changed="${(e: CustomEvent) => this._overrideChanged('pump_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker>
+                <ha-entity-picker label="Pumpe (override)" .hass="${this.hass}" .value="${this._config.pump_entity || ''}" .includeDomains="${['switch']}" @value-changed="${(e: CustomEvent) => this._overrideChanged('pump_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker>
               ` : ''}
               ${this._config.card_type === 'heater' || this._config.card_type === 'overview' || this._config.card_type === 'system' ? html`
-                <ha-entity-picker label="Heater (override)" .hass="${this.hass}" .value="${(this._config as any).heater_entity || ''}" .includeDomains="${['climate']}" @value-changed="${(e: CustomEvent) => this._overrideChanged('heater_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker>
+                <ha-entity-picker label="Heater (override)" .hass="${this.hass}" .value="${this._config.heater_entity || ''}" .includeDomains="${['climate']}" @value-changed="${(e: CustomEvent) => this._overrideChanged('heater_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker>
               ` : ''}
               ${this._config.card_type === 'solar' || this._config.card_type === 'overview' || this._config.card_type === 'system' ? html`
-                <ha-entity-picker label="Solar (override)" .hass="${this.hass}" .value="${(this._config as any).solar_entity || ''}" .includeDomains="${['climate']}" @value-changed="${(e: CustomEvent) => this._overrideChanged('solar_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker>
+                <ha-entity-picker label="Solar (override)" .hass="${this.hass}" .value="${this._config.solar_entity || ''}" .includeDomains="${['climate']}" @value-changed="${(e: CustomEvent) => this._overrideChanged('solar_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker>
               ` : ''}
               ${this._config.card_type === 'dosing' || this._config.card_type === 'overview' || this._config.card_type === 'system' ? html`
-                <ha-entity-picker label="Chlorine Dosing (override)" .hass="${this.hass}" .value="${(this._config as any).chlorine_entity || ''}" .includeDomains="${['switch']}" @value-changed="${(e: CustomEvent) => this._overrideChanged('chlorine_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker>
+                <ha-entity-picker label="Chlorine Dosing (override)" .hass="${this.hass}" .value="${this._config.chlorine_entity || ''}" .includeDomains="${['switch']}" @value-changed="${(e: CustomEvent) => this._overrideChanged('chlorine_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker>
               ` : ''}
               ${['dosing','overview','system','chemical'].includes(this._config.card_type) ? html`
-                <ha-entity-picker label="pH-Sensor (override)" .hass="${this.hass}" .value="${(this._config as any).ph_value_entity || ''}" .includeDomains="${['sensor']}" @value-changed="${(e: CustomEvent) => this._overrideChanged('ph_value_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker>
-                <ha-entity-picker label="ORP-Sensor (override)" .hass="${this.hass}" .value="${(this._config as any).orp_value_entity || ''}" .includeDomains="${['sensor']}" @value-changed="${(e: CustomEvent) => this._overrideChanged('orp_value_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker>
+                <ha-entity-picker label="pH-Sensor (override)" .hass="${this.hass}" .value="${this._config.ph_value_entity || ''}" .includeDomains="${['sensor']}" @value-changed="${(e: CustomEvent) => this._overrideChanged('ph_value_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker>
+                <ha-entity-picker label="ORP-Sensor (override)" .hass="${this.hass}" .value="${this._config.orp_value_entity || ''}" .includeDomains="${['sensor']}" @value-changed="${(e: CustomEvent) => this._overrideChanged('orp_value_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker>
               ` : ''}
               ${['heater','solar','overview','system','chemical'].includes(this._config.card_type) ? html`
-                <ha-entity-picker label="Pool-Temperatur (override)" .hass="${this.hass}" .value="${(this._config as any).pool_temp_entity || ''}" .includeDomains="${['sensor']}" @value-changed="${(e: CustomEvent) => this._overrideChanged('pool_temp_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker>
+                <ha-entity-picker label="Pool-Temperatur (override)" .hass="${this.hass}" .value="${this._config.pool_temp_entity || ''}" .includeDomains="${['sensor']}" @value-changed="${(e: CustomEvent) => this._overrideChanged('pool_temp_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker>
               ` : ''}
             </div>
           </details>
@@ -471,12 +477,12 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
   }
 
   private _cardTypeChanged(ev: Event): void {
-    const target = ev.target as any;
-    if (this._config.card_type === target.value) return;
+    const target = ev.target as HaElement;
+    if (!target.value || this._config.card_type === target.value) return;
 
     this._config = {
       ...this._config,
-      card_type: target.value,
+      card_type: target.value as VioletPoolCardConfig['card_type'],
     };
     this._fireConfigChanged();
   }
@@ -488,7 +494,7 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
 
     this._config = {
       ...this._config,
-      entity_prefix: value || 'violet_pool',
+      entity_prefix: value || 'violet_pool_controller',
     };
     this._fireConfigChanged();
   }
@@ -507,7 +513,7 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
   private _sizeChanged(size: string): void {
     this._config = {
       ...this._config,
-      size: size as any,
+      size: size as CardSize,
     };
     this._fireConfigChanged();
   }
@@ -515,7 +521,7 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
   private _themeChanged(theme: string): void {
     this._config = {
       ...this._config,
-      theme: theme as any,
+      theme: theme as Theme,
     };
     this._fireConfigChanged();
   }
@@ -523,34 +529,37 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
   private _animationChanged(animation: string): void {
     this._config = {
       ...this._config,
-      animation: animation as any,
+      animation: animation as Animation,
     };
     this._fireConfigChanged();
   }
 
   private _layoutVariantChanged(ev: Event): void {
-    const target = ev.target as any;
+    const target = ev.target as HaElement;
+    if (!target.value) return;
     this._config = {
       ...this._config,
-      layout_variant: target.value,
+      layout_variant: target.value as VioletPoolCardConfig['layout_variant'],
     };
     this._fireConfigChanged();
   }
 
   private _alarmStyleChanged(ev: Event): void {
-    const target = ev.target as any;
+    const target = ev.target as HaElement;
+    if (!target.value) return;
     this._config = {
       ...this._config,
-      alarm_style: target.value,
+      alarm_style: target.value as VioletPoolCardConfig['alarm_style'],
     };
     this._fireConfigChanged();
   }
 
   private _accessibilityModeChanged(ev: Event): void {
-    const target = ev.target as any;
+    const target = ev.target as HaElement;
+    if (!target.value) return;
     this._config = {
       ...this._config,
-      accessibility_mode: target.value,
+      accessibility_mode: target.value as VioletPoolCardConfig['accessibility_mode'],
     };
     this._fireConfigChanged();
   }
@@ -567,10 +576,11 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
   }
 
   private _dashboardModeChanged(ev: Event): void {
-    const target = ev.target as any;
+    const target = ev.target as HaElement;
+    if (!target.value) return;
     this._config = {
       ...this._config,
-      dashboard_mode: target.value,
+      dashboard_mode: target.value as VioletPoolCardConfig['dashboard_mode'],
     };
     this._fireConfigChanged();
   }
@@ -593,7 +603,7 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
   }
 
   private _showStateChanged(ev: Event): void {
-    const target = ev.target as any;
+    const target = ev.target as HaElement;
     this._config = {
       ...this._config,
       show_state: target.checked,
@@ -602,7 +612,7 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
   }
 
   private _showDetailStatusChanged(ev: Event): void {
-    const target = ev.target as any;
+    const target = ev.target as HaElement;
     this._config = {
       ...this._config,
       show_detail_status: target.checked,
@@ -611,7 +621,7 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
   }
 
   private _showControlsChanged(ev: Event): void {
-    const target = ev.target as any;
+    const target = ev.target as HaElement;
     this._config = {
       ...this._config,
       show_controls: target.checked,
@@ -620,7 +630,7 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
   }
 
   private _showRuntimeChanged(ev: Event): void {
-    const target = ev.target as any;
+    const target = ev.target as HaElement;
     this._config = {
       ...this._config,
       show_runtime: target.checked,
@@ -629,7 +639,7 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
   }
 
   private _showHistoryChanged(ev: Event): void {
-    const target = ev.target as any;
+    const target = ev.target as HaElement;
     this._config = {
       ...this._config,
       show_history: target.checked,
@@ -638,25 +648,27 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
   }
 
   private _dosingTypeChanged(ev: Event): void {
-    const target = ev.target as any;
+    const target = ev.target as HaElement;
+    if (!target.value) return;
     this._config = {
       ...this._config,
-      dosing_type: target.value,
+      dosing_type: target.value as VioletPoolCardConfig['dosing_type'],
     };
     this._fireConfigChanged();
   }
 
   private _chemistryTypeChanged(ev: Event): void {
-    const target = ev.target as any;
+    const target = ev.target as HaElement;
+    if (!target.value) return;
     this._config = {
       ...this._config,
-      chemistry_type: target.value,
+      chemistry_type: target.value as VioletPoolCardConfig['chemistry_type'],
     };
     this._fireConfigChanged();
   }
 
   private _showTemperatureChanged(ev: Event): void {
-    const target = ev.target as any;
+    const target = ev.target as HaElement;
     this._config = {
       ...this._config,
       show_temperature: target.checked,
@@ -665,7 +677,7 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
   }
 
   private _showPhChanged(ev: Event): void {
-    const target = ev.target as any;
+    const target = ev.target as HaElement;
     this._config = {
       ...this._config,
       show_ph: target.checked,
@@ -674,7 +686,7 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
   }
 
   private _showOrpChanged(ev: Event): void {
-    const target = ev.target as any;
+    const target = ev.target as HaElement;
     this._config = {
       ...this._config,
       show_orp: target.checked,
@@ -683,7 +695,7 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
   }
 
   private _showChlorineChanged(ev: Event): void {
-    const target = ev.target as any;
+    const target = ev.target as HaElement;
     this._config = {
       ...this._config,
       show_chlorine: target.checked,
@@ -692,7 +704,7 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
   }
 
   private _showSaltChanged(ev: Event): void {
-    const target = ev.target as any;
+    const target = ev.target as HaElement;
     this._config = {
       ...this._config,
       show_salt: target.checked,
@@ -701,7 +713,7 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
   }
 
   private _showInletChanged(ev: Event): void {
-    const target = ev.target as any;
+    const target = ev.target as HaElement;
     this._config = {
       ...this._config,
       show_inlet: target.checked,
@@ -777,10 +789,10 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
   }
 
   private _shadowIntensityChanged(ev: Event): void {
-    const target = ev.target as any;
+    const target = ev.target as HaElement;
     this._config = {
       ...this._config,
-      shadow_intensity: target.value || undefined,
+      shadow_intensity: (target.value as VioletPoolCardConfig['shadow_intensity']) || undefined,
     };
     this._fireConfigChanged();
   }

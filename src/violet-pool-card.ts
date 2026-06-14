@@ -32,6 +32,7 @@ import { PerformanceMonitor } from './utils/performance';
 import { pumpSVG, heaterSVG, solarSVG, coverSVG, lightSVG, gaugeNeedleSVG, filterGaugeSVG, chartSVG, backwashSVG, refillSVG, solarSurplusSVG, flowRateSVG, inletSVG, counterCurrentSVG, chlorineCanisterSVG, phPlusCanisterSVG, phMinusCanisterSVG, flocculantCanisterSVG, waterThermometerSVG, phOrbSVG, chlorineOrbSVG, saltCrystalSVG, orpEnergySVG, automationRulesSVG, diagnosticsPulseSVG } from './utils/animated-icons';
 import { SeverityModel, type SeverityAlert } from './utils/severity-model';
 import { TrendHelper } from './utils/trend-helper';
+import { getSystemCardGroups } from './utils/system-dashboard';
 
 
 // HomeAssistant types
@@ -51,10 +52,22 @@ interface HomeAssistant {
   language?: string;
 }
 
+// ─────────────────────────── Exported helper types ───────────────────────────
+export type CardSize = 'small' | 'medium' | 'large' | 'fullscreen';
+export type Theme = 'classic' | 'midnight' | 'elegance' | 'vibrant' | 'pure' | 'frost' | 'glow' | 'metallic' | 'ocean' | 'sunset' | 'forest' | 'aurora';
+export type Animation = 'none' | 'subtle' | 'smooth' | 'energetic';
+
+/** Per-entity config for the details card — either a bare entity ID or a structured object. */
+interface EntityConfig {
+  entity: string;
+  name?: string;
+  icon?: string;
+}
+
 interface LovelaceCardConfig {
   type: string;
   entity?: string;
-  entities?: string[];
+  entities?: (string | EntityConfig)[];
   card_type: 'pump' | 'heater' | 'solar' | 'dosing' | 'overview' | 'details' | 'sensor' | 'cover' | 'light' | 'compact' | 'system' | 'chemical' | 'filter' | 'backwash' | 'refill' | 'solar_surplus' | 'flow_rate' | 'inlet' | 'counter_current' | 'chlorine_canister' | 'ph_plus_canister' | 'ph_minus_canister' | 'flocculant_canister' | 'digital_rules' | 'diagnostics';
   name?: string;
   icon?: string;
@@ -69,9 +82,9 @@ interface LovelaceCardConfig {
   show_inlet?: boolean;
 
   // PREMIUM DESIGN SYSTEM
-  size?: 'small' | 'medium' | 'large' | 'fullscreen';
-  theme?: 'classic' | 'midnight' | 'elegance' | 'vibrant' | 'pure' | 'frost' | 'glow' | 'metallic' | 'ocean' | 'sunset' | 'forest' | 'aurora';
-  animation?: 'none' | 'subtle' | 'smooth' | 'energetic';
+  size?: CardSize;
+  theme?: Theme;
+  animation?: Animation;
   layout_variant?: 'standard' | 'glass' | 'dashboard' | 'focus';
   alarm_style?: 'soft' | 'outline' | 'pulse';
   accessibility_mode?: 'standard' | 'high_contrast' | 'reduced_motion';
@@ -131,11 +144,38 @@ export interface VioletPoolCardConfig extends LovelaceCardConfig {
   filter_entity?: string;
   filter_pressure_entity?: string;
   backwash_entity?: string;
+  refill_entity?: string;
+  solar_surplus_entity?: string;
+  flow_rate_entity?: string;
+  inlet_entity?: string;
+  counter_current_entity?: string;
+  chlorine_level_entity?: string;
+  ph_plus_level_entity?: string;
+  ph_minus_level_entity?: string;
+  flocculant_level_entity?: string;
+  digital_rules_entity?: string;
+  diagnostics_entity?: string;
+
+  // Extended entity overrides for specialised card types
+  pool_level_entity?: string;
+  water_level_entity?: string;
+  refill_valve_entity?: string;
+  chlorine_value_entity?: string;
+  solar_power_entity?: string;
+  export_entity?: string;
+  surplus_threshold?: number;
+  title?: string;
+
+  // Canister / level card helpers
+  salt_level_entity?: string;
+  level_entity?: string;
+  max_level?: number;
 }
 
 export class VioletPoolCard extends LitElement {
   @property({ attribute: false })
   public set hass(hass: HomeAssistant) {
+    const oldHass = this._hass;
     this._hass = hass;
     // Detect language: prefer locale.language, fallback to language property
     const langStr = hass.locale?.language || hass.language;
@@ -143,6 +183,8 @@ export class VioletPoolCard extends LitElement {
       // Switch i18n to German if language starts with 'de', else fallback to English
       i18n.setLanguage(langStr.startsWith('de') ? 'de' : 'en');
     }
+    // Custom accessor: Lit does not generate one, so trigger the update manually
+    this.requestUpdate('hass', oldHass);
   }
 
   public get hass(): HomeAssistant {
@@ -182,7 +224,7 @@ export class VioletPoolCard extends LitElement {
       blur_intensity: 10,
       style: 'standard',
       show_flow_animation: false,
-      entity_prefix: 'violet_pool',
+      entity_prefix: 'violet_pool_controller',
       ...config,
     };
   }
@@ -200,7 +242,7 @@ export class VioletPoolCard extends LitElement {
   }
 
   private _buildEntityId(domain: string, suffix: string): string {
-    const prefix = this.config.entity_prefix || 'violet_pool';
+    const prefix = this.config.entity_prefix || 'violet_pool_controller';
     return `${domain}.${prefix}_${suffix}`;
   }
 
@@ -215,7 +257,8 @@ export class VioletPoolCard extends LitElement {
       return configValue;
     }
     if (entitiesIndex !== undefined && this.config.entities && this.config.entities[entitiesIndex]) {
-      return this.config.entities[entitiesIndex];
+      const entry = this.config.entities[entitiesIndex];
+      return typeof entry === 'string' ? entry : entry.entity;
     }
     return this._buildEntityId(domain, suffix);
   }
@@ -225,20 +268,29 @@ export class VioletPoolCard extends LitElement {
    */
   private _getFriendlyState(state: string, cardType?: string): string {
     const map: Record<string, string> = {
-      'on': 'Active',
-      'off': 'Off',
-      'auto': 'Auto',
-      'heat': 'Heating',
-      'heating': 'Heating',
-      'cool': 'Cooling',
-      'cooling': 'Cooling',
-      'idle': 'Idle',
-      'unavailable': 'Unavailable',
-      'unknown': 'Unknown',
-      'manual': 'Manual',
+      'on': i18n.t('state_on'),
+      'off': i18n.t('state_off'),
+      'auto': i18n.t('state_auto'),
+      'heat': i18n.t('state_heat'),
+      'heating': i18n.t('state_heat'),
+      'cool': i18n.t('state_cool'),
+      'cooling': i18n.t('state_cool'),
+      'idle': i18n.t('state_idle'),
+      'unavailable': i18n.t('state_unavailable'),
+      'unknown': i18n.t('unknown'),
+      'manual': i18n.t('state_manual'),
+      'open': i18n.t('state_open'),
+      'closed': i18n.t('state_closed'),
+      'opening': i18n.t('state_opening'),
+      'closing': i18n.t('state_closing'),
     };
-    if (cardType === 'pump' && state === 'on') return 'Running';
+    if (cardType === 'pump' && state === 'on') return i18n.t('state_running');
     return map[state] ?? state.charAt(0).toUpperCase() + state.slice(1);
+  }
+
+  /** Error card shown when a configured entity does not exist in Home Assistant. */
+  private _renderEntityNotFound(entityId?: string): TemplateResult {
+    return html` <ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">${i18n.t('data_not_available')}</span><span class="error-entity">${entityId || ''}</span></div></div></ha-card> `;
   }
 
   /**
@@ -256,14 +308,15 @@ export class VioletPoolCard extends LitElement {
     return config.alarm_style || 'soft';
   }
 
-  private _renderRecommendationList(recommendations: SeverityAlert[], title = 'Empfehlungen'): TemplateResult {
+  private _renderRecommendationList(recommendations: SeverityAlert[], title?: string): TemplateResult {
     if (recommendations.length === 0) return html``;
+    const heading = title ?? i18n.t('recommendations');
 
     return html`
       <div class="recommendation-panel">
         <div class="section-title">
           <ha-icon icon="mdi:lightbulb-on-outline" style="--mdc-icon-size: 14px"></ha-icon>
-          <span>${title}</span>
+          <span>${heading}</span>
           <span class="section-count">${recommendations.length}</span>
         </div>
         <div class="recommendation-list">
@@ -379,15 +432,15 @@ export class VioletPoolCard extends LitElement {
   }
 
   private _getRgbColorName(rgb: [number, number, number] | null): string {
-    if (!rgb) return 'Keine Farbe';
+    if (!rgb) return i18n.t('color_none');
 
     const [r, g, b] = rgb;
 
     // Check for near-white
-    if (r > 200 && g > 200 && b > 200) return 'Weiß';
+    if (r > 200 && g > 200 && b > 200) return i18n.t('color_white');
 
     // Check for near-black
-    if (r < 50 && g < 50 && b < 50) return 'Schwarz';
+    if (r < 50 && g < 50 && b < 50) return i18n.t('color_black');
 
     const max = Math.max(r, g, b);
     const min = Math.min(r, g, b);
@@ -410,17 +463,17 @@ export class VioletPoolCard extends LitElement {
 
     // Determine color name based on hue
     if (saturation < 0.1) {
-      return 'Grau';
+      return i18n.t('color_gray');
     }
 
-    if (hue < 0.05 || hue >= 0.95) return 'Rot';
-    if (hue < 0.15) return 'Orange';
-    if (hue < 0.25) return 'Gelb';
-    if (hue < 0.4) return 'Grün';
-    if (hue < 0.55) return 'Cyan';
-    if (hue < 0.7) return 'Blau';
-    if (hue < 0.85) return 'Magenta';
-    return 'Rot';
+    if (hue < 0.05 || hue >= 0.95) return i18n.t('color_red');
+    if (hue < 0.15) return i18n.t('color_orange');
+    if (hue < 0.25) return i18n.t('color_yellow');
+    if (hue < 0.4) return i18n.t('color_green');
+    if (hue < 0.55) return i18n.t('color_cyan');
+    if (hue < 0.7) return i18n.t('color_blue');
+    if (hue < 0.85) return i18n.t('color_magenta');
+    return i18n.t('color_red');
   }
 
   protected render(): TemplateResult {
@@ -433,7 +486,7 @@ export class VioletPoolCard extends LitElement {
     if (this.config.entity) {
       const entity = this.hass.states[this.config.entity];
       if (!entity) {
-        return html` <ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">Entity Not Found</span><span class="error-entity">${this.config.entity}</span></div></div></ha-card> `;
+        return this._renderEntityNotFound(this.config.entity);
       }
     }
 
@@ -637,7 +690,7 @@ export class VioletPoolCard extends LitElement {
    * Render Quick-Settings Panel with common pool actions
    */
   private _renderQuickSettingsPanel(): TemplateResult {
-    const heaterEntityId = this._getEntityId('heater_entity', 'climate', 'heater', 1);
+    const heaterEntityId = this._getEntityId('heater_entity', 'climate', 'heizung', 1);
 
     return html`
       <div style="display: grid; gap: 8px; padding: 12px; background: var(--vpc-surface); border-radius: 12px; margin-top: 12px;">
@@ -681,28 +734,40 @@ export class VioletPoolCard extends LitElement {
   }
 
   private renderSystemCard(): TemplateResult {
-    const pumpEntity = this._getEntityId('pump_entity', 'switch', 'pump', 0);
-    const heaterEntity = this._getEntityId('heater_entity', 'climate', 'heater', 1);
-    const solarEntity = this._getEntityId('solar_entity', 'climate', 'solar', 2);
-    const dosingEntity = this._getEntityId('chlorine_entity', 'switch', 'dos_1_cl', 3);
+    const pumpEntity = this._getEntityId('pump_entity', 'switch', 'filterpumpe', 0);
+    const heaterEntity = this._getEntityId('heater_entity', 'climate', 'heizung', 1);
+    const solarEntity = this._getEntityId('solar_entity', 'climate', 'solarabsorber', 2);
+    const dosingEntity = this._getEntityId('chlorine_entity', 'switch', 'chlor_dosierung', 3);
     const layoutVariant = this.config.layout_variant || 'glass';
     const dashboardMode = this.config.dashboard_mode || 'default';
 
-    const createSubConfig = (type: string, entity: string, extra: any = {}): VioletPoolCardConfig | null => {
+    const createSubConfig = (type: string, entity: string, extra: Partial<VioletPoolCardConfig> = {}): VioletPoolCardConfig | null => {
       if (!['overview', 'chemical', 'details'].includes(type) && !this.hass.states[entity]) return null;
       return {
         ...this.config,
-        card_type: type as any,
+        card_type: type as VioletPoolCardConfig['card_type'],
         entity: entity,
         // Ensure entity_prefix is always propagated to sub-cards (bug fix)
-        entity_prefix: this.config.entity_prefix || 'violet_pool',
+        entity_prefix: this.config.entity_prefix || 'violet_pool_controller',
         ...extra
       };
     };
 
-    const coverEntitySys = this._getEntityId('cover_entity', 'cover', 'cover');
-    const lightEntitySys = this._getEntityId('light_entity', 'light', 'light');
-    const filterEntitySys = this._getEntityId('filter_entity' as any, 'sensor', 'filter_pressure');
+    const coverEntitySys = this._getEntityId('cover_entity', 'cover', 'abdeckung');
+    const lightEntitySys = this._getEntityId('light_entity', 'switch', 'beleuchtung');
+    const filterEntitySys = this._getEntityId('filter_entity', 'sensor', 'filterdruck');
+    const backwashEntitySys = this._getEntityId('backwash_entity', 'switch', 'ruckspulung');
+    const refillEntitySys = this._getEntityId('refill_entity', 'sensor', 'uberlaufbehalter');
+    const solarSurplusEntitySys = this._getEntityId('solar_surplus_entity', 'sensor', 'pv_uberschuss_status');
+    const flowRateEntitySys = this._getEntityId('flow_rate_entity', 'sensor', 'pumpen_durchfluss');
+    const inletEntitySys = this._getEntityId('inlet_entity', 'sensor', 'inlet_status');
+    const counterCurrentEntitySys = this._getEntityId('counter_current_entity', 'switch', 'counter_current');
+    const chlorineCanisterEntitySys = this._getEntityId('chlorine_level_entity', 'sensor', 'dos_1_cl_remaining_range');
+    const phPlusCanisterEntitySys = this._getEntityId('ph_plus_level_entity', 'sensor', 'dos_5_php_remaining_range');
+    const phMinusCanisterEntitySys = this._getEntityId('ph_minus_level_entity', 'sensor', 'dos_4_phm_remaining_range');
+    const flocculantCanisterEntitySys = this._getEntityId('flocculant_level_entity', 'sensor', 'dos_6_floc_remaining_range');
+    const digitalRulesEntitySys = this._getEntityId('digital_rules_entity', 'switch', 'schaltregel_1');
+    const diagnosticsEntitySys = this._getEntityId('diagnostics_entity', 'sensor', 'diagnostics_status');
 
     const overviewConfig = createSubConfig('overview', '', { name: 'Pool Overview' });
     const pumpConfig = createSubConfig('pump', pumpEntity, { show_runtime: true });
@@ -711,18 +776,30 @@ export class VioletPoolCard extends LitElement {
     const dosingConfig = createSubConfig('dosing', dosingEntity, { dosing_type: 'chlorine' });
     const coverConfig = createSubConfig('cover', coverEntitySys);
     const lightConfig = createSubConfig('light', lightEntitySys);
-    const filterConfig = createSubConfig('filter' as any, filterEntitySys);
+    const filterConfig = createSubConfig('filter', filterEntitySys);
+    const backwashConfig = createSubConfig('backwash', backwashEntitySys);
+    const refillConfig = createSubConfig('refill', refillEntitySys);
+    const solarSurplusConfig = createSubConfig('solar_surplus', solarSurplusEntitySys);
+    const flowRateConfig = createSubConfig('flow_rate', flowRateEntitySys);
+    const inletConfig = createSubConfig('inlet', inletEntitySys);
+    const counterCurrentConfig = createSubConfig('counter_current', counterCurrentEntitySys);
+    const chlorineCanisterConfig = createSubConfig('chlorine_canister', chlorineCanisterEntitySys);
+    const phPlusCanisterConfig = createSubConfig('ph_plus_canister', phPlusCanisterEntitySys);
+    const phMinusCanisterConfig = createSubConfig('ph_minus_canister', phMinusCanisterEntitySys);
+    const flocculantCanisterConfig = createSubConfig('flocculant_canister', flocculantCanisterEntitySys);
+    const digitalRulesConfig = createSubConfig('digital_rules', digitalRulesEntitySys, { name: 'Digital Rules' });
+    const diagnosticsConfig = createSubConfig('diagnostics', diagnosticsEntitySys, { name: 'Diagnostics' });
     const chemicalConfig = createSubConfig('chemical', '', { name: 'Water Chemistry', show_controls: false });
-    let controlCards = [pumpConfig, heaterConfig, solarConfig, dosingConfig].filter(Boolean);
-    let utilityCards = [coverConfig, lightConfig, filterConfig].filter(Boolean);
-
-    if (dashboardMode === 'maintenance') {
-      utilityCards = [filterConfig, coverConfig, lightConfig].filter(Boolean);
-    }
-    if (dashboardMode === 'alarm_center') {
-      utilityCards = [filterConfig, dosingConfig, coverConfig].filter(Boolean);
-      controlCards = [heaterConfig, pumpConfig, solarConfig].filter(Boolean);
-    }
+    const groups = getSystemCardGroups(
+      dashboardMode,
+      [pumpConfig, heaterConfig, solarConfig, dosingConfig, counterCurrentConfig],
+      [coverConfig, lightConfig, filterConfig, flowRateConfig, inletConfig, solarSurplusConfig, backwashConfig, refillConfig, chlorineCanisterConfig, phPlusCanisterConfig, phMinusCanisterConfig, flocculantCanisterConfig, digitalRulesConfig, diagnosticsConfig],
+      [filterConfig, backwashConfig, refillConfig, coverConfig, lightConfig, diagnosticsConfig],
+      [heaterConfig, pumpConfig, solarConfig, counterCurrentConfig],
+      [filterConfig, dosingConfig, solarSurplusConfig, coverConfig, diagnosticsConfig]
+    );
+    const controlCards = groups.controlCards;
+    const utilityCards = groups.utilityCards;
 
     const totalCards = [overviewConfig, chemicalConfig, ...controlCards, ...utilityCards].filter(Boolean).length;
 
@@ -756,15 +833,7 @@ export class VioletPoolCard extends LitElement {
               <span class="system-section-count">${controlCards.length} Karten</span>
             </div>
             <div class="system-grid system-grid-primary">
-              ${controlCards.map((card) => {
-                switch (card!.card_type) {
-                  case 'pump': return this.renderPumpCard(card!);
-                  case 'heater': return this.renderHeaterCard(card!);
-                  case 'solar': return this.renderSolarCard(card!);
-                  case 'dosing': return this.renderDosingCard(card!);
-                  default: return html``;
-                }
-              })}
+              ${controlCards.map((card) => this._renderCardByType(card!))}
             </div>
           </div>
         ` : ''}
@@ -779,19 +848,37 @@ export class VioletPoolCard extends LitElement {
               <span class="system-section-count">${utilityCards.length} Karten</span>
             </div>
             <div class="system-grid system-grid-secondary">
-              ${utilityCards.map((card) => {
-                switch (card!.card_type) {
-                  case 'cover': return this.renderCoverCard(card!);
-                  case 'light': return this.renderLightCard(card!);
-                  case 'filter': return this.renderFilterCard(card!);
-                  default: return html``;
-                }
-              })}
+              ${utilityCards.map((card) => this._renderCardByType(card!))}
             </div>
           </div>
         ` : ''}
       </div>
     `;
+  }
+
+  private _renderCardByType(card: VioletPoolCardConfig): TemplateResult {
+    switch (card.card_type) {
+      case 'pump': return this.renderPumpCard(card);
+      case 'heater': return this.renderHeaterCard(card);
+      case 'solar': return this.renderSolarCard(card);
+      case 'dosing': return this.renderDosingCard(card);
+      case 'cover': return this.renderCoverCard(card);
+      case 'light': return this.renderLightCard(card);
+      case 'filter': return this.renderFilterCard(card);
+      case 'backwash': return this.renderBackwashCard(card);
+      case 'refill': return this.renderRefillCard(card);
+      case 'solar_surplus': return this.renderSolarSurplusCard(card);
+      case 'flow_rate': return this.renderFlowRateCard(card);
+      case 'inlet': return this.renderInletCard(card);
+      case 'counter_current': return this.renderCounterCurrentCard(card);
+      case 'chlorine_canister': return this.renderChlorineCanisterCard(card);
+      case 'ph_plus_canister': return this.renderPhPlusCanisterCard(card);
+      case 'ph_minus_canister': return this.renderPhMinusCanisterCard(card);
+      case 'flocculant_canister': return this.renderFlocculantCanisterCard(card);
+      case 'digital_rules': return this.renderDigitalRulesCard(card);
+      case 'diagnostics': return this.renderDiagnosticsCard(card);
+      default: return html``;
+    }
   }
 
   private renderPumpCard(config: VioletPoolCardConfig = this.config): TemplateResult {
@@ -1002,7 +1089,7 @@ export class VioletPoolCard extends LitElement {
           ${config.show_runtime && runtimeSeconds > 0
             ? html` <div class="info-row"><ha-icon icon="mdi:timer-outline"></ha-icon><span class="info-label">Runtime</span><span class="info-value">${runtimeDisplay}</span></div> `
             : ''}
-          ${this._renderRecommendationList(pumpRecommendations, 'Betriebshinweise')}
+          ${this._renderRecommendationList(pumpRecommendations)}
         </div>
       </ha-card>
     `;
@@ -1342,6 +1429,8 @@ export class VioletPoolCard extends LitElement {
     const accentColor = this._getAccentColor('dosing', config);
 
     const dosingType = config.dosing_type || this._detectDosingType(config.entity!);
+    /** Map from config dosing_type to the service-layer literal expected by ServiceCaller. */
+    const dosName = (dosingType === 'chlorine' ? 'Chlor' : dosingType === 'ph_minus' ? 'pH-' : dosingType === 'ph_plus' ? 'pH+' : 'Flockmittel') as 'Chlor' | 'pH-' | 'pH+' | 'Flockmittel';
 
     const dosingStateKey = Object.keys(entity.attributes || {}).find(
       (key) => key.includes('DOS_') && key.includes('_STATE')
@@ -1355,20 +1444,20 @@ export class VioletPoolCard extends LitElement {
     let unit = '';
 
     if (dosingType === 'chlorine') {
-      const orpSensorId = this._getEntityId('orp_value_entity', 'sensor', 'orp_value');
+      const orpSensorId = this._getEntityId('orp_value_entity', 'sensor', 'redoxpotential');
       const orpSensor = this.hass.states[orpSensorId];
       currentValue = orpSensor ? parseFloat(orpSensor.state) : undefined;
-      const targetOrpId = this._getEntityId('target_orp_entity', 'number', 'target_orp');
+      const targetOrpId = this._getEntityId('target_orp_entity', 'number', 'redox_sollwert');
       const targetEntity = this.hass.states[targetOrpId];
       targetValue = targetEntity ? parseFloat(targetEntity.state) : undefined;
       minValue = Number(targetEntity?.attributes?.min) || 600;
       maxValue = Number(targetEntity?.attributes?.max) || 800;
       unit = 'mV';
     } else if (dosingType === 'ph_minus' || dosingType === 'ph_plus') {
-      const phSensorId = this._getEntityId('ph_value_entity', 'sensor', 'ph_value');
+      const phSensorId = this._getEntityId('ph_value_entity', 'sensor', 'ph_wert');
       const phSensor = this.hass.states[phSensorId];
       currentValue = phSensor ? parseFloat(phSensor.state) : undefined;
-      const targetPhId = this._getEntityId('target_ph_entity', 'number', 'target_ph');
+      const targetPhId = this._getEntityId('target_ph_entity', 'number', 'ph_sollwert');
       const targetEntity = this.hass.states[targetPhId];
       targetValue = targetEntity ? parseFloat(targetEntity.state) : undefined;
       minValue = Number(targetEntity?.attributes?.min) || 6.8;
@@ -1424,8 +1513,8 @@ export class VioletPoolCard extends LitElement {
         label: 'STOP',
         action: async () => {
           const serviceCaller = new ServiceCaller(this.hass);
-          const dosType = dosingType === 'chlorine' ? 'Chlor' : dosingType === 'ph_minus' ? 'pH-' : dosingType === 'ph_plus' ? 'pH+' : 'Flockmittel';
-          await serviceCaller.stopDosing(dosType as any);
+          const dosType = (dosingType === 'chlorine' ? 'Chlor' : dosingType === 'ph_minus' ? 'pH-' : dosingType === 'ph_plus' ? 'pH+' : 'Flockmittel') as 'Chlor' | 'pH-' | 'pH+' | 'Flockmittel';
+          await serviceCaller.stopDosing(dosType);
         },
         color: '#FF3B30',
         confirmMessage: 'Stop current dosing?',
@@ -1520,19 +1609,19 @@ export class VioletPoolCard extends LitElement {
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
                   <button style="padding: 8px; border: none; border-radius: 6px; background: ${accentColor}; color: white; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
-                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).manualDose(dosingType === 'chlorine' ? 'Chlor' : dosingType === 'ph_minus' ? 'pH-' : dosingType === 'ph_plus' ? 'pH+' : 'Flockmittel' as any, 30, false); }}">
+                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).manualDose(dosName, 30, false); }}">
                     <ha-icon icon="mdi:play" style="--mdc-icon-size: 14px;"></ha-icon> 30s
                   </button>
                   <button style="padding: 8px; border: none; border-radius: 6px; background: ${accentColor}; color: white; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
-                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).manualDose(dosingType === 'chlorine' ? 'Chlor' : dosingType === 'ph_minus' ? 'pH-' : dosingType === 'ph_plus' ? 'pH+' : 'Flockmittel' as any, 60, false); }}">
+                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).manualDose(dosName, 60, false); }}">
                     <ha-icon icon="mdi:play" style="--mdc-icon-size: 14px;"></ha-icon> 60s
                   </button>
                   <button style="padding: 8px; border: none; border-radius: 6px; background: #34C759; color: white; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
-                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).autoDose(dosingType === 'chlorine' ? 'Chlor' : dosingType === 'ph_minus' ? 'pH-' : dosingType === 'ph_plus' ? 'pH+' : 'Flockmittel' as any); }}">
+                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).autoDose(dosName); }}">
                     <ha-icon icon="mdi:auto-fix" style="--mdc-icon-size: 14px;"></ha-icon> Auto
                   </button>
                   <button style="padding: 8px; border: none; border-radius: 6px; background: #FF3B30; color: white; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
-                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).stopDosing(dosingType === 'chlorine' ? 'Chlor' : dosingType === 'ph_minus' ? 'pH-' : dosingType === 'ph_plus' ? 'pH+' : 'Flockmittel' as any); }}">
+                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).stopDosing(dosName); }}">
                     <ha-icon icon="mdi:stop" style="--mdc-icon-size: 14px;"></ha-icon> Stop
                   </button>
                 </div>
@@ -1575,11 +1664,11 @@ export class VioletPoolCard extends LitElement {
     const layoutVariant = config.layout_variant || 'glass';
     const alarmStyle = this._getEffectiveAlarmStyle(config);
 
-    const pumpEntityId = this._getEntityId('pump_entity', 'switch', 'pump', 0);
-    const heaterEntityId = this._getEntityId('heater_entity', 'climate', 'heater', 1);
-    const solarEntityId = this._getEntityId('solar_entity', 'climate', 'solar', 2);
-    const chlorineEntityId = this._getEntityId('chlorine_entity', 'switch', 'dos_1_cl', 3);
-    const phEntityId = this._getEntityId('ph_minus_entity', 'switch', 'dos_2_phm', 4);
+    const pumpEntityId = this._getEntityId('pump_entity', 'switch', 'filterpumpe', 0);
+    const heaterEntityId = this._getEntityId('heater_entity', 'climate', 'heizung', 1);
+    const solarEntityId = this._getEntityId('solar_entity', 'climate', 'solarabsorber', 2);
+    const chlorineEntityId = this._getEntityId('chlorine_entity', 'switch', 'chlor_dosierung', 3);
+    const phEntityId = this._getEntityId('ph_minus_entity', 'switch', 'dosierung_ph_2', 4);
 
     const pumpEntity = this.hass.states[pumpEntityId];
     const heaterEntity = this.hass.states[heaterEntityId];
@@ -1587,9 +1676,9 @@ export class VioletPoolCard extends LitElement {
     const chlorineEntity = this.hass.states[chlorineEntityId];
     const phEntity = this.hass.states[phEntityId];
 
-    const poolTempSensorId = this._getEntityId('pool_temp_entity', 'sensor', 'temperature', 5);
-    const phSensorId = this._getEntityId('ph_value_entity', 'sensor', 'ph_value', 6);
-    const orpSensorId = this._getEntityId('orp_value_entity', 'sensor', 'orp_value', 7);
+    const poolTempSensorId = this._getEntityId('pool_temp_entity', 'sensor', 'beckenwasser', 5);
+    const phSensorId = this._getEntityId('ph_value_entity', 'sensor', 'ph_wert', 6);
+    const orpSensorId = this._getEntityId('orp_value_entity', 'sensor', 'redoxpotential', 7);
 
     const poolTempSensor = this.hass.states[poolTempSensorId];
     const phSensor = this.hass.states[phSensorId];
@@ -1687,7 +1776,7 @@ export class VioletPoolCard extends LitElement {
     }
 
     // Cover entity
-    const coverEntityId = this._getEntityId('cover_entity', 'cover', 'cover');
+    const coverEntityId = this._getEntityId('cover_entity', 'cover', 'abdeckung');
     const coverEntity = this.hass.states[coverEntityId];
     if (coverEntity) {
       const pos = coverEntity.attributes?.current_position;
@@ -1702,7 +1791,7 @@ export class VioletPoolCard extends LitElement {
     }
 
     // Light entity
-    const lightEntityId = this._getEntityId('light_entity', 'light', 'light');
+    const lightEntityId = this._getEntityId('light_entity', 'switch', 'beleuchtung');
     const lightEntity = this.hass.states[lightEntityId];
     if (lightEntity) {
       const br = lightEntity.attributes?.brightness as number | undefined;
@@ -1719,7 +1808,7 @@ export class VioletPoolCard extends LitElement {
     const alertEntries: Array<{ text: string; severity: 'warning' | 'critical'; icon: string }> = [];
 
     // Filter entity
-    const filterEntityId = this._getEntityId('filter_entity' as any, 'sensor', 'filter_pressure');
+    const filterEntityId = this._getEntityId('filter_entity', 'sensor', 'filterdruck');
     const filterEntity = this.hass.states[filterEntityId];
     if (filterEntity) {
       const pressureVal = parseFloat(filterEntity.state);
@@ -1733,7 +1822,7 @@ export class VioletPoolCard extends LitElement {
     }
 
     // Pool level / Füllstand
-    const poolLevelEntityId = this._getEntityId('pool_level_entity' as any, 'sensor', 'pool_level');
+    const poolLevelEntityId = this._getEntityId('pool_level_entity', 'sensor', 'uberlaufbehalter');
     const poolLevelEntity = this.hass.states[poolLevelEntityId];
     if (poolLevelEntity) {
       const levelVal = parseFloat(poolLevelEntity.state);
@@ -1747,7 +1836,7 @@ export class VioletPoolCard extends LitElement {
     }
 
     // Flow rate / Durchfluss
-    const flowRateEntityId = this._getEntityId('flow_rate_entity' as any, 'sensor', 'flow_rate');
+    const flowRateEntityId = this._getEntityId('flow_rate_entity', 'sensor', 'pumpen_durchfluss');
     const flowRateEntity = this.hass.states[flowRateEntityId];
     if (flowRateEntity) {
       const flowVal = parseFloat(flowRateEntity.state);
@@ -1762,7 +1851,7 @@ export class VioletPoolCard extends LitElement {
     }
 
     // Inlet / Anströmung
-    const inletEntityId = this._getEntityId('inlet_entity' as any, 'sensor', 'inlet');
+    const inletEntityId = this._getEntityId('inlet_entity', 'sensor', 'inlet');
     const inletEntity = this.hass.states[inletEntityId];
     if (inletEntity) {
       const inletVal = parseFloat(inletEntity.state);
@@ -1777,7 +1866,7 @@ export class VioletPoolCard extends LitElement {
     }
 
     // Chlorine value / Chlor-Wert (sensor)
-    const chlorineValueEntityId = this._getEntityId('chlorine_value_entity' as any, 'sensor', 'chlorine_value');
+    const chlorineValueEntityId = this._getEntityId('chlorine_value_entity', 'sensor', 'chlorgehalt');
     const chlorineValueEntity = this.hass.states[chlorineValueEntityId];
     if (chlorineValueEntity) {
       const clVal = parseFloat(chlorineValueEntity.state);
@@ -2013,7 +2102,7 @@ export class VioletPoolCard extends LitElement {
   }
 
   private renderDetailsCard(config: VioletPoolCardConfig = this.config): TemplateResult {
-    const title = config.name || (config as any).title || 'Details';
+    const title = config.name || config.title || 'Details';
     const entities = config.entities || [];
     const icon = config.icon;
 
@@ -2049,9 +2138,9 @@ export class VioletPoolCard extends LitElement {
               if (typeof entityConf === 'string') {
                 entityId = entityConf;
               } else {
-                entityId = (entityConf as any).entity;
-                entityName = (entityConf as any).name;
-                entityIcon = (entityConf as any).icon;
+                entityId = entityConf.entity;
+                entityName = entityConf.name ?? '';
+                entityIcon = entityConf.icon ?? '';
               }
 
               const stateObj = this.hass.states[entityId];
@@ -2096,8 +2185,11 @@ export class VioletPoolCard extends LitElement {
                 if (isActionable) {
                   this.hass.callService('homeassistant', 'toggle', { entity_id: entityId });
                 } else {
-                  const event = new Event('hass-more-info', { bubbles: true, composed: true });
-                  (event as any).detail = { entityId: entityId };
+                  const event = new CustomEvent('hass-more-info', {
+                    detail: { entityId: entityId },
+                    bubbles: true,
+                    composed: true,
+                  });
                   this.dispatchEvent(event);
                 }
               };
@@ -2126,6 +2218,9 @@ export class VioletPoolCard extends LitElement {
 
   private renderCompactCard(config: VioletPoolCardConfig = this.config): TemplateResult {
     const entity = this.hass.states[config.entity!];
+    if (!entity) {
+      return this._renderEntityNotFound(config.entity);
+    }
     const state = entity.state;
     const name = config.name || entity.attributes.friendly_name || 'Entity';
     const domain = config.entity!.split('.')[0];
@@ -2185,13 +2280,13 @@ export class VioletPoolCard extends LitElement {
 
       const dosingType = this._detectDosingType(config.entity!);
       if (dosingType === 'chlorine') {
-        const orpSensorId = this._getEntityId('orp_value_entity', 'sensor', 'orp_value');
+        const orpSensorId = this._getEntityId('orp_value_entity', 'sensor', 'redoxpotential');
         const orpSensor = this.hass.states[orpSensorId];
         if (orpSensor) {
           currentValue = `${parseFloat(orpSensor.state).toFixed(0)}mV`;
         }
       } else if (dosingType === 'ph_minus' || dosingType === 'ph_plus') {
-        const phSensorId = this._getEntityId('ph_value_entity', 'sensor', 'ph_value');
+        const phSensorId = this._getEntityId('ph_value_entity', 'sensor', 'ph_wert');
         const phSensor = this.hass.states[phSensorId];
         if (phSensor) {
           currentValue = `pH ${parseFloat(phSensor.state).toFixed(1)}`;
@@ -2200,11 +2295,11 @@ export class VioletPoolCard extends LitElement {
     } else if (domain === 'cover') {
       const pos = entity.attributes?.current_position as number | null | undefined;
       if (pos != null) currentValue = `${Math.round(pos)}%`;
-      detailStatus = entity.state === 'open' ? 'Geöffnet' : entity.state === 'closed' ? 'Geschlossen' : entity.state === 'opening' ? 'Öffnet…' : entity.state === 'closing' ? 'Schließt…' : entity.state;
+      detailStatus = this._getFriendlyState(entity.state);
     } else if (domain === 'light') {
       const br = entity.attributes?.brightness as number | null | undefined;
       if (br != null) currentValue = `${Math.round(br / 255 * 100)}%`;
-      detailStatus = entity.state === 'on' ? 'An' : 'Aus';
+      detailStatus = entity.state === 'on' ? i18n.t('on') : i18n.t('off');
     } else if (domain === 'sensor') {
       const unit = entity.attributes?.unit_of_measurement || '';
       const num = parseFloat(entity.state);
@@ -2225,7 +2320,7 @@ export class VioletPoolCard extends LitElement {
   }
 
   private renderChemicalCard(config: VioletPoolCardConfig = this.config): TemplateResult {
-    const name = config.name || 'Wasserchemie';
+    const name = config.name || i18n.t('water_chemistry');
     const accentColor = '#4CAF50';
     const chemistryType = config.chemistry_type || 'chlorine';
 
@@ -2238,14 +2333,14 @@ export class VioletPoolCard extends LitElement {
     const showInlet = config.show_inlet === true;
 
     // Get sensor entities
-    const poolTempSensorId = showTemp ? this._getEntityId('pool_temp_entity', 'sensor', 'temperature', 5) : null;
-    const phSensorId = showPh ? this._getEntityId('ph_value_entity', 'sensor', 'ph_value', 6) : null;
-    const orpSensorId = showOrp ? this._getEntityId('orp_value_entity', 'sensor', 'orp_value', 7) : null;
-    const chlorineSensorId = showChlorine ? ((config as any).chlorine_entity || this._buildEntityId('sensor', 'chlorine')) : null;
-    const saltSensorId = showSalt ? ((config as any).salt_level_entity || this._buildEntityId('sensor', 'salt_level')) : null;
-    const inletEntityId = showInlet ? ((config as any).inlet_entity || this._buildEntityId('switch', 'inlet')) : null;
-    const targetPhId = this._getEntityId('target_ph_entity', 'number', 'target_ph');
-    const targetOrpId = showOrp ? this._getEntityId('target_orp_entity', 'number', 'target_orp') : null;
+    const poolTempSensorId = showTemp ? this._getEntityId('pool_temp_entity', 'sensor', 'beckenwasser', 5) : null;
+    const phSensorId = showPh ? this._getEntityId('ph_value_entity', 'sensor', 'ph_wert', 6) : null;
+    const orpSensorId = showOrp ? this._getEntityId('orp_value_entity', 'sensor', 'redoxpotential', 7) : null;
+    const chlorineSensorId = showChlorine ? (config.chlorine_entity || this._buildEntityId('sensor', 'chlorgehalt')) : null;
+    const saltSensorId = showSalt ? (config.salt_level_entity || this._buildEntityId('sensor', 'salzgehalt')) : null;
+    const inletEntityId = showInlet ? (config.inlet_entity || this._buildEntityId('switch', 'inlet')) : null;
+    const targetPhId = this._getEntityId('target_ph_entity', 'number', 'ph_sollwert');
+    const targetOrpId = showOrp ? this._getEntityId('target_orp_entity', 'number', 'redox_sollwert') : null;
 
     // Get sensor states
     const poolTempSensor = poolTempSensorId ? this.hass.states[poolTempSensorId] : undefined;
@@ -2275,47 +2370,47 @@ export class VioletPoolCard extends LitElement {
     // Status helpers
     const getTempStatus = (t?: number) => {
       if (t === undefined) return '';
-      if (t < 20) return 'Sehr kalt';
-      if (t < 24) return 'Kühl';
-      if (t <= 28) return 'Perfekt';
-      if (t <= 32) return 'Angenehm warm';
-      return 'Zu warm';
+      if (t < 20) return i18n.t('status_very_cold');
+      if (t < 24) return i18n.t('status_cool');
+      if (t <= 28) return i18n.t('status_perfect');
+      if (t <= 32) return i18n.t('status_pleasantly_warm');
+      return i18n.t('status_too_warm');
     };
 
     const getPhStatus = (ph?: number) => {
-      if (ph === undefined) return 'Unbekannt';
-      if (ph < 6.8) return 'Zu sauer';
-      if (ph < 7.0) return 'Leicht sauer';
-      if (ph <= 7.4) return 'Optimal';
-      if (ph <= 7.6) return 'Leicht basisch';
-      return 'Zu basisch';
+      if (ph === undefined) return i18n.t('unknown');
+      if (ph < 6.8) return i18n.t('status_too_acidic');
+      if (ph < 7.0) return i18n.t('status_slightly_acidic');
+      if (ph <= 7.4) return i18n.t('optimal');
+      if (ph <= 7.6) return i18n.t('status_slightly_alkaline');
+      return i18n.t('status_too_alkaline');
     };
 
     const getOrpStatus = (orp?: number) => {
-      if (orp === undefined) return 'Unbekannt';
-      if (orp < 600) return 'Zu niedrig';
-      if (orp < 650) return 'Niedrig';
-      if (orp <= 750) return 'Optimal';
-      if (orp <= 800) return 'Erhöht';
-      return 'Zu hoch';
+      if (orp === undefined) return i18n.t('unknown');
+      if (orp < 600) return i18n.t('status_too_low');
+      if (orp < 650) return i18n.t('status_low');
+      if (orp <= 750) return i18n.t('optimal');
+      if (orp <= 800) return i18n.t('status_elevated');
+      return i18n.t('status_too_high');
     };
 
     const getChlorineStatus = (cl?: number) => {
-      if (cl === undefined) return 'Unbekannt';
-      if (cl < 0.3) return 'Zu niedrig';
-      if (cl < 0.5) return 'Niedrig';
-      if (cl <= 1.5) return 'Optimal';
-      if (cl <= 2.0) return 'Erhöht';
-      return 'Zu hoch';
+      if (cl === undefined) return i18n.t('unknown');
+      if (cl < 0.3) return i18n.t('status_too_low');
+      if (cl < 0.5) return i18n.t('status_low');
+      if (cl <= 1.5) return i18n.t('optimal');
+      if (cl <= 2.0) return i18n.t('status_elevated');
+      return i18n.t('status_too_high');
     };
 
     const getSaltStatus = (salt?: number) => {
-      if (salt === undefined) return 'Unbekannt';
-      if (salt < 2500) return 'Zu niedrig';
-      if (salt < 3000) return 'Niedrig';
-      if (salt <= 4000) return 'Optimal';
-      if (salt <= 4500) return 'Erhöht';
-      return 'Zu hoch';
+      if (salt === undefined) return i18n.t('unknown');
+      if (salt < 2500) return i18n.t('status_too_low');
+      if (salt < 3000) return i18n.t('status_low');
+      if (salt <= 4000) return i18n.t('optimal');
+      if (salt <= 4500) return i18n.t('status_elevated');
+      return i18n.t('status_too_high');
     };
 
     // Check values
@@ -2332,7 +2427,7 @@ export class VioletPoolCard extends LitElement {
       showSalt && !saltOk
     ].filter(v => v).length;
 
-    const overallStatus = issuesCount === 0 ? 'Optimal' : issuesCount === 1 ? 'Achtung' : 'Eingriff nötig';
+    const overallStatus = issuesCount === 0 ? i18n.t('optimal') : issuesCount === 1 ? i18n.t('status_attention') : i18n.t('status_action_needed');
     const overallColor = issuesCount === 0 ? 'var(--vpc-success, #34C759)' : issuesCount === 1 ? 'var(--vpc-warning, #FF9F0A)' : 'var(--vpc-danger, #FF3B30)';
     const overallIcon = issuesCount === 0 ? 'mdi:water-check' : issuesCount === 1 ? 'mdi:alert' : 'mdi:alert-circle';
 
@@ -2518,37 +2613,37 @@ export class VioletPoolCard extends LitElement {
             <div class="chem-recommendations">
               <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
                 <ha-icon icon="mdi:lightbulb" style="color: var(--vpc-warning, #FF9F0A); --mdc-icon-size: 16px"></ha-icon>
-                <span style="font-weight: 600; color: var(--vpc-text); font-size: 13px;">Empfehlungen</span>
+                <span style="font-weight: 600; color: var(--vpc-text); font-size: 13px;">${i18n.t('recommendations')}</span>
               </div>
               ${phValue !== undefined && !phOk ? html`
                 <div class="chem-rec-row" style="--rec-color: ${phColor?.color || 'var(--vpc-warning)'}">
                   <ha-icon icon="mdi:ph"></ha-icon>
-                  <span>${phValue < 7.0 ? 'pH zu sauer: pH+ Mittel zugeben' : 'pH zu basisch: pH- Mittel zugeben'}</span>
+                  <span>${phValue < 7.0 ? i18n.t('rec_ph_low') : i18n.t('rec_ph_high')}</span>
                 </div>
               ` : ''}
               ${orpValue !== undefined && !orpOk ? html`
                 <div class="chem-rec-row" style="--rec-color: ${orpColor?.color || 'var(--vpc-warning)'}">
                   <ha-icon icon="mdi:flask-outline"></ha-icon>
-                  <span>${orpValue < 650 ? 'Redoxwert zu niedrig: Chlordosierung erhöhen' : 'Redoxwert zu hoch: Chlordosierung reduzieren'}</span>
+                  <span>${orpValue < 650 ? i18n.t('rec_orp_low') : i18n.t('rec_orp_high')}</span>
                 </div>
               ` : ''}
               ${chlorineValue !== undefined && !chlorineOk ? html`
                 <div class="chem-rec-row" style="--rec-color: var(--vpc-warning)">
                   <ha-icon icon="mdi:flask"></ha-icon>
-                  <span>${chlorineValue < 0.5 ? 'Chlor zu niedrig: Chlordosierung erhöhen' : 'Chlor zu hoch: Abwarten oder verdünnen'}</span>
+                  <span>${chlorineValue < 0.5 ? i18n.t('rec_chlorine_low') : i18n.t('rec_chlorine_high')}</span>
                 </div>
               ` : ''}
               ${saltValue !== undefined && !saltOk ? html`
                 <div class="chem-rec-row" style="--rec-color: var(--vpc-warning)">
                   <ha-icon icon="mdi:shaker"></ha-icon>
-                  <span>${saltValue < 3000 ? 'Salz zu niedrig: Salz nachfüllen' : 'Salz zu hoch: Wasser verdünnen oder teilweise ablassen'}</span>
+                  <span>${saltValue < 3000 ? i18n.t('rec_salt_low') : i18n.t('rec_salt_high')}</span>
                 </div>
               ` : ''}
             </div>
           ` : html`
             <div class="all-ok-display">
               <ha-icon icon="mdi:water-check" style="--mdc-icon-size: 18px"></ha-icon>
-              <span>Wasserqualität optimal</span>
+              <span>${i18n.t('water_quality_optimal')}</span>
             </div>
           `}
         </div>
@@ -2558,6 +2653,9 @@ export class VioletPoolCard extends LitElement {
 
   private renderSensorCard(config: VioletPoolCardConfig = this.config): TemplateResult {
     const entity = this.hass.states[config.entity!];
+    if (!entity) {
+      return this._renderEntityNotFound(config.entity);
+    }
     const state = entity.state;
     const name = config.name || (entity.attributes.friendly_name as string) || 'Sensor';
     const unit = (entity.attributes.unit_of_measurement as string) || '';
@@ -2624,7 +2722,7 @@ export class VioletPoolCard extends LitElement {
   }
 
   private renderCoverCard(config: VioletPoolCardConfig = this.config): TemplateResult {
-    const entityId = config.cover_entity || config.entity || this._buildEntityId('cover', 'cover');
+    const entityId = config.cover_entity || config.entity || this._buildEntityId('cover', 'abdeckung');
     const entity = this.hass.states[entityId];
     if (!entity) {
       return html`<ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">Cover nicht gefunden</span><span class="error-entity">${entityId}</span></div></div></ha-card>`;
@@ -2702,7 +2800,7 @@ export class VioletPoolCard extends LitElement {
   }
 
   private renderLightCard(config: VioletPoolCardConfig = this.config): TemplateResult {
-    const entityId = config.light_entity || config.entity || this._buildEntityId('light', 'light');
+    const entityId = config.light_entity || config.entity || this._buildEntityId('switch', 'beleuchtung');
     const entity = this.hass.states[entityId];
     if (!entity) {
       return html`<ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">Licht nicht gefunden</span><span class="error-entity">${entityId}</span></div></div></ha-card>`;
@@ -2774,7 +2872,7 @@ export class VioletPoolCard extends LitElement {
                        let angle = Math.atan2(dy, dx) * (180 / Math.PI);
                        angle = (angle + 360) % 360;
                        const rgb = this._hsvToRgb(angle / 360, 1, 1);
-                       this.hass.callService('light', 'turn_on', { entity_id: entityId, rgb_color: rgb });
+                       this.hass.callService(entityId.startsWith('light.') ? 'light' : 'switch', 'turn_on', { entity_id: entityId, rgb_color: rgb });
                      }
                    }}">
                 <svg viewBox="0 0 200 200" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" xmlns="http://www.w3.org/2000/svg">
@@ -2816,7 +2914,7 @@ export class VioletPoolCard extends LitElement {
                 { label: 'Weiß', rgb: [255, 255, 255], icon: '⚪' },
               ].map(preset => html`
                 <button style="padding: 6px; border: 2px solid ${rgb && rgb[0] === preset.rgb[0] && rgb[1] === preset.rgb[1] && rgb[2] === preset.rgb[2] ? accentColor : 'transparent'}; border-radius: 8px; background: rgb(${preset.rgb[0]}, ${preset.rgb[1]}, ${preset.rgb[2]}); color: white; font-weight: 600; cursor: pointer; transition: all 0.2s; font-size: 10px; text-shadow: 0 1px 2px rgba(0,0,0,0.3);"
-                        @click="${(e: Event) => { e.stopPropagation(); this.hass.callService('light', 'turn_on', { entity_id: entityId, rgb_color: preset.rgb }); }}"
+                        @click="${(e: Event) => { e.stopPropagation(); this.hass.callService(entityId.startsWith('light.') ? 'light' : 'switch', 'turn_on', { entity_id: entityId, rgb_color: preset.rgb }); }}"
                         @mouseover="${(e: Event) => (e.target as HTMLElement).style.transform = 'scale(1.05)'}"
                         @mouseout="${(e: Event) => (e.target as HTMLElement).style.transform = 'scale(1)'}">
                   ${preset.icon}
@@ -2834,7 +2932,7 @@ export class VioletPoolCard extends LitElement {
                     <input type="range" min="154" max="500" value="${colorTemp || 250}" style="flex: 1; height: 6px; cursor: pointer;"
                            @change="${(e: Event) => {
                              const mirek = parseInt((e.target as HTMLInputElement).value);
-                             this.hass.callService('light', 'turn_on', { entity_id: entityId, color_temp: mirek });
+                             this.hass.callService(entityId.startsWith('light.') ? 'light' : 'switch', 'turn_on', { entity_id: entityId, color_temp: mirek });
                            }}"/>
                     <div style="width: 25px; text-align: center; font-size: 10px; color: var(--vpc-text-secondary);">🟠<br/>2000K</div>
                   </div>
@@ -2861,7 +2959,7 @@ export class VioletPoolCard extends LitElement {
                   .value="${brightnessPercent}" unit="%"
                   @value-changed="${(e: CustomEvent) => {
                     e.stopPropagation();
-                    this.hass.callService('light', 'turn_on', { entity_id: entityId, brightness_pct: e.detail.value });
+                    this.hass.callService(entityId.startsWith('light.') ? 'light' : 'switch', 'turn_on', { entity_id: entityId, brightness_pct: e.detail.value });
                   }}"
                 ></vpc-slider-control>
               </div>
@@ -2892,12 +2990,12 @@ export class VioletPoolCard extends LitElement {
             <div class="cover-controls">
               <button class="cover-btn cover-btn-open ${isOn ? 'cvr-active' : ''}"
                       style="--cvr-btn-color:${accentColor}"
-                      @click="${(e: Event) => { e.stopPropagation(); this.hass.callService('light', 'turn_on', { entity_id: entityId }); }}">
+                      @click="${(e: Event) => { e.stopPropagation(); this.hass.callService(entityId.startsWith('light.') ? 'light' : 'switch', 'turn_on', { entity_id: entityId }); }}">
                 <ha-icon icon="mdi:lightbulb-on" style="--mdc-icon-size:17px"></ha-icon>
                 <span>An</span>
               </button>
               <button class="cover-btn cover-btn-close ${!isOn ? 'cvr-active' : ''}"
-                      @click="${(e: Event) => { e.stopPropagation(); this.hass.callService('light', 'turn_off', { entity_id: entityId }); }}">
+                      @click="${(e: Event) => { e.stopPropagation(); this.hass.callService(entityId.startsWith('light.') ? 'light' : 'switch', 'turn_off', { entity_id: entityId }); }}">
                 <ha-icon icon="mdi:lightbulb-off" style="--mdc-icon-size:17px"></ha-icon>
                 <span>Aus</span>
               </button>
@@ -2908,8 +3006,8 @@ export class VioletPoolCard extends LitElement {
   }
 
   private renderFilterCard(config: VioletPoolCardConfig = this.config): TemplateResult {
-    const pressureEntityId = (config as any).filter_pressure_entity || config.entity || this._buildEntityId('sensor', 'filter_pressure');
-    const backwashEntityId = (config as any).backwash_entity;
+    const pressureEntityId = config.filter_pressure_entity || config.entity || this._buildEntityId('sensor', 'filterdruck');
+    const backwashEntityId = config.backwash_entity;
 
     const pressureEntity = this.hass.states[pressureEntityId];
     if (!pressureEntity) {
@@ -3003,7 +3101,7 @@ export class VioletPoolCard extends LitElement {
               </button>
             </div>
           ` : ''}
-          ${this._renderRecommendationList(filterRecommendations, 'Wartung')}
+          ${this._renderRecommendationList(filterRecommendations, i18n.t('maintenance'))}
         </div>
       </ha-card>`;
   }
@@ -3012,7 +3110,7 @@ export class VioletPoolCard extends LitElement {
    * Render Backwash Card - shows backwash status and controls
    */
   private renderBackwashCard(config: VioletPoolCardConfig = this.config): TemplateResult {
-    const entityId = (config as any).backwash_entity || config.entity || this._buildEntityId('switch', 'backwash');
+    const entityId = config.backwash_entity || config.entity || this._buildEntityId('switch', 'ruckspulung');
     const entity = this.hass.states[entityId];
     if (!entity) {
       return html`<ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">Rückspülung nicht gefunden</span><span class="error-entity">${entityId}</span></div></div></ha-card>`;
@@ -3033,14 +3131,14 @@ export class VioletPoolCard extends LitElement {
       backwashRecommendations.push({
         severity: 'info',
         icon: 'mdi:progress-clock',
-        text: 'Rueckspuelung aktiv',
-        recommendation: remaining > 0 ? `${remaining} min verbleibend. Nach Abschluss Filterdruck erneut pruefen.` : 'Laufenden Zyklus beobachten und anschliessend klares Wasserbild kontrollieren.',
+        text: 'Rückspülung aktiv',
+        recommendation: remaining > 0 ? `${remaining} min verbleibend. Nach Abschluss Filterdruck erneut prüfen.` : 'Laufenden Zyklus beobachten und anschließend klares Wasserbild kontrollieren.',
       });
       if (duration > 20) {
         backwashRecommendations.push({
           severity: 'warning',
           icon: 'mdi:timer-alert-outline',
-          text: 'Langer Rueckspuelzyklus',
+          text: 'Langer Rückspülzyklus',
           recommendation: 'Hauefige oder lange Zyklen koennen auf hohen Schmutzeintrag oder einen zugesetzten Filter hinweisen.',
         });
       }
@@ -3048,7 +3146,7 @@ export class VioletPoolCard extends LitElement {
       backwashRecommendations.push({
         severity: 'info',
         icon: 'mdi:check-circle-outline',
-        text: 'Rueckspuelung bereit',
+        text: 'Rückspülung bereit',
         recommendation: 'Nur bei erhoehtem Filterdruck oder als Teil der Wartung starten.',
       });
     }
@@ -3091,7 +3189,7 @@ export class VioletPoolCard extends LitElement {
 
           <div style="margin: 2px 0 0; padding: 12px; background: var(--vpc-surface); border-radius: 12px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-              <span style="font-size: 12px; font-weight: 600; color: var(--vpc-text);">Rueckspuelzyklus</span>
+              <span style="font-size: 12px; font-weight: 600; color: var(--vpc-text);">Rückspülzyklus</span>
               <span style="font-size: 12px; color: var(--vpc-text-secondary);">${isRunning ? `${remaining > 0 ? `${remaining} min offen` : 'Laeuft'}` : 'Bereit'}</span>
             </div>
             <div style="width: 100%; height: 10px; background: var(--vpc-bg); border-radius: 6px; overflow: hidden;">
@@ -3123,7 +3221,7 @@ export class VioletPoolCard extends LitElement {
               </button>
             </div>
           ` : ''}
-          ${this._renderRecommendationList(backwashRecommendations, 'Rueckspuel-Hinweise')}
+          ${this._renderRecommendationList(backwashRecommendations)}
         </div>
       </ha-card>`;
   }
@@ -3132,8 +3230,8 @@ export class VioletPoolCard extends LitElement {
    * Render Refill Card - shows water level and refill status
    */
   private renderRefillCard(config: VioletPoolCardConfig = this.config): TemplateResult {
-    const levelSensorId = (config as any).water_level_entity || config.entity || this._buildEntityId('sensor', 'water_level');
-    const valveEntityId = (config as any).refill_valve_entity;
+    const levelSensorId = config.water_level_entity || config.entity || this._buildEntityId('sensor', 'uberlaufbehalter');
+    const valveEntityId = config.refill_valve_entity;
 
     const levelSensor = this.hass.states[levelSensorId];
     if (!levelSensor) {
@@ -3141,7 +3239,7 @@ export class VioletPoolCard extends LitElement {
     }
 
     const level = parseFloat(levelSensor.state) || 0;
-    const maxLevel = (config as any).max_level || 100;
+    const maxLevel = config.max_level || 100;
     const name = config.name || levelSensor.attributes.friendly_name || 'Wasserstand';
     const accentColor = this._getAccentColor('refill', config);
 
@@ -3161,14 +3259,14 @@ export class VioletPoolCard extends LitElement {
         severity: 'critical',
         icon: 'mdi:water-alert',
         text: 'Wasserstand niedrig',
-        recommendation: isRefilling ? 'Nachfuellung laeuft. Pegel und Ueberlauf beobachten.' : 'Nachfuellung starten oder Wasserverlust pruefen.',
+        recommendation: isRefilling ? 'Nachfüllung läuft. Pegel und Überlauf beobachten.' : 'Nachfüllung starten oder Wasserverlust prüfen.',
       });
     } else if (isRefilling) {
       refillRecommendations.push({
         severity: 'info',
         icon: 'mdi:water-plus',
-        text: 'Nachfuellung aktiv',
-        recommendation: 'Nach Abschluss Endstand kontrollieren, damit nicht ueberfuellt wird.',
+        text: 'Nachfüllung aktiv',
+        recommendation: 'Nach Abschluss Endstand kontrollieren, damit nicht überfüllt wird.',
       });
     }
     if (levelDelta < -2) {
@@ -3176,7 +3274,7 @@ export class VioletPoolCard extends LitElement {
         severity: 'warning',
         icon: 'mdi:trending-down',
         text: 'Pegel sinkt',
-        recommendation: 'Rueckspuelung, Undichtigkeiten oder Verdunstungsverlust im Blick behalten.',
+        recommendation: 'Rückspülung, Undichtigkeiten oder Verdunstungsverlust im Blick behalten.',
       });
     }
 
@@ -3207,7 +3305,7 @@ export class VioletPoolCard extends LitElement {
 
           <div class="insight-grid">
             <div class="insight-card">
-              <span class="insight-label">Fuellstand</span>
+              <span class="insight-label">Füllstand</span>
               <span class="insight-value">${percent.toFixed(0)}%</span>
             </div>
             <div class="insight-card">
@@ -3262,7 +3360,7 @@ export class VioletPoolCard extends LitElement {
               </button>
             </div>
           ` : ''}
-          ${this._renderRecommendationList(refillRecommendations, 'Nachfuell-Hinweise')}
+          ${this._renderRecommendationList(refillRecommendations)}
         </div>
       </ha-card>`;
   }
@@ -3271,8 +3369,8 @@ export class VioletPoolCard extends LitElement {
    * Render PV Surplus Card - shows solar energy surplus and export status
    */
   private renderSolarSurplusCard(config: VioletPoolCardConfig = this.config): TemplateResult {
-    const powerSensorId = (config as any).solar_power_entity || config.entity || this._buildEntityId('sensor', 'solar_power');
-    const exportEntityId = (config as any).export_entity;
+    const powerSensorId = config.solar_power_entity || config.entity || this._buildEntityId('sensor', 'pv_uberschuss_status');
+    const exportEntityId = config.export_entity;
 
     const powerSensor = this.hass.states[powerSensorId];
     if (!powerSensor) {
@@ -3280,7 +3378,7 @@ export class VioletPoolCard extends LitElement {
     }
 
     const power = parseFloat(powerSensor.state) || 0;
-    const threshold = (config as any).surplus_threshold || 0;
+    const threshold = config.surplus_threshold || 0;
     const name = config.name || powerSensor.attributes.friendly_name || 'PV Überschuss';
     const accentColor = this._getAccentColor('solar', config);
 
@@ -3387,7 +3485,7 @@ export class VioletPoolCard extends LitElement {
         severity: 'critical',
         icon: 'mdi:water-off-outline',
         text: 'Kein Durchfluss erkannt',
-        recommendation: 'Pumpe, Ventile und Filterweg pruefen. Ohne Durchfluss leidet die Wasseraufbereitung.',
+        recommendation: 'Pumpe, Ventile und Filterweg prüfen. Ohne Durchfluss leidet die Wasseraufbereitung.',
       });
     } else if (flowRate < 10) {
       flowRecommendations.push({
@@ -3497,7 +3595,7 @@ export class VioletPoolCard extends LitElement {
               <vpc-quick-actions .actions="${quickActions}"></vpc-quick-actions>
             </div>
           ` : ''}
-          ${this._renderRecommendationList(flowRecommendations, 'Flow-Hinweise')}
+          ${this._renderRecommendationList(flowRecommendations)}
         </div>
       </ha-card>
     `;
@@ -3521,7 +3619,7 @@ export class VioletPoolCard extends LitElement {
     const inflowColor = isInflowing ? accentColor : 'var(--vpc-text-secondary)';
 
     // Check for flow rate sensor
-    const flowSensorId = (config as any).flow_rate_entity || this._buildEntityId('sensor', 'inlet_flow');
+    const flowSensorId = config.flow_rate_entity || this._buildEntityId('sensor', 'pumpen_durchfluss');
     const flowSensor = this.hass.states[flowSensorId];
     const flow = flowSensor ? parseFloat(flowSensor.state) || 0 : undefined;
     const inletTrend = flowSensor ? TrendHelper.getEntityTrend(flowSensor) : [];
@@ -3532,8 +3630,8 @@ export class VioletPoolCard extends LitElement {
       inletRecommendations.push({
         severity: 'critical',
         icon: 'mdi:pipe-disconnected',
-        text: 'Anstroemung aktiv ohne Flow',
-        recommendation: 'Einlass, Ventilstellung und zugehoerigen Sensor pruefen.',
+        text: 'Anströmung aktiv ohne Flow',
+        recommendation: 'Einlass, Ventilstellung und zugehörigen Sensor prüfen.',
       });
     } else if (!isInflowing && flow && flow > 0.3) {
       inletRecommendations.push({
@@ -3546,7 +3644,7 @@ export class VioletPoolCard extends LitElement {
       inletRecommendations.push({
         severity: 'info',
         icon: 'mdi:check-circle-outline',
-        text: 'Einstroemung stabil',
+        text: 'Einströmung stabil',
         recommendation: 'Gute Beckendurchmischung unterstuetzt Temperatur- und Chemieverteilung.',
       });
     }
@@ -3610,14 +3708,14 @@ export class VioletPoolCard extends LitElement {
                 <span class="info-label">Durchfluss</span>
                 <span class="info-value">${flow.toFixed(1)} m³/h</span>
               </div>
-              ${inletTrend.length > 1 ? this._renderSparkline(inletTrend, inflowColor, 'Anstroemung Trend') : ''}
+              ${inletTrend.length > 1 ? this._renderSparkline(inletTrend, inflowColor, 'Anströmung Trend') : ''}
               <div class="t-tip">
                 <div class="t-tip-title">Einström-Durchfluss</div>
                 <div class="t-tip-desc">Aktuelle Durchflussrate der Anströmung.</div>
               </div>
             </div>
           ` : ''}
-          ${this._renderRecommendationList(inletRecommendations, 'Anstroem-Hinweise')}
+          ${this._renderRecommendationList(inletRecommendations)}
 
           ${config.show_controls !== false ? html`
             <div class="cover-controls" style="margin-top: 12px;">
@@ -3759,7 +3857,7 @@ export class VioletPoolCard extends LitElement {
               </button>
             </div>
           ` : ''}
-          ${this._renderRecommendationList(currentRecommendations, 'Gegenstrom-Hinweise')}
+          ${this._renderRecommendationList(currentRecommendations)}
         </div>
       </ha-card>`;
   }
@@ -3836,7 +3934,7 @@ export class VioletPoolCard extends LitElement {
     defaultIcon: string,
     svgFunction: (fillLevel: number, maxLevel: number, color: string) => TemplateResult
   ): TemplateResult {
-    const sensorEntityId = (config as any).level_entity || config.entity || this._buildEntityId('sensor', `${entitySuffix}_level`);
+    const sensorEntityId = config.level_entity || config.entity || this._buildEntityId('sensor', `${entitySuffix}_level`);
     const sensorEntity = this.hass.states[sensorEntityId];
 
     if (!sensorEntity) {
@@ -3844,7 +3942,7 @@ export class VioletPoolCard extends LitElement {
     }
 
     const currentLevel = parseFloat(sensorEntity.state) || 0;
-    const maxLevel = (config as any).max_level || 5000;
+    const maxLevel = config.max_level || 5000;
     const name = config.name || sensorEntity.attributes.friendly_name || defaultName;
     const accentColor = this._getAccentColor(cardType, config);
     const fillPercent = Math.min((currentLevel / maxLevel) * 100, 100);
@@ -3859,7 +3957,7 @@ export class VioletPoolCard extends LitElement {
     const canisterRecommendations: SeverityAlert[] = [];
 
     if (isEmpty) {
-      canisterRecommendations.push({ severity: 'critical', icon: 'mdi:cup-off', text: `${shortLabel} fast leer`, recommendation: 'Kanister sofort tauschen oder nachfuellen, damit die Wasserpflege nicht aussetzt.' });
+      canisterRecommendations.push({ severity: 'critical', icon: 'mdi:cup-off', text: `${shortLabel} fast leer`, recommendation: 'Kanister sofort tauschen oder nachfüllen, damit die Wasserpflege nicht aussetzt.' });
     } else if (isLow) {
       canisterRecommendations.push({ severity: 'warning', icon: 'mdi:cup-water', text: `${shortLabel} knapp`, recommendation: estimatedDays !== undefined ? `Voraussichtliche Reserve: ${estimatedDays.toFixed(1)} Tage.` : 'Ersatzkanister bereitlegen.' });
     }
@@ -3894,7 +3992,7 @@ export class VioletPoolCard extends LitElement {
 
           <div class="insight-grid">
             <div class="insight-card">
-              <span class="insight-label">Fuellung</span>
+              <span class="insight-label">Füllung</span>
               <span class="insight-value">${fillPercent.toFixed(0)}%</span>
             </div>
             <div class="insight-card">
@@ -4108,6 +4206,14 @@ ha-card.theme-midnight .chem-metric-track{background:rgba(255,255,255,0.08);}
 .a11y-reduced-motion *, .a11y-reduced-motion *::before, .a11y-reduced-motion *::after{animation:none !important;transition:none !important;scroll-behavior:auto !important;}
 @media (max-width:900px){.overview-hero,.system-hero-panel{grid-template-columns:1fr;display:grid;align-items:flex-start;}.overview-snapshot-grid,.overview-facts{grid-template-columns:1fr;}.system-hero-pills{justify-content:flex-start;}}
 @media (max-width:600px){.insight-grid{grid-template-columns:1fr;}}
+ha-card{will-change:transform,box-shadow;}
+ha-card::before{content:'';position:absolute;inset:-1px;border-radius:inherit;pointer-events:none;opacity:0;background:radial-gradient(120% 90% at 15% 0%,color-mix(in srgb,var(--card-accent,var(--vpc-primary)) 20%,transparent),transparent 56%);transition:opacity .24s ease;}
+ha-card:hover::before,ha-card.is-active::before{opacity:.9;}
+ha-card.theme-glass .header-icon,ha-card.layout-glass .header-icon{box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 10px 22px color-mix(in srgb,var(--icon-accent,var(--vpc-primary)) 16%,transparent);}
+.temp-range-fill,.chem-range-fill,.chem-metric-fill,.cover-pos-fill{position:relative;overflow:hidden;}
+.temp-range-fill::after,.chem-range-fill::after,.chem-metric-fill::after,.cover-pos-fill::after{content:'';position:absolute;inset:0;transform:translateX(-120%);background:linear-gradient(90deg,transparent,rgba(255,255,255,.34),transparent);animation:vpc-shine 2.8s ease-in-out infinite;}
+@keyframes vpc-shine{0%,65%{transform:translateX(-120%);}100%{transform:translateX(130%);}}
+@media (prefers-reduced-motion:reduce){ha-card,ha-card *{animation:none !important;transition:none !important;}ha-card:hover{transform:none;}}
 `;
 
   }
@@ -4133,10 +4239,28 @@ ha-card.theme-midnight .chem-metric-track{background:rgba(255,255,255,0.08);}
     }
   }
 
+  /** Layout hints for Home Assistant sections-view dashboards (HA 2024.3+). */
+  public getGridOptions(): { columns: number; min_columns: number; rows?: number; min_rows?: number } {
+    switch (this.config?.card_type) {
+      case 'compact':
+        return { columns: 6, min_columns: 4, rows: 1, min_rows: 1 };
+      case 'sensor':
+        return { columns: 6, min_columns: 4, min_rows: 2 };
+      case 'overview':
+      case 'chemical':
+      case 'system':
+      case 'details':
+        return { columns: 12, min_columns: 6, min_rows: 4 };
+      default:
+        return { columns: 12, min_columns: 6, min_rows: 3 };
+    }
+  }
+
   private renderDigitalRulesCard(config: VioletPoolCardConfig = this.config): TemplateResult {
     const accentColor = this._getAccentColor('digital_rules', config);
 
-    const rules = [
+    type DigitalRuleKey = 'DIRULE_1' | 'DIRULE_2' | 'DIRULE_3' | 'DIRULE_4' | 'DIRULE_5' | 'DIRULE_6' | 'DIRULE_7';
+    const rules: Array<{ id: DigitalRuleKey; label: string; tone: string; summary: string }> = [
       { id: 'DIRULE_1', label: 'Rule 1', tone: '#34C759', summary: 'Automatischer Trigger' },
       { id: 'DIRULE_2', label: 'Rule 2', tone: '#00BCD4', summary: 'Eingangslogik / Freigabe' },
       { id: 'DIRULE_3', label: 'Rule 3', tone: '#FF9F0A', summary: 'Wartungsroutine' },
@@ -4190,22 +4314,22 @@ ha-card.theme-midnight .chem-metric-track{background:rgba(255,255,255,0.08);}
                 <div style="font-size:11px;color:var(--vpc-text-secondary);">${rule.summary}</div>
                 <div style="display: flex; gap: 4px; flex-wrap: wrap;">
                   <button style="flex: 1; padding: 6px; border: none; border-radius: 6px; background: ${accentColor}; color: white; font-size: 10px; font-weight: 600; cursor: pointer;"
-                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).manageDigitalRules(rule.id as any, 'trigger'); }}">
+                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).manageDigitalRules(rule.id, 'trigger'); }}">
                     Trigger
                   </button>
                   <button style="flex: 1; padding: 6px; border: none; border-radius: 6px; background: #FF9F0A; color: white; font-size: 10px; font-weight: 600; cursor: pointer;"
-                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).manageDigitalRules(rule.id as any, 'lock'); }}">
+                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).manageDigitalRules(rule.id, 'lock'); }}">
                     Lock
                   </button>
                   <button style="flex: 1; padding: 6px; border: none; border-radius: 6px; background: #34C759; color: white; font-size: 10px; font-weight: 600; cursor: pointer;"
-                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).manageDigitalRules(rule.id as any, 'unlock'); }}">
+                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).manageDigitalRules(rule.id, 'unlock'); }}">
                     Unlock
                   </button>
                 </div>
               </div>
             `)}
           </div>
-          ${this._renderRecommendationList(ruleRecommendations, 'Rule-Hinweise')}
+          ${this._renderRecommendationList(ruleRecommendations)}
         </div>
       </ha-card>
     `;
@@ -4216,7 +4340,7 @@ ha-card.theme-midnight .chem-metric-track{background:rgba(255,255,255,0.08);}
     const deviceId = config.entity || 'violet_pool_controller';
     const diagnosticsActive = true;
     const diagnosticRecommendations: SeverityAlert[] = [
-      { severity: 'info', icon: 'mdi:wifi-check', text: 'Verbindung zuerst pruefen', recommendation: 'Mit Connection Test schnell zwischen Integrationsproblem und reiner Sensorabweichung unterscheiden.' },
+      { severity: 'info', icon: 'mdi:wifi-check', text: 'Verbindung zuerst prüfen', recommendation: 'Mit Connection Test schnell zwischen Integrationsproblem und reiner Sensorabweichung unterscheiden.' },
       { severity: 'warning', icon: 'mdi:file-document-outline', text: 'Logs bei Fehlern exportieren', recommendation: 'Vor Reset oder Verlauf-Loeschung immer erst Logs sichern, damit Ursachen sauber nachvollziehbar bleiben.' },
     ];
 
@@ -4278,7 +4402,7 @@ ha-card.theme-midnight .chem-metric-track{background:rgba(255,255,255,0.08);}
               <span>Clear Error History</span>
             </button>
           </div>
-          ${this._renderRecommendationList(diagnosticRecommendations, 'Diagnose-Hinweise')}
+          ${this._renderRecommendationList(diagnosticRecommendations)}
         </div>
       </ha-card>
     `;
@@ -4287,8 +4411,8 @@ ha-card.theme-midnight .chem-metric-track{background:rgba(255,255,255,0.08);}
   public static getStubConfig(): VioletPoolCardConfig {
     return {
       type: 'custom:violet-pool-card',
-      entity_prefix: 'violet_pool',
-      entity: 'switch.violet_pool_pump',
+      entity_prefix: 'violet_pool_controller',
+      entity: 'switch.violet_pool_controller_filterpumpe',
       card_type: 'pump',
     };
   }
@@ -4300,97 +4424,6 @@ ha-card.theme-midnight .chem-metric-track{background:rgba(255,255,255,0.08);}
 }
 
 if (!customElements.get('violet-pool-card')) {
-  // Inject modal styles globally — only once, identified by id to avoid duplicates
-  const MODAL_STYLE_ID = 'vpc-modal-styles';
-  if (!document.getElementById(MODAL_STYLE_ID)) {
-  const modalStyles = `
-    .confirmation-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 10000;
-      animation: fadeIn 0.2s ease;
-      backdrop-filter: blur(4px);
-      padding: 16px;
-    }
-    .confirmation-dialog {
-      background: var(--card-background-color, #fff);
-      border-radius: 16px;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-      max-width: 90%;
-      width: 400px;
-      animation: slideUp 0.3s cubic-bezier(0.34, 1.4, 0.64, 1);
-    }
-    .confirmation-content {
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-    .confirmation-message {
-      font-size: 14px;
-      color: var(--primary-text-color);
-      margin: 0;
-      line-height: 1.5;
-    }
-    .confirmation-buttons {
-      display: flex;
-      gap: 12px;
-      justify-content: flex-end;
-    }
-    .confirmation-buttons button {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      min-height: 44px;
-      min-width: 44px;
-    }
-    .btn-cancel {
-      background: var(--divider-color, rgba(0, 0, 0, 0.12));
-      color: var(--primary-text-color);
-    }
-    .btn-cancel:hover {
-      background: var(--divider-color, rgba(0, 0, 0, 0.2));
-    }
-    .btn-confirm {
-      background: var(--primary-color, #007aff);
-      color: white;
-    }
-    .btn-confirm:hover {
-      opacity: 0.9;
-      box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    @keyframes slideUp {
-      from { transform: translateY(20px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-    @media (max-width: 600px) {
-      .confirmation-dialog { width: 90%; }
-      .confirmation-buttons { flex-direction: column-reverse; }
-      .confirmation-buttons button { width: 100%; }
-    }
-  `;
-
-    const styleElement = document.createElement('style');
-    styleElement.id = MODAL_STYLE_ID;
-    styleElement.textContent = modalStyles;
-    document.head.appendChild(styleElement);
-  }
-
   customElements.define('violet-pool-card', VioletPoolCard);
 }
 
@@ -4414,4 +4447,3 @@ window.customCards.push({
   preview: true,
   // Add icon for Card Picker if missing. This is ignored by HACS list but useful for HA Add Card UI.
 });
-

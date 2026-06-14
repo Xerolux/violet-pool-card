@@ -163,7 +163,10 @@ export class SeverityModel {
     }
 
     if ((dosingType === 'ph_minus' || dosingType === 'ph_plus') && currentValue !== undefined) {
-      if (currentValue < 7.0) {
+      // Respect the configured target pH (±0.3 tolerance, DIN 19643: 7.0–7.4 default)
+      const phLow = targetValue !== undefined ? targetValue - 0.3 : 7.0;
+      const phHigh = targetValue !== undefined ? targetValue + 0.3 : 7.4;
+      if (currentValue < phLow) {
         alerts.push({
           text: 'pH zu niedrig',
           severity: 'warning',
@@ -172,7 +175,7 @@ export class SeverityModel {
           source: 'dosing',
         });
       }
-      if (currentValue > 7.4) {
+      if (currentValue > phHigh) {
         alerts.push({
           text: 'pH zu hoch',
           severity: 'warning',

@@ -8,6 +8,8 @@
 
 import { LitElement, html, css, TemplateResult, CSSResultGroup } from 'lit';
 import { property, state } from 'lit/decorators.js';
+import { i18n } from '../utils/i18n';
+import { injectModalStyles } from '../styles/modal-styles';
 
 export interface QuickAction {
   icon: string;
@@ -73,40 +75,49 @@ export class QuickActions extends LitElement {
         })
       );
     } finally {
-      // Clear loading state
+      // Clear loading state (skip the update if we were removed mid-flight)
       this.loadingStates.set(index, false);
-      this.requestUpdate();
+      if (this.isConnected) {
+        this.requestUpdate();
+      }
     }
   }
 
   private async showConfirmation(message: string): Promise<boolean> {
+    // The dialog lives in the light DOM (document.body), so its styles must
+    // be available globally — inject them once.
+    injectModalStyles();
+
     return new Promise<boolean>((resolve) => {
+      const previousFocus = document.activeElement as HTMLElement | null;
+
       const overlay = document.createElement('div');
-      overlay.className = 'confirmation-overlay';
+      overlay.className = 'vpc-confirmation-overlay';
 
       const dialog = document.createElement('div');
-      dialog.className = 'confirmation-dialog';
+      dialog.className = 'vpc-confirmation-dialog';
+      dialog.setAttribute('role', 'alertdialog');
+      dialog.setAttribute('aria-modal', 'true');
+      dialog.setAttribute('aria-label', message);
 
       // Build DOM safely — no innerHTML to prevent XSS
       const content = document.createElement('div');
-      content.className = 'confirmation-content';
+      content.className = 'vpc-confirmation-content';
 
       const msgEl = document.createElement('p');
-      msgEl.className = 'confirmation-message';
+      msgEl.className = 'vpc-confirmation-message';
       msgEl.textContent = message; // safe: textContent, not innerHTML
 
       const buttons = document.createElement('div');
-      buttons.className = 'confirmation-buttons';
+      buttons.className = 'vpc-confirmation-buttons';
 
       const cancelBtn = document.createElement('button');
-      cancelBtn.className = 'btn-cancel';
-      cancelBtn.setAttribute('aria-label', 'Cancel');
-      cancelBtn.textContent = 'Cancel';
+      cancelBtn.className = 'vpc-btn-cancel';
+      cancelBtn.textContent = i18n.t('cancel');
 
       const confirmBtn = document.createElement('button');
-      confirmBtn.className = 'btn-confirm';
-      confirmBtn.setAttribute('aria-label', 'Confirm');
-      confirmBtn.textContent = 'Confirm';
+      confirmBtn.className = 'vpc-btn-confirm';
+      confirmBtn.textContent = i18n.t('confirm');
 
       buttons.appendChild(cancelBtn);
       buttons.appendChild(confirmBtn);
@@ -119,6 +130,7 @@ export class QuickActions extends LitElement {
       const cleanup = () => {
         document.removeEventListener('keydown', handleKeydown);
         overlay.remove();
+        previousFocus?.focus?.();
       };
 
       const handleResolve = (value: boolean) => {
@@ -135,16 +147,24 @@ export class QuickActions extends LitElement {
         }
       });
 
-      // Keyboard support
+      // Keyboard support incl. simple focus trap between the two buttons.
+      // Enter is intentionally not handled here: the browser already
+      // "clicks" the focused button, so Enter on Cancel must cancel.
       const handleKeydown = (e: KeyboardEvent) => {
-        if (e.key === 'Escape') handleResolve(false);
-        if (e.key === 'Enter') handleResolve(true);
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          handleResolve(false);
+        } else if (e.key === 'Tab') {
+          e.preventDefault();
+          const next = document.activeElement === confirmBtn ? cancelBtn : confirmBtn;
+          next.focus();
+        }
       };
 
       document.addEventListener('keydown', handleKeydown);
 
-      // Focus confirm button for accessibility
-      confirmBtn.focus();
+      // Focus cancel button by default — safer for destructive actions
+      cancelBtn.focus();
     });
   }
 

@@ -146,6 +146,65 @@ export const TRANSLATIONS = {
     chlorine_short: 'Chlorine',
     pump_short: 'Pump',
     heater_short: 'Heater',
+
+    // Dialogs
+    confirm: 'Confirm',
+    recommendations: 'Recommendations',
+
+    // Friendly entity states
+    state_on: 'Active',
+    state_off: 'Off',
+    state_auto: 'Auto',
+    state_heat: 'Heating',
+    state_cool: 'Cooling',
+    state_idle: 'Idle',
+    state_manual: 'Manual',
+    state_unavailable: 'Unavailable',
+    state_running: 'Running',
+    state_open: 'Open',
+    state_closed: 'Closed',
+    state_opening: 'Opening…',
+    state_closing: 'Closing…',
+
+    // Water chemistry card
+    water_chemistry: 'Water Chemistry',
+    status_very_cold: 'Very cold',
+    status_cool: 'Cool',
+    status_perfect: 'Perfect',
+    status_pleasantly_warm: 'Pleasantly warm',
+    status_too_warm: 'Too warm',
+    status_too_acidic: 'Too acidic',
+    status_slightly_acidic: 'Slightly acidic',
+    status_slightly_alkaline: 'Slightly alkaline',
+    status_too_alkaline: 'Too alkaline',
+    status_too_low: 'Too low',
+    status_low: 'Low',
+    status_elevated: 'Elevated',
+    status_too_high: 'Too high',
+    status_attention: 'Attention',
+    status_action_needed: 'Action needed',
+    water_quality_optimal: 'Water quality optimal',
+    rec_ph_low: 'pH too acidic: add pH+ agent',
+    rec_ph_high: 'pH too alkaline: add pH- agent',
+    rec_orp_low: 'ORP too low: increase chlorine dosing',
+    rec_orp_high: 'ORP too high: reduce chlorine dosing',
+    rec_chlorine_low: 'Chlorine too low: increase dosing',
+    rec_chlorine_high: 'Chlorine too high: wait or dilute',
+    rec_salt_low: 'Salt too low: add salt',
+    rec_salt_high: 'Salt too high: dilute or partially drain water',
+
+    // Light color names
+    color_none: 'No color',
+    color_white: 'White',
+    color_black: 'Black',
+    color_gray: 'Gray',
+    color_red: 'Red',
+    color_orange: 'Orange',
+    color_yellow: 'Yellow',
+    color_green: 'Green',
+    color_cyan: 'Cyan',
+    color_blue: 'Blue',
+    color_magenta: 'Magenta',
   },
   de: {
     // Card Types
@@ -283,6 +342,65 @@ export const TRANSLATIONS = {
     chlorine_short: 'Chlor',
     pump_short: 'Pumpe',
     heater_short: 'Heizung',
+
+    // Dialogs
+    confirm: 'Bestätigen',
+    recommendations: 'Empfehlungen',
+
+    // Friendly entity states
+    state_on: 'Aktiv',
+    state_off: 'Aus',
+    state_auto: 'Auto',
+    state_heat: 'Heizt',
+    state_cool: 'Kühlt',
+    state_idle: 'Bereit',
+    state_manual: 'Manuell',
+    state_unavailable: 'Nicht verfügbar',
+    state_running: 'Läuft',
+    state_open: 'Geöffnet',
+    state_closed: 'Geschlossen',
+    state_opening: 'Öffnet…',
+    state_closing: 'Schließt…',
+
+    // Water chemistry card
+    water_chemistry: 'Wasserchemie',
+    status_very_cold: 'Sehr kalt',
+    status_cool: 'Kühl',
+    status_perfect: 'Perfekt',
+    status_pleasantly_warm: 'Angenehm warm',
+    status_too_warm: 'Zu warm',
+    status_too_acidic: 'Zu sauer',
+    status_slightly_acidic: 'Leicht sauer',
+    status_slightly_alkaline: 'Leicht basisch',
+    status_too_alkaline: 'Zu basisch',
+    status_too_low: 'Zu niedrig',
+    status_low: 'Niedrig',
+    status_elevated: 'Erhöht',
+    status_too_high: 'Zu hoch',
+    status_attention: 'Achtung',
+    status_action_needed: 'Eingriff nötig',
+    water_quality_optimal: 'Wasserqualität optimal',
+    rec_ph_low: 'pH zu sauer: pH+ Mittel zugeben',
+    rec_ph_high: 'pH zu basisch: pH- Mittel zugeben',
+    rec_orp_low: 'Redoxwert zu niedrig: Chlordosierung erhöhen',
+    rec_orp_high: 'Redoxwert zu hoch: Chlordosierung reduzieren',
+    rec_chlorine_low: 'Chlor zu niedrig: Chlordosierung erhöhen',
+    rec_chlorine_high: 'Chlor zu hoch: Abwarten oder verdünnen',
+    rec_salt_low: 'Salz zu niedrig: Salz nachfüllen',
+    rec_salt_high: 'Salz zu hoch: Wasser verdünnen oder teilweise ablassen',
+
+    // Light color names
+    color_none: 'Keine Farbe',
+    color_white: 'Weiß',
+    color_black: 'Schwarz',
+    color_gray: 'Grau',
+    color_red: 'Rot',
+    color_orange: 'Orange',
+    color_yellow: 'Gelb',
+    color_green: 'Grün',
+    color_cyan: 'Cyan',
+    color_blue: 'Blau',
+    color_magenta: 'Magenta',
   },
 };
 
@@ -304,6 +422,7 @@ export class i18n {
 
   static t(key: TranslationKey): string {
     const translations = TRANSLATIONS[this.language];
-    return translations[key as keyof typeof translations] || key;
+    // Fall back to English before exposing the raw key to the user
+    return translations[key as keyof typeof translations] || TRANSLATIONS.en[key] || key;
   }
 }

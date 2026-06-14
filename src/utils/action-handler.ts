@@ -8,8 +8,8 @@
 
 // HomeAssistant interface
 interface HomeAssistant {
-  states: { [entity_id: string]: any };
-  callService: (domain: string, service: string, serviceData?: any) => Promise<any>;
+  states: Record<string, { entity_id: string; state: string; attributes: Record<string, unknown> }>;
+  callService: (domain: string, service: string, serviceData?: Record<string, unknown>) => Promise<unknown>;
 }
 
 export interface ActionConfig {
@@ -17,7 +17,7 @@ export interface ActionConfig {
   navigation_path?: string;
   url_path?: string;
   service?: string;
-  service_data?: any;
+  service_data?: Record<string, unknown>;
 }
 
 export class ActionHandler {
