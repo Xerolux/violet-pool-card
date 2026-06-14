@@ -21,6 +21,9 @@ import './components/duration-slider';
 import './components/action-selector';
 import './components/safety-toggle';
 import './components/speed-slider';
+import './components/calibration-status';
+import './components/error-dashboard';
+import './components/system-update';
 import type { QuickAction } from './components/quick-actions';
 
 // Import utilities
@@ -68,7 +71,7 @@ interface LovelaceCardConfig {
   type: string;
   entity?: string;
   entities?: (string | EntityConfig)[];
-  card_type: 'pump' | 'heater' | 'solar' | 'dosing' | 'overview' | 'details' | 'sensor' | 'cover' | 'light' | 'compact' | 'system' | 'chemical' | 'filter' | 'backwash' | 'refill' | 'solar_surplus' | 'flow_rate' | 'inlet' | 'counter_current' | 'chlorine_canister' | 'ph_plus_canister' | 'ph_minus_canister' | 'flocculant_canister' | 'digital_rules' | 'diagnostics';
+  card_type: 'pump' | 'heater' | 'solar' | 'dosing' | 'overview' | 'details' | 'sensor' | 'cover' | 'light' | 'compact' | 'system' | 'chemical' | 'filter' | 'backwash' | 'refill' | 'overflow' | 'error' | 'calibration' | 'update' | 'solar_surplus' | 'flow_rate' | 'inlet' | 'counter_current' | 'chlorine_canister' | 'ph_plus_canister' | 'ph_minus_canister' | 'flocculant_canister' | 'digital_rules' | 'diagnostics';
   name?: string;
   icon?: string;
 
@@ -542,6 +545,14 @@ export class VioletPoolCard extends LitElement {
         result = this.renderDigitalRulesCard(); break;
       case 'diagnostics':
         result = this.renderDiagnosticsCard(); break;
+      case 'calibration':
+        result = this.renderCalibrationCard(); break;
+      case 'error':
+        result = this.renderErrorCard(); break;
+      case 'overflow':
+        result = this.renderOverflowCard(); break;
+      case 'update':
+        result = this.renderUpdateCard(); break;
       default:
         result = html` <ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">Unknown Card Type</span><span class="error-entity">${this.config.card_type}</span></div></div></ha-card> `;
     }
@@ -729,6 +740,10 @@ export class VioletPoolCard extends LitElement {
       case 'flocculant_canister': return '#9C27B0';
       case 'digital_rules': return '#00BCD4';
       case 'diagnostics': return '#9C27B0';
+      case 'calibration': return '#FF6B6B';
+      case 'error': return '#FF3B30';
+      case 'overflow': return '#FF9500';
+      case 'update': return '#00B4FF';
       default: return '#2196F3';
     }
   }
@@ -4403,6 +4418,65 @@ ha-card.theme-glass .header-icon,ha-card.layout-glass .header-icon{box-shadow:in
             </button>
           </div>
           ${this._renderRecommendationList(diagnosticRecommendations)}
+        </div>
+      </ha-card>
+    `;
+  }
+
+  private renderCalibrationCard(): TemplateResult {
+    const deviceId = this.config.entity_prefix || 'violet_pool_controller';
+    return html`
+      <ha-card class="${this._getCardClasses(false, this.config)}" style="${this._getCardStyles(this.config)}">
+        <div class="accent-bar"></div>
+        <div class="card-content">
+          <calibration-status .hass="${this.hass}" .deviceName="${this.config.name || 'Calibration Status'}"></calibration-status>
+        </div>
+      </ha-card>
+    `;
+  }
+
+  private renderErrorCard(): TemplateResult {
+    const deviceId = this.config.entity_prefix || 'violet_pool_controller';
+    return html`
+      <ha-card class="${this._getCardClasses(false, this.config)}" style="${this._getCardStyles(this.config)}">
+        <div class="accent-bar"></div>
+        <div class="card-content">
+          <error-dashboard .hass="${this.hass}" .deviceName="${this.config.name || 'Error Dashboard'}"></error-dashboard>
+        </div>
+      </ha-card>
+    `;
+  }
+
+  private renderOverflowCard(): TemplateResult {
+    const deviceId = this.config.entity_prefix || 'violet_pool_controller';
+    return html`
+      <ha-card class="${this._getCardClasses(false, this.config)}" style="${this._getCardStyles(this.config)}">
+        <div class="accent-bar"></div>
+        <div class="card-content">
+          <div class="header">
+            <div class="header-icon" style="--icon-accent: #00BCD4">
+              ${refillSVG(false, '#00BCD4')}
+            </div>
+            <div class="header-info">
+              <span class="name">${this.config.name || 'Overflow Protection'}</span>
+              <span class="header-subtitle">Water Level Control</span>
+            </div>
+          </div>
+          <div style="padding: 12px 0;">
+            <p style="color: rgba(255,255,255,0.6); font-size: 12px;">Overflow protection status and configuration.</p>
+          </div>
+        </div>
+      </ha-card>
+    `;
+  }
+
+  private renderUpdateCard(): TemplateResult {
+    const deviceId = this.config.entity_prefix || 'violet_pool_controller';
+    return html`
+      <ha-card class="${this._getCardClasses(false, this.config)}" style="${this._getCardStyles(this.config)}">
+        <div class="accent-bar"></div>
+        <div class="card-content">
+          <system-update .hass="${this.hass}" .deviceName="${this.config.name || 'System Update'}"></system-update>
         </div>
       </ha-card>
     `;

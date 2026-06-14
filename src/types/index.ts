@@ -99,6 +99,7 @@ export type CardType =
   | 'overflow'
   | 'error'
   | 'calibration'
+  | 'update'
   | 'solar_surplus'
   | 'flow_rate'
   | 'inlet'
