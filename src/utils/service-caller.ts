@@ -711,4 +711,215 @@ export class ServiceCaller {
 
     return result;
   }
+
+  // ============================================================================
+  // HEATER CONTROL – Complete Heating System Management
+  // ============================================================================
+
+  async configureHeater(
+    heaterEntity: string,
+    targetTemp?: number,
+    postrunDelay?: number,
+    boilerMonitor?: boolean
+  ): Promise<ServiceCallResult> {
+    const payload: Record<string, unknown> = { entity_id: heaterEntity };
+    if (targetTemp !== undefined) payload.target_temp = targetTemp;
+    if (postrunDelay !== undefined) payload.postrun_delay = postrunDelay;
+    if (boilerMonitor !== undefined) payload.boiler_monitor = boilerMonitor;
+
+    const result = await this.callService('violet_pool_controller', 'control_heater_http', payload);
+    if (result.success) {
+      this.showToast('Heater configured');
+    }
+    return result;
+  }
+
+  // ============================================================================
+  // SOLAR CONTROL – Solar Heating System Management
+  // ============================================================================
+
+  async configureSolar(
+    solarEntity: string,
+    enabled?: boolean,
+    flushMode?: boolean,
+    antiFreeze?: boolean
+  ): Promise<ServiceCallResult> {
+    const payload: Record<string, unknown> = { entity_id: solarEntity };
+    if (enabled !== undefined) payload.enabled = enabled;
+    if (flushMode) payload.action = 'forced_flush';
+    if (antiFreeze !== undefined) payload.anti_freeze = antiFreeze;
+
+    const result = await this.callService('violet_pool_controller', 'control_solar_http', payload);
+    if (result.success) {
+      this.showToast('Solar system configured');
+    }
+    return result;
+  }
+
+  async forceSolarFlush(solarEntity: string): Promise<ServiceCallResult> {
+    const result = await this.callService('violet_pool_controller', 'control_solar_http', {
+      entity_id: solarEntity,
+      action: 'forced_flush',
+    });
+    if (result.success) {
+      this.showToast('Solar flush initiated');
+    }
+    return result;
+  }
+
+  // ============================================================================
+  // DOSING CONFIGURATION – Chemistry Management
+  // ============================================================================
+
+  async setDosingTarget(
+    dosingType: 'pH-' | 'pH+' | 'Chlor' | 'Flockmittel',
+    targetLevel: number
+  ): Promise<ServiceCallResult> {
+    const result = await this.callService('violet_pool_controller', 'set_dosing_target', {
+      dosing_type: dosingType,
+      target_level: targetLevel,
+    });
+    if (result.success) {
+      this.showToast(`${dosingType} target level set to ${targetLevel}`);
+    }
+    return result;
+  }
+
+  async setDosingMaxDaily(
+    dosingType: 'pH-' | 'pH+' | 'Chlor' | 'Flockmittel',
+    maxDailyMl: number
+  ): Promise<ServiceCallResult> {
+    const result = await this.callService('violet_pool_controller', 'set_dosing_max_daily', {
+      dosing_type: dosingType,
+      max_daily_ml: maxDailyMl,
+    });
+    if (result.success) {
+      this.showToast(`${dosingType} daily limit set to ${maxDailyMl}ml`);
+    }
+    return result;
+  }
+
+  async setDosingDaytime(
+    dosingType: 'pH-' | 'pH+' | 'Chlor' | 'Flockmittel',
+    startHour: number,
+    endHour: number
+  ): Promise<ServiceCallResult> {
+    const result = await this.callService('violet_pool_controller', 'set_dosing_daytime', {
+      dosing_type: dosingType,
+      start_hour: startHour,
+      end_hour: endHour,
+    });
+    if (result.success) {
+      this.showToast(`${dosingType} daytime restriction set`);
+    }
+    return result;
+  }
+
+  // ============================================================================
+  // RULE MANAGEMENT – Automation Rules
+  // ============================================================================
+
+  async configureTemperatureRule(
+    deviceId: string,
+    enabled: boolean,
+    sensor1: string,
+    sensor2: string,
+    hysteresis: number,
+    targetTemp: number
+  ): Promise<ServiceCallResult> {
+    const result = await this.callService('violet_pool_controller', 'configure_temp_rule', {
+      device_id: deviceId,
+      enabled,
+      sensor1,
+      sensor2,
+      hysteresis,
+      target_temp: targetTemp,
+    });
+    if (result.success) {
+      this.showToast('Temperature rule configured');
+    }
+    return result;
+  }
+
+  async configureAnalogRule(
+    deviceId: string,
+    enabled: boolean,
+    adcChannel: number,
+    threshold: number,
+    hysteresis: number
+  ): Promise<ServiceCallResult> {
+    const result = await this.callService('violet_pool_controller', 'configure_analog_rule', {
+      device_id: deviceId,
+      enabled,
+      adc_channel: adcChannel,
+      threshold,
+      hysteresis,
+    });
+    if (result.success) {
+      this.showToast('Analog rule configured');
+    }
+    return result;
+  }
+
+  async configureSwitchingRule(
+    deviceId: string,
+    enabled: boolean,
+    diInput: number,
+    timeout: number,
+    action: string
+  ): Promise<ServiceCallResult> {
+    const result = await this.callService('violet_pool_controller', 'configure_switching_rule', {
+      device_id: deviceId,
+      enabled,
+      di_input: diInput,
+      timeout,
+      action,
+    });
+    if (result.success) {
+      this.showToast('Switching rule configured');
+    }
+    return result;
+  }
+
+  async configureTimerRule(
+    deviceId: string,
+    enabled: boolean,
+    cronExpression: string,
+    action: string
+  ): Promise<ServiceCallResult> {
+    const result = await this.callService('violet_pool_controller', 'configure_timer_rule', {
+      device_id: deviceId,
+      enabled,
+      cron: cronExpression,
+      action,
+    });
+    if (result.success) {
+      this.showToast('Timer rule configured');
+    }
+    return result;
+  }
+
+  // ============================================================================
+  // SYSTEM STATUS – Health & Diagnostics
+  // ============================================================================
+
+  async getSystemHealth(deviceId: string): Promise<ServiceCallResult> {
+    const result = await this.callService('violet_pool_controller', 'get_connection_status', {
+      device_id: deviceId,
+    });
+    if (result.success) {
+      this.showToast('System health retrieved');
+    }
+    return result;
+  }
+
+  async getControlState(deviceId: string): Promise<ServiceCallResult> {
+    const result = await this.callService('violet_pool_controller', 'get_error_summary', {
+      device_id: deviceId,
+    });
+    if (result.success) {
+      this.showToast('Control state retrieved');
+    }
+    return result;
+  }
 }
