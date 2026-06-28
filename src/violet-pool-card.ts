@@ -2298,13 +2298,15 @@ export class VioletPoolCard extends LitElement {
         const orpSensorId = this._getEntityId('orp_value_entity', 'sensor', 'redoxpotential');
         const orpSensor = this.hass.states[orpSensorId];
         if (orpSensor) {
-          currentValue = `${parseFloat(orpSensor.state).toFixed(0)}mV`;
+          const orpVal = parseFloat(orpSensor.state);
+          if (!isNaN(orpVal)) currentValue = `${orpVal.toFixed(0)}mV`;
         }
       } else if (dosingType === 'ph_minus' || dosingType === 'ph_plus') {
         const phSensorId = this._getEntityId('ph_value_entity', 'sensor', 'ph_wert');
         const phSensor = this.hass.states[phSensorId];
         if (phSensor) {
-          currentValue = `pH ${parseFloat(phSensor.state).toFixed(1)}`;
+          const phVal = parseFloat(phSensor.state);
+          if (!isNaN(phVal)) currentValue = `pH ${phVal.toFixed(1)}`;
         }
       }
     } else if (domain === 'cover') {
@@ -4424,7 +4426,6 @@ ha-card.theme-glass .header-icon,ha-card.layout-glass .header-icon{box-shadow:in
   }
 
   private renderCalibrationCard(): TemplateResult {
-    const deviceId = this.config.entity_prefix || 'violet_pool_controller';
     return html`
       <ha-card class="${this._getCardClasses(false, this.config)}" style="${this._getCardStyles(this.config)}">
         <div class="accent-bar"></div>
@@ -4436,7 +4437,6 @@ ha-card.theme-glass .header-icon,ha-card.layout-glass .header-icon{box-shadow:in
   }
 
   private renderErrorCard(): TemplateResult {
-    const deviceId = this.config.entity_prefix || 'violet_pool_controller';
     return html`
       <ha-card class="${this._getCardClasses(false, this.config)}" style="${this._getCardStyles(this.config)}">
         <div class="accent-bar"></div>
@@ -4448,14 +4448,13 @@ ha-card.theme-glass .header-icon,ha-card.layout-glass .header-icon{box-shadow:in
   }
 
   private renderOverflowCard(): TemplateResult {
-    const deviceId = this.config.entity_prefix || 'violet_pool_controller';
     return html`
       <ha-card class="${this._getCardClasses(false, this.config)}" style="${this._getCardStyles(this.config)}">
         <div class="accent-bar"></div>
         <div class="card-content">
           <div class="header">
             <div class="header-icon" style="--icon-accent: #00BCD4">
-              ${refillSVG(false, '#00BCD4')}
+              ${refillSVG(50, 100, '#00BCD4')}
             </div>
             <div class="header-info">
               <span class="name">${this.config.name || 'Overflow Protection'}</span>
@@ -4471,7 +4470,6 @@ ha-card.theme-glass .header-icon,ha-card.layout-glass .header-icon{box-shadow:in
   }
 
   private renderUpdateCard(): TemplateResult {
-    const deviceId = this.config.entity_prefix || 'violet_pool_controller';
     return html`
       <ha-card class="${this._getCardClasses(false, this.config)}" style="${this._getCardStyles(this.config)}">
         <div class="accent-bar"></div>

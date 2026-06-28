@@ -80,6 +80,12 @@ export interface SensorEntity extends HassEntity {
 // Card Configuration Types
 // ============================================================================
 
+export interface EntityConfig {
+  entity: string;
+  name?: string;
+  icon?: string;
+}
+
 export type CardType =
   | 'pump'
   | 'heater'
@@ -104,6 +110,8 @@ export type CardType =
   | 'flow_rate'
   | 'inlet'
   | 'counter_current'
+  | 'digital_rules'
+  | 'diagnostics'
   | 'chlorine_canister'
   | 'ph_plus_canister'
   | 'ph_minus_canister'
@@ -149,7 +157,7 @@ export interface VioletPoolCardConfig {
   type: string;
   card_type: CardType;
   entity?: string;
-  entities?: string[];
+  entities?: (string | EntityConfig)[];
 
   // Entity overrides
   entity_prefix?: string;

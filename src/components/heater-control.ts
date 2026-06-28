@@ -7,7 +7,7 @@
 
 import { LitElement, html, css, TemplateResult, CSSResultGroup } from 'lit';
 import { property } from 'lit/decorators.js';
-import type { ServiceCaller } from '../utils/service-caller';
+import { ServiceCaller } from '../utils/service-caller';
 import { heaterSVG } from '../utils/animated-icons';
 
 export class HeaterControl extends LitElement {
@@ -26,7 +26,7 @@ export class HeaterControl extends LitElement {
   connectedCallback() {
     super.connectedCallback();
     if (this.hass?.callService) {
-      this.serviceCaller = new (require('../utils/service-caller').ServiceCaller)(this.hass);
+      this.serviceCaller = new ServiceCaller(this.hass);
     }
   }
 
