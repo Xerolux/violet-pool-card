@@ -1,19 +1,21 @@
-## v0.1.8 – Violet Pool Card
+## v0.1.9 – Violet Pool Card
 
 ✅ **STABLE RELEASE**
 
 ### ✨ New Features | Neue Funktionen
 
-- Enhanced Violet Pool Card functionality
+- feat: Add system update card and component (f029bd1)
+- feat: Add calibration status component and monitoring UI (786dca8)
 
 ### 🚀 Improvements | Verbesserungen
 
-- 📝 Release v0.1.7 - Update changelog, version and info.md (70569f3)
+- build: update auto-generated files [skip ci] (a7d1651)
+- feat: Add system update card and component (f029bd1)
+- build: update auto-generated files [skip ci] (3d1b6e1)
 
 ### 🔧 Bug Fixes | Fehlerbehebungen
 
-- fix: address review feedback on dialog Enter handling and i18n titles (3489975)
-- fix: bugs, accessibility, i18n and mobile design improvements (33afaaf)
+- fix: HA 2026.7 compatibility + bug fixes (e66d4c8)
 
 ---
 
@@ -36,7 +38,7 @@
 
 ---
 
-📋 [Full changelog: v0.1.7...v0.1.8](https://github.com/Xerolux/violet-pool-card/compare/v0.1.7...v0.1.8)
+📋 [Full changelog: v0.2.0...v0.1.9](https://github.com/Xerolux/violet-pool-card/compare/v0.2.0...v0.1.9)
 
 ---
 
@@ -61,4 +63,4 @@ Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
 
 ---
 
-_Generated automatically by GitHub Actions on 2026-06-14 07:00:41 UTC_
+_Generated automatically by GitHub Actions on 2026-06-29 04:09:26 UTC_
