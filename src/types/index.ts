@@ -382,6 +382,9 @@ export interface HomeAssistant {
     accessToken: string;
     expires: number;
   };
+  connection?: {
+    sendMessageAwaitResponse: (message: Record<string, unknown>) => Promise<unknown>;
+  };
 }
 
 export interface LovelaceCardEditor extends HTMLElement {
