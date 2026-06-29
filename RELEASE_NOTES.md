@@ -1,21 +1,19 @@
-## v0.1.9 – Violet Pool Card
+## v0.2.0 – Violet Pool Card
 
 ✅ **STABLE RELEASE**
 
 ### ✨ New Features | Neue Funktionen
 
-- feat: Add system update card and component (f029bd1)
-- feat: Add calibration status component and monitoring UI (786dca8)
+- feat: Add Home Assistant Brands Proxy API integration (#71) (1de76d2)
 
 ### 🚀 Improvements | Verbesserungen
 
-- build: update auto-generated files [skip ci] (a7d1651)
-- feat: Add system update card and component (f029bd1)
-- build: update auto-generated files [skip ci] (3d1b6e1)
+- update brands (98144b9)
+- 📝 Release v0.1.9 - Update changelog, version and info.md (f6311a4)
 
 ### 🔧 Bug Fixes | Fehlerbehebungen
 
-- fix: HA 2026.7 compatibility + bug fixes (e66d4c8)
+- Minor bug fixes and stability improvements
 
 ---
 
@@ -38,7 +36,7 @@
 
 ---
 
-📋 [Full changelog: v0.2.0...v0.1.9](https://github.com/Xerolux/violet-pool-card/compare/v0.2.0...v0.1.9)
+📋 [Full changelog: v0.1.9...v0.2.0](https://github.com/Xerolux/violet-pool-card/compare/v0.1.9...v0.2.0)
 
 ---
 
@@ -63,4 +61,4 @@ Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
 
 ---
 
-_Generated automatically by GitHub Actions on 2026-06-29 04:09:26 UTC_
+_Generated automatically by GitHub Actions on 2026-06-29 04:40:42 UTC_
