@@ -24,6 +24,7 @@ import type { HomeAssistant } from '../types/index';
 
 let cachedAccessToken: string | null = null;
 let tokenCacheTime = 0;
+let pendingTokenPromise: Promise<string> | null = null;
 const TOKEN_CACHE_DURATION = 3600000; // 1 hour in milliseconds
 
 export async function getBrandsAccessToken(hass: HomeAssistant): Promise<string> {
@@ -34,24 +35,40 @@ export async function getBrandsAccessToken(hass: HomeAssistant): Promise<string>
     return cachedAccessToken;
   }
 
-  try {
-    if (!hass.connection) {
-      console.warn('Home Assistant connection not available for brands token');
-      return '';
-    }
-
-    const token = await hass.connection.sendMessageAwaitResponse({
-      type: 'brands/access_token',
-    }) as { access_token: string };
-
-    cachedAccessToken = token.access_token;
-    tokenCacheTime = now;
-    return cachedAccessToken;
-  } catch (error) {
-    console.error('Failed to get brands access token:', error);
-    // Return empty string if token retrieval fails - URLs will work without token on fallback
-    return '';
+  // Return pending promise if token request already in progress
+  if (pendingTokenPromise) {
+    return pendingTokenPromise;
   }
+
+  pendingTokenPromise = (async () => {
+    try {
+      if (!hass.connection) {
+        console.warn('Home Assistant connection not available for brands token');
+        return '';
+      }
+
+      const response = await hass.connection.sendMessageAwaitResponse({
+        type: 'brands/access_token',
+      });
+
+      // Defensive runtime check on response format
+      if (response && typeof response === 'object' && 'access_token' in response) {
+        cachedAccessToken = (response as { access_token: string }).access_token;
+        tokenCacheTime = Date.now();
+        return cachedAccessToken;
+      }
+
+      console.warn('Invalid response format for brands token');
+      return '';
+    } catch (error) {
+      console.error('Failed to get brands access token:', error);
+      return '';
+    } finally {
+      pendingTokenPromise = null;
+    }
+  })();
+
+  return pendingTokenPromise;
 }
 
 export function getIntegrationBrandImageUrl(
@@ -59,10 +76,10 @@ export function getIntegrationBrandImageUrl(
   imageName: string,
   accessToken?: string
 ): string {
-  const baseUrl = `/api/brands/integration/${domain}/${imageName}`;
+  const baseUrl = `/api/brands/integration/${encodeURIComponent(domain)}/${encodeURIComponent(imageName)}`;
 
   if (accessToken) {
-    return `${baseUrl}?access_token=${accessToken}`;
+    return `${baseUrl}?access_token=${encodeURIComponent(accessToken)}`;
   }
 
   return baseUrl;
@@ -73,10 +90,10 @@ export function getHardwareBrandImageUrl(
   imageName: string,
   accessToken?: string
 ): string {
-  const baseUrl = `/api/brands/hardware/${category}/${imageName}`;
+  const baseUrl = `/api/brands/hardware/${encodeURIComponent(category)}/${encodeURIComponent(imageName)}`;
 
   if (accessToken) {
-    return `${baseUrl}?access_token=${accessToken}`;
+    return `${baseUrl}?access_token=${encodeURIComponent(accessToken)}`;
   }
 
   return baseUrl;
@@ -101,4 +118,5 @@ export async function brandsUrl(
 export function clearBrandsCacheToken(): void {
   cachedAccessToken = null;
   tokenCacheTime = 0;
+  pendingTokenPromise = null;
 }
