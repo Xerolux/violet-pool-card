@@ -124,8 +124,9 @@ Die Antwort enthält das Access-Token:
 ## Dateien
 
 - `src/utils/brands-url.ts` — Hauptimplementierung der Brands Proxy API
+- `src/utils/card-brand.ts` — Card Brand-Assets und lokale/Proxy-Unterstützung
 - `src/types/index.ts` — HomeAssistant-Type mit connection Property
-- `brands/` — Lokale Brand-Assets für die Violet Pool Card
+- `brand/` — Lokale Brand-Assets für die Violet Pool Card
   - `icon.png` / `icon@2x.png`
   - `logo.png` / `logo@2x.png`
   - `dark_icon.png` / `dark_icon@2x.png`
