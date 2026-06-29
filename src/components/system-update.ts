@@ -153,7 +153,7 @@ export class SystemUpdate extends LitElement {
   }
 
   private sanitizeHtml(input: string): string {
-    let sanitized = input
+    const sanitized = input
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
