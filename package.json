@@ -19,7 +19,7 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "copy:brand": "cp -r brand dist/",
+    "copy:brand": "node scripts/copy-brand-assets.cjs",
     "build": "node node_modules/rollup/dist/bin/rollup -c rollup.config.mjs && npm run copy:brand",
     "build:info": "node scripts/generate-hacs-info.js",
     "watch": "node node_modules/rollup/dist/bin/rollup -c rollup.config.mjs --watch",
