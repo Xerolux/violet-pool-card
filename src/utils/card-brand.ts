@@ -17,10 +17,10 @@ import { brandsUrl } from './brands-url';
 export interface BrandAssets {
   icon: string;
   logo: string;
-  iconDark?: string;
-  logoDark?: string;
-  icon2x?: string;
-  logo2x?: string;
+  iconDark: string;
+  logoDark: string;
+  icon2x: string;
+  logo2x: string;
 }
 
 const LOCAL_BRAND_PATH = '/hacsfiles/violet-pool-card';
