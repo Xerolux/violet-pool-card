@@ -30,6 +30,7 @@ export const TRANSLATIONS = {
     maintenance: 'Maintenance',
     alerts: 'Alerts',
     comparison: 'Comparison',
+    theme_lagoon: 'Lagoon',
 
     // Common
     on: 'On',
@@ -242,6 +243,7 @@ export const TRANSLATIONS = {
     maintenance: 'Wartung',
     alerts: 'Benachrichtigungen',
     comparison: 'Vergleich',
+    theme_lagoon: 'Lagune',
 
     // Common
     on: 'An',

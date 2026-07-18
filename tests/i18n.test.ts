@@ -47,4 +47,11 @@ describe('i18n', () => {
     i18n.setLanguage('de'); // no-op
     expect(i18n.getLanguage()).toBe('de');
   });
+
+  it('provides a label for the lagoon theme in both languages', () => {
+    i18n.setLanguage('en');
+    expect(i18n.t('theme_lagoon')).toBe('Lagoon');
+    i18n.setLanguage('de');
+    expect(i18n.t('theme_lagoon')).toBe('Lagune');
+  });
 });
