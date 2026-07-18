@@ -1,18 +1,23 @@
-## v0.2.2 – Violet Pool Card
+## v0.3.0 – Violet Pool Card
 
 ✅ **STABLE RELEASE**
 
 ### ✨ New Features | Neue Funktionen
 
-- Enhanced Violet Pool Card functionality
+- **New `lagoon` dark theme** — deep navy gradient with violet accent (WCAG-AA contrast)
+- **New editor preset "Dark Lagoon"** for one-click dark setup
 
 ### 🚀 Improvements | Verbesserungen
 
-- 📝 Release v0.2.1 - Update changelog, version and info.md (f08beef)
+- Accessibility: `:focus-visible` rings on all interactive elements
+- Accessibility: `prefers-reduced-motion` support (WCAG 2.1 AA)
+- Editor theme picker and demo page updated for lagoon
+- Bilingual labels added (`theme_lagoon`)
 
-### 🔧 Bug Fixes | Fehlerbehebungen
+### 🧩 Compatibility
 
-- Minor bug fixes and stability improvements
+- All 13 existing themes remain visually byte-identical
+- Purely additive; no config migrations required
 
 ---
 
@@ -21,9 +26,8 @@
 **HACS (Recommended):**
 1. Open HACS in Home Assistant
 2. Go to "Frontend"
-3. Click "+" and search for "Violet Pool Card"
-4. Click "Download"
-5. Restart Home Assistant
+3. Find "Violet Pool Card" → Update
+4. Refresh the Home Assistant frontend
 
 **Manual:**
 1. Download `violet-pool-card.js` from the assets below
@@ -31,11 +35,13 @@
 3. Add resource in Configuration → Lovelace Dashboards → Resources
    - URL: `/local/violet-pool-card.js`
    - Type: `JavaScript Module`
-4. Restart Home Assistant
+4. Refresh the Home Assistant frontend
+
+To use the new theme, set `theme: lagoon` in your card config or pick it in the visual editor.
 
 ---
 
-📋 [Full changelog: v0.2.1...v0.2.2](https://github.com/Xerolux/violet-pool-card/compare/v0.2.1...v0.2.2)
+📋 [Full changelog: v0.2.2...v0.3.0](https://github.com/Xerolux/violet-pool-card/compare/v0.2.2...v0.3.0)
 
 ---
 
@@ -60,4 +66,4 @@ Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
 
 ---
 
-_Generated automatically by GitHub Actions on 2026-06-29 04:53:34 UTC_
+_Generated on 2026-07-18_

@@ -1,6 +1,37 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [0.3.0] - 2026-07-18
+
+### ✨ New Features | Neue Funktionen
+
+- **New `lagoon` dark theme** — a calm, deep navy gradient (`#0d1b2a → #102a43`) with a violet accent (`#9b6dff`) that matches the Violet brand identity. All text colors meet WCAG 2.1 AA contrast (text 16.8:1, secondary 6.9:1, status colors 5.6–9.4:1).
+- **New editor preset "Dark Lagoon"** — one-click dark setup with the lagoon theme, glass layout and high shadow intensity.
+
+### 🚀 Improvements | Verbesserungen
+
+- **Accessibility: focus-visible rings** on all interactive elements (speed segments, off button, chemistry cards, device rows, the card itself) via a new `--vpc-focus-ring` token.
+- **Accessibility: `prefers-reduced-motion`** — decorative animations (pump rotation, heater/solar breathing, dosing pulse, active dot) and hover transforms are now suppressed when the OS requests reduced motion (WCAG 2.1 AA).
+- **Editor** shows the new `lagoon` theme in the theme picker.
+- **Demo page** (`demo/index.html`) gained two lagoon showcase cards (pump + heater).
+- Added bilingual labels (`theme_lagoon`: Lagoon / Lagune).
+
+### 🧩 Compatibility
+
+- All 13 existing themes remain visually byte-identical — this release is purely additive.
+- Bundle grows by ~2 kB.
+- No config migrations required; existing card configs keep working unchanged.
+
+### 📦 Installation
+
+**HACS (Recommended):** Update via HACS → Frontend → Violet Pool Card → Update. Then refresh the HA frontend.
+
+**Manual:** Replace `violet-pool-card.js` in `config/www/` with the build from this release's assets.
+
+To try the new theme, set `theme: lagoon` in your card config (or pick it in the visual editor).
+
+---
+
 ## [0.2.2] - 2026-06-29
 
 ## v0.2.2 – Violet Pool Card
