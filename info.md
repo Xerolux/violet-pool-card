@@ -34,7 +34,7 @@ A premium Lovelace card for the [Violet Pool Controller](https://github.com/Xero
 - **Diagnostics**: Support-Panel mit Schnellaktionen, Logik-Hinweisen und klarerem Health-Fokus
 
 ### 🎨 Design & Themes
-- **6 Premium-Themes** — Luxury (Glassmorphism), Modern, Minimalist, Glass, Neon, Premium
+- **7 Premium-Themes** — Luxury (Glassmorphism), Modern, Minimalist, Glass, Neon, Premium, Lagoon (Dark)
 - **8 vorgesetzte Farbkombinationen** — Apple, Dark, Luxury, Modern, Minimalist, Glass, Neon, Premium
 - **4 Größen-Varianten** — Small, Medium, Large, Fullscreen
 - **3 Animations-Stufen** — None, Subtle, Smooth, Energetic
@@ -1048,7 +1048,7 @@ Z1Z2: sensor.violet_pool_controller_inputz1z2
 
 ### v1.x.x
 - 13 Standard-Kartentypen
-- 6 Premium-Themes
+- 7 Premium-Themes (inkl. Lagoon Dark)
 - RGB-Farbwähler
 - Tooltip-System
 - Responsive Design

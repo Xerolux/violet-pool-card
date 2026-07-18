@@ -101,6 +101,16 @@
       </div>
     </div>
 
+    <h3>Lagoon Theme (Dark) - Large Pump</h3>
+    <div class="card-container">
+      <div class="card-wrapper">
+        <violet-pool-card id="lagoon-pump-large"></violet-pool-card>
+      </div>
+      <div class="card-wrapper">
+        <violet-pool-card id="lagoon-heater-medium"></violet-pool-card>
+      </div>
+    </div>
+
     <!-- Card Types -->
     <h2>Card Types</h2>
     <div class="card-container">
@@ -373,6 +383,35 @@
               state: 'off',
               attributes: { PUMPSTATE: 'ERROR', runtime: 0 }
           }
+      });
+
+      // Lagoon Theme (Dark) - Large Pump, high speed
+      configureCard('lagoon-pump-large', {
+        entity: 'switch.violet_pool_pump',
+        card_type: 'pump',
+        size: 'large',
+        theme: 'lagoon',
+        animation: 'smooth',
+        show_runtime: true
+      }, {
+          'switch.violet_pool_pump': {
+              state: 'on',
+              attributes: { PUMPSTATE: '3|OK', runtime: 7200 }
+          }
+      });
+
+      // Lagoon Theme (Dark) - Medium Heater, heating
+      configureCard('lagoon-heater-medium', {
+        entity: 'climate.violet_pool_heater',
+        card_type: 'heater',
+        size: 'medium',
+        theme: 'lagoon',
+        animation: 'smooth'
+      }, {
+         'climate.violet_pool_heater': {
+            state: 'heating',
+            attributes: { current_temperature: 25.5, temperature: 28.5 }
+         }
       });
 
       // --- Card Types ---
