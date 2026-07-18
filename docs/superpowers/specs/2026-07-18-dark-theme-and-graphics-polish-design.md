@@ -58,82 +58,51 @@ Ein tiefer, ruhiger Dark-Modus mit klarem, kühlem Wasser-Charakter und Violet-A
 - `--vpc-warning` `#ffb454` → ~9.4:1 ✅
 - `--vpc-danger` `#ff5470` → ~5.6:1 ✅
 
-### 2.2 Typografie-Stärkung (für das `lagoon`-Theme)
+### 2.2 Typografie & Status-Badges — auf Phase 3 verschoben
 
-Innerhalb des `lagoon`-Themes werden die Messwert-Zahlen größer und klarer. Wir nutzen dafür neue optionale Tokens, die nur von `lagoon` (und später ggf. anderen) gesetzt werden:
+Ursprünglich hier geplant: größere Messwert-Typografie über neue Tokens (`--vpc-metric-size` etc.) und vereinheitlichte Status-Badges.
 
-- `--vpc-metric-size`: `2.4rem` (Hauptmesswert einer Karte, z. B. pH-Wert, Temperatur)
-- `--vpc-metric-weight`: `650`
-- `--vpc-metric-tracking`: `-0.02em`
-- `--vpc-label-size`: `0.78rem`, `letter-spacing: 0.04em`, `text-transform: uppercase`
-- `--vpc-unit-size`: `0.9rem`, Farbe `--vpc-text-secondary`
+**Code-Analyse bei der Plan-Erstellung hat gezeigt:** Messwert-Größen und Badge-Styling sind im Card-CSS hart in vielen einzelnen Selektoren codiert (`.temp-hero-value{font-size:44px}`, `.dosing-current-value{font-size:32px}`, `.info-badge`, `.dosing-status-pill`, `.overview-active-dot` …), nicht über Tokens. Eine Token-basierte Umstellung würde diese Selektoren umschreiben — das verletzt das "bestehende Themes bleiben byte-identisch"-Ziel und ist von der Größe her Phase-3-Material (Refactoring der Hauptdatei).
 
-Diese Tokens sind für alle Themes deklariert (mit bestehenden Werten als Default), sodass bestehende Themes optisch identisch bleiben und nur `lagoon` sie überschreibt.
-
-### 2.3 Status-Badges vereinheitlicht
-
-Neue Badge-Komponenten-CSS (in `component-styles.ts`, gültig für alle Themes, aber nur visuell sichtbar wenn Tokens vorhanden — Abwärtskompatibilität durch Default-Werte):
-
-- Vier Varianten passend zum bestehenden Severity-Modell (`ok`, `info`, `warning`, `critical`). `info` ist im Modell bereits enthalten — hier wird nur das Badge-Styling dafür ergänzt.
-- Jedes Badge: 4–6px Dot + Icon + Label, nicht nur Farbe.
-- Pillenform: `border-radius: 999px`, Padding `4px 10px`, Font `0.72rem` `500`.
-- `lagoon`-spezifisch: Badge-Hintergrund ist ein 12%-Alpha der Status-Farbe, Border 25%-Alpha, Text volle Status-Farbe.
+**Scope-Reduktion für Phase 1:** Typografie- und Badge-Vereinheitlichung wandern in Phase 3. Phase 1 liefert nur das `lagoon`-Theme (§2.1), Fokus-Ringe und `prefers-reduced-motion` (§3.2) — das ist sicher rein additiv.
 
 ---
 
 ## 3. Grafik-Polish (profitiert allen Themes, rein CSS-Token-basiert)
 
-Diese Maßnahmen sind **rein additiv über neue CSS-Tokens** und verändern bestehende Themes nicht, weil die Token-Defaults den aktuellen Werten entsprechen.
+Diese Maßnahmen sind **rein additiv** und verändern bestehende Themes nicht.
 
-### 3.1 Neue optionale Design-Tokens (in `design-system.ts`)
+### 3.1 Eingesetzter Token (in Phase 1)
 
-```
---vpc-tile-radius:        /* default: var(--vpc-radius) */
---vpc-tile-padding:       /* default: var(--vpc-spacing) */
---vpc-tile-gap:           /* default: calc(var(--vpc-spacing) / 2) */
---vpc-control-radius:     /* default: 10px */
---vpc-segment-gap:        /* default: 2px */
---vpc-focus-ring:         /* default: 0 0 0 2px var(--vpc-primary-glow) */
---vpc-pressed-scale:      /* default: 0.97 */
---vpc-hover-lift:         /* default: -2px */
---vpc-motion-ease:        /* default: cubic-bezier(0.2, 0.7, 0.2, 1) */
-```
+- `--vpc-focus-ring` (Default `0 0 0 2px color-mix(... var(--vpc-primary) 55% ...)`) — wird nur von `:focus-visible` konsumiert, das bisher keine Regel hatte. Für bestehende Themes ein reiner Accessibility-Gewinn ohne optische Änderung im Nicht-Fokus-Zustand.
 
-`lagoon` überschreibt gezielt: `--vpc-tile-radius: 16px`, `--vpc-control-radius: 12px`, `--vpc-tile-gap: 8px`, `--vpc-hover-lift: -3px`.
+Weitere Tokens (`--vpc-tile-radius`, `--vpc-hover-lift`, `--vpc-metric-size` etc.) sind auf Phase 3 verschoben (siehe §2.2), weil ihre Konsumstellen tief im bestehenden CSS verankert sind und ein Umschreiben das "byte-identisch"-Ziel gefährden würde.
 
-### 3.2 Interaktions-Polish
+### 3.2 Interaktions-Polish (in Phase 1 umgesetzt)
 
-- **Fokus-Ring** (`:focus-visible`) auf allen interaktiven Elementen via `--vpc-focus-ring`. Derzeit fehlt dies teilweise → Accessibility-Gewinn.
-- **Pressed-Feedback:** Buttons/Toggles skalieren auf `--vpc-pressed-scale` beim `:active`, Transit `120ms`.
-- **Hover-Lift:** Tiles heben um `--vpc-hover-lift` beim Hover, mit `--vpc-shadow`.
-- Alle Bewegungen hinter `@media (prefers-reduced-motion: reduce)` → reduziert auf reine Farbwechsel.
+- **Fokus-Ring** (`:focus-visible`) auf Speed-Segmenten, Off-Button, Chemie-Karten, Device-Rows und der Karte selbst via `--vpc-focus-ring`. Accessibility-Gewinn.
+- **`prefers-reduced-motion`**: globales `@media`-Block, das alle dekorativen Animationen (pump-running, heater-active, solar-active, dosing-active, overview-active-dot) und Hover-Transforms unterdrückt, wenn das OS Reduced-motion anfordert. WCAG 2.1 AA.
 
-### 3.3 Messwert-Darstellung verfeinern
+### 3.3 Messwert-Darstellung — auf Phase 3 verschoben
 
-In den Karten, die Hauptwerte zeigen (Chemie, Temperatur, Filterdruck, Durchfluss, Kanister-Level):
-- Zahl groß (via `--vpc-metric-size`), Einheit klein daneben (via `--vpc-unit-size`).
-- Zielwert-Bereich als dezenter "Target"-Subtext (`Soll 7.0–7.4`), nicht als eigene Zeile dominierend.
-- Sparkline optional darunter, nur wenn Daten vorhanden (bereits implementiert → nur Styling konsistenter machen).
-
-Das passiert ausschließlich über CSS-Selektoren, die bereits vorhandene Klassennamen verwenden. Keine HTML-Strukturänderung an bestehenden Render-Pfaden.
+Siehe §2.2: erfordert Selektor-Umschreibung, daher nicht in Phase 1.
 
 ---
 
 ## 4. Komponenten-Beteiligte
 
+Code-Analyse bei der Plan-Erstellung hat gezeigt: Die Dateien `src/styles/design-system.ts`, `src/styles/premium-themes.ts` und `src/styles/component-styles.ts` sind **toter Code** — sie werden nirgendwo importiert. Der gesamte Theme-Mechanismus lebt im großen `static get styles()` CSS-Block in `src/violet-pool-card.ts` (ab Zeile 4065). Die folgende Liste ist an diese Realität angepasst.
+
 | Datei | Änderung | Risiko |
 |-------|----------|--------|
-| `src/styles/design-system.ts` | Neue Token-Defaults hinzufügen (nicht ersetzen). | Sehr niedrig — additive Defaults. |
-| `src/styles/premium-themes.ts` | Neuen Block `ha-card.theme-lagoon { ... }` anhängen. | Niedrig — reiner Zusatz. |
-| `src/styles/component-styles.ts` | Fokus-Ring, Pressed, Hover-Lift, Badge-Stile ergänzen. | Niedrig — nutzt neue Token, Defaults erhalten. |
-| `src/violet-pool-card.ts` | `Theme`-Typ um `'lagoon'` erweitern. (Hinweis: Die Hauptdatei deklariert ihren eigenen `Theme`-Typ separat von `types/index.ts` — beide Stellen müssen konsistent erweitert werden.) | Niedrig. |
-| `src/types/index.ts` | `Theme`-Typ ergänzen, `isValidTheme`-Liste ergänzen. | Niedrig. |
-| `src/editor/violet-pool-card-editor.ts` | Theme-Picker-Eintrag für `lagoon` ergänzen; optional neuer Preset "Ruhiges Wasser". | Niedrig. |
-| `src/utils/i18n.ts` | Label `theme_lagoon: 'Lagoon'` in en/de. | Niedrig. |
-| `demo/index.html` | Eine Demo-Karte mit `lagoon`-Theme ergänzen. | Kein Risiko. |
+| `src/violet-pool-card.ts` | `Theme`-Typ (Zeile 60) um `'lagoon'` erweitern; `ha-card.theme-lagoon { ... }` + Fokus/Reduced-Motion-Block im CSS (Zeile 4065) anhängen. | Niedrig — Typ plus reiner CSS-Zusatz. |
+| `src/types/index.ts` | `Theme`-Typ (Zeile 122) und `isValidTheme`-Liste (Zeile 471) ergänzen. | Niedrig. |
+| `src/editor/violet-pool-card-editor.ts` | Theme-Picker-Eintrag für `lagoon` ergänzen; optional neuer Preset "Dark Lagoon". | Niedrig. |
+| `src/utils/i18n.ts` | Label `theme_lagoon: 'Lagoon'` (en) / `'Lagune'` (de). | Niedrig. |
+| `demo/index.html` | Zwei Demo-Karten (Pump + Heater) mit `lagoon`-Theme ergänzen. | Kein Risiko. |
 | `README.md` / `info.md` | Theme in der Liste erwähnen. | Kein Risiko. |
 
-**Nicht angetastet:** Service-Logik, Entity-Auflösung, animated-icons, severity-model, Hauptrender-Pfade.
+**Nicht angetastet:** Service-Logik, Entity-Auflösung, animated-icons, severity-model, Hauptrender-Pfade, die toten `src/styles/*.ts`-Dateien (außer Scope).
 
 ---
 
