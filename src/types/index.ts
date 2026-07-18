@@ -131,7 +131,8 @@ export type Theme =
   | 'ocean'
   | 'sunset'
   | 'forest'
-  | 'aurora';
+  | 'aurora'
+  | 'lagoon';
 
 export type Animation = 'none' | 'subtle' | 'smooth' | 'energetic';
 export type LayoutVariant = 'standard' | 'glass' | 'dashboard' | 'focus';
@@ -482,6 +483,7 @@ export function isValidTheme(value: unknown): value is Theme {
     'sunset',
     'forest',
     'aurora',
+    'lagoon',
   ];
   return typeof value === 'string' && validThemes.includes(value as Theme);
 }

@@ -57,7 +57,7 @@ interface HomeAssistant {
 
 // ─────────────────────────── Exported helper types ───────────────────────────
 export type CardSize = 'small' | 'medium' | 'large' | 'fullscreen';
-export type Theme = 'classic' | 'midnight' | 'elegance' | 'vibrant' | 'pure' | 'frost' | 'glow' | 'metallic' | 'ocean' | 'sunset' | 'forest' | 'aurora';
+export type Theme = 'classic' | 'midnight' | 'elegance' | 'vibrant' | 'pure' | 'frost' | 'glow' | 'metallic' | 'ocean' | 'sunset' | 'forest' | 'aurora' | 'lagoon';
 export type Animation = 'none' | 'subtle' | 'smooth' | 'energetic';
 
 /** Per-entity config for the details card — either a bare entity ID or a structured object. */
