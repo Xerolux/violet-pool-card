@@ -46,6 +46,7 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
     { id: 'alarm_focus', label: 'Alarm Focus', description: 'Kontraststark mit klaren Alarmen', config: { theme: 'midnight', layout_variant: 'focus', alarm_style: 'outline', animation: 'subtle', shadow_intensity: 'high' } },
     { id: 'tech_room', label: 'Technikraum', description: 'Kompakt, sachlich, dashboard-orientiert', config: { theme: 'metallic', layout_variant: 'dashboard', alarm_style: 'soft', animation: 'subtle', shadow_intensity: 'low' } },
     { id: 'family_view', label: 'Familienansicht', description: 'Ruhiger Look mit klarer Lesbarkeit', config: { theme: 'ocean', layout_variant: 'glass', alarm_style: 'soft', animation: 'smooth', shadow_intensity: 'medium' } },
+    { id: 'dark_lagoon', label: 'Dark Lagoon', description: 'Tiefer Dark-Modus mit Violet-Akzent', config: { theme: 'lagoon', layout_variant: 'glass', alarm_style: 'pulse', animation: 'smooth', shadow_intensity: 'high' } },
   ] as const;
 
   public setConfig(config: VioletPoolCardConfig): void {
@@ -118,6 +119,7 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
                 { value: 'sunset', icon: '', label: 'Sunset', desc: 'Warm Orange', preview: '#FF6B35' },
                 { value: 'forest', icon: '', label: 'Forest', desc: 'Natural Green', preview: '#228B22' },
                 { value: 'aurora', icon: '', label: 'Aurora', desc: 'Northern Lights', preview: 'linear-gradient(45deg, #00C9FF 0%, #92FE9D 100%)' },
+                { value: 'lagoon', icon: '', label: 'Lagoon', desc: 'Dark · Violet Accent', preview: 'linear-gradient(160deg, #0d1b2a 0%, #9b6dff 100%)' },
               ].map(
                 (theme) => html` <button class="theme-button ${this._config.theme === theme.value || (!this._config.theme && theme.value === 'classic') ? 'active' : ''}" @click="${() => this._themeChanged(theme.value)}" ><div class="theme-preview theme-${theme.value}"><div class="theme-dot" style="background:${theme.preview}"></div></div><div class="theme-info"><span class="theme-label">${theme.label}</span><span class="theme-desc">${theme.desc}</span></div></button> `
               )}
