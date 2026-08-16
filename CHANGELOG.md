@@ -1,6 +1,70 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+
+## [0.4.0] - 2026-08-16
+
+### ✨ New Features | Neue Funktionen
+
+- **Konfigurierbare Grenzwerte** — die "optimalen" Bereiche der Wasserwerte sind nicht mehr fest verdrahtet.
+  Über `thresholds` (YAML) oder den neuen Editor-Abschnitt **Grenzwerte** lassen sich `min`, `max`, eine
+  Warn-Toleranz (`warn`), der Anzeigebereich (`range`) und ein `ignore`-Flag je Messgröße setzen —
+  für `ph`, `orp`, `chlorine`, `salt`, `temperature`, `cyanuric_acid` und `alkalinity`.
+- **Meldungsstufe `alerts`** — `all` (Standard), `warning`, `critical` oder `none`. Damit meldet die Karte
+  nicht mehr jede kleine Abweichung, wenn das nicht gewünscht ist. Die Messwerte bleiben immer sichtbar.
+- **Gauges zeigen jetzt den Wert** — pH- und Redox-Kachel stellen Zahlenwert, Einheit, Skalenenden und die
+  Optimalzone dar, statt nur einer Nadel.
+
+### 🐛 Bug Fixes | Fehlerbehebungen
+
+- **SVG-Inhalte wurden im falschen Namespace erzeugt.** Verschachtelte Lit-Templates innerhalb von `<svg>`
+  benutzten `html` statt `svg` — die entstandenen Elemente landeten im HTML-Namespace und wurden nie
+  gerendert. Betroffen waren 32 Stellen: Gauge-Nadel, Wertbogen und Optimalzone, aber auch die animierten
+  Details von Pumpe, Solar, Licht, Abdeckung, Kanistern und Diagnose-Icons.
+- **Gauge-Bogen war mathematisch falsch.** Der Wertbogen wurde als Gerade statt entlang des Kreises
+  berechnet, und ab der Skalenmitte kippte das SVG `large-arc-flag` auf 1, sodass der Bogen den langen Weg
+  um den Kreis nahm. Beides ist korrigiert und durch Tests abgesichert.
+- **Optimalzone verschwand hinter dem Wertbogen** — sie wird jetzt auf einem inneren Radius nach dem
+  Wertbogen gezeichnet und bleibt dadurch immer sichtbar.
+- **Statusfarbe und Statustext widersprachen sich.** Ein Redoxwert konnte als "Zu hoch" beschriftet und
+  gleichzeitig grün eingefärbt sein, weil Text und Farbe aus zwei verschiedenen Regelwerken kamen. Beide
+  stammen jetzt aus derselben Bewertung.
+- **Alarme wurden doppelt angezeigt** — der Block "Alarme" und der Block "Empfehlungen" listeten dieselben
+  Werte. Sie sind zu einem Panel zusammengefasst, das Befund und Handlungsempfehlung zusammen zeigt.
+- **Kartentitel wurde vom Status-Badge überlagert.** Das Badge ist jetzt kompakt, Titel und Untertitel
+  laufen sauber aus.
+- **Filterdruck-Gauge**: Umfang war mit 240 statt 2π·40 ≈ 251 angenommen, wodurch der Bogen um ~5 %
+  überzeichnete; der weiße Mittelkreis und die schwarze Beschriftung waren in dunklen Themes unlesbar.
+  Negative Druckwerte werden jetzt geklemmt.
+- **"Wasserqualität optimal"** wurde auch dann angezeigt, wenn Werte ausserhalb des Bereichs lagen und nur
+  die Meldungen stummgeschaltet waren.
+- **Karten-Vorschau im Card Picker** zeigte einen "Daten nicht verfügbar"-Fehler, weil die Stub-Konfiguration
+  eine konkrete Entity voraussetzte. Sie startet jetzt mit der `overview`-Karte.
+- Tote CSS-Keyframes `gauge-fill` entfernt (referenzierte eine nie gesetzte Variable `--gauge-dash`).
+
+### 🎨 Design
+
+- Neues Karten-Icon und Logo (violette Kachel mit Wassertropfen und Wellen), reproduzierbar erzeugt über
+  `scripts/generate-brand-assets.py`. Enthält Light- und Dark-Varianten in 1x und 2x sowie die
+  Repository-Assets `icon.png` und `logo.png` für HACS und README.
+- Gauge-Track und Filterdruck-Gauge respektieren jetzt dunkle Themes über `--vpc-gauge-track`.
+- Kompakteres Status-Badge; der Untertitel nennt stattdessen die Anzahl der Werte ausserhalb des Zielbereichs.
+
+### 🧪 Tests
+
+- Neue Suites `tests/thresholds.test.ts` (27 Tests) und `tests/chem-gauge.test.ts` (14 Tests):
+  Grenzwert-Auflösung inkl. fehlerhafter Eingaben, Bewertung an den Bandgrenzen, Meldungsfilter,
+  Gauge-Geometrie auf dem Kreis, `large-arc-flag`, Sichtbarkeit der Optimalzone.
+- Gesamt: 88 Tests.
+
+### 🧩 Compatibility
+
+- Rein additiv — bestehende Konfigurationen funktionieren unverändert weiter und behalten die
+  bisherigen Standardbereiche.
+- `gaugeNeedleSVG()` bleibt als Wrapper um das neue `chemGaugeSVG()` erhalten (deprecated).
+
+---
+
 ## [0.3.0] - 2026-07-18
 
 ### ✨ New Features | Neue Funktionen

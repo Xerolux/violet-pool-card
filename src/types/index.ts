@@ -142,6 +142,8 @@ export type DashboardMode = 'default' | 'operations' | 'chemistry' | 'maintenanc
 
 export type DosingType = 'chlorine' | 'ph_minus' | 'ph_plus' | 'flocculant';
 
+export type { ThresholdsConfig, ThresholdBandConfig, AlertLevel } from '../utils/thresholds';
+
 export interface CardAction {
   action?: string;
   service?: string;
@@ -197,6 +199,13 @@ export interface VioletPoolCardConfig {
   show_ph?: boolean;
   show_orp?: boolean;
   show_inlet?: boolean;
+
+  // Water value thresholds (all optional – unset metrics use the defaults)
+  thresholds?: import('../utils/thresholds').ThresholdsConfig;
+  /** How chatty the card is about out-of-range readings: all | warning | critical | none. */
+  alerts?: import('../utils/thresholds').AlertLevel;
+  /** Legacy shorthand for `alerts: none`. */
+  show_alerts?: boolean;
 
   // Display options
   name?: string;

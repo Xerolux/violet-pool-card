@@ -6,7 +6,7 @@
  * Erstellt von Xerolux | MIT License
  */
 
-import { html, TemplateResult } from 'lit';
+import { html, svg, TemplateResult } from 'lit';
 
 function clamp01(value: number): number {
   return Math.max(0, Math.min(1, value));
@@ -32,7 +32,7 @@ export function pumpSVG(speed: number, color: string): TemplateResult {
       </g>
       <circle cx="24" cy="24" r="5" fill="${color}"/>
       <circle cx="24" cy="24" r="2.5" fill="white" fill-opacity="0.9"/>
-      ${isOn ? html`
+      ${isOn ? svg`
         <circle cx="24" cy="24" r="21" fill="none" stroke="${color}" stroke-width="3"
           stroke-dasharray="${speed * 33} 100" stroke-opacity="0.5" stroke-linecap="round"
           transform="rotate(-90 24 24)"/>
@@ -67,13 +67,13 @@ export function solarSVG(active: boolean, color: string): TemplateResult {
     <svg viewBox="0 0 48 48" style="width:100%;height:100%;display:block;overflow:visible" xmlns="http://www.w3.org/2000/svg">
       <circle cx="24" cy="24" r="22" fill="${color}" fill-opacity="${active ? 0.13 : 0.07}"/>
       <g style="transform-origin:24px 24px;will-change:transform;animation:${active ? 'spin-slow 14s linear infinite' : 'none'}">
-        ${rays.map(angle => html`
+        ${rays.map(angle => svg`
           <rect x="22.5" y="3" width="3" height="5.5" rx="1.5"
                 fill="${color}" fill-opacity="${active ? 0.75 : 0.3}"
                 style="transform:rotate(${angle}deg);transform-origin:24px 24px"/>
         `)}
       </g>
-      ${active ? html`
+      ${active ? svg`
         <circle cx="24" cy="24" r="14" fill="none" stroke="${color}" stroke-width="1.5"
           stroke-opacity="0.35" style="will-change:transform;animation:breathe 2.8s ease-in-out infinite"/>
       ` : ''}
@@ -101,10 +101,10 @@ export function coverSVG(position: number, isMoving: boolean, color: string): Te
       <path d="M8,29 C17,25 27,33 37,29 C47,25 57,33 67,29 C71,27 74,29 77,29"
             fill="none" stroke="rgba(0,150,255,0.25)" stroke-width="1.1" stroke-linecap="round"/>
       <!-- Cover panel -->
-      ${coverWidth > 0 ? html`
+      ${coverWidth > 0 ? svg`
         <rect x="2" y="4" width="${coverWidth}" height="40" rx="9"
               fill="${color}" fill-opacity="0.82"/>
-        ${Array.from({ length: slatCount }, (_, i) => html`
+        ${Array.from({ length: slatCount }, (_, i) => svg`
           <line x1="${9 + i * 7}" y1="6" x2="${9 + i * 7}" y2="42"
                 stroke="white" stroke-width="0.6" stroke-opacity="0.22"/>
         `)}
@@ -129,18 +129,18 @@ export function lightSVG(on: boolean, rgb: [number, number, number] | null, brig
 
   return html`
     <svg viewBox="0 0 48 48" style="width:100%;height:100%;display:block;overflow:visible" xmlns="http://www.w3.org/2000/svg">
-      ${on ? html`
+      ${on ? svg`
         <circle cx="24" cy="24" r="23" fill="${rgbStr}" fill-opacity="${0.07 + bNorm * 0.18}"
                 style="will-change:opacity;animation:light-glow 2.6s ease-in-out infinite"/>
         <circle cx="24" cy="24" r="17" fill="${rgbStr}" fill-opacity="${0.09 + bNorm * 0.12}"/>
         <g style="transform-origin:24px 24px;will-change:transform;animation:spin-slow 9s linear infinite">
-          ${glowRays.map(a => html`
+          ${glowRays.map(a => svg`
             <line x1="24" y1="5" x2="24" y2="9" stroke="${rgbStr}"
                   stroke-width="2.2" stroke-linecap="round" stroke-opacity="${0.4 + bNorm * 0.4}"
                   style="transform:rotate(${a}deg);transform-origin:24px 24px"/>
           `)}
         </g>
-      ` : html`<circle cx="24" cy="24" r="22" fill="${fallbackColor}" fill-opacity="0.07"/>`}
+      ` : svg`<circle cx="24" cy="24" r="22" fill="${fallbackColor}" fill-opacity="0.07"/>`}
       <!-- Housing ring -->
       <circle cx="24" cy="24" r="20" fill="none" stroke="${on ? rgbStr : fallbackColor}"
               stroke-width="1.5" stroke-opacity="${on ? 0.55 : 0.3}"/>
@@ -175,7 +175,7 @@ export function dosingDropletSVG(active: boolean, level: number, color: string):
             fill="${color}" fill-opacity="0.5"
             style="will-change:height;animation:${active ? 'fill-rise 2s ease-in-out infinite' : ''}"/>
       <!-- Bubbles -->
-      ${active ? html`
+      ${active ? svg`
         <circle cx="20" cy="22" r="1.5" fill="white" fill-opacity="0.6" style="will-change:transform;animation:bubble-float 2s ease-in-out infinite"/>
         <circle cx="28" cy="20" r="1.5" fill="white" fill-opacity="0.6" style="will-change:transform;animation:bubble-float 2s ease-in-out infinite 0.5s"/>
       ` : ''}
@@ -218,7 +218,7 @@ export function phOrbSVG(active: boolean, color: string): TemplateResult {
       <path d="M17,26 C19.7,22.4 21.7,18.5 24,14.7 C26.3,18.5 28.3,22.4 31,26"
             fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-opacity="${active ? 0.8 : 0.55}"/>
       <text x="24" y="30.2" text-anchor="middle" font-size="8.5" font-weight="700" fill="white" opacity="0.92">pH</text>
-      ${active ? html`
+      ${active ? svg`
         <circle cx="15.5" cy="17" r="1.5" fill="white" fill-opacity="0.55" style="animation:bubble-float 1.9s ease-in-out infinite"/>
         <circle cx="33" cy="18.5" r="1.2" fill="white" fill-opacity="0.4" style="animation:bubble-float 2.2s ease-in-out infinite 0.35s"/>
       ` : ''}
@@ -237,7 +237,7 @@ export function chlorineOrbSVG(active: boolean, color: string): TemplateResult {
             fill="${color}" fill-opacity="${active ? 0.84 : 0.58}"/>
       <text x="24" y="28.5" text-anchor="middle" font-size="8.5" font-weight="700" fill="white" opacity="0.94">Cl</text>
       <path d="M19.5,17.5 C21.8,15.7 26.2,15.7 28.5,17.5" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity="0.65"/>
-      ${active ? html`
+      ${active ? svg`
         <circle cx="16" cy="19" r="1.4" fill="white" fill-opacity="0.52" style="animation:bubble-float 1.8s ease-in-out infinite"/>
         <circle cx="31.5" cy="16.5" r="1.3" fill="white" fill-opacity="0.42" style="animation:bubble-float 2s ease-in-out infinite 0.45s"/>
         <circle cx="35" cy="24" r="3.5" fill="none" stroke="${color}" stroke-width="1.2" stroke-opacity="0.35"
@@ -257,7 +257,7 @@ export function saltCrystalSVG(active: boolean, color: string): TemplateResult {
       <polygon points="24,10 31,16 31,26 24,32 17,26 17,16" fill="${color}" fill-opacity="${active ? 0.86 : 0.58}"/>
       <polygon points="24,15 27.8,18.2 27.8,23.8 24,27 20.2,23.8 20.2,18.2" fill="white" fill-opacity="${active ? 0.34 : 0.18}"/>
       <path d="M10,35 L16,28 M38,35 L32,28 M24,37 L24,31" fill="none" stroke="${color}" stroke-width="1.6" stroke-linecap="round" stroke-opacity="${active ? 0.68 : 0.35}"/>
-      ${active ? html`
+      ${active ? svg`
         <path d="M24,7 L24,11 M14,14 L17,17 M34,14 L31,17" fill="none" stroke="${color}" stroke-width="1.4" stroke-linecap="round" stroke-opacity="0.55"
               style="animation:light-glow 2.4s ease-in-out infinite"/>
       ` : ''}
@@ -274,64 +274,178 @@ export function orpEnergySVG(active: boolean, color: string): TemplateResult {
       <circle cx="24" cy="24" r="21" fill="none" stroke="${color}" stroke-width="1.5" stroke-opacity="0.34"/>
       <path d="M26,9 L16,26 H23 L21,39 L32,21 H25 Z"
             fill="${color}" fill-opacity="${active ? 0.9 : 0.62}"/>
-      ${active ? html`
+      ${active ? svg`
         <circle cx="24" cy="24" r="14.5" fill="none" stroke="${color}" stroke-width="1.2" stroke-opacity="0.28"
                 style="animation:ring-pulse 1.9s ease-out infinite"/>
       ` : ''}
     </svg>`;
 }
 
+/** Options for {@link chemGaugeSVG}. */
+export interface ChemGaugeOptions {
+  /** Measured value. `undefined` renders the gauge in an empty "no data" state. */
+  value?: number;
+  /** Displayed scale as [from, to]. */
+  range: [number, number];
+  /** Optimal zone highlighted on the arc as [from, to]. */
+  ideal?: [number, number];
+  /** Arc / needle / value colour. */
+  color: string;
+  /** Unit printed next to the value (e.g. `mV`). */
+  unit?: string;
+  /** Decimals used for the value and the scale labels. */
+  decimals?: number;
+  /** Accessible description of the reading. */
+  ariaLabel?: string;
+}
+
 /**
- * Animated gauge needle for chemistry/sensor readings
+ * Geometry of the gauge: a semicircle around (50,46) with radius 34 inside a
+ * 100×76 viewBox. The bottom strip is reserved for the numeric reading, so the
+ * needle never overlaps the value.
  */
-export function gaugeNeedleSVG(value: number, min: number, max: number, color: string): TemplateResult {
-  const normalizedValue = Math.max(min, Math.min(max, value));
-  const percent = (normalizedValue - min) / (max - min);
-  const rotation = percent * 180 - 90;
+const GAUGE_CX = 50;
+const GAUGE_CY = 46;
+const GAUGE_R = 34;
+
+/**
+ * Point on the gauge arc for a fraction 0..1 (0 = left end, 1 = right end).
+ * Exported so the geometry can be unit-tested without a DOM.
+ */
+export function gaugePoint(fraction: number, radius = GAUGE_R): { x: number; y: number } {
+  // The arc sweeps from 180° (left) to 0° (right) in SVG coordinates.
+  const angle = Math.PI * (1 - clamp01(fraction));
+  return {
+    x: GAUGE_CX + radius * Math.cos(angle),
+    y: GAUGE_CY - radius * Math.sin(angle),
+  };
+}
+
+/**
+ * Arc path between two fractions of the gauge sweep.
+ *
+ * The full sweep is a semicircle, so any segment of it is at most 180° and the
+ * large-arc flag is always 0. Setting it from `to - from > 0.5` made every
+ * reading past the midpoint take the long way round the circle.
+ */
+function gaugeArc(from: number, to: number, radius = GAUGE_R): string {
+  const start = gaugePoint(from, radius);
+  const end = gaugePoint(to, radius);
+  return `M ${start.x.toFixed(2)} ${start.y.toFixed(2)} A ${radius} ${radius} 0 0 1 ${end.x.toFixed(2)} ${end.y.toFixed(2)}`;
+}
+
+/**
+ * Half-circle gauge for chemistry readings (pH, ORP, …).
+ *
+ * Renders the scale, the optimal zone, a value arc, a needle and — crucially —
+ * the numeric value itself, so the tile is readable without a tooltip.
+ */
+export function chemGaugeSVG(options: ChemGaugeOptions): TemplateResult {
+  const { range, ideal, color, unit = '', decimals = 1, ariaLabel } = options;
+  const [min, max] = range;
+  const span = max - min;
+  const hasValue = options.value !== undefined && Number.isFinite(options.value);
+
+  const fractionOf = (v: number) => (span > 0 ? clamp01((v - min) / span) : 0);
+  const fraction = hasValue ? fractionOf(options.value as number) : 0;
+
+  // The needle is drawn pointing straight up and rotated into place, because
+  // `transform` transitions smoothly in every browser while `x2`/`y2` do not.
+  const rotation = fraction * 180 - 90;
+  const needleLength = GAUGE_R - 5;
+
+  const idealFrom = ideal ? fractionOf(Math.min(ideal[0], ideal[1])) : undefined;
+  const idealTo = ideal ? fractionOf(Math.max(ideal[0], ideal[1])) : undefined;
+  const hasIdeal = idealFrom !== undefined && idealTo !== undefined && idealTo - idealFrom > 0.001;
+
+  const label = ariaLabel
+    ?? (hasValue ? `${(options.value as number).toFixed(decimals)}${unit ? ` ${unit}` : ''}` : 'Keine Daten');
+
+  const scaleLabel = 'var(--vpc-text-tertiary, rgba(60,60,67,0.45))';
 
   return html`
-    <svg viewBox="0 0 100 60" style="width:100%;height:auto;display:block" xmlns="http://www.w3.org/2000/svg">
-      <!-- Background gauge arc -->
-      <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="rgba(0,0,0,0.1)" stroke-width="8" stroke-linecap="round"/>
+    <svg viewBox="0 0 100 76" style="width:100%;height:100%;display:block"
+         xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${label}" font-family="inherit">
+      <!-- Scale -->
+      <path d="${gaugeArc(0, 1)}" fill="none" stroke-width="7" stroke-linecap="round"
+            style="stroke:var(--vpc-gauge-track, rgba(120,120,128,0.18))"/>
+
       <!-- Value arc -->
-      <path d="M 10 50 A 40 40 0 0 1 ${10 + 80*percent} ${50 - 40*(1-Math.cos(percent*Math.PI))}"
-            fill="none" stroke="${color}" stroke-width="8" stroke-linecap="round"
-            style="will-change:stroke-dasharray;animation:gauge-fill 0.6s ease-out forwards"/>
-      <!-- Needle pivot -->
-      <circle cx="50" cy="50" r="3" fill="${color}"/>
+      ${hasValue && fraction > 0.004 ? svg`
+        <path d="${gaugeArc(0, fraction)}" fill="none" stroke-width="7" stroke-linecap="round"
+              style="stroke:${color};transition:stroke 0.3s ease"/>
+      ` : ''}
+
+      <!-- Optimal zone, drawn inside the main arc so the value arc can never
+           cover it – that is what made the target band disappear at high readings -->
+      ${hasIdeal ? svg`
+        <path d="${gaugeArc(idealFrom as number, idealTo as number, GAUGE_R - 6.5)}" fill="none"
+              stroke-width="3" stroke-linecap="butt"
+              style="stroke:var(--vpc-success, #34C759)"/>
+      ` : ''}
+
       <!-- Needle -->
-      <line x1="50" y1="50" x2="50" y2="15" stroke="${color}" stroke-width="3" stroke-linecap="round"
-            style="will-change:transform;transform:rotate(${rotation}deg);transform-origin:50px 50px;transition:transform 0.5s cubic-bezier(0.34,1.4,0.64,1)"/>
-      <!-- Center cap -->
-      <circle cx="50" cy="50" r="5" fill="${color}" fill-opacity="0.8"/>
-      <circle cx="50" cy="50" r="2" fill="white"/>
+      ${hasValue ? svg`
+        <line x1="${GAUGE_CX}" y1="${GAUGE_CY}" x2="${GAUGE_CX}" y2="${GAUGE_CY - needleLength}"
+              stroke-width="2.6" stroke-linecap="round"
+              transform="rotate(${rotation.toFixed(2)} ${GAUGE_CX} ${GAUGE_CY})"
+              style="stroke:${color};transition:transform 0.5s cubic-bezier(0.34,1.4,0.64,1),stroke 0.3s ease"/>
+        <circle cx="${GAUGE_CX}" cy="${GAUGE_CY}" r="4.2" style="fill:${color}"/>
+        <circle cx="${GAUGE_CX}" cy="${GAUGE_CY}" r="1.7" style="fill:var(--vpc-bg, #fff)"/>
+      ` : svg`
+        <circle cx="${GAUGE_CX}" cy="${GAUGE_CY}" r="4.2" style="fill:var(--vpc-gauge-track, rgba(120,120,128,0.18))"/>
+      `}
+
+      <!-- Scale end labels -->
+      <text x="3" y="55" text-anchor="start" font-size="7.5" style="fill:${scaleLabel}">${min.toFixed(decimals)}</text>
+      <text x="97" y="55" text-anchor="end" font-size="7.5" style="fill:${scaleLabel}">${max.toFixed(decimals)}</text>
+
+      <!-- Reading -->
+      <text x="${GAUGE_CX}" y="72" text-anchor="middle" font-size="19" font-weight="700"
+            style="fill:${hasValue ? color : scaleLabel}" letter-spacing="-0.5"
+        >${hasValue ? (options.value as number).toFixed(decimals) : '--'}${unit ? svg`<tspan font-size="9" font-weight="600" style="fill:${scaleLabel}" dx="2">${unit}</tspan>` : ''}</text>
     </svg>`;
+}
+
+/**
+ * Backwards-compatible wrapper around {@link chemGaugeSVG}.
+ * @deprecated Prefer `chemGaugeSVG` – it also renders the value and the optimal zone.
+ */
+export function gaugeNeedleSVG(value: number, min: number, max: number, color: string): TemplateResult {
+  return chemGaugeSVG({ value, range: [min, max], color });
 }
 
 /**
  * Animated filter pressure gauge with warning colors
  */
 export function filterGaugeSVG(pressure: number, maxPressure: number): TemplateResult {
-  const percent = Math.min(pressure / maxPressure, 1);
+  const safeMax = maxPressure > 0 ? maxPressure : 1;
+  const percent = clamp01(pressure / safeMax);
   const statusColor = percent > 0.8 ? '#FF5722' : percent > 0.6 ? '#FF9F0A' : '#34C759';
 
+  // Actual circumference of the r=40 ring – the old hard-coded 240 made the
+  // arc overshoot the scale by ~5%.
+  const circumference = 2 * Math.PI * 40;
+  const dash = percent * circumference;
+  const muted = 'var(--vpc-text-tertiary, rgba(60,60,67,0.45))';
+
   return html`
-    <svg viewBox="0 0 100 100" style="width:100%;height:auto;display:block" xmlns="http://www.w3.org/2000/svg">
+    <svg viewBox="0 0 100 100" style="width:100%;height:auto;display:block" xmlns="http://www.w3.org/2000/svg"
+         role="img" aria-label="${pressure.toFixed(2)} von ${safeMax} bar" font-family="inherit">
       <!-- Outer ring -->
-      <circle cx="50" cy="50" r="48" fill="none" stroke="rgba(0,0,0,0.08)" stroke-width="2"/>
+      <circle cx="50" cy="50" r="48" fill="none" stroke-width="2" style="stroke:var(--vpc-gauge-track, rgba(120,120,128,0.18))"/>
       <!-- Background arc (full range) -->
-      <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(0,0,0,0.06)" stroke-width="12" stroke-linecap="round"/>
+      <circle cx="50" cy="50" r="40" fill="none" stroke-width="12" stroke-linecap="round" style="stroke:var(--vpc-gauge-track, rgba(120,120,128,0.18))"/>
       <!-- Colored pressure arc -->
       <circle cx="50" cy="50" r="40" fill="none" stroke="${statusColor}" stroke-width="12" stroke-linecap="round"
-              stroke-dasharray="${percent * 240} 240"
+              stroke-dasharray="${dash.toFixed(2)} ${circumference.toFixed(2)}"
               style="will-change:stroke-dasharray;transform:rotate(-90deg);transform-origin:50px 50px;transition:stroke 0.4s ease, stroke-dasharray 0.6s cubic-bezier(0.34,1.4,0.64,1)"/>
-      <!-- Gauge labels -->
-      <text x="20" y="55" text-anchor="middle" font-size="10" fill="rgba(0,0,0,0.4)">0</text>
-      <text x="80" y="55" text-anchor="middle" font-size="10" fill="rgba(0,0,0,0.4)">${maxPressure}</text>
-      <!-- Center value display -->
-      <circle cx="50" cy="50" r="25" fill="white" fill-opacity="0.95"/>
-      <text x="50" y="48" text-anchor="middle" font-size="20" font-weight="bold" fill="${statusColor}">${Math.round(pressure)}</text>
-      <text x="50" y="60" text-anchor="middle" font-size="11" fill="rgba(0,0,0,0.5)">bar</text>
+      <!-- Center value display: inherits the card background so it works in dark themes -->
+      <circle cx="50" cy="50" r="25" style="fill:var(--vpc-bg, #fff)"/>
+      <text x="50" y="50" text-anchor="middle" font-size="20" font-weight="700" fill="${statusColor}">${pressure.toFixed(pressure < 10 ? 1 : 0)}</text>
+      <text x="50" y="62" text-anchor="middle" font-size="10" style="fill:${muted}">bar</text>
+      <!-- Scale ends -->
+      <text x="50" y="88" text-anchor="middle" font-size="9" style="fill:${muted}">0 – ${safeMax} bar</text>
     </svg>`;
 }
 
@@ -364,7 +478,7 @@ export function chartSVG(values: number[], color: string): TemplateResult {
       ${values.map((v, i) => {
         const x = (i / (values.length - 1 || 1)) * 80 + 10;
         const y = 70 - ((v - min) / range) * 50;
-        return html`<circle cx="${x}" cy="${y}" r="1.5" fill="${color}" fill-opacity="0.6"/>`;
+        return svg`<circle cx="${x}" cy="${y}" r="1.5" fill="${color}" fill-opacity="0.6"/>`;
       })}
     </svg>`;
 }
@@ -378,22 +492,22 @@ export function alertPulseSVG(severity: 'info' | 'warning' | 'error', color: str
   return html`
     <svg viewBox="0 0 48 48" style="width:100%;height:100%;display:block;overflow:visible" xmlns="http://www.w3.org/2000/svg">
       <!-- Pulsing background circles -->
-      ${severity === 'error' ? html`
+      ${severity === 'error' ? svg`
         <circle cx="24" cy="24" r="22" fill="${color}" fill-opacity="${bgOpacity}"
                 style="will-change:r,fill-opacity;animation:alert-pulse 1.5s ease-in-out infinite"/>
       ` : ''}
 
       <!-- Alert triangle/bell/info -->
-      ${severity === 'error' ? html`
+      ${severity === 'error' ? svg`
         <!-- Triangle -->
         <path d="M24,6 L42,38 L6,38 Z" fill="${color}" fill-opacity="0.9"/>
         <text x="24" y="35" text-anchor="middle" font-size="20" fill="white" font-weight="bold">!</text>
-      ` : severity === 'warning' ? html`
+      ` : severity === 'warning' ? svg`
         <!-- Bell -->
         <path d="M24,8 C20,8 16,10 16,14 L16,24 C16,28 14,30 14,32 L34,32 C34,30 32,28 32,24 L32,14 C32,10 28,8 24,8 Z"
               fill="${color}" fill-opacity="0.85" stroke="${color}" stroke-width="0.5"/>
         <circle cx="24" cy="38" r="2" fill="${color}" fill-opacity="0.7"/>
-      ` : html`
+      ` : svg`
         <!-- Info circle -->
         <circle cx="24" cy="24" r="18" fill="none" stroke="${color}" stroke-width="2" stroke-opacity="0.8"/>
         <circle cx="24" cy="16" r="1.5" fill="${color}"/>
@@ -425,7 +539,7 @@ export function valveSVG(open: boolean, color: string): TemplateResult {
       <rect x="17" y="7" width="14" height="3" rx="1.5" fill="${color}" fill-opacity="0.75"
             style="will-change:transform;transform:rotate(${open ? 0 : 90}deg);transform-origin:24px 8.5px;transition:transform 0.4s ease"/>
       <!-- Flow indicator -->
-      ${open ? html`
+      ${open ? svg`
         <circle cx="9" cy="24" r="2" fill="white" fill-opacity="0.7" style="will-change:transform;animation:flow-dot 1.2s ease-in-out infinite"/>
         <circle cx="39" cy="24" r="2" fill="white" fill-opacity="0.7" style="will-change:transform;animation:flow-dot 1.2s ease-in-out infinite 0.3s"/>
       ` : ''}
@@ -465,7 +579,7 @@ export function refillSVG(level: number, maxLevel: number, color: string): Templ
       <path d="M34,14 C37,16 39,18 39,22 C39,25.8 36.5,28.5 33.5,29.5"
             fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round"/>
       <path d="M35,15 L39,14 L38,18" fill="none" stroke="${color}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-      ${percent < 0.45 ? html`
+      ${percent < 0.45 ? svg`
         <path d="M12,37 C15,34 18,40 21,37 C24,34 27,40 30,37" fill="none" stroke="${color}" stroke-width="1.5" stroke-linecap="round" stroke-opacity="0.55"
               style="animation:wave-drift 2.1s ease-in-out infinite"/>
       ` : ''}
@@ -487,13 +601,13 @@ export function overflowSVG(waterLevel: number, maxLevel: number, overflowEnable
       <!-- Water level indicator -->
       <rect x="17.5" y="${35 - 22 * Math.min(percent, 1)}" width="13" height="${22 * Math.min(percent, 1)}" rx="2" fill="${color}" fill-opacity="0.65"/>
       <!-- Warning triangle for overflow -->
-      ${isOverflowing ? html`
+      ${isOverflowing ? svg`
         <path d="M24,8 L28,14 L20,14 Z" fill="${color}" fill-opacity="0.9"/>
         <circle cx="24" cy="10" r="1.2" fill="white" fill-opacity="0.8"/>
         <path d="M24,11 L24,12.5" stroke="white" stroke-width="0.8" stroke-opacity="0.8"/>
       ` : ''}
       <!-- Overflow waves animation when enabled -->
-      ${overflowEnabled && isOverflowing ? html`
+      ${overflowEnabled && isOverflowing ? svg`
         <path d="M16,12 C19,10 22,14 25,12 C28,10 31,14 34,12" fill="none" stroke="${color}" stroke-width="1.5" stroke-linecap="round" stroke-opacity="0.7"
               style="animation:wave-pulse 0.8s ease-in-out infinite"/>
       ` : ''}
@@ -509,7 +623,7 @@ export function solarSurplusSVG(hasSurplus: boolean, _isExporting: boolean, colo
       <circle cx="24" cy="24" r="22" fill="${color}" fill-opacity="${hasSurplus ? 0.15 : 0.07}"/>
       <circle cx="24" cy="24" r="12" fill="${color}" fill-opacity="0.8"/>
       <!-- Rays -->
-      ${[0,45,90,135,180,225,270,315].map(deg => html`
+      ${[0,45,90,135,180,225,270,315].map(deg => svg`
         <line x1="24" y1="8" x2="24" y2="4" stroke="${color}" stroke-width="2" style="transform:rotate(${deg}deg);transform-origin:24px 24px;"/>
       `)}
     </svg>`;
@@ -529,7 +643,7 @@ export function flowRateSVG(_flow: number, _maxFlow: number, color: string): Tem
             style="${active ? 'animation:wave-drift 1.6s ease-in-out infinite' : ''}"/>
       <path d="M9,28 C13,24 17,32 21,28 C25,24 29,32 33,28 C36,26 38,28 39,28" fill="none" stroke="${color}" stroke-width="2.4" stroke-linecap="round" stroke-opacity="${active ? 0.7 : 0.3}"
             style="${active ? 'animation:wave-drift 1.6s ease-in-out infinite 0.25s' : ''}"/>
-      ${active ? html`
+      ${active ? svg`
         <circle cx="15" cy="17" r="1.4" fill="white" fill-opacity="0.55" style="animation:bubble-float 1.7s ease-in-out infinite"/>
         <circle cx="31" cy="16" r="1.2" fill="white" fill-opacity="0.4" style="animation:bubble-float 2s ease-in-out infinite 0.35s"/>
       ` : ''}
@@ -547,7 +661,7 @@ export function inletSVG(isInflowing: boolean, color: string): TemplateResult {
       <rect x="9" y="20" width="16" height="8" rx="4" fill="${color}" fill-opacity="0.72" />
       <path d="M25,24 H38" fill="none" stroke="${color}" stroke-width="3" stroke-linecap="round"/>
       <path d="M33,18 L39,24 L33,30" fill="none" stroke="${color}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
-      ${isInflowing ? html`
+      ${isInflowing ? svg`
         <circle cx="15" cy="24" r="2" fill="white" fill-opacity="0.75" style="animation:flow-dot 1.1s ease-in-out infinite"/>
         <circle cx="22" cy="24" r="2" fill="white" fill-opacity="0.6" style="animation:flow-dot 1.1s ease-in-out infinite 0.25s"/>
       ` : ''}
@@ -567,7 +681,7 @@ export function counterCurrentSVG(isActive: boolean, color: string): TemplateRes
             style="${isActive ? 'animation:wave-drift 1.4s ease-in-out infinite' : ''}"/>
       <path d="M34,30 H16 M16,30 L20.5,25.5 M16,30 L20.5,34.5" fill="none" stroke="${color}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"
             style="${isActive ? 'animation:wave-drift 1.4s ease-in-out infinite reverse' : ''}"/>
-      ${isActive ? html`<circle cx="24" cy="24" r="4.5" fill="${color}" fill-opacity="0.18" style="animation:breathe 1.8s ease-in-out infinite"/>` : ''}
+      ${isActive ? svg`<circle cx="24" cy="24" r="4.5" fill="${color}" fill-opacity="0.18" style="animation:breathe 1.8s ease-in-out infinite"/>` : ''}
     </svg>`;
 }
 
@@ -584,7 +698,7 @@ export function automationRulesSVG(activeCount: number, color: string): Template
       <rect x="28" y="13" width="10" height="8" rx="3" fill="${color}" fill-opacity="0.86"/>
       <rect x="19" y="27" width="10" height="8" rx="3" fill="${color}" fill-opacity="0.86"/>
       <path d="M20,17 H28 M24,17 V27" fill="none" stroke="${color}" stroke-width="2.2" stroke-linecap="round" stroke-opacity="0.9"/>
-      ${activeCount > 0 ? html`
+      ${activeCount > 0 ? svg`
         <circle cx="24" cy="24" r="15" fill="none" stroke="${color}" stroke-width="1.1" stroke-opacity="0.24" style="animation:ring-pulse 2.2s ease-out infinite"/>
       ` : ''}
     </svg>`;
