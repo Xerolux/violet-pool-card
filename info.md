@@ -112,7 +112,7 @@ Die [Violet Pool Controller](https://github.com/Xerolux/violet-hass) Integration
 
 1. **HACS** öffnen → **Frontend**
 2. Drei-Punkte-Menü → **Eigene Repositories**
-3. Repository-URL: `https://github.com/Xerolux/VIOLET_CARD_QUICK`
+3. Repository-URL: `https://github.com/Xerolux/violet-pool-card`
 4. Kategorie **Dashboard** → **Hinzufügen**
 5. **Violet Pool Card** installieren
 6. Home Assistant **neustarten**
@@ -923,10 +923,10 @@ entities:
 ## Support & Entwicklung
 
 ### Bug Reports
-Bitte auf GitHub erstellen: [Issues](https://github.com/Xerolux/VIOLET_CARD_QUICK/issues)
+Bitte auf GitHub erstellen: [Issues](https://github.com/Xerolux/violet-pool-card/issues)
 
 ### Feature Requests
-Im [Discussions](https://github.com/Xerolux/VIOLET_CARD_QUICK/discussions) Forum
+Im [Discussions](https://github.com/Xerolux/violet-pool-card/discussions) Forum
 
 ### Development
 ```bash
