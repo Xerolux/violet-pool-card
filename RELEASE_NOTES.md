@@ -1,23 +1,59 @@
-## v0.3.0 – Violet Pool Card
+## v0.4.0 – Violet Pool Card
 
 ✅ **STABLE RELEASE**
 
+Diese Version behebt die Ursache für zwei häufig gemeldete Probleme: dauerhafte
+"Wert ausserhalb des Bereichs"-Meldungen und die unleserlichen pH-/Redox-Anzeigen.
+
 ### ✨ New Features | Neue Funktionen
 
-- **New `lagoon` dark theme** — deep navy gradient with violet accent (WCAG-AA contrast)
-- **New editor preset "Dark Lagoon"** for one-click dark setup
+- **Grenzwerte sind jetzt einstellbar** — im visuellen Editor unter **Grenzwerte** oder per YAML:
 
-### 🚀 Improvements | Verbesserungen
+  ```yaml
+  thresholds:
+    ph:          { min: 7.0, max: 7.6 }
+    orp:         { min: 600, max: 800 }
+    chlorine:    { min: 0.3, max: 1.5 }
+    temperature: { min: 26, max: 31 }
+  alerts: warning
+  ```
 
-- Accessibility: `:focus-visible` rings on all interactive elements
-- Accessibility: `prefers-reduced-motion` support (WCAG 2.1 AA)
-- Editor theme picker and demo page updated for lagoon
-- Bilingual labels added (`theme_lagoon`)
+  Je Messgröße lassen sich `min`, `max`, eine Warn-Toleranz (`warn`), der Anzeigebereich (`range`)
+  und ein `ignore`-Flag setzen. Unterstützt: `ph`, `orp`, `chlorine`, `salt`, `temperature`,
+  `cyanuric_acid`, `alkalinity`.
+- **Meldungsstufe `alerts`** — `all` (Standard), `warning`, `critical` oder `none`. Die Messwerte
+  bleiben immer sichtbar; nur die Hinweise werden gefiltert.
+- **Gauges mit Werten** — pH und Redox zeigen Zahl, Einheit, Skalenenden und die Optimalzone.
+
+### 🐛 Bug Fixes | Fehlerbehebungen
+
+- Verschachtelte SVG-Templates wurden im HTML-Namespace erzeugt und **nie gerendert** — betraf
+  32 Stellen inklusive Gauge-Nadel, Wertbogen und den animierten Details von Pumpe, Solar, Licht,
+  Abdeckung und Kanistern.
+- Gauge-Bogen wurde als Gerade statt entlang des Kreises berechnet; ab Skalenmitte lief er zusätzlich
+  den langen Weg um den Kreis.
+- Statusfarbe und Statustext konnten sich widersprechen ("Zu hoch" in Grün).
+- Alarme und Empfehlungen wurden doppelt gelistet — jetzt ein Panel mit Befund und Empfehlung.
+- Kartentitel wurde vom Status-Badge überlagert.
+- Filterdruck-Gauge: falscher Kreisumfang (~5 % Überzeichnung) und in dunklen Themes unlesbar.
+- "Wasserqualität optimal" erschien auch bei stummgeschalteten, aber abweichenden Werten.
+- Karten-Vorschau im Card Picker zeigte einen Entity-Fehler statt einer Vorschau.
+
+### 🎨 Design
+
+- Neues Karten-Icon und Logo (violette Kachel mit Wassertropfen und Wellen) in Light- und
+  Dark-Varianten, reproduzierbar über `scripts/generate-brand-assets.py`.
+- Gauges respektieren dunkle Themes über `--vpc-gauge-track`.
+
+### 🧪 Tests
+
+- 88 Tests (vorher 47), davon 41 neu für Grenzwert-Logik und Gauge-Geometrie.
 
 ### 🧩 Compatibility
 
-- All 13 existing themes remain visually byte-identical
-- Purely additive; no config migrations required
+- Rein additiv. Bestehende Konfigurationen funktionieren unverändert und behalten die
+  bisherigen Standardbereiche (angelehnt an DIN 19643).
+- Keine Migration nötig.
 
 ---
 
@@ -37,11 +73,9 @@
    - Type: `JavaScript Module`
 4. Refresh the Home Assistant frontend
 
-To use the new theme, set `theme: lagoon` in your card config or pick it in the visual editor.
-
 ---
 
-📋 [Full changelog: v0.2.2...v0.3.0](https://github.com/Xerolux/violet-pool-card/compare/v0.2.2...v0.3.0)
+📋 [Full changelog: v0.3.0...v0.4.0](https://github.com/Xerolux/violet-pool-card/compare/v0.3.0...v0.4.0)
 
 ---
 
@@ -66,4 +100,4 @@ Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
 
 ---
 
-_Generated on 2026-07-18_
+_Generated on 2026-08-16_

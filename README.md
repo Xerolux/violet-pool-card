@@ -1,7 +1,7 @@
 # Violet Pool Card
 
 <div align="center">
-<img src="logo.png" width="300" alt="Violet Pool Card Logo">
+<img src="https://raw.githubusercontent.com/Xerolux/violet-pool-card/main/logo.png" width="360" alt="Violet Pool Card">
 <br><br>
 
 [![GitHub Release][releases-shield]][releases]
@@ -472,6 +472,47 @@ target_entity: number.violet_pool_target_temp
 | `show_controls` | boolean | true | Control-Buttons anzeigen |
 | `show_runtime` | boolean | false | Betriebsstunden anzeigen |
 | `show_history` | boolean | false | Historie anzeigen |
+
+### Grenzwerte (Zielbereiche der Wasserwerte)
+
+Bis v0.3.0 waren die "optimalen" Bereiche fest im Code verdrahtet (pH 7.0–7.4, Redox 650–750 mV …).
+Wer seinen Pool bewusst anders fährt, bekam dadurch dauerhaft Meldungen "Wert ausserhalb des Bereichs".
+Ab **v0.4.0** legst du die Zielbereiche selbst fest – im visuellen Editor unter **Grenzwerte** oder in YAML:
+
+```yaml
+type: custom:violet-pool-card
+card_type: chemical
+thresholds:
+  ph:          { min: 7.0, max: 7.6 }
+  orp:         { min: 600, max: 800 }
+  chlorine:    { min: 0.3, max: 1.5 }
+  salt:        { min: 3000, max: 4500 }
+  temperature: { min: 26, max: 31 }
+alerts: warning
+```
+
+| Feld | Typ | Beschreibung |
+|------|-----|--------------|
+| `min` | number | Untere Grenze des Optimalbereichs |
+| `max` | number | Obere Grenze des Optimalbereichs |
+| `warn` | number | Toleranz ausserhalb von `min`/`max`, die nur als **Warnung** statt als **kritisch** gilt |
+| `range` | `[von, bis]` | Anzeigebereich der Skala/Gauge. Wird automatisch geweitet, damit der Zielbereich immer sichtbar bleibt |
+| `ignore` | boolean | Diese Messgröße von der Bewertung ausnehmen – sie wird angezeigt, löst aber nie eine Meldung aus |
+
+Konfigurierbare Messgrößen: `ph`, `orp`, `chlorine`, `salt`, `temperature`, `cyanuric_acid`, `alkalinity`.
+Nicht gesetzte Felder behalten den Standardwert (angelehnt an DIN 19643).
+
+**Meldungsstufe** über `alerts` – damit die Karte nicht bei jeder kleinen Abweichung Alarm schlägt:
+
+| Wert | Verhalten |
+|------|-----------|
+| `all` (Standard) | Jede Abweichung wird gemeldet |
+| `warning` | Warnungen und kritische Werte |
+| `critical` | Nur kritische Werte (ausserhalb von `min`/`max` **plus** `warn`) |
+| `none` | Keine Wasserwert-Meldungen – die Werte werden weiterhin angezeigt |
+
+Die Grenzwerte gelten für `chemical`, `overview`, `system`, `heater` und `dosing` und steuern dort
+Statustexte, Farben, die Optimalzone in den Gauges **und** die Meldungen – alles bleibt konsistent.
 
 ### Trenddaten für Sparklines
 

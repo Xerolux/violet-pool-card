@@ -10,6 +10,10 @@
 import { LitElement, html, css, TemplateResult, CSSResultGroup } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import type { VioletPoolCardConfig, CardSize, Theme, Animation } from '../violet-pool-card';
+import { DEFAULT_THRESHOLDS, type MetricKey } from '../utils/thresholds';
+
+/** Card types that read water values and therefore expose the threshold editor. */
+const THRESHOLD_CARD_TYPES = ['chemical', 'overview', 'system', 'heater', 'dosing'];
 
 // HomeAssistant types
 interface HassEntity {
@@ -400,6 +404,44 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
           `
           : ''}
 
+        <!-- Water value thresholds -->
+        ${THRESHOLD_CARD_TYPES.includes(this._config.card_type) ? html`
+          <div class="config-section">
+            <div class="section-header">
+              <ha-icon icon="mdi:tune-variant"></ha-icon>
+              <span>Grenzwerte</span>
+            </div>
+            <div class="prefix-info">
+              <ha-icon icon="mdi:information-outline"></ha-icon>
+              <span>
+                Lege fest, welche Werte für deinen Pool "optimal" sind. Nur Abweichungen
+                ausserhalb dieser Bereiche werden gemeldet. Leer lassen = Standardwert.
+              </span>
+            </div>
+
+            <ha-select
+              label="Meldungen anzeigen"
+              .value="${this._config.alerts || 'all'}"
+              @selected="${this._alertLevelChanged}"
+              @closed="${(e: Event) => e.stopPropagation()}"
+            >
+              <mwc-list-item value="all">🔔 Alle Abweichungen</mwc-list-item>
+              <mwc-list-item value="warning">⚠️ Warnungen und kritische Werte</mwc-list-item>
+              <mwc-list-item value="critical">🚨 Nur kritische Werte</mwc-list-item>
+              <mwc-list-item value="none">🔕 Keine Wasserwert-Meldungen</mwc-list-item>
+            </ha-select>
+
+            ${this._renderThresholdRow('ph', 'pH-Wert', 0.1)}
+            ${this._renderThresholdRow('orp', 'Redox (mV)', 10)}
+            ${this._renderThresholdRow('chlorine', 'Chlor (mg/l)', 0.1)}
+            ${this._renderThresholdRow('salt', 'Salz (ppm)', 100)}
+            ${this._renderThresholdRow('temperature', 'Wassertemperatur (°C)', 0.5)}
+
+            <mwc-button class="threshold-reset" @click="${this._resetThresholds}">
+              Auf Standardwerte zurücksetzen
+            </mwc-button>
+          </div>
+        ` : ''}
 
         <!-- Entity Overrides (card-type specific) -->
         ${['pump','heater','solar','dosing','overview','system','chemical'].includes(this._config.card_type) ? html`
@@ -807,6 +849,102 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
     this._fireConfigChanged();
   }
 
+  /** One row of min/max inputs for a single water value. */
+  private _renderThresholdRow(metric: MetricKey, label: string, step: number): TemplateResult {
+    const band = this._config.thresholds?.[metric];
+    const fallback = DEFAULT_THRESHOLDS[metric];
+
+    return html`
+      <div class="threshold-row">
+        <span class="threshold-label">${label}</span>
+        <ha-textfield
+          type="number"
+          label="Min"
+          .step="${String(step)}"
+          .value="${band?.min !== undefined ? String(band.min) : ''}"
+          placeholder="${String(fallback.min)}"
+          @change="${(e: Event) => this._thresholdChanged(metric, 'min', e)}"
+        ></ha-textfield>
+        <ha-textfield
+          type="number"
+          label="Max"
+          .step="${String(step)}"
+          .value="${band?.max !== undefined ? String(band.max) : ''}"
+          placeholder="${String(fallback.max)}"
+          @change="${(e: Event) => this._thresholdChanged(metric, 'max', e)}"
+        ></ha-textfield>
+        <ha-textfield
+          type="number"
+          label="Toleranz"
+          .step="${String(step)}"
+          .value="${band?.warn !== undefined ? String(band.warn) : ''}"
+          placeholder="${String(fallback.warn)}"
+          helper="Warnung statt Alarm"
+          @change="${(e: Event) => this._thresholdChanged(metric, 'warn', e)}"
+        ></ha-textfield>
+      </div>
+    `;
+  }
+
+  private _thresholdChanged(metric: MetricKey, key: 'min' | 'max' | 'warn', ev: Event): void {
+    const raw = (ev.target as HTMLInputElement).value?.trim() ?? '';
+    const thresholds: NonNullable<VioletPoolCardConfig['thresholds']> = { ...(this._config.thresholds || {}) };
+    const band = { ...(thresholds[metric] || {}) };
+
+    if (raw === '') {
+      delete band[key];
+    } else {
+      const parsed = Number(raw);
+      if (!Number.isFinite(parsed)) return;
+      band[key] = parsed;
+    }
+
+    if (Object.keys(band).length === 0) {
+      delete thresholds[metric];
+    } else {
+      thresholds[metric] = band;
+    }
+
+    const next = { ...this._config };
+    if (Object.keys(thresholds).length === 0) {
+      delete next.thresholds;
+    } else {
+      next.thresholds = thresholds;
+    }
+
+    this._config = next;
+    this._fireConfigChanged();
+  }
+
+  private _alertLevelChanged(ev: Event): void {
+    const value = (ev.target as HaElement).value as VioletPoolCardConfig['alerts'];
+    if (!value || this._config.alerts === value) return;
+
+    const next = { ...this._config };
+    if (value === 'all') {
+      delete next.alerts;
+    } else {
+      next.alerts = value;
+    }
+    // The legacy switch would silently override the new setting.
+    delete next.show_alerts;
+
+    this._config = next;
+    this._fireConfigChanged();
+  }
+
+  private _resetThresholds(): void {
+    if (!this._config.thresholds && !this._config.alerts && this._config.show_alerts === undefined) return;
+
+    const next = { ...this._config };
+    delete next.thresholds;
+    delete next.alerts;
+    delete next.show_alerts;
+
+    this._config = next;
+    this._fireConfigChanged();
+  }
+
   private _fireConfigChanged(): void {
     const event = new CustomEvent('config-changed', {
       detail: { config: this._config },
@@ -817,7 +955,7 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
   }
 
   static get styles(): CSSResultGroup {
-    return css`:host{font-family:-apple-system, system-ui, 'Segoe UI', sans-serif;}.card-config{display:flex;flex-direction:column;gap:14px;padding:16px;}.config-section{background:var(--card-background-color, #fff);border:1px solid var(--divider-color, rgba(0,0,0,0.08));border-radius:14px;padding:16px;}.section-header{display:flex;align-items:center;gap:8px;margin-bottom:14px;font-weight:600;font-size:14px;letter-spacing:-0.2px;color:var(--primary-text-color);}.section-header ha-icon{--mdc-icon-size:18px;color:var(--primary-color);}.prefix-info{display:flex;align-items:flex-start;gap:8px;padding:10px 12px;margin-top:10px;background:rgba(0,122,255,0.07);border-radius:10px;font-size:12px;color:var(--secondary-text-color);line-height:1.4;}.prefix-info ha-icon{--mdc-icon-size:16px;color:#007AFF;flex-shrink:0;margin-top:2px;}.premium-section{background:var(--card-background-color, #fff);border:2px solid rgba(0,122,255,0.15);}.premium-header{color:#007AFF;}.picker-container{margin-bottom:20px;}.picker-container:last-child{margin-bottom:0;}.picker-container > label{display:block;font-weight:500;font-size:13px;margin-bottom:10px;color:var(--secondary-text-color);text-transform:uppercase;letter-spacing:0.5px;}.size-picker{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}.theme-picker{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}.animation-picker{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;}.preset-picker{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}.size-button,.theme-button,.animation-button,.preset-button{display:flex;align-items:center;gap:10px;padding:10px;background:var(--secondary-background-color, rgba(120,120,128,0.06));border:1.5px solid transparent;border-radius:10px;cursor:pointer;transition:all 0.16s ease;font-family:inherit;}.size-button{flex-direction:column;gap:6px;align-items:center;}.theme-button{flex-direction:column;gap:6px;align-items:center;padding:10px 8px;}.preset-button{flex-direction:column;align-items:flex-start;text-align:left;gap:4px;min-height:84px;justify-content:flex-start;}.size-button:hover,.theme-button:hover,.animation-button:hover,.preset-button:hover{border-color:rgba(0,122,255,0.3);background:rgba(0,122,255,0.05);}.size-button.active,.animation-button.active{border-color:#007AFF;background:rgba(0,122,255,0.1);color:#007AFF;}.theme-button.active{border-color:#007AFF;background:rgba(0,122,255,0.08);box-shadow:0 0 0 3px rgba(0,122,255,0.15);}.preset-label{font-size:12px;font-weight:700;color:var(--primary-text-color);}.preset-desc{font-size:11px;line-height:1.35;color:var(--secondary-text-color);}.size-preview{width:36px;height:26px;border-radius:6px;border:2px solid currentColor;opacity:0.3;}.size-preview.size-small{width:22px;height:18px;}.size-preview.size-medium{width:30px;height:22px;}.size-preview.size-large{width:40px;height:28px;}.size-preview.size-fullscreen{width:46px;height:34px;}.size-button.active .size-preview{opacity:1;}.size-button span{font-size:11px;font-weight:500;}.theme-preview{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;border:1px solid rgba(0,0,0,0.08);}.theme-preview.theme-classic{background:#F2F2F7;}.theme-preview.theme-midnight{background:#0D1117;}.theme-preview.theme-elegance{background:linear-gradient(135deg,#FFD700 0%,#F0E6FA 50%,#DDA0DD 100%);}.theme-preview.theme-vibrant{background:linear-gradient(135deg,#FF6B6B 0%,#4ECDC4 100%);}.theme-preview.theme-pure{background:#fff;border:2px solid #e5e5e5;}.theme-preview.theme-frost{background:rgba(200,220,255,0.4);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.3);}.theme-preview.theme-glow{background:#0D0D14;border:2px solid #00D4FF;box-shadow:0 0 8px rgba(0,212,255,0.5);}.theme-preview.theme-metallic{background:linear-gradient(135deg,#C0C0C0 0%,#E8E8E8 50%,#A8A8A8 100%);border:2px solid #999;}.theme-preview.theme-ocean{background:#0077BE;}.theme-preview.theme-sunset{background:#FF6B35;}.theme-preview.theme-forest{background:#228B22;}.theme-preview.theme-aurora{background:linear-gradient(45deg, #00C9FF 0%, #92FE9D 100%);}.theme-dot{width:20px;height:20px;border-radius:50%;border:2px solid rgba(0,0,0,0.1);}.theme-info, .anim-info{display:flex;flex-direction:column;gap:1px;}.theme-label, .anim-label{font-weight:600;color:var(--primary-text-color);font-size:12px;}.theme-desc, .anim-desc{color:var(--secondary-text-color);font-size:10px;}.anim-icon{font-size:18px;}.advanced-section{background:var(--card-background-color);border:1px solid var(--divider-color);border-radius:14px;padding:14px;}.advanced-section summary{display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;font-size:14px;color:var(--primary-text-color);list-style:none;}.advanced-section summary::-webkit-details-marker{display:none;}.advanced-section summary ha-icon{--mdc-icon-size:18px;color:var(--primary-color);}.advanced-content{display:flex;flex-direction:column;gap:12px;margin-top:14px;}ha-select,ha-textfield,ha-entity-picker,ha-icon-picker{width:100%;}ha-formfield{display:flex;align-items:center;margin-bottom:10px;}@media (max-width:760px){.theme-picker,.preset-picker{grid-template-columns:repeat(2,1fr);}.size-picker{grid-template-columns:repeat(2,1fr);}}`;
+    return css`:host{font-family:-apple-system, system-ui, 'Segoe UI', sans-serif;}.card-config{display:flex;flex-direction:column;gap:14px;padding:16px;}.config-section{background:var(--card-background-color, #fff);border:1px solid var(--divider-color, rgba(0,0,0,0.08));border-radius:14px;padding:16px;}.section-header{display:flex;align-items:center;gap:8px;margin-bottom:14px;font-weight:600;font-size:14px;letter-spacing:-0.2px;color:var(--primary-text-color);}.section-header ha-icon{--mdc-icon-size:18px;color:var(--primary-color);}.prefix-info{display:flex;align-items:flex-start;gap:8px;padding:10px 12px;margin-top:10px;background:rgba(0,122,255,0.07);border-radius:10px;font-size:12px;color:var(--secondary-text-color);line-height:1.4;}.prefix-info ha-icon{--mdc-icon-size:16px;color:#007AFF;flex-shrink:0;margin-top:2px;}.premium-section{background:var(--card-background-color, #fff);border:2px solid rgba(0,122,255,0.15);}.premium-header{color:#007AFF;}.picker-container{margin-bottom:20px;}.picker-container:last-child{margin-bottom:0;}.picker-container > label{display:block;font-weight:500;font-size:13px;margin-bottom:10px;color:var(--secondary-text-color);text-transform:uppercase;letter-spacing:0.5px;}.size-picker{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}.theme-picker{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}.animation-picker{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;}.preset-picker{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}.size-button,.theme-button,.animation-button,.preset-button{display:flex;align-items:center;gap:10px;padding:10px;background:var(--secondary-background-color, rgba(120,120,128,0.06));border:1.5px solid transparent;border-radius:10px;cursor:pointer;transition:all 0.16s ease;font-family:inherit;}.size-button{flex-direction:column;gap:6px;align-items:center;}.theme-button{flex-direction:column;gap:6px;align-items:center;padding:10px 8px;}.preset-button{flex-direction:column;align-items:flex-start;text-align:left;gap:4px;min-height:84px;justify-content:flex-start;}.size-button:hover,.theme-button:hover,.animation-button:hover,.preset-button:hover{border-color:rgba(0,122,255,0.3);background:rgba(0,122,255,0.05);}.size-button.active,.animation-button.active{border-color:#007AFF;background:rgba(0,122,255,0.1);color:#007AFF;}.theme-button.active{border-color:#007AFF;background:rgba(0,122,255,0.08);box-shadow:0 0 0 3px rgba(0,122,255,0.15);}.preset-label{font-size:12px;font-weight:700;color:var(--primary-text-color);}.preset-desc{font-size:11px;line-height:1.35;color:var(--secondary-text-color);}.size-preview{width:36px;height:26px;border-radius:6px;border:2px solid currentColor;opacity:0.3;}.size-preview.size-small{width:22px;height:18px;}.size-preview.size-medium{width:30px;height:22px;}.size-preview.size-large{width:40px;height:28px;}.size-preview.size-fullscreen{width:46px;height:34px;}.size-button.active .size-preview{opacity:1;}.size-button span{font-size:11px;font-weight:500;}.theme-preview{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;border:1px solid rgba(0,0,0,0.08);}.theme-preview.theme-classic{background:#F2F2F7;}.theme-preview.theme-midnight{background:#0D1117;}.theme-preview.theme-elegance{background:linear-gradient(135deg,#FFD700 0%,#F0E6FA 50%,#DDA0DD 100%);}.theme-preview.theme-vibrant{background:linear-gradient(135deg,#FF6B6B 0%,#4ECDC4 100%);}.theme-preview.theme-pure{background:#fff;border:2px solid #e5e5e5;}.theme-preview.theme-frost{background:rgba(200,220,255,0.4);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.3);}.theme-preview.theme-glow{background:#0D0D14;border:2px solid #00D4FF;box-shadow:0 0 8px rgba(0,212,255,0.5);}.theme-preview.theme-metallic{background:linear-gradient(135deg,#C0C0C0 0%,#E8E8E8 50%,#A8A8A8 100%);border:2px solid #999;}.theme-preview.theme-ocean{background:#0077BE;}.theme-preview.theme-sunset{background:#FF6B35;}.theme-preview.theme-forest{background:#228B22;}.theme-preview.theme-aurora{background:linear-gradient(45deg, #00C9FF 0%, #92FE9D 100%);}.theme-dot{width:20px;height:20px;border-radius:50%;border:2px solid rgba(0,0,0,0.1);}.theme-info, .anim-info{display:flex;flex-direction:column;gap:1px;}.theme-label, .anim-label{font-weight:600;color:var(--primary-text-color);font-size:12px;}.theme-desc, .anim-desc{color:var(--secondary-text-color);font-size:10px;}.anim-icon{font-size:18px;}.advanced-section{background:var(--card-background-color);border:1px solid var(--divider-color);border-radius:14px;padding:14px;}.advanced-section summary{display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;font-size:14px;color:var(--primary-text-color);list-style:none;}.advanced-section summary::-webkit-details-marker{display:none;}.advanced-section summary ha-icon{--mdc-icon-size:18px;color:var(--primary-color);}.advanced-content{display:flex;flex-direction:column;gap:12px;margin-top:14px;}ha-select,ha-textfield,ha-entity-picker,ha-icon-picker{width:100%;}ha-formfield{display:flex;align-items:center;margin-bottom:10px;}.threshold-row{display:grid;grid-template-columns:minmax(96px,1fr) repeat(3,minmax(72px,1fr));align-items:start;gap:8px;margin-top:12px;}.threshold-label{font-size:12px;font-weight:600;color:var(--primary-text-color);padding-top:14px;}.threshold-reset{margin-top:14px;--mdc-theme-primary:var(--primary-color);}@media (max-width:600px){.threshold-row{grid-template-columns:repeat(3,1fr);}.threshold-label{grid-column:1/-1;padding-top:4px;}}@media (max-width:760px){.theme-picker,.preset-picker{grid-template-columns:repeat(2,1fr);}.size-picker{grid-template-columns:repeat(2,1fr);}}`;
   }
 }
 

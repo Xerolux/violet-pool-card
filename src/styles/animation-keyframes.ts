@@ -47,15 +47,6 @@ export const advancedAnimationStyles = css`
   }
 
   /* === GAUGE & SENSOR ANIMATIONS === */
-  @keyframes gauge-fill {
-    from {
-      stroke-dasharray: 0 240;
-    }
-    to {
-      stroke-dasharray: var(--gauge-dash) 240;
-    }
-  }
-
   @keyframes line-draw {
     from {
       stroke-dasharray: 0 300;
