@@ -150,6 +150,12 @@ Entitäten, die von der Integration *Violet Pool Controller* stammen, und ordnet
 sie über deren sprachunabhängige Schlüssel den Anzeigen zu. Das funktioniert
 unabhängig davon, wie die Entity-IDs heißen — deutsch, englisch, umbenannt.
 
+Wer seine Filterpumpe in „Hundepumpe" umbenennt oder ihr die Entity-ID
+`switch.hundepumpe` gibt, findet sie in der Karte also weiterhin: Name und
+Entity-ID darf jeder ändern, der Schlüssel der Integration bleibt.
+**Nicht** gefunden wird, was gar nicht von der Integration stammt — ein eigener
+Template-Sensor etwa; den trägst du direkt mit `entity:` ein.
+
 Du musst also nichts angeben. Bei **mehreren Controllern** sagt `entity_prefix`,
 welcher gemeint ist:
 
