@@ -352,75 +352,51 @@ size: fullscreen
 - Vollbildansicht
 - Optimiert für Tablets
 
-### Neue Analytics & Monitoring Karten
+### Diagnose & Wartung
 
-#### Statistiken (`statistics`)
+#### Digitale Regeln (`digital_rules`)
 ```yaml
 type: custom:violet-pool-card
-entity: sensor.violet_pool_temperature
-card_type: statistics
+card_type: digital_rules
+entity_prefix: violet_pool_controller
 ```
 
 **Funktionen:**
-- Trendanalyse mit Charts
-- Historische Daten (letzte 12 Messwerte)
-- Gain/Loss-Anzeige
-- Sparkline-Visualization
+- Zustand der Schaltregeln 1–8
+- Restlaufzeit laufender Regeln
 
-#### Wetter (`weather`)
+#### Diagnose (`diagnostics`)
 ```yaml
 type: custom:violet-pool-card
-entity: weather.openweathermap
-card_type: weather
+card_type: diagnostics
+entity_prefix: violet_pool_controller
 ```
 
 **Funktionen:**
-- Aktuelle Wetterdaten
-- Pool-Auswirkungen-Warnung
-- Luftfeuchte/Temperatur
-- Regenprognose
+- Systemzustand, Latenz, Speicher
+- Modul-Erkennung (Basis, Dosierung, Erweiterungen)
 
-#### Wartung (`maintenance`)
+#### Kalibrierung (`calibration`)
 ```yaml
 type: custom:violet-pool-card
-card_type: maintenance
+card_type: calibration
+entity_prefix: violet_pool_controller
 ```
 
 **Funktionen:**
-- Service-Kalender
-- Task-Tracking
-- Fälligkeitsindikatoren
-- Maintenance-Logging
+- Letzte Kalibrierung je Sonde
+- Fälligkeitshinweis
 
-#### Benachrichtigungen (`alerts`)
+#### Firmware-Update (`update`)
 ```yaml
 type: custom:violet-pool-card
-card_type: alerts
+card_type: update
+entity_prefix: violet_pool_controller
 ```
 
 **Funktionen:**
-- Aktive Alarme-Liste
-- Severity-Levels (Info/Warning/Error)
-- Zeitstempel
-- Dismissible Alerts
-
-#### Vergleich (`comparison`)
-```yaml
-type: custom:violet-pool-card
-entity: sensor.violet_pool_temperature
-card_type: comparison
-target_entity: number.violet_pool_target_temp
-```
-
-**Funktionen:**
-- Ist vs. Soll
-- Delta-Berechnung (Wert + %)
-- Visual Diff
-- Trend-Indikatoren
-
----
-
-## Konfigurationsoptionen
+- Installierte und verfügbare Version
+- Update-Start aus der Karte
 
 ### Allgemein
 

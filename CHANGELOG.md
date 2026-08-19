@@ -1,6 +1,34 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [0.4.1] - 2026-08-19
+
+### 🔧 Bug Fixes | Fehlerbehebungen
+
+- **Der Karten-Typ ließ sich im visuellen Editor nicht auswählen.** Home
+  Assistant hat `<ha-select>` neu gebaut: das Element baut seine Liste jetzt aus
+  einer `options`-Eigenschaft und zeigt eingebettete `<mwc-list-item>`-Einträge
+  nur noch an, ohne sie auswählbar zu machen. Genau das war zu sehen — die
+  Liste ging auf, klicken bewirkte nichts, und wer daraufhin `type:` im
+  Code-Editor änderte, bekam „unknown card type". Alle neun Auswahlfelder des
+  Editors liefern jetzt `options` mit und lesen den Wert aus beiden
+  Event-Formaten, funktionieren also mit alter **und** neuer Oberfläche.
+- **Vier Kartentypen fehlten im Editor** (`digital_rules`, `diagnostics`,
+  `calibration`, `update`) — sie waren nur über YAML erreichbar.
+- **Fünf dokumentierte Kartentypen gab es gar nicht.** `statistics`, `weather`,
+  `maintenance`, `alerts` und `comparison` standen in README, `info.md` und den
+  YAML-Beispielen, führten aber zu „Unknown Card Type". Sie sind aus der
+  Dokumentation entfernt; dafür sind die vier tatsächlich vorhandenen
+  Diagnose-Karten dokumentiert.
+
+### 🧪 Tests
+
+- 16 neue Tests (88 → 104): beide Event-Formate von `ha-select`, eindeutige
+  Einträge in allen Auswahllisten, und ein Abgleich, dass Editor, Karte und
+  Dokumentation dieselben Kartentypen kennen.
+
+---
+
 ## [0.4.0] - 2026-08-16
 
 ## v0.4.0 – Violet Pool Card

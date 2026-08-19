@@ -11,6 +11,19 @@ import { LitElement, html, css, TemplateResult, CSSResultGroup } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import type { VioletPoolCardConfig, CardSize, Theme, Animation } from '../violet-pool-card';
 import { DEFAULT_THRESHOLDS, type MetricKey } from '../utils/thresholds';
+import {
+  ACCESSIBILITY_OPTIONS,
+  ALARM_STYLE_OPTIONS,
+  ALERT_LEVEL_OPTIONS,
+  CARD_TYPE_OPTIONS,
+  CHEMISTRY_TYPE_OPTIONS,
+  DASHBOARD_MODE_OPTIONS,
+  DOSING_TYPE_OPTIONS,
+  LAYOUT_VARIANT_OPTIONS,
+  SHADOW_INTENSITY_OPTIONS,
+  selectedValue,
+  type SelectOption,
+} from './select-options';
 
 /** Card types that read water values and therefore expose the threshold editor. */
 const THRESHOLD_CARD_TYPES = ['chemical', 'overview', 'system', 'heater', 'dosing'];
@@ -57,6 +70,38 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
     this._config = config;
   }
 
+  /**
+   * Render a dropdown that works on every Home Assistant version.
+   *
+   * The current `<ha-select>` builds its menu from an `options` property and
+   * only renders slotted children when that property is absent - so the
+   * `<mwc-list-item>` elements the editor used to slot in were displayed but
+   * could not be picked (reported on the forum: the card type list opened,
+   * nothing could be selected). Passing `options` drives the current element,
+   * the slotted items keep the older one working, and `selectedValue()`
+   * accepts both event shapes.
+   */
+  private _renderSelect(
+    label: string,
+    value: string,
+    options: SelectOption[],
+    handler: (ev: Event) => void
+  ): TemplateResult {
+    return html`
+      <ha-select
+        label="${label}"
+        .value="${value}"
+        .options="${options}"
+        @selected="${handler}"
+        @closed="${(e: Event) => e.stopPropagation()}"
+      >
+        ${options.map(
+          (option) => html`<mwc-list-item value="${option.value}">${option.label}</mwc-list-item>`
+        )}
+      </ha-select>
+    `;
+  }
+
   protected render(): TemplateResult {
     if (!this.hass || !this._config) {
       return html``;
@@ -71,7 +116,7 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
     };
     const includeDomains = domainFilter[this._config.card_type] || [];
 
-    return html` <div class="card-config"><!-- Card Type Selection --><div class="config-section"><div class="section-header"><ha-icon icon="mdi:card-outline"></ha-icon><span>Card Type</span></div><ha-select label="Card Type" .value="${this._config.card_type}" @selected="${this._cardTypeChanged}" @closed="${(e: Event) => e.stopPropagation()}" ><mwc-list-item value="pump">🔵 Pump</mwc-list-item><mwc-list-item value="heater">🔥 Heater</mwc-list-item><mwc-list-item value="solar">☀️ Solar</mwc-list-item><mwc-list-item value="dosing">💧 Dosing</mwc-list-item><mwc-list-item value="cover">🪟 Cover</mwc-list-item><mwc-list-item value="light">💡 Light</mwc-list-item><mwc-list-item value="filter">⏰ Filter</mwc-list-item><mwc-list-item value="backwash">🔄 Backwash</mwc-list-item><mwc-list-item value="refill">💧 Refill</mwc-list-item><mwc-list-item value="overflow">⚠️ Overflow</mwc-list-item><mwc-list-item value="error">🚨 Error Dashboard</mwc-list-item><mwc-list-item value="solar_surplus">☀️ PV Surplus</mwc-list-item><mwc-list-item value="flow_rate">💨 Flow Rate</mwc-list-item><mwc-list-item value="inlet">➡️ Inlet</mwc-list-item><mwc-list-item value="counter_current">🏊 Counter Current</mwc-list-item><mwc-list-item value="chlorine_canister">🧪 Chlorine Canister</mwc-list-item><mwc-list-item value="ph_plus_canister">➕ pH Plus Canister</mwc-list-item><mwc-list-item value="ph_minus_canister">➖ pH Minus Canister</mwc-list-item><mwc-list-item value="flocculant_canister">✨ Flocculant Canister</mwc-list-item><mwc-list-item value="overview">📊 Overview</mwc-list-item><mwc-list-item value="compact">📋 Compact</mwc-list-item><mwc-list-item value="system">🖥️ System Dashboard</mwc-list-item><mwc-list-item value="details">📝 Details</mwc-list-item><mwc-list-item value="chemical">🧪 Chemistry</mwc-list-item><mwc-list-item value="sensor">📡 Sensor</mwc-list-item></ha-select></div><!-- Controller Configuration --><div class="config-section"><div class="section-header"><ha-icon icon="mdi:chip"></ha-icon><span>Controller Configuration</span></div><ha-textfield label="Entity Prefix" .value="${this._config.entity_prefix || 'violet_pool_controller'}" @input="${this._entityPrefixChanged}" helper="Name of your pool controller (e.g., 'violet_pool_controller', 'pool_1', 'garden_pool')" ></ha-textfield><div class="prefix-info"><ha-icon icon="mdi:information-outline"></ha-icon><span> The entity prefix should match your Violet Pool Controller name in Home Assistant. All entities will be automatically discovered based on this prefix. </span></div></div><!-- Entity Selection -->
+    return html` <div class="card-config"><!-- Card Type Selection --><div class="config-section"><div class="section-header"><ha-icon icon="mdi:card-outline"></ha-icon><span>Card Type</span></div>${this._renderSelect('Card Type', this._config.card_type, CARD_TYPE_OPTIONS, this._cardTypeChanged)}</div><!-- Controller Configuration --><div class="config-section"><div class="section-header"><ha-icon icon="mdi:chip"></ha-icon><span>Controller Configuration</span></div><ha-textfield label="Entity Prefix" .value="${this._config.entity_prefix || 'violet_pool_controller'}" @input="${this._entityPrefixChanged}" helper="Name of your pool controller (e.g., 'violet_pool_controller', 'pool_1', 'garden_pool')" ></ha-textfield><div class="prefix-info"><ha-icon icon="mdi:information-outline"></ha-icon><span> The entity prefix should match your Violet Pool Controller name in Home Assistant. All entities will be automatically discovered based on this prefix. </span></div></div><!-- Entity Selection -->
         ${needsEntity || coverOrLight ? html`
           <div class="config-section">
             <div class="section-header">
@@ -169,18 +214,7 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
               @input="${this._borderRadiusChanged}"
             ></ha-textfield>
 
-            <ha-select
-              label="Shadow Intensity"
-              .value="${this._config.shadow_intensity || ''}"
-              @selected="${this._shadowIntensityChanged}"
-              @closed="${(e: Event) => e.stopPropagation()}"
-            >
-              <mwc-list-item value="">Default</mwc-list-item>
-              <mwc-list-item value="none">None</mwc-list-item>
-              <mwc-list-item value="low">Low</mwc-list-item>
-              <mwc-list-item value="medium">Medium</mwc-list-item>
-              <mwc-list-item value="high">High</mwc-list-item>
-            </ha-select>
+            ${this._renderSelect('Shadow Intensity', this._config.shadow_intensity || '', SHADOW_INTENSITY_OPTIONS, this._shadowIntensityChanged)}
           </div>
 
           <!-- Animation Picker -->
@@ -215,53 +249,13 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
               <ha-icon icon="mdi:view-dashboard-variant"></ha-icon>
               <span>Dashboard Layout</span>
             </div>
-            <ha-select
-              label="Layout Variant"
-              .value="${this._config.layout_variant || 'glass'}"
-              @selected="${this._layoutVariantChanged}"
-              @closed="${(e: Event) => e.stopPropagation()}"
-            >
-              <mwc-list-item value="standard">Standard</mwc-list-item>
-              <mwc-list-item value="glass">Glass UI</mwc-list-item>
-              <mwc-list-item value="dashboard">Dashboard Focus</mwc-list-item>
-              <mwc-list-item value="focus">Alert Focus</mwc-list-item>
-            </ha-select>
+            ${this._renderSelect('Layout Variant', this._config.layout_variant || 'glass', LAYOUT_VARIANT_OPTIONS, this._layoutVariantChanged)}
 
-            <ha-select
-              label="Alarm Style"
-              .value="${this._config.alarm_style || 'pulse'}"
-              @selected="${this._alarmStyleChanged}"
-              @closed="${(e: Event) => e.stopPropagation()}"
-            >
-              <mwc-list-item value="soft">Soft</mwc-list-item>
-              <mwc-list-item value="outline">Outline</mwc-list-item>
-              <mwc-list-item value="pulse">Pulse</mwc-list-item>
-            </ha-select>
+            ${this._renderSelect('Alarm Style', this._config.alarm_style || 'pulse', ALARM_STYLE_OPTIONS, this._alarmStyleChanged)}
 
-            <ha-select
-              label="Accessibility"
-              .value="${this._config.accessibility_mode || 'standard'}"
-              @selected="${this._accessibilityModeChanged}"
-              @closed="${(e: Event) => e.stopPropagation()}"
-            >
-              <mwc-list-item value="standard">Standard</mwc-list-item>
-              <mwc-list-item value="high_contrast">High Contrast</mwc-list-item>
-              <mwc-list-item value="reduced_motion">Reduced Motion</mwc-list-item>
-            </ha-select>
+            ${this._renderSelect('Accessibility', this._config.accessibility_mode || 'standard', ACCESSIBILITY_OPTIONS, this._accessibilityModeChanged)}
 
-            <ha-select
-              label="Dashboard Mode"
-              .value="${this._config.dashboard_mode || 'default'}"
-              @selected="${this._dashboardModeChanged}"
-              @closed="${(e: Event) => e.stopPropagation()}"
-            >
-              <mwc-list-item value="default">Default</mwc-list-item>
-              <mwc-list-item value="operations">Operations</mwc-list-item>
-              <mwc-list-item value="chemistry">Chemistry</mwc-list-item>
-              <mwc-list-item value="maintenance">Maintenance</mwc-list-item>
-              <mwc-list-item value="compact_mobile">Compact Mobile</mwc-list-item>
-              <mwc-list-item value="alarm_center">Alarm Center</mwc-list-item>
-            </ha-select>
+            ${this._renderSelect('Dashboard Mode', this._config.dashboard_mode || 'default', DASHBOARD_MODE_OPTIONS, this._dashboardModeChanged)}
           </div>
         </div>
 
@@ -325,7 +319,7 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
 
         <!-- Dosing Type (for dosing cards) -->
         ${this._config.card_type === 'dosing'
-          ? html` <div class="config-section"><div class="section-header"><ha-icon icon="mdi:flask"></ha-icon><span>Dosing Type</span></div><ha-select label="Dosing Type" .value="${this._config.dosing_type || 'chlorine'}" @selected="${this._dosingTypeChanged}" @closed="${(e: Event) => e.stopPropagation()}" ><mwc-list-item value="chlorine">💧 Chlorine (ORP)</mwc-list-item><mwc-list-item value="ph_minus">➖ pH Minus</mwc-list-item><mwc-list-item value="ph_plus">➕ pH Plus</mwc-list-item><mwc-list-item value="flocculant">🌊 Flocculant</mwc-list-item></ha-select></div> `
+          ? html` <div class="config-section"><div class="section-header"><ha-icon icon="mdi:flask"></ha-icon><span>Dosing Type</span></div>${this._renderSelect('Dosing Type', this._config.dosing_type || 'chlorine', DOSING_TYPE_OPTIONS, this._dosingTypeChanged)}</div> `
           : ''}
 
         <!-- Chemistry Card Configuration -->
@@ -336,17 +330,7 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
                 <ha-icon icon="mdi:flask"></ha-icon>
                 <span>Chemistry Type</span>
               </div>
-              <ha-select
-                label="Pool Treatment Type"
-                .value="${this._config.chemistry_type || 'chlorine'}"
-                @selected="${this._chemistryTypeChanged}"
-                @closed="${(e: Event) => e.stopPropagation()}"
-              >
-                <mwc-list-item value="chlorine">🧪 Chlorine Pool</mwc-list-item>
-                <mwc-list-item value="salt">🧂 Salt Water Pool</mwc-list-item>
-                <mwc-list-item value="bromine">🔄 Bromine Pool</mwc-list-item>
-                <mwc-list-item value="ozone">🌊 Ozone Pool</mwc-list-item>
-              </ha-select>
+              ${this._renderSelect('Pool Treatment Type', this._config.chemistry_type || 'chlorine', CHEMISTRY_TYPE_OPTIONS, this._chemistryTypeChanged)}
             </div>
 
             <div class="config-section">
@@ -419,17 +403,7 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
               </span>
             </div>
 
-            <ha-select
-              label="Meldungen anzeigen"
-              .value="${this._config.alerts || 'all'}"
-              @selected="${this._alertLevelChanged}"
-              @closed="${(e: Event) => e.stopPropagation()}"
-            >
-              <mwc-list-item value="all">🔔 Alle Abweichungen</mwc-list-item>
-              <mwc-list-item value="warning">⚠️ Warnungen und kritische Werte</mwc-list-item>
-              <mwc-list-item value="critical">🚨 Nur kritische Werte</mwc-list-item>
-              <mwc-list-item value="none">🔕 Keine Wasserwert-Meldungen</mwc-list-item>
-            </ha-select>
+            ${this._renderSelect('Meldungen anzeigen', this._config.alerts || 'all', ALERT_LEVEL_OPTIONS, this._alertLevelChanged)}
 
             ${this._renderThresholdRow('ph', 'pH-Wert', 0.1)}
             ${this._renderThresholdRow('orp', 'Redox (mV)', 10)}
@@ -521,12 +495,12 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
   }
 
   private _cardTypeChanged(ev: Event): void {
-    const target = ev.target as HaElement;
-    if (!target.value || this._config.card_type === target.value) return;
+    const value = selectedValue(ev);
+    if (!value || this._config.card_type === value) return;
 
     this._config = {
       ...this._config,
-      card_type: target.value as VioletPoolCardConfig['card_type'],
+      card_type: value as VioletPoolCardConfig['card_type'],
     };
     this._fireConfigChanged();
   }
@@ -579,31 +553,31 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
   }
 
   private _layoutVariantChanged(ev: Event): void {
-    const target = ev.target as HaElement;
-    if (!target.value) return;
+    const value = selectedValue(ev);
+    if (!value) return;
     this._config = {
       ...this._config,
-      layout_variant: target.value as VioletPoolCardConfig['layout_variant'],
+      layout_variant: value as VioletPoolCardConfig['layout_variant'],
     };
     this._fireConfigChanged();
   }
 
   private _alarmStyleChanged(ev: Event): void {
-    const target = ev.target as HaElement;
-    if (!target.value) return;
+    const value = selectedValue(ev);
+    if (!value) return;
     this._config = {
       ...this._config,
-      alarm_style: target.value as VioletPoolCardConfig['alarm_style'],
+      alarm_style: value as VioletPoolCardConfig['alarm_style'],
     };
     this._fireConfigChanged();
   }
 
   private _accessibilityModeChanged(ev: Event): void {
-    const target = ev.target as HaElement;
-    if (!target.value) return;
+    const value = selectedValue(ev);
+    if (!value) return;
     this._config = {
       ...this._config,
-      accessibility_mode: target.value as VioletPoolCardConfig['accessibility_mode'],
+      accessibility_mode: value as VioletPoolCardConfig['accessibility_mode'],
     };
     this._fireConfigChanged();
   }
@@ -620,11 +594,11 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
   }
 
   private _dashboardModeChanged(ev: Event): void {
-    const target = ev.target as HaElement;
-    if (!target.value) return;
+    const value = selectedValue(ev);
+    if (!value) return;
     this._config = {
       ...this._config,
-      dashboard_mode: target.value as VioletPoolCardConfig['dashboard_mode'],
+      dashboard_mode: value as VioletPoolCardConfig['dashboard_mode'],
     };
     this._fireConfigChanged();
   }
@@ -692,21 +666,21 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
   }
 
   private _dosingTypeChanged(ev: Event): void {
-    const target = ev.target as HaElement;
-    if (!target.value) return;
+    const value = selectedValue(ev);
+    if (!value) return;
     this._config = {
       ...this._config,
-      dosing_type: target.value as VioletPoolCardConfig['dosing_type'],
+      dosing_type: value as VioletPoolCardConfig['dosing_type'],
     };
     this._fireConfigChanged();
   }
 
   private _chemistryTypeChanged(ev: Event): void {
-    const target = ev.target as HaElement;
-    if (!target.value) return;
+    const value = selectedValue(ev);
+    if (!value) return;
     this._config = {
       ...this._config,
-      chemistry_type: target.value as VioletPoolCardConfig['chemistry_type'],
+      chemistry_type: value as VioletPoolCardConfig['chemistry_type'],
     };
     this._fireConfigChanged();
   }
@@ -833,10 +807,10 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
   }
 
   private _shadowIntensityChanged(ev: Event): void {
-    const target = ev.target as HaElement;
     this._config = {
       ...this._config,
-      shadow_intensity: (target.value as VioletPoolCardConfig['shadow_intensity']) || undefined,
+      shadow_intensity:
+        (selectedValue(ev) as VioletPoolCardConfig['shadow_intensity']) || undefined,
     };
     this._fireConfigChanged();
   }
@@ -917,7 +891,7 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
   }
 
   private _alertLevelChanged(ev: Event): void {
-    const value = (ev.target as HaElement).value as VioletPoolCardConfig['alerts'];
+    const value = selectedValue(ev) as VioletPoolCardConfig['alerts'];
     if (!value || this._config.alerts === value) return;
 
     const next = { ...this._config };
