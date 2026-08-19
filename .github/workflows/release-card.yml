@@ -46,6 +46,7 @@ jobs:
       is_prerelease: ${{ steps.version.outputs.is_prerelease }}
       is_draft: ${{ steps.version.outputs.is_draft }}
       release_type: ${{ steps.version.outputs.release_type }}
+      release_existed: ${{ steps.existing.outputs.existed }}
       release-notes: ${{ steps.generate.outputs.release-notes }}
     steps:
       - uses: actions/checkout@v4
@@ -115,6 +116,22 @@ jobs:
           echo "  Type: $RELEASE_TYPE"
           echo "  Pre-release: $IS_PRERELEASE"
           echo "  Draft: $IS_DRAFT"
+
+      - name: Check whether the release already exists
+        id: existing
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          # Re-running this workflow for a tag that is already published is a
+          # legitimate way to correct a release page. It must not announce the
+          # release a second time, so record whether it existed beforehand.
+          if gh release view "$TAG" --json id >/dev/null 2>&1; then
+            echo "existed=true" >> $GITHUB_OUTPUT
+            echo "ℹ️ $TAG is already published - this run updates it"
+          else
+            echo "existed=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: Validate tag format
         run: |
@@ -292,7 +309,8 @@ jobs:
     if: |
       success() &&
       needs.prepare-release.outputs.is_draft != 'true' &&
-      needs.prepare-release.outputs.release_type == 'stable'
+      needs.prepare-release.outputs.release_type == 'stable' &&
+      needs.prepare-release.outputs.release_existed != 'true'
     steps:
       - name: Generate X post
         id: xpost
