@@ -1,18 +1,18 @@
-## v0.4.0 – Violet Pool Card
+## v0.4.1 – Violet Pool Card
 
 ✅ **STABLE RELEASE**
 
 ### ✨ New Features | Neue Funktionen
 
-- feat: configurable water-value thresholds, fix invisible SVG gauges (v0.4.0) (#75) (727acd2)
+- Enhanced Violet Pool Card functionality
 
 ### 🚀 Improvements | Verbesserungen
 
-- Performance improvements and code optimizations
+- 📝 Release v0.4.0 - Update changelog, version and info.md (25e6ad8)
 
 ### 🔧 Bug Fixes | Fehlerbehebungen
 
-- feat: configurable water-value thresholds, fix invisible SVG gauges (v0.4.0) (#75) (727acd2)
+- fix: point the HACS install instructions at this repository (#74) (fd66391)
 
 ---
 
@@ -35,7 +35,7 @@
 
 ---
 
-📋 [Full changelog: v0.3.0...v0.4.0](https://github.com/Xerolux/violet-pool-card/compare/v0.3.0...v0.4.0)
+📋 [Full changelog: v0.4.0...v0.4.1](https://github.com/Xerolux/violet-pool-card/compare/v0.4.0...v0.4.1)
 
 ---
 
@@ -60,4 +60,4 @@ Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
 
 ---
 
-_Generated automatically by GitHub Actions on 2026-08-16 13:24:47 UTC_
+_Generated automatically by GitHub Actions on 2026-08-19 17:47:47 UTC_
