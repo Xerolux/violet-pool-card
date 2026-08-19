@@ -155,11 +155,33 @@ lovelace:
 
 ```yaml
 type: custom:violet-pool-card
-entity: switch.violet_pool_pump
 card_type: pump
 ```
 
-Die Karte erkennt automatisch zugehörige Entities!
+### Wie die Karte ihre Entitäten findet
+
+Die Karte fragt das Entitätsregister von Home Assistant: Sie nimmt die
+Entitäten, die von der Integration *Violet Pool Controller* stammen, und ordnet
+sie über deren sprachunabhängige Schlüssel den Anzeigen zu. Das funktioniert
+unabhängig davon, wie die Entity-IDs heißen — deutsch, englisch, umbenannt.
+
+Du musst also nichts angeben. Bei **mehreren Controllern** sagt `entity_prefix`,
+welcher gemeint ist:
+
+```yaml
+type: custom:violet-pool-card
+card_type: pump
+entity_prefix: garten_pool
+```
+
+Und wer eine bestimmte Entität erzwingen will — etwa einen eigenen
+Template-Sensor — setzt sie weiterhin direkt:
+
+```yaml
+type: custom:violet-pool-card
+card_type: pump
+entity: switch.meine_eigene_pumpe
+```
 
 ### Mit Anpassungen
 

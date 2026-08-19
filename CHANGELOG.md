@@ -15,6 +15,20 @@ All notable changes to this project will be documented in this file.
   Event-Formaten, funktionieren also mit alter **und** neuer Oberfläche.
 - **Vier Kartentypen fehlten im Editor** (`digital_rules`, `diagnostics`,
   `calibration`, `update`) — sie waren nur über YAML erreichbar.
+- **Die Karte fand die Entitäten einer neu eingerichteten Anlage nicht.** Sie
+  hat jede Entity-ID aus dem Präfix zusammengesetzt (`switch.<präfix>_filterpumpe`)
+  — und zwar in der alten deutschen Schreibweise. Die Integration bildet ihre
+  Entity-IDs seit 2.5.0 aus den englischen Namen, damit sie auf jeder
+  Installation gleich heißen: aus `filterpumpe` wurde `filter_pump`, aus
+  `beckenwasser` `pool_water`, aus `ph_wert` `ph_value`. Auf einer heute
+  eingerichteten Anlage traf damit fast kein geratener Name mehr.
+  Die Karte schlägt ihre Entitäten jetzt im Entitätsregister von Home Assistant
+  nach (`hass.entities`): dort steht zu jeder Entität, von welcher Integration
+  sie stammt und welchen sprachunabhängigen Schlüssel sie trägt. Damit findet
+  die Karte sie unabhängig von Sprache, Umbenennung und Präfix — **alte
+  Installationen eingeschlossen**, denn deren IDs stehen genauso im Register.
+  Wo die Integration nichts Passendes führt, bleibt es beim bisherigen
+  geratenen Namen; ein explizit gesetztes `entity:` hat weiterhin Vorrang.
 - **Fünf dokumentierte Kartentypen gab es gar nicht.** `statistics`, `weather`,
   `maintenance`, `alerts` und `comparison` standen in README, `info.md` und den
   YAML-Beispielen, führten aber zu „Unknown Card Type". Sie sind aus der
@@ -23,9 +37,11 @@ All notable changes to this project will be documented in this file.
 
 ### 🧪 Tests
 
-- 16 neue Tests (88 → 104): beide Event-Formate von `ha-select`, eindeutige
-  Einträge in allen Auswahllisten, und ein Abgleich, dass Editor, Karte und
-  Dokumentation dieselben Kartentypen kennen.
+- 31 neue Tests (88 → 119): beide Event-Formate von `ha-select`, eindeutige
+  Einträge in allen Auswahllisten, ein Abgleich, dass Editor, Karte und
+  Dokumentation dieselben Kartentypen kennen — sowie der Registry-Nachschlag
+  mit mehreren Controllern, fremden Integrationen, fehlendem Register und den
+  Endungen, für die es bewusst kein Gegenstück gibt.
 
 ---
 
