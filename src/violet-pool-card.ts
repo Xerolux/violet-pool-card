@@ -29,6 +29,11 @@ import type { QuickAction } from './components/quick-actions';
 // Import utilities
 import { ServiceCaller } from './utils/service-caller';
 import { EntityHelper } from './utils/entity-helper';
+import {
+  buildEntityIndex,
+  resolveEntityId,
+  type RegistryDisplayEntry,
+} from './utils/entity-registry';
 import { StateColorHelper } from './utils/state-color';
 import { i18n } from './utils/i18n';
 import { PerformanceMonitor } from './utils/performance';
@@ -67,6 +72,8 @@ interface HomeAssistant {
   callService: (domain: string, service: string, serviceData?: Record<string, unknown>) => Promise<unknown>;
   locale?: { language: string };
   language?: string;
+  /** Home Assistant's entity registry, as every card receives it. */
+  entities?: Record<string, RegistryDisplayEntry>;
 }
 
 // ─────────────────────────── Exported helper types ───────────────────────────
@@ -265,9 +272,34 @@ export class VioletPoolCard extends LitElement {
     PerformanceMonitor.clearMetrics();
   }
 
+  /** Cached registry index, rebuilt when Home Assistant hands over a new one. */
+  private _entityIndexSource?: Record<string, RegistryDisplayEntry>;
+  private _entityIndex = new Map<string, string>();
+
+  /**
+   * The lookup table "domain + translation key -> entity id" for this
+   * controller. Empty until Home Assistant has handed the registry over.
+   */
+  private get _registryIndex(): Map<string, string> {
+    const entities = this.hass?.entities;
+    if (entities !== this._entityIndexSource) {
+      this._entityIndexSource = entities;
+      this._entityIndex = buildEntityIndex(entities, this.config?.entity_prefix);
+    }
+    return this._entityIndex;
+  }
+
+  /**
+   * Resolve one of the integration's entities.
+   *
+   * The registry is asked first, so the card finds the entity whatever its id
+   * happens to be. Only when the integration reports nothing for it does the
+   * old guess from the prefix remain - that keeps setups working whose ids the
+   * registry cannot explain (a renamed entity, a template sensor).
+   */
   private _buildEntityId(domain: string, suffix: string): string {
     const prefix = this.config.entity_prefix || 'violet_pool_controller';
-    return `${domain}.${prefix}_${suffix}`;
+    return resolveEntityId(this._registryIndex, domain, suffix) ?? `${domain}.${prefix}_${suffix}`;
   }
 
   private _getEntityId(

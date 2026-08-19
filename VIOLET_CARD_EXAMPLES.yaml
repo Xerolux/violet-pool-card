@@ -194,35 +194,6 @@
     - sensor.violet_pool_orp_value
     - sensor.violet_pool_free_chlorine
 
-# --- Statistics Card ---
-- type: custom:violet-pool-card
-  entity: sensor.violet_pool_temperature
-  card_type: statistics
-  name: Temperatur Trend
-
-# --- Wetter Card ---
-- type: custom:violet-pool-card
-  entity: weather.openweathermap
-  card_type: weather
-  name: Pool Wetter
-
-# --- Wartung Card ---
-- type: custom:violet-pool-card
-  card_type: maintenance
-  name: Pool Wartung
-
-# --- Benachrichtigungen Card ---
-- type: custom:violet-pool-card
-  card_type: alerts
-  name: Aktuelle Alarme
-
-# --- Vergleich Card ---
-- type: custom:violet-pool-card
-  entity: sensor.violet_pool_temperature
-  card_type: comparison
-  target_entity: number.violet_pool_target_temp
-  name: Ist/Soll Vergleich
-
 # ============================================================================
 # SYSTEM CARD - Vollbildansicht
 # ============================================================================
@@ -260,35 +231,6 @@
   layout_variant: glass
   dashboard_mode: compact_mobile
   accessibility_mode: reduced_motion
-
-# --- Statistics Card ---
-- type: custom:violet-pool-card
-  entity: sensor.violet_pool_temperature
-  card_type: statistics
-  name: Temperatur Trend
-
-# --- Wetter Card ---
-- type: custom:violet-pool-card
-  entity: weather.openweathermap
-  card_type: weather
-  name: Pool Wetter
-
-# --- Wartung Card ---
-- type: custom:violet-pool-card
-  card_type: maintenance
-  name: Pool Wartung
-
-# --- Benachrichtigungen Card ---
-- type: custom:violet-pool-card
-  card_type: alerts
-  name: Aktuelle Alarme
-
-# --- Vergleich Card ---
-- type: custom:violet-pool-card
-  entity: sensor.violet_pool_temperature
-  card_type: comparison
-  target_entity: number.violet_pool_target_temp
-  name: Ist/Soll Vergleich
 
 # ============================================================================
 # COMPACT CARDS - Dashboard Übersicht

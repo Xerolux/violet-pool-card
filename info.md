@@ -140,11 +140,39 @@ lovelace:
 
 ```yaml
 type: custom:violet-pool-card
-entity: switch.violet_pool_pump
 card_type: pump
 ```
 
-Die Karte erkennt automatisch zugehörige Entities!
+### Wie die Karte ihre Entitäten findet
+
+Die Karte fragt das Entitätsregister von Home Assistant: Sie nimmt die
+Entitäten, die von der Integration *Violet Pool Controller* stammen, und ordnet
+sie über deren sprachunabhängige Schlüssel den Anzeigen zu. Das funktioniert
+unabhängig davon, wie die Entity-IDs heißen — deutsch, englisch, umbenannt.
+
+Wer seine Filterpumpe in „Hundepumpe" umbenennt oder ihr die Entity-ID
+`switch.hundepumpe` gibt, findet sie in der Karte also weiterhin: Name und
+Entity-ID darf jeder ändern, der Schlüssel der Integration bleibt.
+**Nicht** gefunden wird, was gar nicht von der Integration stammt — ein eigener
+Template-Sensor etwa; den trägst du direkt mit `entity:` ein.
+
+Du musst also nichts angeben. Bei **mehreren Controllern** sagt `entity_prefix`,
+welcher gemeint ist:
+
+```yaml
+type: custom:violet-pool-card
+card_type: pump
+entity_prefix: garten_pool
+```
+
+Und wer eine bestimmte Entität erzwingen will — etwa einen eigenen
+Template-Sensor — setzt sie weiterhin direkt:
+
+```yaml
+type: custom:violet-pool-card
+card_type: pump
+entity: switch.meine_eigene_pumpe
+```
 
 ### Mit Anpassungen
 
@@ -352,75 +380,51 @@ size: fullscreen
 - Vollbildansicht
 - Optimiert für Tablets
 
-### Neue Analytics & Monitoring Karten
+### Diagnose & Wartung
 
-#### Statistiken (`statistics`)
+#### Digitale Regeln (`digital_rules`)
 ```yaml
 type: custom:violet-pool-card
-entity: sensor.violet_pool_temperature
-card_type: statistics
+card_type: digital_rules
+entity_prefix: violet_pool_controller
 ```
 
 **Funktionen:**
-- Trendanalyse mit Charts
-- Historische Daten (letzte 12 Messwerte)
-- Gain/Loss-Anzeige
-- Sparkline-Visualization
+- Zustand der Schaltregeln 1–8
+- Restlaufzeit laufender Regeln
 
-#### Wetter (`weather`)
+#### Diagnose (`diagnostics`)
 ```yaml
 type: custom:violet-pool-card
-entity: weather.openweathermap
-card_type: weather
+card_type: diagnostics
+entity_prefix: violet_pool_controller
 ```
 
 **Funktionen:**
-- Aktuelle Wetterdaten
-- Pool-Auswirkungen-Warnung
-- Luftfeuchte/Temperatur
-- Regenprognose
+- Systemzustand, Latenz, Speicher
+- Modul-Erkennung (Basis, Dosierung, Erweiterungen)
 
-#### Wartung (`maintenance`)
+#### Kalibrierung (`calibration`)
 ```yaml
 type: custom:violet-pool-card
-card_type: maintenance
+card_type: calibration
+entity_prefix: violet_pool_controller
 ```
 
 **Funktionen:**
-- Service-Kalender
-- Task-Tracking
-- Fälligkeitsindikatoren
-- Maintenance-Logging
+- Letzte Kalibrierung je Sonde
+- Fälligkeitshinweis
 
-#### Benachrichtigungen (`alerts`)
+#### Firmware-Update (`update`)
 ```yaml
 type: custom:violet-pool-card
-card_type: alerts
+card_type: update
+entity_prefix: violet_pool_controller
 ```
 
 **Funktionen:**
-- Aktive Alarme-Liste
-- Severity-Levels (Info/Warning/Error)
-- Zeitstempel
-- Dismissible Alerts
-
-#### Vergleich (`comparison`)
-```yaml
-type: custom:violet-pool-card
-entity: sensor.violet_pool_temperature
-card_type: comparison
-target_entity: number.violet_pool_target_temp
-```
-
-**Funktionen:**
-- Ist vs. Soll
-- Delta-Berechnung (Wert + %)
-- Visual Diff
-- Trend-Indikatoren
-
----
-
-## Konfigurationsoptionen
+- Installierte und verfügbare Version
+- Update-Start aus der Karte
 
 ### Allgemein
 
