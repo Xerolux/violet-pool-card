@@ -37,7 +37,15 @@ All notable changes to this project will be documented in this file.
 
 ### 🧪 Tests
 
-- 31 neue Tests (88 → 119): beide Event-Formate von `ha-select`, eindeutige
+- **Die Schlüssel der Integration werden gegengeprüft.** `npm run keys:update`
+  holt die Entitäts-Schlüssel aus dem Integrations-Repository nach
+  `tests/fixtures/integration-entity-keys.json`; `npm test` prüft jeden Eintrag
+  der Zuordnungstabelle dagegen — offline und ohne Netz. Ein eigener CI-Job
+  liest die Liste vor den Tests neu ein: benennt die Integration einen
+  Schlüssel um, wird die Karte hier rot, statt die Entität stillschweigend
+  nicht mehr zu finden. Die CI führt jetzt außerdem überhaupt `npm test` aus —
+  bisher liefen die Tests dort nicht.
+- 33 neue Tests (88 → 121): beide Event-Formate von `ha-select`, eindeutige
   Einträge in allen Auswahllisten, ein Abgleich, dass Editor, Karte und
   Dokumentation dieselben Kartentypen kennen — sowie der Registry-Nachschlag
   mit mehreren Controllern, fremden Integrationen, fehlendem Register und den

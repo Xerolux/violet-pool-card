@@ -29,45 +29,55 @@ export interface RegistryDisplayEntry {
 /** Die Integration, deren Entitäten diese Karte anzeigt. */
 export const VIOLET_PLATFORM = 'violet_pool_controller';
 
+/** Wo eine geratene Entity-ID-Endung bei der Integration wirklich liegt. */
+export interface LegacyEntitySlot {
+  /** Die Domain, in der die Karte diese Entität sucht. */
+  domain: string;
+  /** Der Schlüssel, unter dem die Integration sie führt. */
+  translationKey: string;
+}
+
 /**
- * Geratene Entity-ID-Endung → Übersetzungsschlüssel der Integration.
+ * Geratene Entity-ID-Endung → Eintrag bei der Integration.
  *
  * Die Endungen links sind die deutschen IDs, die die Karte bisher geraten hat;
- * rechts steht der Schlüssel, unter dem die Integration dieselbe Entität
- * führt. Endungen ohne Gegenstück (`inlet`, `counter_current`, `salzgehalt`)
- * fehlen hier bewusst – die Integration kennt sie nicht, dafür bleibt es beim
- * geratenen Namen.
+ * rechts steht, wo dieselbe Entität bei der Integration liegt. Endungen ohne
+ * Gegenstück (`inlet`, `counter_current`, `salzgehalt`) fehlen hier bewusst –
+ * die Integration kennt sie nicht, dafür bleibt es beim geratenen Namen.
+ *
+ * `tests/entity-registry.test.ts` prüft jeden Eintrag gegen die
+ * Übersetzungsschlüssel der Integration; `npm run keys:update` holt sie neu.
  */
-export const LEGACY_SUFFIX_TO_TRANSLATION_KEY: Record<string, string> = {
+export const LEGACY_SUFFIX_TO_SLOT: Record<string, LegacyEntitySlot> = {
   // Ausgänge
-  filterpumpe: 'pump',
-  beleuchtung: 'light',
-  ruckspulung: 'backwash',
-  chlor_dosierung: 'dos_1_cl',
-  dosierung_ph_2: 'dos_4_phm',
-  schaltregel_1: 'dirule_1',
+  filterpumpe: { domain: 'switch', translationKey: 'pump' },
+  beleuchtung: { domain: 'switch', translationKey: 'light' },
+  ruckspulung: { domain: 'switch', translationKey: 'backwash' },
+  chlor_dosierung: { domain: 'switch', translationKey: 'dos_1_cl' },
+  dosierung_ph_2: { domain: 'switch', translationKey: 'dos_4_phm' },
+  schaltregel_1: { domain: 'switch', translationKey: 'dirule_1' },
   // Klima und Abdeckung
-  heizung: 'heater',
-  solarabsorber: 'solar',
-  abdeckung: 'pool_cover',
+  heizung: { domain: 'climate', translationKey: 'heater' },
+  solarabsorber: { domain: 'climate', translationKey: 'solar' },
+  abdeckung: { domain: 'cover', translationKey: 'pool_cover' },
   // Sollwerte
-  ph_sollwert: 'ph_setpoint',
-  redox_sollwert: 'orp_setpoint',
+  ph_sollwert: { domain: 'number', translationKey: 'ph_setpoint' },
+  redox_sollwert: { domain: 'number', translationKey: 'orp_setpoint' },
   // Messwerte
-  beckenwasser: 'onewire1_value',
-  ph_wert: 'ph_value',
-  redoxpotential: 'orp_value',
-  chlorgehalt: 'pot_value',
-  filterdruck: 'adc1_value',
-  uberlaufbehalter: 'adc2_value',
-  pumpen_durchfluss: 'flow_rate',
-  pv_uberschuss_status: 'pvsurplus',
-  diagnostics_status: 'system_health',
+  beckenwasser: { domain: 'sensor', translationKey: 'onewire1_value' },
+  ph_wert: { domain: 'sensor', translationKey: 'ph_value' },
+  redoxpotential: { domain: 'sensor', translationKey: 'orp_value' },
+  chlorgehalt: { domain: 'sensor', translationKey: 'pot_value' },
+  filterdruck: { domain: 'sensor', translationKey: 'adc1_value' },
+  uberlaufbehalter: { domain: 'sensor', translationKey: 'adc2_value' },
+  pumpen_durchfluss: { domain: 'sensor', translationKey: 'flow_rate' },
+  pv_uberschuss_status: { domain: 'sensor', translationKey: 'pvsurplus' },
+  diagnostics_status: { domain: 'sensor', translationKey: 'system_health' },
   // Reichweiten der Dosierkanäle (gleicher Name auf beiden Seiten)
-  dos_1_cl_remaining_range: 'dos_1_cl_remaining_range',
-  dos_4_phm_remaining_range: 'dos_4_phm_remaining_range',
-  dos_5_php_remaining_range: 'dos_5_php_remaining_range',
-  dos_6_floc_remaining_range: 'dos_6_floc_remaining_range',
+  dos_1_cl_remaining_range: { domain: 'sensor', translationKey: 'dos_1_cl_remaining_range' },
+  dos_4_phm_remaining_range: { domain: 'sensor', translationKey: 'dos_4_phm_remaining_range' },
+  dos_5_php_remaining_range: { domain: 'sensor', translationKey: 'dos_5_php_remaining_range' },
+  dos_6_floc_remaining_range: { domain: 'sensor', translationKey: 'dos_6_floc_remaining_range' },
 };
 
 /** Schlüssel im Index: Domain und Übersetzungsschlüssel zusammen. */
@@ -139,9 +149,9 @@ export function resolveEntityId(
   domain: string,
   suffix: string
 ): string | undefined {
-  const translationKey = LEGACY_SUFFIX_TO_TRANSLATION_KEY[suffix];
-  if (!translationKey) {
+  const slot = LEGACY_SUFFIX_TO_SLOT[suffix];
+  if (!slot || slot.domain !== domain) {
     return undefined;
   }
-  return index.get(indexKey(domain, translationKey));
+  return index.get(indexKey(domain, slot.translationKey));
 }

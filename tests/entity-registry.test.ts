@@ -1,6 +1,7 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import {
-  LEGACY_SUFFIX_TO_TRANSLATION_KEY,
+  LEGACY_SUFFIX_TO_SLOT,
   VIOLET_PLATFORM,
   buildEntityIndex,
   resolveEntityId,
@@ -120,11 +121,35 @@ describe('resolveEntityId', () => {
   });
 });
 
-describe('LEGACY_SUFFIX_TO_TRANSLATION_KEY', () => {
-  it('maps every suffix to a non-empty key', () => {
-    for (const [suffix, key] of Object.entries(LEGACY_SUFFIX_TO_TRANSLATION_KEY)) {
+describe('LEGACY_SUFFIX_TO_SLOT', () => {
+  /**
+   * The entity keys of the integration, fetched by
+   * `npm run keys:update` (the CI refreshes them before running the tests).
+   */
+  const integrationKeys: Record<string, string[]> = JSON.parse(
+    readFileSync(new URL('./fixtures/integration-entity-keys.json', import.meta.url), 'utf-8')
+  ).keys;
+
+  it('points every entry at a key the integration really has', () => {
+    // Without this the card would silently stop finding an entity when the
+    // integration renames its translation key.
+    const unknown = Object.entries(LEGACY_SUFFIX_TO_SLOT)
+      .filter(([, slot]) => !integrationKeys[slot.domain]?.includes(slot.translationKey))
+      .map(([suffix, slot]) => `${suffix} -> ${slot.domain}.${slot.translationKey}`);
+
+    expect(unknown).toEqual([]);
+  });
+
+  it('names a domain the integration provides entities for', () => {
+    for (const slot of Object.values(LEGACY_SUFFIX_TO_SLOT)) {
+      expect(Object.keys(integrationKeys)).toContain(slot.domain);
+    }
+  });
+
+  it('has no empty suffix or key', () => {
+    for (const [suffix, slot] of Object.entries(LEGACY_SUFFIX_TO_SLOT)) {
       expect(suffix.trim()).not.toBe('');
-      expect(key.trim()).not.toBe('');
+      expect(slot.translationKey.trim()).not.toBe('');
     }
   });
 });
