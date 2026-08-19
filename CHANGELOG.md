@@ -29,6 +29,9 @@ All notable changes to this project will be documented in this file.
   Installationen eingeschlossen**, denn deren IDs stehen genauso im Register.
   Wo die Integration nichts Passendes führt, bleibt es beim bisherigen
   geratenen Namen; ein explizit gesetztes `entity:` hat weiterhin Vorrang.
+  Umbenennen ändert daran nichts: Wer seine Filterpumpe „Hundepumpe" nennt oder
+  ihr die Entity-ID `switch.hundepumpe` gibt, findet sie weiterhin in der
+  Karte — Name und ID gehören dem Nutzer, der Schlüssel der Integration bleibt.
 - **Fünf dokumentierte Kartentypen gab es gar nicht.** `statistics`, `weather`,
   `maintenance`, `alerts` und `comparison` standen in README, `info.md` und den
   YAML-Beispielen, führten aber zu „Unknown Card Type". Sie sind aus der

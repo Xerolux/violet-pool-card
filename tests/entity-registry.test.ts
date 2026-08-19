@@ -15,6 +15,18 @@ const entry = (
   platform: string = VIOLET_PLATFORM
 ): RegistryDisplayEntry => ({ entity_id, translation_key, platform });
 
+/** The same, for an entity the user renamed. */
+const renamed = (
+  entity_id: string,
+  name: string,
+  translation_key: string
+): RegistryDisplayEntry & { name: string } => ({
+  entity_id,
+  name,
+  translation_key,
+  platform: VIOLET_PLATFORM,
+});
+
 const registry = (...entries: RegistryDisplayEntry[]): Record<string, RegistryDisplayEntry> =>
   Object.fromEntries(entries.map((item) => [item.entity_id, item]));
 
@@ -59,6 +71,18 @@ describe('buildEntityIndex', () => {
     );
 
     expect(index.get('switch:pump')).toBe('switch.garden_pool_filter_pump');
+  });
+
+  it('finds an entity the user renamed', () => {
+    // Renaming in Home Assistant changes the name and may change the entity
+    // id; the integration's platform and translation key stay untouched, which
+    // is exactly what the lookup goes by.
+    const index = buildEntityIndex(
+      registry(renamed('switch.hundepumpe', 'Hundepumpe', 'pump'))
+    );
+
+    expect(index.get('switch:pump')).toBe('switch.hundepumpe');
+    expect(resolveEntityId(index, 'switch', 'filterpumpe')).toBe('switch.hundepumpe');
   });
 
   it('picks a stable entity when no prefix matches', () => {
