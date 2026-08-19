@@ -1,73 +1,8 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
-## [0.4.1] - 2026-08-19
-
-## v0.4.1 – Violet Pool Card
-
-✅ **STABLE RELEASE**
-
-### ✨ New Features | Neue Funktionen
-
-- Enhanced Violet Pool Card functionality
-
-### 🚀 Improvements | Verbesserungen
-
-- 📝 Release v0.4.0 - Update changelog, version and info.md (25e6ad8)
-
-### 🔧 Bug Fixes | Fehlerbehebungen
-
-- fix: point the HACS install instructions at this repository (#74) (fd66391)
-
----
-
-### 📦 Installation
-
-**HACS (Recommended):**
-1. Open HACS in Home Assistant
-2. Go to "Frontend"
-3. Click "+" and search for "Violet Pool Card"
-4. Click "Download"
-5. Restart Home Assistant
-
-**Manual:**
-1. Download `violet-pool-card.js` from the assets below
-2. Copy to `config/www/violet-pool-card.js`
-3. Add resource in Configuration → Lovelace Dashboards → Resources
-   - URL: `/local/violet-pool-card.js`
-   - Type: `JavaScript Module`
-4. Restart Home Assistant
-
----
-
-📋 [Full changelog: v0.4.0...v0.4.1](https://github.com/Xerolux/violet-pool-card/compare/v0.4.0...v0.4.1)
-
----
-
-### ❤️ Support | Unterstützung
-
-If you find this card useful, consider supporting the developer:
-
-- ☕ **[Buy Me a Coffee](https://buymeacoffee.com/xerolux)**
-- 🚗 **[Tesla Referral Code](https://ts.la/sebastian564489)**
-- ⭐ **Star this repository**
-
-Every contribution, no matter how small, is a huge motivation! Thank you! 🙏
-
-Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
-
----
-
-### 💬 Feedback & Contributions
-
-- 🐛 **[Report a bug](https://github.com/Xerolux/violet-pool-card/issues/new?template=bug_report.md)**
-- 💡 **[Request a feature](https://github.com/Xerolux/violet-pool-card/issues/new?template=feature_request.md)**
-
----
-
-_Generated automatically by GitHub Actions on 2026-08-19 17:47:47 UTC_
-
----
+Jeder Abschnitt hier wird beim Release zum Text der GitHub-Release-Seite —
+was hier nicht steht, erfährt also auch niemand dort.
 
 ## [0.4.1] - 2026-08-19
 
@@ -106,6 +41,10 @@ _Generated automatically by GitHub Actions on 2026-08-19 17:47:47 UTC_
   Dokumentation entfernt; dafür sind die vier tatsächlich vorhandenen
   Diagnose-Karten dokumentiert.
 
+### 📚 Dokumentation
+
+- Die HACS-Installationsanleitung zeigte auf das falsche Repository (#74).
+
 ### 🧪 Tests
 
 - **Die Schlüssel der Integration werden gegengeprüft.** `npm run keys:update`
@@ -123,75 +62,6 @@ _Generated automatically by GitHub Actions on 2026-08-19 17:47:47 UTC_
   Endungen, für die es bewusst kein Gegenstück gibt.
 
 ---
-
-## [0.4.0] - 2026-08-16
-
-## v0.4.0 – Violet Pool Card
-
-✅ **STABLE RELEASE**
-
-### ✨ New Features | Neue Funktionen
-
-- feat: configurable water-value thresholds, fix invisible SVG gauges (v0.4.0) (#75) (727acd2)
-
-### 🚀 Improvements | Verbesserungen
-
-- Performance improvements and code optimizations
-
-### 🔧 Bug Fixes | Fehlerbehebungen
-
-- feat: configurable water-value thresholds, fix invisible SVG gauges (v0.4.0) (#75) (727acd2)
-
----
-
-### 📦 Installation
-
-**HACS (Recommended):**
-1. Open HACS in Home Assistant
-2. Go to "Frontend"
-3. Click "+" and search for "Violet Pool Card"
-4. Click "Download"
-5. Restart Home Assistant
-
-**Manual:**
-1. Download `violet-pool-card.js` from the assets below
-2. Copy to `config/www/violet-pool-card.js`
-3. Add resource in Configuration → Lovelace Dashboards → Resources
-   - URL: `/local/violet-pool-card.js`
-   - Type: `JavaScript Module`
-4. Restart Home Assistant
-
----
-
-📋 [Full changelog: v0.3.0...v0.4.0](https://github.com/Xerolux/violet-pool-card/compare/v0.3.0...v0.4.0)
-
----
-
-### ❤️ Support | Unterstützung
-
-If you find this card useful, consider supporting the developer:
-
-- ☕ **[Buy Me a Coffee](https://buymeacoffee.com/xerolux)**
-- 🚗 **[Tesla Referral Code](https://ts.la/sebastian564489)**
-- ⭐ **Star this repository**
-
-Every contribution, no matter how small, is a huge motivation! Thank you! 🙏
-
-Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
-
----
-
-### 💬 Feedback & Contributions
-
-- 🐛 **[Report a bug](https://github.com/Xerolux/violet-pool-card/issues/new?template=bug_report.md)**
-- 💡 **[Request a feature](https://github.com/Xerolux/violet-pool-card/issues/new?template=feature_request.md)**
-
----
-
-_Generated automatically by GitHub Actions on 2026-08-16 13:24:47 UTC_
-
----
-
 
 ## [0.4.0] - 2026-08-16
 
@@ -277,89 +147,17 @@ _Generated automatically by GitHub Actions on 2026-08-16 13:24:47 UTC_
 - Bundle grows by ~2 kB.
 - No config migrations required; existing card configs keep working unchanged.
 
-### 📦 Installation
-
-**HACS (Recommended):** Update via HACS → Frontend → Violet Pool Card → Update. Then refresh the HA frontend.
-
-**Manual:** Replace `violet-pool-card.js` in `config/www/` with the build from this release's assets.
-
-To try the new theme, set `theme: lagoon` in your card config (or pick it in the visual editor).
-
 ---
 
 ## [0.2.2] - 2026-06-29
-
-## v0.2.2 – Violet Pool Card
-
-✅ **STABLE RELEASE**
-
-### ✨ New Features | Neue Funktionen
-
-- Enhanced Violet Pool Card functionality
 
 ### 🚀 Improvements | Verbesserungen
 
 - 📝 Release v0.2.1 - Update changelog, version and info.md (f08beef)
 
-### 🔧 Bug Fixes | Fehlerbehebungen
-
-- Minor bug fixes and stability improvements
-
----
-
-### 📦 Installation
-
-**HACS (Recommended):**
-1. Open HACS in Home Assistant
-2. Go to "Frontend"
-3. Click "+" and search for "Violet Pool Card"
-4. Click "Download"
-5. Restart Home Assistant
-
-**Manual:**
-1. Download `violet-pool-card.js` from the assets below
-2. Copy to `config/www/violet-pool-card.js`
-3. Add resource in Configuration → Lovelace Dashboards → Resources
-   - URL: `/local/violet-pool-card.js`
-   - Type: `JavaScript Module`
-4. Restart Home Assistant
-
----
-
-📋 [Full changelog: v0.2.1...v0.2.2](https://github.com/Xerolux/violet-pool-card/compare/v0.2.1...v0.2.2)
-
----
-
-### ❤️ Support | Unterstützung
-
-If you find this card useful, consider supporting the developer:
-
-- ☕ **[Buy Me a Coffee](https://buymeacoffee.com/xerolux)**
-- 🚗 **[Tesla Referral Code](https://ts.la/sebastian564489)**
-- ⭐ **Star this repository**
-
-Every contribution, no matter how small, is a huge motivation! Thank you! 🙏
-
-Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
-
----
-
-### 💬 Feedback & Contributions
-
-- 🐛 **[Report a bug](https://github.com/Xerolux/violet-pool-card/issues/new?template=bug_report.md)**
-- 💡 **[Request a feature](https://github.com/Xerolux/violet-pool-card/issues/new?template=feature_request.md)**
-
----
-
-_Generated automatically by GitHub Actions on 2026-06-29 04:53:34 UTC_
-
 ---
 
 ## [0.2.1] - 2026-06-29
-
-## v0.2.1 – Violet Pool Card
-
-✅ **STABLE RELEASE**
 
 ### ✨ New Features | Neue Funktionen
 
@@ -383,59 +181,7 @@ _Generated automatically by GitHub Actions on 2026-06-29 04:53:34 UTC_
 
 ---
 
-### 📦 Installation
-
-**HACS (Recommended):**
-1. Open HACS in Home Assistant
-2. Go to "Frontend"
-3. Click "+" and search for "Violet Pool Card"
-4. Click "Download"
-5. Restart Home Assistant
-
-**Manual:**
-1. Download `violet-pool-card.js` from the assets below
-2. Copy to `config/www/violet-pool-card.js`
-3. Add resource in Configuration → Lovelace Dashboards → Resources
-   - URL: `/local/violet-pool-card.js`
-   - Type: `JavaScript Module`
-4. Restart Home Assistant
-
----
-
-📋 [Full changelog: v0.2.0...v0.2.1](https://github.com/Xerolux/violet-pool-card/compare/v0.2.0...v0.2.1)
-
----
-
-### ❤️ Support | Unterstützung
-
-If you find this card useful, consider supporting the developer:
-
-- ☕ **[Buy Me a Coffee](https://buymeacoffee.com/xerolux)**
-- 🚗 **[Tesla Referral Code](https://ts.la/sebastian564489)**
-- ⭐ **Star this repository**
-
-Every contribution, no matter how small, is a huge motivation! Thank you! 🙏
-
-Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
-
----
-
-### 💬 Feedback & Contributions
-
-- 🐛 **[Report a bug](https://github.com/Xerolux/violet-pool-card/issues/new?template=bug_report.md)**
-- 💡 **[Request a feature](https://github.com/Xerolux/violet-pool-card/issues/new?template=feature_request.md)**
-
----
-
-_Generated automatically by GitHub Actions on 2026-06-29 04:50:30 UTC_
-
----
-
 ## [0.2.0] - 2026-06-29
-
-## v0.2.0 – Violet Pool Card
-
-✅ **STABLE RELEASE**
 
 ### ✨ New Features | Neue Funktionen
 
@@ -446,65 +192,9 @@ _Generated automatically by GitHub Actions on 2026-06-29 04:50:30 UTC_
 - update brands (98144b9)
 - 📝 Release v0.1.9 - Update changelog, version and info.md (f6311a4)
 
-### 🔧 Bug Fixes | Fehlerbehebungen
-
-- Minor bug fixes and stability improvements
-
----
-
-### 📦 Installation
-
-**HACS (Recommended):**
-1. Open HACS in Home Assistant
-2. Go to "Frontend"
-3. Click "+" and search for "Violet Pool Card"
-4. Click "Download"
-5. Restart Home Assistant
-
-**Manual:**
-1. Download `violet-pool-card.js` from the assets below
-2. Copy to `config/www/violet-pool-card.js`
-3. Add resource in Configuration → Lovelace Dashboards → Resources
-   - URL: `/local/violet-pool-card.js`
-   - Type: `JavaScript Module`
-4. Restart Home Assistant
-
----
-
-📋 [Full changelog: v0.1.9...v0.2.0](https://github.com/Xerolux/violet-pool-card/compare/v0.1.9...v0.2.0)
-
----
-
-### ❤️ Support | Unterstützung
-
-If you find this card useful, consider supporting the developer:
-
-- ☕ **[Buy Me a Coffee](https://buymeacoffee.com/xerolux)**
-- 🚗 **[Tesla Referral Code](https://ts.la/sebastian564489)**
-- ⭐ **Star this repository**
-
-Every contribution, no matter how small, is a huge motivation! Thank you! 🙏
-
-Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
-
----
-
-### 💬 Feedback & Contributions
-
-- 🐛 **[Report a bug](https://github.com/Xerolux/violet-pool-card/issues/new?template=bug_report.md)**
-- 💡 **[Request a feature](https://github.com/Xerolux/violet-pool-card/issues/new?template=feature_request.md)**
-
----
-
-_Generated automatically by GitHub Actions on 2026-06-29 04:40:42 UTC_
-
 ---
 
 ## [0.1.9] - 2026-06-29
-
-## v0.1.9 – Violet Pool Card
-
-✅ **STABLE RELEASE**
 
 ### ✨ New Features | Neue Funktionen
 
@@ -523,63 +213,7 @@ _Generated automatically by GitHub Actions on 2026-06-29 04:40:42 UTC_
 
 ---
 
-### 📦 Installation
-
-**HACS (Recommended):**
-1. Open HACS in Home Assistant
-2. Go to "Frontend"
-3. Click "+" and search for "Violet Pool Card"
-4. Click "Download"
-5. Restart Home Assistant
-
-**Manual:**
-1. Download `violet-pool-card.js` from the assets below
-2. Copy to `config/www/violet-pool-card.js`
-3. Add resource in Configuration → Lovelace Dashboards → Resources
-   - URL: `/local/violet-pool-card.js`
-   - Type: `JavaScript Module`
-4. Restart Home Assistant
-
----
-
-📋 [Full changelog: v0.2.0...v0.1.9](https://github.com/Xerolux/violet-pool-card/compare/v0.2.0...v0.1.9)
-
----
-
-### ❤️ Support | Unterstützung
-
-If you find this card useful, consider supporting the developer:
-
-- ☕ **[Buy Me a Coffee](https://buymeacoffee.com/xerolux)**
-- 🚗 **[Tesla Referral Code](https://ts.la/sebastian564489)**
-- ⭐ **Star this repository**
-
-Every contribution, no matter how small, is a huge motivation! Thank you! 🙏
-
-Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
-
----
-
-### 💬 Feedback & Contributions
-
-- 🐛 **[Report a bug](https://github.com/Xerolux/violet-pool-card/issues/new?template=bug_report.md)**
-- 💡 **[Request a feature](https://github.com/Xerolux/violet-pool-card/issues/new?template=feature_request.md)**
-
----
-
-_Generated automatically by GitHub Actions on 2026-06-29 04:09:26 UTC_
-
----
-
 ## [0.1.8] - 2026-06-14
-
-## v0.1.8 – Violet Pool Card
-
-✅ **STABLE RELEASE**
-
-### ✨ New Features | Neue Funktionen
-
-- Enhanced Violet Pool Card functionality
 
 ### 🚀 Improvements | Verbesserungen
 
@@ -592,63 +226,7 @@ _Generated automatically by GitHub Actions on 2026-06-29 04:09:26 UTC_
 
 ---
 
-### 📦 Installation
-
-**HACS (Recommended):**
-1. Open HACS in Home Assistant
-2. Go to "Frontend"
-3. Click "+" and search for "Violet Pool Card"
-4. Click "Download"
-5. Restart Home Assistant
-
-**Manual:**
-1. Download `violet-pool-card.js` from the assets below
-2. Copy to `config/www/violet-pool-card.js`
-3. Add resource in Configuration → Lovelace Dashboards → Resources
-   - URL: `/local/violet-pool-card.js`
-   - Type: `JavaScript Module`
-4. Restart Home Assistant
-
----
-
-📋 [Full changelog: v0.1.7...v0.1.8](https://github.com/Xerolux/violet-pool-card/compare/v0.1.7...v0.1.8)
-
----
-
-### ❤️ Support | Unterstützung
-
-If you find this card useful, consider supporting the developer:
-
-- ☕ **[Buy Me a Coffee](https://buymeacoffee.com/xerolux)**
-- 🚗 **[Tesla Referral Code](https://ts.la/sebastian564489)**
-- ⭐ **Star this repository**
-
-Every contribution, no matter how small, is a huge motivation! Thank you! 🙏
-
-Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
-
----
-
-### 💬 Feedback & Contributions
-
-- 🐛 **[Report a bug](https://github.com/Xerolux/violet-pool-card/issues/new?template=bug_report.md)**
-- 💡 **[Request a feature](https://github.com/Xerolux/violet-pool-card/issues/new?template=feature_request.md)**
-
----
-
-_Generated automatically by GitHub Actions on 2026-06-14 07:00:41 UTC_
-
----
-
 ## [0.1.7] - 2026-05-22
-
-## v0.1.7 – Violet Pool Card
-
-✅ **STABLE RELEASE**
-
-### ✨ New Features | Neue Funktionen
-
-- Enhanced Violet Pool Card functionality
 
 ### 🚀 Improvements | Verbesserungen
 
@@ -660,59 +238,7 @@ _Generated automatically by GitHub Actions on 2026-06-14 07:00:41 UTC_
 
 ---
 
-### 📦 Installation
-
-**HACS (Recommended):**
-1. Open HACS in Home Assistant
-2. Go to "Frontend"
-3. Click "+" and search for "Violet Pool Card"
-4. Click "Download"
-5. Restart Home Assistant
-
-**Manual:**
-1. Download `violet-pool-card.js` from the assets below
-2. Copy to `config/www/violet-pool-card.js`
-3. Add resource in Configuration → Lovelace Dashboards → Resources
-   - URL: `/local/violet-pool-card.js`
-   - Type: `JavaScript Module`
-4. Restart Home Assistant
-
----
-
-📋 [Full changelog: v0.1.6...v0.1.7](https://github.com/Xerolux/violet-pool-card/compare/v0.1.6...v0.1.7)
-
----
-
-### ❤️ Support | Unterstützung
-
-If you find this card useful, consider supporting the developer:
-
-- ☕ **[Buy Me a Coffee](https://buymeacoffee.com/xerolux)**
-- 🚗 **[Tesla Referral Code](https://ts.la/sebastian564489)**
-- ⭐ **Star this repository**
-
-Every contribution, no matter how small, is a huge motivation! Thank you! 🙏
-
-Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
-
----
-
-### 💬 Feedback & Contributions
-
-- 🐛 **[Report a bug](https://github.com/Xerolux/violet-pool-card/issues/new?template=bug_report.md)**
-- 💡 **[Request a feature](https://github.com/Xerolux/violet-pool-card/issues/new?template=feature_request.md)**
-
----
-
-_Generated automatically by GitHub Actions on 2026-05-22 21:05:30 UTC_
-
----
-
 ## [0.1.6] - 2026-05-07
-
-## v0.1.6 – Violet Pool Card
-
-✅ **STABLE RELEASE**
 
 ### ✨ New Features | Neue Funktionen
 
@@ -724,133 +250,17 @@ _Generated automatically by GitHub Actions on 2026-05-22 21:05:30 UTC_
 - feat: Update default entities to match German Violet Pool Controller add-on (d427595)
 - 📝 Release v0.1.5 - Update changelog, version and info.md (94a18d5)
 
-### 🔧 Bug Fixes | Fehlerbehebungen
-
-- Minor bug fixes and stability improvements
-
----
-
-### 📦 Installation
-
-**HACS (Recommended):**
-1. Open HACS in Home Assistant
-2. Go to "Frontend"
-3. Click "+" and search for "Violet Pool Card"
-4. Click "Download"
-5. Restart Home Assistant
-
-**Manual:**
-1. Download `violet-pool-card.js` from the assets below
-2. Copy to `config/www/violet-pool-card.js`
-3. Add resource in Configuration → Lovelace Dashboards → Resources
-   - URL: `/local/violet-pool-card.js`
-   - Type: `JavaScript Module`
-4. Restart Home Assistant
-
----
-
-📋 [Full changelog: v0.1.5...v0.1.6](https://github.com/Xerolux/violet-pool-card/compare/v0.1.5...v0.1.6)
-
----
-
-### ❤️ Support | Unterstützung
-
-If you find this card useful, consider supporting the developer:
-
-- ☕ **[Buy Me a Coffee](https://buymeacoffee.com/xerolux)**
-- 🚗 **[Tesla Referral Code](https://ts.la/sebastian564489)**
-- ⭐ **Star this repository**
-
-Every contribution, no matter how small, is a huge motivation! Thank you! 🙏
-
-Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
-
----
-
-### 💬 Feedback & Contributions
-
-- 🐛 **[Report a bug](https://github.com/Xerolux/violet-pool-card/issues/new?template=bug_report.md)**
-- 💡 **[Request a feature](https://github.com/Xerolux/violet-pool-card/issues/new?template=feature_request.md)**
-
----
-
-_Generated automatically by GitHub Actions on 2026-05-07 06:20:28 UTC_
-
 ---
 
 ## [0.1.5] - 2026-05-04
-
-## v0.1.5 – Violet Pool Card
-
-✅ **STABLE RELEASE**
-
-### ✨ New Features | Neue Funktionen
-
-- Enhanced Violet Pool Card functionality
 
 ### 🚀 Improvements | Verbesserungen
 
 - 📝 Release v0.1.4 - Update changelog, version and info.md (fd0272d)
 
-### 🔧 Bug Fixes | Fehlerbehebungen
-
-- Minor bug fixes and stability improvements
-
----
-
-### 📦 Installation
-
-**HACS (Recommended):**
-1. Open HACS in Home Assistant
-2. Go to "Frontend"
-3. Click "+" and search for "Violet Pool Card"
-4. Click "Download"
-5. Restart Home Assistant
-
-**Manual:**
-1. Download `violet-pool-card.js` from the assets below
-2. Copy to `config/www/violet-pool-card.js`
-3. Add resource in Configuration → Lovelace Dashboards → Resources
-   - URL: `/local/violet-pool-card.js`
-   - Type: `JavaScript Module`
-4. Restart Home Assistant
-
----
-
-📋 [Full changelog: v0.1.4...v0.1.5](https://github.com/Xerolux/violet-pool-card/compare/v0.1.4...v0.1.5)
-
----
-
-### ❤️ Support | Unterstützung
-
-If you find this card useful, consider supporting the developer:
-
-- ☕ **[Buy Me a Coffee](https://buymeacoffee.com/xerolux)**
-- 🚗 **[Tesla Referral Code](https://ts.la/sebastian564489)**
-- ⭐ **Star this repository**
-
-Every contribution, no matter how small, is a huge motivation! Thank you! 🙏
-
-Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
-
----
-
-### 💬 Feedback & Contributions
-
-- 🐛 **[Report a bug](https://github.com/Xerolux/violet-pool-card/issues/new?template=bug_report.md)**
-- 💡 **[Request a feature](https://github.com/Xerolux/violet-pool-card/issues/new?template=feature_request.md)**
-
----
-
-_Generated automatically by GitHub Actions on 2026-05-04 09:51:25 UTC_
-
 ---
 
 ## [0.1.4] - 2026-05-04
-
-## v0.1.4 – Violet Pool Card
-
-✅ **STABLE RELEASE**
 
 ### ✨ New Features | Neue Funktionen
 
@@ -969,59 +379,7 @@ _Generated automatically by GitHub Actions on 2026-05-04 09:51:25 UTC_
 
 ---
 
-### 📦 Installation
-
-**HACS (Recommended):**
-1. Open HACS in Home Assistant
-2. Go to "Frontend"
-3. Click "+" and search for "Violet Pool Card"
-4. Click "Download"
-5. Restart Home Assistant
-
-**Manual:**
-1. Download `violet-pool-card.js` from the assets below
-2. Copy to `config/www/violet-pool-card.js`
-3. Add resource in Configuration → Lovelace Dashboards → Resources
-   - URL: `/local/violet-pool-card.js`
-   - Type: `JavaScript Module`
-4. Restart Home Assistant
-
----
-
-📋 [Full changelog: v0.1.3...v0.1.4](https://github.com/Xerolux/violet-pool-card/compare/v0.1.3...v0.1.4)
-
----
-
-### ❤️ Support | Unterstützung
-
-If you find this card useful, consider supporting the developer:
-
-- ☕ **[Buy Me a Coffee](https://buymeacoffee.com/xerolux)**
-- 🚗 **[Tesla Referral Code](https://ts.la/sebastian564489)**
-- ⭐ **Star this repository**
-
-Every contribution, no matter how small, is a huge motivation! Thank you! 🙏
-
-Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
-
----
-
-### 💬 Feedback & Contributions
-
-- 🐛 **[Report a bug](https://github.com/Xerolux/violet-pool-card/issues/new?template=bug_report.md)**
-- 💡 **[Request a feature](https://github.com/Xerolux/violet-pool-card/issues/new?template=feature_request.md)**
-
----
-
-_Generated automatically by GitHub Actions on 2026-05-04 07:52:50 UTC_
-
----
-
 ## [0.1.2] - 2026-05-04
-
-## v0.1.2 – Violet Pool Card
-
-✅ **STABLE RELEASE**
 
 ### ✨ New Features | Neue Funktionen
 
@@ -1139,61 +497,7 @@ _Generated automatically by GitHub Actions on 2026-05-04 07:52:50 UTC_
 
 ---
 
-### 📦 Installation
-
-**HACS (Recommended):**
-1. Open HACS in Home Assistant
-2. Go to "Frontend"
-3. Click "+" and search for "Violet Pool Card"
-4. Click "Download"
-5. Restart Home Assistant
-
-**Manual:**
-1. Download `violet-pool-card.js` from the assets below
-2. Copy to `config/www/violet-pool-card.js`
-3. Add resource in Configuration → Lovelace Dashboards → Resources
-   - URL: `/local/violet-pool-card.js`
-   - Type: `JavaScript Module`
-4. Restart Home Assistant
-
----
-
-📋 [Full changelog: v0.1.3...v0.1.2](https://github.com/Xerolux/violet-pool-card/compare/v0.1.3...v0.1.2)
-
----
-
-### ❤️ Support | Unterstützung
-
-If you find this card useful, consider supporting the developer:
-
-- ☕ **[Buy Me a Coffee](https://buymeacoffee.com/xerolux)**
-- 🚗 **[Tesla Referral Code](https://ts.la/sebastian564489)**
-- ⭐ **Star this repository**
-
-Every contribution, no matter how small, is a huge motivation! Thank you! 🙏
-
-Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
-
----
-
-### 💬 Feedback & Contributions
-
-- 🐛 **[Report a bug](https://github.com/Xerolux/violet-pool-card/issues/new?template=bug_report.md)**
-- 💡 **[Request a feature](https://github.com/Xerolux/violet-pool-card/issues/new?template=feature_request.md)**
-
----
-
-_Generated automatically by GitHub Actions on 2026-05-04 07:51:43 UTC_
-
----
-
 ## [0.1.3] - 2026-03-08
-
-## v0.1.3 – Violet Pool Card
-
-🟡 **BETA RELEASE** - Testing phase, may contain bugs
-
----
 
 ### ✨ New Features | Neue Funktionen
 
@@ -1305,61 +609,7 @@ _Generated automatically by GitHub Actions on 2026-05-04 07:51:43 UTC_
 
 ---
 
-### 📦 Installation
-
-**HACS (Recommended):**
-1. Open HACS in Home Assistant
-2. Go to "Frontend"
-3. Click "+" and search for "Violet Pool Card"
-4. Click "Download"
-5. Restart Home Assistant
-
-**Manual:**
-1. Download `violet-pool-card.js` from the assets below
-2. Copy to `config/www/violet-pool-card.js`
-3. Add resource in Configuration → Lovelace Dashboards → Resources
-   - URL: `/local/violet-pool-card.js`
-   - Type: `JavaScript Module`
-4. Restart Home Assistant
-
----
-
-📋 [Full changelog: v0.1.2...v0.1.3](https://github.com/Xerolux/violet-pool-card/compare/v0.1.2...v0.1.3)
-
----
-
-### ❤️ Support | Unterstützung
-
-If you find this card useful, consider supporting the developer:
-
-- ☕ **[Buy Me a Coffee](https://buymeacoffee.com/xerolux)**
-- 🚗 **[Tesla Referral Code](https://ts.la/sebastian564489)**
-- ⭐ **Star this repository**
-
-Every contribution, no matter how small, is a huge motivation! Thank you! 🙏
-
-Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
-
----
-
-### 💬 Feedback & Contributions
-
-- 🐛 **[Report a bug](https://github.com/Xerolux/violet-pool-card/issues/new?template=bug_report.md)**
-- 💡 **[Request a feature](https://github.com/Xerolux/violet-pool-card/issues/new?template=feature_request.md)**
-
----
-
-_Generated automatically by GitHub Actions on 2026-03-08 13:53:46 UTC_
-
----
-
 ## [0.1.2] - 2026-03-04
-
-## v0.1.2 – Violet Pool Card
-
-🟡 **BETA RELEASE** - Testing phase, may contain bugs
-
----
 
 ### ✨ New Features | Neue Funktionen
 
@@ -1463,61 +713,7 @@ _Generated automatically by GitHub Actions on 2026-03-08 13:53:46 UTC_
 
 ---
 
-### 📦 Installation
-
-**HACS (Recommended):**
-1. Open HACS in Home Assistant
-2. Go to "Frontend"
-3. Click "+" and search for "Violet Pool Card"
-4. Click "Download"
-5. Restart Home Assistant
-
-**Manual:**
-1. Download `violet-pool-card.js` from the assets below
-2. Copy to `config/www/violet-pool-card.js`
-3. Add resource in Configuration → Lovelace Dashboards → Resources
-   - URL: `/local/violet-pool-card.js`
-   - Type: `JavaScript Module`
-4. Restart Home Assistant
-
----
-
-📋 [Full changelog: v0.1.3...v0.1.2](https://github.com/Xerolux/violet-pool-card/compare/v0.1.3...v0.1.2)
-
----
-
-### ❤️ Support | Unterstützung
-
-If you find this card useful, consider supporting the developer:
-
-- ☕ **[Buy Me a Coffee](https://buymeacoffee.com/xerolux)**
-- 🚗 **[Tesla Referral Code](https://ts.la/sebastian564489)**
-- ⭐ **Star this repository**
-
-Every contribution, no matter how small, is a huge motivation! Thank you! 🙏
-
-Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
-
----
-
-### 💬 Feedback & Contributions
-
-- 🐛 **[Report a bug](https://github.com/Xerolux/violet-pool-card/issues/new?template=bug_report.md)**
-- 💡 **[Request a feature](https://github.com/Xerolux/violet-pool-card/issues/new?template=feature_request.md)**
-
----
-
-_Generated automatically by GitHub Actions on 2026-03-04 16:13:21 UTC_
-
----
-
 ## [0.1.2] - 2026-03-04
-
-## v0.1.2 – Violet Pool Card
-
-🟡 **BETA RELEASE** - Testing phase, may contain bugs
-
----
 
 ### ✨ New Features | Neue Funktionen
 
@@ -1618,61 +814,7 @@ _Generated automatically by GitHub Actions on 2026-03-04 16:13:21 UTC_
 
 ---
 
-### 📦 Installation
-
-**HACS (Recommended):**
-1. Open HACS in Home Assistant
-2. Go to "Frontend"
-3. Click "+" and search for "Violet Pool Card"
-4. Click "Download"
-5. Restart Home Assistant
-
-**Manual:**
-1. Download `violet-pool-card.js` from the assets below
-2. Copy to `config/www/violet-pool-card.js`
-3. Add resource in Configuration → Lovelace Dashboards → Resources
-   - URL: `/local/violet-pool-card.js`
-   - Type: `JavaScript Module`
-4. Restart Home Assistant
-
----
-
-📋 [Full changelog: v0.1.3...v0.1.2](https://github.com/Xerolux/violet-pool-card/compare/v0.1.3...v0.1.2)
-
----
-
-### ❤️ Support | Unterstützung
-
-If you find this card useful, consider supporting the developer:
-
-- ☕ **[Buy Me a Coffee](https://buymeacoffee.com/xerolux)**
-- 🚗 **[Tesla Referral Code](https://ts.la/sebastian564489)**
-- ⭐ **Star this repository**
-
-Every contribution, no matter how small, is a huge motivation! Thank you! 🙏
-
-Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
-
----
-
-### 💬 Feedback & Contributions
-
-- 🐛 **[Report a bug](https://github.com/Xerolux/violet-pool-card/issues/new?template=bug_report.md)**
-- 💡 **[Request a feature](https://github.com/Xerolux/violet-pool-card/issues/new?template=feature_request.md)**
-
----
-
-_Generated automatically by GitHub Actions on 2026-03-04 09:18:23 UTC_
-
----
-
 ## [0.1.2] - 2026-03-04
-
-## v0.1.2 – Violet Pool Card
-
-🟡 **BETA RELEASE** - Testing phase, may contain bugs
-
----
 
 ### ✨ New Features | Neue Funktionen
 
@@ -1769,59 +911,7 @@ _Generated automatically by GitHub Actions on 2026-03-04 09:18:23 UTC_
 
 ---
 
-### 📦 Installation
-
-**HACS (Recommended):**
-1. Open HACS in Home Assistant
-2. Go to "Frontend"
-3. Click "+" and search for "Violet Pool Card"
-4. Click "Download"
-5. Restart Home Assistant
-
-**Manual:**
-1. Download `violet-pool-card.js` from the assets below
-2. Copy to `config/www/violet-pool-card.js`
-3. Add resource in Configuration → Lovelace Dashboards → Resources
-   - URL: `/local/violet-pool-card.js`
-   - Type: `JavaScript Module`
-4. Restart Home Assistant
-
----
-
-📋 [Full changelog: v0.1.3...v0.1.2](https://github.com/Xerolux/violet-pool-card/compare/v0.1.3...v0.1.2)
-
----
-
-### ❤️ Support | Unterstützung
-
-If you find this card useful, consider supporting the developer:
-
-- ☕ **[Buy Me a Coffee](https://buymeacoffee.com/xerolux)**
-- 🚗 **[Tesla Referral Code](https://ts.la/sebastian564489)**
-- ⭐ **Star this repository**
-
-Every contribution, no matter how small, is a huge motivation! Thank you! 🙏
-
-Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
-
----
-
-### 💬 Feedback & Contributions
-
-- 🐛 **[Report a bug](https://github.com/Xerolux/violet-pool-card/issues/new?template=bug_report.md)**
-- 💡 **[Request a feature](https://github.com/Xerolux/violet-pool-card/issues/new?template=feature_request.md)**
-
----
-
-_Generated automatically by GitHub Actions on 2026-03-04 09:10:21 UTC_
-
----
-
 ## [0.1.1] - 2026-03-04
-
-## v0.1.1 – Violet Pool Card
-
-✅ **STABLE RELEASE**
 
 ### ✨ New Features | Neue Funktionen
 
@@ -1908,61 +998,7 @@ _Generated automatically by GitHub Actions on 2026-03-04 09:10:21 UTC_
 
 ---
 
-### 📦 Installation
-
-**HACS (Recommended):**
-1. Open HACS in Home Assistant
-2. Go to "Frontend"
-3. Click "+" and search for "Violet Pool Card"
-4. Click "Download"
-5. Restart Home Assistant
-
-**Manual:**
-1. Download `violet-pool-card.js` from the assets below
-2. Copy to `config/www/violet-pool-card.js`
-3. Add resource in Configuration → Lovelace Dashboards → Resources
-   - URL: `/local/violet-pool-card.js`
-   - Type: `JavaScript Module`
-4. Restart Home Assistant
-
----
-
-📋 [Full changelog: v0.1.3...v0.1.1](https://github.com/Xerolux/violet-pool-card/compare/v0.1.3...v0.1.1)
-
----
-
-### ❤️ Support | Unterstützung
-
-If you find this card useful, consider supporting the developer:
-
-- ☕ **[Buy Me a Coffee](https://buymeacoffee.com/xerolux)**
-- 🚗 **[Tesla Referral Code](https://ts.la/sebastian564489)**
-- ⭐ **Star this repository**
-
-Every contribution, no matter how small, is a huge motivation! Thank you! 🙏
-
-Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
-
----
-
-### 💬 Feedback & Contributions
-
-- 🐛 **[Report a bug](https://github.com/Xerolux/violet-pool-card/issues/new?template=bug_report.md)**
-- 💡 **[Request a feature](https://github.com/Xerolux/violet-pool-card/issues/new?template=feature_request.md)**
-
----
-
-_Generated automatically by GitHub Actions on 2026-03-04 08:53:39 UTC_
-
----
-
 ## [0.1.1] - 2026-03-04
-
-## v0.1.1 – Violet Pool Card
-
-🟡 **BETA RELEASE** - Testing phase, may contain bugs
-
----
 
 ### ✨ New Features | Neue Funktionen
 
@@ -2042,61 +1078,7 @@ _Generated automatically by GitHub Actions on 2026-03-04 08:53:39 UTC_
 
 ---
 
-### 📦 Installation
-
-**HACS (Recommended):**
-1. Open HACS in Home Assistant
-2. Go to "Frontend"
-3. Click "+" and search for "Violet Pool Card"
-4. Click "Download"
-5. Restart Home Assistant
-
-**Manual:**
-1. Download `violet-pool-card.js` from the assets below
-2. Copy to `config/www/violet-pool-card.js`
-3. Add resource in Configuration → Lovelace Dashboards → Resources
-   - URL: `/local/violet-pool-card.js`
-   - Type: `JavaScript Module`
-4. Restart Home Assistant
-
----
-
-📋 [Full changelog: v0.1.3...v0.1.1](https://github.com/Xerolux/violet-pool-card/compare/v0.1.3...v0.1.1)
-
----
-
-### ❤️ Support | Unterstützung
-
-If you find this card useful, consider supporting the developer:
-
-- ☕ **[Buy Me a Coffee](https://buymeacoffee.com/xerolux)**
-- 🚗 **[Tesla Referral Code](https://ts.la/sebastian564489)**
-- ⭐ **Star this repository**
-
-Every contribution, no matter how small, is a huge motivation! Thank you! 🙏
-
-Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
-
----
-
-### 💬 Feedback & Contributions
-
-- 🐛 **[Report a bug](https://github.com/Xerolux/violet-pool-card/issues/new?template=bug_report.md)**
-- 💡 **[Request a feature](https://github.com/Xerolux/violet-pool-card/issues/new?template=feature_request.md)**
-
----
-
-_Generated automatically by GitHub Actions on 2026-03-04 07:57:32 UTC_
-
----
-
 ## [0.1.3] - 2026-03-04
-
-## v0.1.3 – Violet Pool Card
-
-🟡 **BETA RELEASE** - Testing phase, may contain bugs
-
----
 
 ### ✨ New Features | Neue Funktionen
 
@@ -2168,61 +1150,7 @@ _Generated automatically by GitHub Actions on 2026-03-04 07:57:32 UTC_
 
 ---
 
-### 📦 Installation
-
-**HACS (Recommended):**
-1. Open HACS in Home Assistant
-2. Go to "Frontend"
-3. Click "+" and search for "Violet Pool Card"
-4. Click "Download"
-5. Restart Home Assistant
-
-**Manual:**
-1. Download `violet-pool-card.js` from the assets below
-2. Copy to `config/www/violet-pool-card.js`
-3. Add resource in Configuration → Lovelace Dashboards → Resources
-   - URL: `/local/violet-pool-card.js`
-   - Type: `JavaScript Module`
-4. Restart Home Assistant
-
----
-
-📋 [Full changelog: v0.1.2...v0.1.3](https://github.com/Xerolux/violet-pool-card/compare/v0.1.2...v0.1.3)
-
----
-
-### ❤️ Support | Unterstützung
-
-If you find this card useful, consider supporting the developer:
-
-- ☕ **[Buy Me a Coffee](https://buymeacoffee.com/xerolux)**
-- 🚗 **[Tesla Referral Code](https://ts.la/sebastian564489)**
-- ⭐ **Star this repository**
-
-Every contribution, no matter how small, is a huge motivation! Thank you! 🙏
-
-Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
-
----
-
-### 💬 Feedback & Contributions
-
-- 🐛 **[Report a bug](https://github.com/Xerolux/violet-pool-card/issues/new?template=bug_report.md)**
-- 💡 **[Request a feature](https://github.com/Xerolux/violet-pool-card/issues/new?template=feature_request.md)**
-
----
-
-_Generated automatically by GitHub Actions on 2026-03-04 05:39:39 UTC_
-
----
-
 ## [0.1.2] - 2026-03-04
-
-## v0.1.2 – Violet Pool Card
-
-🟡 **BETA RELEASE** - Testing phase, may contain bugs
-
----
 
 ### ✨ New Features | Neue Funktionen
 
@@ -2281,61 +1209,7 @@ _Generated automatically by GitHub Actions on 2026-03-04 05:39:39 UTC_
 
 ---
 
-### 📦 Installation
-
-**HACS (Recommended):**
-1. Open HACS in Home Assistant
-2. Go to "Frontend"
-3. Click "+" and search for "Violet Pool Card"
-4. Click "Download"
-5. Restart Home Assistant
-
-**Manual:**
-1. Download `violet-pool-card.js` from the assets below
-2. Copy to `config/www/violet-pool-card.js`
-3. Add resource in Configuration → Lovelace Dashboards → Resources
-   - URL: `/local/violet-pool-card.js`
-   - Type: `JavaScript Module`
-4. Restart Home Assistant
-
----
-
-📋 [Full changelog: v0.1.3...v0.1.2](https://github.com/Xerolux/violet-pool-card/compare/v0.1.3...v0.1.2)
-
----
-
-### ❤️ Support | Unterstützung
-
-If you find this card useful, consider supporting the developer:
-
-- ☕ **[Buy Me a Coffee](https://buymeacoffee.com/xerolux)**
-- 🚗 **[Tesla Referral Code](https://ts.la/sebastian564489)**
-- ⭐ **Star this repository**
-
-Every contribution, no matter how small, is a huge motivation! Thank you! 🙏
-
-Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
-
----
-
-### 💬 Feedback & Contributions
-
-- 🐛 **[Report a bug](https://github.com/Xerolux/violet-pool-card/issues/new?template=bug_report.md)**
-- 💡 **[Request a feature](https://github.com/Xerolux/violet-pool-card/issues/new?template=feature_request.md)**
-
----
-
-_Generated automatically by GitHub Actions on 2026-03-04 04:19:02 UTC_
-
----
-
 ## [0.1.1] - 2026-03-03
-
-## v0.1.1 – Violet Pool Card
-
-🟡 **BETA RELEASE** - Testing phase, may contain bugs
-
----
 
 ### ✨ New Features | Neue Funktionen
 
@@ -2384,61 +1258,7 @@ _Generated automatically by GitHub Actions on 2026-03-04 04:19:02 UTC_
 
 ---
 
-### 📦 Installation
-
-**HACS (Recommended):**
-1. Open HACS in Home Assistant
-2. Go to "Frontend"
-3. Click "+" and search for "Violet Pool Card"
-4. Click "Download"
-5. Restart Home Assistant
-
-**Manual:**
-1. Download `violet-pool-card.js` from the assets below
-2. Copy to `config/www/violet-pool-card.js`
-3. Add resource in Configuration → Lovelace Dashboards → Resources
-   - URL: `/local/violet-pool-card.js`
-   - Type: `JavaScript Module`
-4. Restart Home Assistant
-
----
-
-📋 [Full changelog: v0.1.3...v0.1.1](https://github.com/Xerolux/violet-pool-card/compare/v0.1.3...v0.1.1)
-
----
-
-### ❤️ Support | Unterstützung
-
-If you find this card useful, consider supporting the developer:
-
-- ☕ **[Buy Me a Coffee](https://buymeacoffee.com/xerolux)**
-- 🚗 **[Tesla Referral Code](https://ts.la/sebastian564489)**
-- ⭐ **Star this repository**
-
-Every contribution, no matter how small, is a huge motivation! Thank you! 🙏
-
-Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
-
----
-
-### 💬 Feedback & Contributions
-
-- 🐛 **[Report a bug](https://github.com/Xerolux/violet-pool-card/issues/new?template=bug_report.md)**
-- 💡 **[Request a feature](https://github.com/Xerolux/violet-pool-card/issues/new?template=feature_request.md)**
-
----
-
-_Generated automatically by GitHub Actions on 2026-03-03 11:14:37 UTC_
-
----
-
 ## [0.1.1] - 2026-03-03
-
-## v0.1.1 – Violet Pool Card
-
-🟡 **BETA RELEASE** - Testing phase, may contain bugs
-
----
 
 ### ✨ New Features | Neue Funktionen
 
@@ -2483,65 +1303,7 @@ _Generated automatically by GitHub Actions on 2026-03-03 11:14:37 UTC_
 
 ---
 
-### 📦 Installation
-
-**HACS (Recommended):**
-1. Open HACS in Home Assistant
-2. Go to "Frontend"
-3. Click "+" and search for "Violet Pool Card"
-4. Click "Download"
-5. Restart Home Assistant
-
-**Manual:**
-1. Download `violet-pool-card.js` from the assets below
-2. Copy to `config/www/violet-pool-card.js`
-3. Add resource in Configuration → Lovelace Dashboards → Resources
-   - URL: `/local/violet-pool-card.js`
-   - Type: `JavaScript Module`
-4. Restart Home Assistant
-
----
-
-📋 [Full changelog: v0.1.3...v0.1.1](https://github.com/Xerolux/violet-pool-card/compare/v0.1.3...v0.1.1)
-
----
-
-### ❤️ Support | Unterstützung
-
-If you find this card useful, consider supporting the developer:
-
-- ☕ **[Buy Me a Coffee](https://buymeacoffee.com/xerolux)**
-- 🚗 **[Tesla Referral Code](https://ts.la/sebastian564489)**
-- ⭐ **Star this repository**
-
-Every contribution, no matter how small, is a huge motivation! Thank you! 🙏
-
-Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
-
----
-
-### 💬 Feedback & Contributions
-
-- 🐛 **[Report a bug](https://github.com/Xerolux/violet-pool-card/issues/new?template=bug_report.md)**
-- 💡 **[Request a feature](https://github.com/Xerolux/violet-pool-card/issues/new?template=feature_request.md)**
-
----
-
-_Generated automatically by GitHub Actions on 2026-03-03 10:43:40 UTC_
-
----
-
 ## [0.1.1] - 2026-03-03
-
-## v0.1.1 – Violet Pool Card
-
-🟡 **BETA RELEASE** - Testing phase, may contain bugs
-
----
-
-### ✨ New Features | Neue Funktionen
-
-- Enhanced Violet Pool Card functionality
 
 ### 🚀 Improvements | Verbesserungen
 
@@ -2561,65 +1323,7 @@ _Generated automatically by GitHub Actions on 2026-03-03 10:43:40 UTC_
 
 ---
 
-### 📦 Installation
-
-**HACS (Recommended):**
-1. Open HACS in Home Assistant
-2. Go to "Frontend"
-3. Click "+" and search for "Violet Pool Card"
-4. Click "Download"
-5. Restart Home Assistant
-
-**Manual:**
-1. Download `violet-pool-card.js` from the assets below
-2. Copy to `config/www/violet-pool-card.js`
-3. Add resource in Configuration → Lovelace Dashboards → Resources
-   - URL: `/local/violet-pool-card.js`
-   - Type: `JavaScript Module`
-4. Restart Home Assistant
-
----
-
-📋 [Full changelog: v0.1.3...v0.1.1](https://github.com/Xerolux/violet-pool-card/compare/v0.1.3...v0.1.1)
-
----
-
-### ❤️ Support | Unterstützung
-
-If you find this card useful, consider supporting the developer:
-
-- ☕ **[Buy Me a Coffee](https://buymeacoffee.com/xerolux)**
-- 🚗 **[Tesla Referral Code](https://ts.la/sebastian564489)**
-- ⭐ **Star this repository**
-
-Every contribution, no matter how small, is a huge motivation! Thank you! 🙏
-
-Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
-
----
-
-### 💬 Feedback & Contributions
-
-- 🐛 **[Report a bug](https://github.com/Xerolux/violet-pool-card/issues/new?template=bug_report.md)**
-- 💡 **[Request a feature](https://github.com/Xerolux/violet-pool-card/issues/new?template=feature_request.md)**
-
----
-
-_Generated automatically by GitHub Actions on 2026-03-03 07:00:28 UTC_
-
----
-
 ## [0.1.1] - 2026-03-03
-
-## v0.1.1 – Violet Pool Card
-
-🟡 **BETA RELEASE** - Testing phase, may contain bugs
-
----
-
-### ✨ New Features | Neue Funktionen
-
-- Enhanced Violet Pool Card functionality
 
 ### 🚀 Improvements | Verbesserungen
 
@@ -2636,65 +1340,7 @@ _Generated automatically by GitHub Actions on 2026-03-03 07:00:28 UTC_
 
 ---
 
-### 📦 Installation
-
-**HACS (Recommended):**
-1. Open HACS in Home Assistant
-2. Go to "Frontend"
-3. Click "+" and search for "Violet Pool Card"
-4. Click "Download"
-5. Restart Home Assistant
-
-**Manual:**
-1. Download `violet-pool-card.js` from the assets below
-2. Copy to `config/www/violet-pool-card.js`
-3. Add resource in Configuration → Lovelace Dashboards → Resources
-   - URL: `/local/violet-pool-card.js`
-   - Type: `JavaScript Module`
-4. Restart Home Assistant
-
----
-
-📋 [Full changelog: v0.1.3...v0.1.1](https://github.com/Xerolux/violet-pool-card/compare/v0.1.3...v0.1.1)
-
----
-
-### ❤️ Support | Unterstützung
-
-If you find this card useful, consider supporting the developer:
-
-- ☕ **[Buy Me a Coffee](https://buymeacoffee.com/xerolux)**
-- 🚗 **[Tesla Referral Code](https://ts.la/sebastian564489)**
-- ⭐ **Star this repository**
-
-Every contribution, no matter how small, is a huge motivation! Thank you! 🙏
-
-Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
-
----
-
-### 💬 Feedback & Contributions
-
-- 🐛 **[Report a bug](https://github.com/Xerolux/violet-pool-card/issues/new?template=bug_report.md)**
-- 💡 **[Request a feature](https://github.com/Xerolux/violet-pool-card/issues/new?template=feature_request.md)**
-
----
-
-_Generated automatically by GitHub Actions on 2026-03-03 05:48:41 UTC_
-
----
-
 ## [0.1.1] - 2026-03-03
-
-## v0.1.1 – Violet Pool Card
-
-🟡 **BETA RELEASE** - Testing phase, may contain bugs
-
----
-
-### ✨ New Features | Neue Funktionen
-
-- Enhanced Violet Pool Card functionality
 
 ### 🚀 Improvements | Verbesserungen
 
@@ -2708,61 +1354,7 @@ _Generated automatically by GitHub Actions on 2026-03-03 05:48:41 UTC_
 
 ---
 
-### 📦 Installation
-
-**HACS (Recommended):**
-1. Open HACS in Home Assistant
-2. Go to "Frontend"
-3. Click "+" and search for "Violet Pool Card"
-4. Click "Download"
-5. Restart Home Assistant
-
-**Manual:**
-1. Download `violet-pool-card.js` from the assets below
-2. Copy to `config/www/violet-pool-card.js`
-3. Add resource in Configuration → Lovelace Dashboards → Resources
-   - URL: `/local/violet-pool-card.js`
-   - Type: `JavaScript Module`
-4. Restart Home Assistant
-
----
-
-📋 [Full changelog: v0.1.3...v0.1.1](https://github.com/Xerolux/violet-pool-card/compare/v0.1.3...v0.1.1)
-
----
-
-### ❤️ Support | Unterstützung
-
-If you find this card useful, consider supporting the developer:
-
-- ☕ **[Buy Me a Coffee](https://buymeacoffee.com/xerolux)**
-- 🚗 **[Tesla Referral Code](https://ts.la/sebastian564489)**
-- ⭐ **Star this repository**
-
-Every contribution, no matter how small, is a huge motivation! Thank you! 🙏
-
-Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
-
----
-
-### 💬 Feedback & Contributions
-
-- 🐛 **[Report a bug](https://github.com/Xerolux/violet-pool-card/issues/new?template=bug_report.md)**
-- 💡 **[Request a feature](https://github.com/Xerolux/violet-pool-card/issues/new?template=feature_request.md)**
-
----
-
-_Generated automatically by GitHub Actions on 2026-03-03 04:37:39 UTC_
-
----
-
 ## [0.1.3] - 2026-03-02
-
-## v0.1.3 – Violet Pool Card
-
-🟡 **BETA RELEASE** - Testing phase, may contain bugs
-
----
 
 ### ✨ New Features | Neue Funktionen
 
@@ -2773,71 +1365,13 @@ _Generated automatically by GitHub Actions on 2026-03-03 04:37:39 UTC_
 - docs: update README with v0.2.0 features (6 new card types, animated SVG icons, RGB picker, tooltips) (aa06296)
 - 📝 Release v0.1.2 - Update changelog and version (6b93afd)
 
-### 🔧 Bug Fixes | Fehlerbehebungen
-
-- Minor bug fixes and stability improvements
-
 ### 📚 Documentation | Dokumentation
 
 - docs: update README with v0.2.0 features (6 new card types, animated SVG icons, RGB picker, tooltips) (aa06296)
 
 ---
 
-### 📦 Installation
-
-**HACS (Recommended):**
-1. Open HACS in Home Assistant
-2. Go to "Frontend"
-3. Click "+" and search for "Violet Pool Card"
-4. Click "Download"
-5. Restart Home Assistant
-
-**Manual:**
-1. Download `violet-pool-card.js` from the assets below
-2. Copy to `config/www/violet-pool-card.js`
-3. Add resource in Configuration → Lovelace Dashboards → Resources
-   - URL: `/local/violet-pool-card.js`
-   - Type: `JavaScript Module`
-4. Restart Home Assistant
-
----
-
-📋 [Full changelog: v0.1.2...v0.1.3](https://github.com/Xerolux/violet-pool-card/compare/v0.1.2...v0.1.3)
-
----
-
-### ❤️ Support | Unterstützung
-
-If you find this card useful, consider supporting the developer:
-
-- ☕ **[Buy Me a Coffee](https://buymeacoffee.com/xerolux)**
-- 🚗 **[Tesla Referral Code](https://ts.la/sebastian564489)**
-- ⭐ **Star this repository**
-
-Every contribution, no matter how small, is a huge motivation! Thank you! 🙏
-
-Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
-
----
-
-### 💬 Feedback & Contributions
-
-- 🐛 **[Report a bug](https://github.com/Xerolux/violet-pool-card/issues/new?template=bug_report.md)**
-- 💡 **[Request a feature](https://github.com/Xerolux/violet-pool-card/issues/new?template=feature_request.md)**
-
----
-
-_Generated automatically by GitHub Actions on 2026-03-02 18:31:34 UTC_
-
----
-
 ## [0.1.2] - 2026-03-02
-
-## v0.1.2 – Violet Pool Card
-
-🟡 **BETA RELEASE** - Testing phase, may contain bugs
-
----
 
 ### ✨ New Features | Neue Funktionen
 
@@ -2848,67 +1382,9 @@ _Generated automatically by GitHub Actions on 2026-03-02 18:31:34 UTC_
 
 - 📝 Release v0.1.1 - Update changelog and version (e8e7a23)
 
-### 🔧 Bug Fixes | Fehlerbehebungen
-
-- Minor bug fixes and stability improvements
-
----
-
-### 📦 Installation
-
-**HACS (Recommended):**
-1. Open HACS in Home Assistant
-2. Go to "Frontend"
-3. Click "+" and search for "Violet Pool Card"
-4. Click "Download"
-5. Restart Home Assistant
-
-**Manual:**
-1. Download `violet-pool-card.js` from the assets below
-2. Copy to `config/www/violet-pool-card.js`
-3. Add resource in Configuration → Lovelace Dashboards → Resources
-   - URL: `/local/violet-pool-card.js`
-   - Type: `JavaScript Module`
-4. Restart Home Assistant
-
----
-
-📋 [Full changelog: v0.1.1...v0.1.2](https://github.com/Xerolux/violet-pool-card/compare/v0.1.1...v0.1.2)
-
----
-
-### ❤️ Support | Unterstützung
-
-If you find this card useful, consider supporting the developer:
-
-- ☕ **[Buy Me a Coffee](https://buymeacoffee.com/xerolux)**
-- 🚗 **[Tesla Referral Code](https://ts.la/sebastian564489)**
-- ⭐ **Star this repository**
-
-Every contribution, no matter how small, is a huge motivation! Thank you! 🙏
-
-Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
-
----
-
-### 💬 Feedback & Contributions
-
-- 🐛 **[Report a bug](https://github.com/Xerolux/violet-pool-card/issues/new?template=bug_report.md)**
-- 💡 **[Request a feature](https://github.com/Xerolux/violet-pool-card/issues/new?template=feature_request.md)**
-
----
-
-_Generated automatically by GitHub Actions on 2026-03-02 18:05:24 UTC_
-
 ---
 
 ## [0.1.1] - 2026-03-02
-
-## v0.1.1 – Violet Pool Card
-
-🟡 **BETA RELEASE** - Testing phase, may contain bugs
-
----
 
 ### ✨ New Features | Neue Funktionen
 
@@ -2951,59 +1427,7 @@ _Generated automatically by GitHub Actions on 2026-03-02 18:05:24 UTC_
 
 ---
 
-### 📦 Installation
-
-**HACS (Recommended):**
-1. Open HACS in Home Assistant
-2. Go to "Frontend"
-3. Click "+" and search for "Violet Pool Card"
-4. Click "Download"
-5. Restart Home Assistant
-
-**Manual:**
-1. Download `violet-pool-card.js` from the assets below
-2. Copy to `config/www/violet-pool-card.js`
-3. Add resource in Configuration → Lovelace Dashboards → Resources
-   - URL: `/local/violet-pool-card.js`
-   - Type: `JavaScript Module`
-4. Restart Home Assistant
-
----
-
-📋 [Full changelog: v0.1.0...v0.1.1](https://github.com/Xerolux/violet-pool-card/compare/v0.1.0...v0.1.1)
-
----
-
-### ❤️ Support | Unterstützung
-
-If you find this card useful, consider supporting the developer:
-
-- ☕ **[Buy Me a Coffee](https://buymeacoffee.com/xerolux)**
-- 🚗 **[Tesla Referral Code](https://ts.la/sebastian564489)**
-- ⭐ **Star this repository**
-
-Every contribution, no matter how small, is a huge motivation! Thank you! 🙏
-
-Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
-
----
-
-### 💬 Feedback & Contributions
-
-- 🐛 **[Report a bug](https://github.com/Xerolux/violet-pool-card/issues/new?template=bug_report.md)**
-- 💡 **[Request a feature](https://github.com/Xerolux/violet-pool-card/issues/new?template=feature_request.md)**
-
----
-
-_Generated automatically by GitHub Actions on 2026-03-02 15:56:51 UTC_
-
----
-
 ## [0.1.0] - 2026-02-06
-
-## v0.1.0 – Violet Pool Card
-
-✅ **STABLE RELEASE**
 
 ### ✨ New Features | Neue Funktionen
 
@@ -3047,61 +1471,7 @@ _Generated automatically by GitHub Actions on 2026-03-02 15:56:51 UTC_
 
 ---
 
-### 📦 Installation
-
-**HACS (Recommended):**
-1. Open HACS in Home Assistant
-2. Go to "Frontend"
-3. Click "+" and search for "Violet Pool Card"
-4. Click "Download"
-5. Restart Home Assistant
-
-**Manual:**
-1. Download `violet-pool-card.js` from the assets below
-2. Copy to `config/www/violet-pool-card.js`
-3. Add resource in Configuration → Lovelace Dashboards → Resources
-   - URL: `/local/violet-pool-card.js`
-   - Type: `JavaScript Module`
-4. Restart Home Assistant
-
----
-
-📋 Full changelog: Initial release
-
----
-
-### ❤️ Support | Unterstützung
-
-If you find this card useful, consider supporting the developer:
-
-- ☕ **[Buy Me a Coffee](https://buymeacoffee.com/xerolux)**
-- 🚗 **[Tesla Referral Code](https://ts.la/sebastian564489)**
-- ⭐ **Star this repository**
-
-Every contribution, no matter how small, is a huge motivation! Thank you! 🙏
-
-Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
-
----
-
-### 💬 Feedback & Contributions
-
-- 🐛 **[Report a bug](https://github.com/Xerolux/violet-pool-card/issues/new?template=bug_report.md)**
-- 💡 **[Request a feature](https://github.com/Xerolux/violet-pool-card/issues/new?template=feature_request.md)**
-
----
-
-_Generated automatically by GitHub Actions on 2026-02-06 13:26:25 UTC_
-
----
-
 ## [0.1.0-alpha.3] - 2026-01-05
-
-## v0.1.0-alpha.3 – Violet Pool Card
-
-🔴 **ALPHA RELEASE** - Experimental features, use with caution!
-
----
 
 ### ✨ New Features | Neue Funktionen
 
@@ -3147,61 +1517,7 @@ _Generated automatically by GitHub Actions on 2026-02-06 13:26:25 UTC_
 
 ---
 
-### 📦 Installation
-
-**HACS (Recommended):**
-1. Open HACS in Home Assistant
-2. Go to "Frontend"
-3. Click "+" and search for "Violet Pool Card"
-4. Click "Download"
-5. Restart Home Assistant
-
-**Manual:**
-1. Download `violet-pool-card.js` from the assets below
-2. Copy to `config/www/violet-pool-card.js`
-3. Add resource in Configuration → Lovelace Dashboards → Resources
-   - URL: `/local/violet-pool-card.js`
-   - Type: `JavaScript Module`
-4. Restart Home Assistant
-
----
-
-📋 Full changelog: Initial release
-
----
-
-### ❤️ Support | Unterstützung
-
-If you find this card useful, consider supporting the developer:
-
-- ☕ **[Buy Me a Coffee](https://buymeacoffee.com/xerolux)**
-- 🚗 **[Tesla Referral Code](https://ts.la/sebastian564489)**
-- ⭐ **Star this repository**
-
-Every contribution, no matter how small, is a huge motivation! Thank you! 🙏
-
-Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
-
----
-
-### 💬 Feedback & Contributions
-
-- 🐛 **[Report a bug](https://github.com/Xerolux/violet-pool-card/issues/new?template=bug_report.md)**
-- 💡 **[Request a feature](https://github.com/Xerolux/violet-pool-card/issues/new?template=feature_request.md)**
-
----
-
-_Generated automatically by GitHub Actions on 2026-01-05 13:09:46 UTC_
-
----
-
 ## [0.1.0-alpha.2] - 2026-01-05
-
-## v0.1.0-alpha.2 – Violet Pool Card
-
-🔴 **ALPHA RELEASE** - Experimental features, use with caution!
-
----
 
 ### ✨ New Features | Neue Funktionen
 
@@ -3247,61 +1563,7 @@ _Generated automatically by GitHub Actions on 2026-01-05 13:09:46 UTC_
 
 ---
 
-### 📦 Installation
-
-**HACS (Recommended):**
-1. Open HACS in Home Assistant
-2. Go to "Frontend"
-3. Click "+" and search for "Violet Pool Card"
-4. Click "Download"
-5. Restart Home Assistant
-
-**Manual:**
-1. Download `violet-pool-card.js` from the assets below
-2. Copy to `config/www/violet-pool-card.js`
-3. Add resource in Configuration → Lovelace Dashboards → Resources
-   - URL: `/local/violet-pool-card.js`
-   - Type: `JavaScript Module`
-4. Restart Home Assistant
-
----
-
-📋 Full changelog: Initial release
-
----
-
-### ❤️ Support | Unterstützung
-
-If you find this card useful, consider supporting the developer:
-
-- ☕ **[Buy Me a Coffee](https://buymeacoffee.com/xerolux)**
-- 🚗 **[Tesla Referral Code](https://ts.la/sebastian564489)**
-- ⭐ **Star this repository**
-
-Every contribution, no matter how small, is a huge motivation! Thank you! 🙏
-
-Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
-
----
-
-### 💬 Feedback & Contributions
-
-- 🐛 **[Report a bug](https://github.com/Xerolux/violet-pool-card/issues/new?template=bug_report.md)**
-- 💡 **[Request a feature](https://github.com/Xerolux/violet-pool-card/issues/new?template=feature_request.md)**
-
----
-
-_Generated automatically by GitHub Actions on 2026-01-05 12:40:37 UTC_
-
----
-
 ## [0.1.0-alpha.1] - 2026-01-05
-
-## v0.1.0-alpha.1 – Violet Pool Card
-
-🔴 **ALPHA RELEASE** - Experimental features, use with caution!
-
----
 
 ### ✨ New Features | Neue Funktionen
 
@@ -3340,55 +1602,6 @@ _Generated automatically by GitHub Actions on 2026-01-05 12:40:37 UTC_
 - 📚 Phase C: Complete Documentation (8cb10ad)
 
 ---
-
-### 📦 Installation
-
-**HACS (Recommended):**
-1. Open HACS in Home Assistant
-2. Go to "Frontend"
-3. Click "+" and search for "Violet Pool Card"
-4. Click "Download"
-5. Restart Home Assistant
-
-**Manual:**
-1. Download `violet-pool-card.js` from the assets below
-2. Copy to `config/www/violet-pool-card.js`
-3. Add resource in Configuration → Lovelace Dashboards → Resources
-   - URL: `/local/violet-pool-card.js`
-   - Type: `JavaScript Module`
-4. Restart Home Assistant
-
----
-
-📋 Full changelog: Initial release
-
----
-
-### ❤️ Support | Unterstützung
-
-If you find this card useful, consider supporting the developer:
-
-- ☕ **[Buy Me a Coffee](https://buymeacoffee.com/xerolux)**
-- 🚗 **[Tesla Referral Code](https://ts.la/sebastian564489)**
-- ⭐ **Star this repository**
-
-Every contribution, no matter how small, is a huge motivation! Thank you! 🙏
-
-Jeder Beitrag, egal wie klein, ist eine große Motivation! Vielen Dank! 🙏
-
----
-
-### 💬 Feedback & Contributions
-
-- 🐛 **[Report a bug](https://github.com/Xerolux/violet-pool-card/issues/new?template=bug_report.md)**
-- 💡 **[Request a feature](https://github.com/Xerolux/violet-pool-card/issues/new?template=feature_request.md)**
-
----
-
-_Generated automatically by GitHub Actions on 2026-01-05 09:44:07 UTC_
-
----
-
 
 ## [1.0.0] - 2026-01-04
 
@@ -3471,3 +1684,5 @@ _Generated automatically by GitHub Actions on 2026-01-05 09:44:07 UTC_
 - TypeScript + Lit Element setup
 - Rollup build system
 - Full documentation (README.md, ROADMAP.md, QUICK_START.md)
+
+---
