@@ -1,19 +1,19 @@
 #!/usr/bin/env node
 /**
- * Violet Pool Card – © 2026 Xerolux | MIT License
+ * Violet Pool Card - (c) 2026 Xerolux | MIT License
  *
- * Holt die Entitäts-Schlüssel der Integration und legt sie als Fixture ab.
+ * Fetches the integration's entity keys and stores them as a fixture.
  *
- * Die Karte schlägt ihre Entitäten über den `translation_key` nach, den die
- * Integration vergibt (siehe `src/utils/entity-registry.ts`). Diese Schlüssel
- * leben in einem anderen Repository — benennt die Integration einen um, würde
- * die Karte die Entität stillschweigend nicht mehr finden.
+ * The card resolves its entities through the `translation_key` the
+ * integration assigns (see `src/utils/entity-registry.ts`). Those keys live in
+ * a different repository - if the integration renames one, the card would
+ * silently stop finding the entity.
  *
- * Deshalb liegt hier eine Kopie der Schlüsselliste: `npm test` prüft die
- * Zuordnungstabelle der Karte dagegen, ganz ohne Netz. Die CI ruft dieses
- * Skript vor den Tests auf, damit eine Umbenennung drüben hier rot wird.
+ * A copy of the key list therefore lives here: `npm test` checks the card's
+ * mapping table against it, entirely offline. CI refreshes the copy with this
+ * script before the tests, so a rename over there turns this repository red.
  *
- * Aufruf:  npm run keys:update
+ * Usage:  npm run keys:update
  */
 
 import { writeFileSync } from 'node:fs';
@@ -34,7 +34,7 @@ const TARGET = join(
 
 /**
  * @returns {Promise<Record<string, Record<string, unknown>>>} Die
- *   `entity`-Sektion der Übersetzungsdatei.
+ *   `entity` section of the translation file.
  */
 async function fetchTranslations() {
   const response = await fetch(SOURCE);

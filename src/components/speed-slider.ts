@@ -2,8 +2,8 @@
  * Violet Pool Card – Custom Lovelace Card for Home Assistant
  * © 2026 Xerolux | https://github.com/Xerolux/violet-pool-card
  *
- * Component: Speed Slider – Drehzahlregelung für die Poolpumpe (ECO / Normal / Boost)
- * Erstellt von Xerolux | MIT License
+ * Component: Speed Slider - speed control for the pool pump (ECO / normal / boost)
+ * Created by Xerolux | MIT License
  */
 
 import { LitElement, html, css } from 'lit';

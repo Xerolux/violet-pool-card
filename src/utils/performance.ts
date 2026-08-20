@@ -2,8 +2,8 @@
  * Violet Pool Card – Custom Lovelace Card for Home Assistant
  * © 2026 Xerolux | https://github.com/Xerolux/violet-pool-card
  *
- * Utility: Performance Monitor – Überwachung von Renderzeiten, Speicher und Animations-FPS
- * Erstellt von Xerolux | MIT License
+ * Utility: Performance Monitor - watches render times, memory and animation FPS
+ * Created by Xerolux | MIT License
  */
 
 export interface PerformanceMetrics {

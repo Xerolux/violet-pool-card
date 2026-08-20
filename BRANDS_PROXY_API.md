@@ -2,7 +2,7 @@
 
 ## Überblick
 
-Die Violet Pool Card unterstützt die Home Assistant Brands Proxy API (ab HA 2026.3) für das Laden von Brand-Images über die lokale Home Assistant API statt direkt vom CDN.
+The Violet Pool Card supports the Home Assistant brands proxy API (HA 2026.3+) for loading brand images through the local Home Assistant API instead of straight from the CDN.
 
 **Referenzen:**
 - [Home Assistant Brands Proxy API Blog](https://developers.home-assistant.io/blog/2026/02/24/brands-proxy-api/)
@@ -10,10 +10,10 @@ Die Violet Pool Card unterstützt die Home Assistant Brands Proxy API (ab HA 202
 
 ## Features
 
-✅ **Lokales Caching** — Bilder werden lokal gecacht und sind offline verfügbar  
-✅ **Access-Token Management** — Automatisches Holen und Cachen des Zugriff-Tokens  
+✅ **Local caching** - images are cached locally and available offline  
+✅ **Access token management** - the token is fetched and cached automatically  
 ✅ **Fallback-Support** — Funktioniert auch ohne Token mit reduzierter Funktionalität  
-✅ **Zwei API-Endpoints** — Support für Integration- und Hardware-Branding  
+✅ **Two API endpoints** - support for integration and hardware branding  
 
 ## API Endpoints
 
@@ -35,7 +35,7 @@ GET /api/brands/hardware/{category}/{image}?access_token=...
 ```
 Für Hardware-Kategorien (z.B. `raspberry_pi`, `zigbee_adapter`)
 
-## Verwendung in der Card
+## Use inside the card
 
 ### 1. Einfache URL-Generierung
 
@@ -74,7 +74,7 @@ try {
   const url = await brandsUrl(hass, 'integration', 'violet_pool', 'icon.png');
   // Nutze url...
 } catch (error) {
-  console.error('Brands API nicht verfügbar:', error);
+  console.error('Brands API unavailable:', error);
   // Fallback verwenden
 }
 ```
@@ -83,10 +83,10 @@ try {
 
 ### Access-Token Management
 
-Das Token wird automatisch geholt und für 1 Stunde gecacht:
+The token is fetched automatically and cached for one hour:
 
 ```typescript
-// Beim ersten Aufruf: Holt das Token
+// First call: fetches the token
 const url1 = await brandsUrl(hass, 'integration', 'violet_pool', 'icon.png');
 
 // Bei wiederholten Aufrufen: Nutzt gecachtes Token
@@ -98,7 +98,7 @@ clearBrandsCacheToken();
 
 ### WebSocket-Befehl
 
-Intern wird folgendes WebSocket-Message verwendet:
+Internally this WebSocket message is used:
 
 ```json
 {
@@ -106,7 +106,7 @@ Intern wird folgendes WebSocket-Message verwendet:
 }
 ```
 
-Die Antwort enthält das Access-Token:
+The response carries the access token:
 
 ```json
 {
@@ -116,17 +116,17 @@ Die Antwort enthält das Access-Token:
 
 ## Best Practices
 
-1. **Token Reuse** — Das Token wird automatisch gecacht, keine manuellen Token-Anfragen nötig
-2. **Fehlerbehandlung** — Die API gibt URLs ohne Token zurück, wenn keine Verbindung existiert
-3. **Image-Formate** — Nutze `@2x` Varianten für hochauflösende Displays
-4. **Dark Mode** — Nutze `dark_icon.png` / `dark_logo.png` für Dark Mode Support
+1. **Token reuse** - the token is cached automatically, no manual token requests needed
+2. **Error handling** - the API returns URLs without a token when there is no connection
+3. **Image formats** - use the `@2x` variants for high-resolution displays
+4. **Dark mode** - use `dark_icon.png` / `dark_logo.png` for dark mode support
 
 ## Dateien
 
-- `src/utils/brands-url.ts` — Hauptimplementierung der Brands Proxy API
-- `src/utils/card-brand.ts` — Card Brand-Assets und lokale/Proxy-Unterstützung
+- `src/utils/brands-url.ts` - main implementation of the brands proxy API
+- `src/utils/card-brand.ts` - card brand assets, local and proxy support
 - `src/types/index.ts` — HomeAssistant-Type mit connection Property
-- `brand/` — Lokale Brand-Assets für die Violet Pool Card
+- `brand/` - local brand assets for the Violet Pool Card
   - `icon.png` / `icon@2x.png`
   - `logo.png` / `logo@2x.png`
   - `dark_icon.png` / `dark_icon@2x.png`
@@ -134,15 +134,15 @@ Die Antwort enthält das Access-Token:
 
 ## Kompatibilität
 
-- **Home Assistant 2026.3+** — Erforderlich für Brands Proxy API
+- **Home Assistant 2026.3+** - required for the brands proxy API
 - **Fallback-Mode** — URLs funktionieren auch ohne Token (eingeschränkt)
 
 ## Fehlerbehandlung
 
-Bei Fehlern wird die Funktion graceful degradieren:
+On error the function degrades gracefully:
 
 ```typescript
-// Wenn connection nicht verfügbar
+// When no connection is available
 const url = await brandsUrl(hass, 'integration', 'violet_pool', 'icon.png');
 // Gibt: `/api/brands/integration/violet_pool/icon.png` (ohne Token)
 

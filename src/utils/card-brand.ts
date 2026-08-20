@@ -4,11 +4,11 @@
  *
  * Utility: Card Brand Assets – Local and Proxy API Support
  *
- * Verwaltet Brand-Assets der Violet Pool Card:
- * - Lokale Assets aus /brand Verzeichnis
- * - Brands Proxy API für Integration-Icons (HA 2026.3+)
+ * Manages the Violet Pool Card brand assets:
+ * - Local assets from the /brand directory
+ * - Brands proxy API for integration icons (HA 2026.3+)
  *
- * Erstellt von Xerolux | MIT License
+ * Created by Xerolux | MIT License
  */
 
 import type { HomeAssistant } from '../types/index';

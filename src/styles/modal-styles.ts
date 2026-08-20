@@ -2,11 +2,11 @@
  * Violet Pool Card – Custom Lovelace Card for Home Assistant
  * © 2026 Xerolux | https://github.com/Xerolux/violet-pool-card
  *
- * Styles: Confirmation Modal – Globale Styles für den Bestätigungsdialog.
- * Der Dialog wird an document.body angehängt und liegt damit außerhalb des
- * Shadow DOM. Diese Styles müssen deshalb einmalig in document.head
- * injiziert werden (siehe injectModalStyles()).
- * Erstellt von Xerolux | MIT License
+ * Styles: Confirmation Modal - global styles for the confirmation dialog.
+ * The dialog is appended to document.body and therefore sits outside the
+ * shadow DOM. These styles have to be injected into document.head once
+ * (see injectModalStyles()).
+ * Created by Xerolux | MIT License
  */
 
 export const MODAL_CSS = `

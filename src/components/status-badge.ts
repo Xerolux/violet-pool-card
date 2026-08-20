@@ -2,8 +2,8 @@
  * Violet Pool Card – Custom Lovelace Card for Home Assistant
  * © 2026 Xerolux | https://github.com/Xerolux/violet-pool-card
  *
- * Component: Status Badge – Anzeige des aktuellen Betriebsstatus eines Pool-Geräts
- * Erstellt von Xerolux | MIT License
+ * Component: Status Badge - shows the current operating status of a pool device
+ * Created by Xerolux | MIT License
  */
 
 import { LitElement, html, css, TemplateResult, CSSResultGroup } from 'lit';

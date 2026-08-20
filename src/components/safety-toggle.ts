@@ -2,8 +2,8 @@
  * Violet Pool Card – Custom Lovelace Card for Home Assistant
  * © 2026 Xerolux | https://github.com/Xerolux/violet-pool-card
  *
- * Component: Safety Toggle – Sicherheitsschalter zur Bestätigung kritischer Aktionen
- * Erstellt von Xerolux | MIT License
+ * Component: Safety Toggle - confirmation switch for critical actions
+ * Created by Xerolux | MIT License
  */
 
 import { LitElement, html, css } from 'lit';
