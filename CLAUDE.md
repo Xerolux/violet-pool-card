@@ -50,10 +50,12 @@ The distinction that matters:
 label: 'Filterpumpe',                              // <- UI string: i18n, may be German
 ```
 
-**Known gap:** some UI strings are still hardcoded in `src/violet-pool-card.ts`
-instead of going through `i18n`, so they are German for English users too.
-Those are a localisation bug, not a language-policy violation - moving them
-into `i18n.ts` is the fix, translating them in place is not.
+Every user-facing string goes through `i18n.t()`. A sentence carrying a value
+uses placeholders - `i18n.t('backwash_desc', { duration })` - rather than being
+split around the value and concatenated: that only works while every language
+keeps the same word order. `tests/i18n-params.test.ts` fails if German text
+reappears outside `i18n.ts`, if the two tables drift apart, or if a placeholder
+exists in one language and not the other.
 
 **Why it is written down:** the card is published on HACS and read by people
 who do not speak German. A German comment or changelog entry excludes them from

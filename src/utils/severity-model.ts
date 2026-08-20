@@ -1,3 +1,5 @@
+import { i18n } from './i18n';
+
 export type Severity = 'ok' | 'info' | 'warning' | 'critical';
 
 export interface SeverityAlert {
@@ -41,18 +43,18 @@ export class SeverityModel {
 
   static getPumpRecommendations(currentSpeed: number, isRunning: boolean, currentMode?: string): string[] {
     if (!isRunning) {
-      return ['Pumpe steht. Für Grundzirkulation ECO oder AUTO aktivieren.'];
+      return [i18n.t('pump_idle_hint')];
     }
     if (currentSpeed >= 3) {
-      return ['Boost nur kurz nutzen, um Energieverbrauch und Verschleiß zu begrenzen.'];
+      return [i18n.t('pump_boost_hint')];
     }
     if (currentSpeed === 1) {
-      return ['ECO läuft effizient. Ideal für Dauerfiltration und Nachtbetrieb.'];
+      return [i18n.t('pump_eco_hint')];
     }
     if (currentMode === 'auto') {
-      return ['AUTO hält die Anlage flexibel. Prüfe, ob Zeitpläne und Regeln passend gesetzt sind.'];
+      return [i18n.t('pump_auto_hint')];
     }
-    return ['Normale Filtration aktiv. Bei Chemiedosierung kurzzeitig auf höhere Leistung wechseln.'];
+    return [i18n.t('pump_normal_hint')];
   }
 
   static getHeaterRecommendations(options: HeaterRecommendationOptions): SeverityAlert[] {
@@ -61,10 +63,10 @@ export class SeverityModel {
 
     if (isBlockedByOutsideTemp) {
       alerts.push({
-        text: 'Heizung durch Außentemperatur begrenzt',
+        text: i18n.t('heater_limited_outside'),
         severity: 'critical',
         icon: 'mdi:snowflake-alert',
-        recommendation: `Außentemperatur liegt unter ${minOutsideTemp}°C. Frostschutz aktiv lassen und Zieltemperatur später prüfen.`,
+        recommendation: i18n.t('heater_frost_hint', { min: minOutsideTemp }),
         source: 'heater',
       });
     }
@@ -74,7 +76,7 @@ export class SeverityModel {
         text: 'Wassertemperatur deutlich unter Zielwert',
         severity: 'warning',
         icon: 'mdi:thermometer-chevron-up',
-        recommendation: 'Heizleistung, Laufzeit und Wärmequelle prüfen, damit der Zielwert erreicht wird.',
+        recommendation: i18n.t('heater_check_output'),
         source: 'heater',
       });
     }
@@ -84,7 +86,7 @@ export class SeverityModel {
         text: 'Heizung kann in Effizienzmodus wechseln',
         severity: 'info',
         icon: 'mdi:leaf',
-        recommendation: 'Bei warmer Außenluft genügt oft AUTO statt Dauer-HEAT.',
+        recommendation: i18n.t('heater_auto_enough'),
         source: 'heater',
       });
     }
@@ -98,10 +100,10 @@ export class SeverityModel {
 
     if (tempDelta !== undefined && tempDelta < 0) {
       alerts.push({
-        text: 'Absorber kälter als Poolwasser',
+        text: i18n.t('solar_absorber_colder'),
         severity: 'warning',
         icon: 'mdi:weather-cloudy-alert',
-        recommendation: 'Solarheizung pausieren oder AUTO nutzen, bis der Kollektor wieder Wärme aufbaut.',
+        recommendation: i18n.t('solar_pause_hint'),
         source: 'solar',
       });
     } else if (tempDelta !== undefined && tempDelta >= 3) {
@@ -109,7 +111,7 @@ export class SeverityModel {
         text: 'Sehr gute Solarbedingungen',
         severity: 'info',
         icon: 'mdi:weather-sunny',
-        recommendation: 'Jetzt eignet sich Solar ideal zum Vorwärmen oder zum kostenlosen Nachheizen.',
+        recommendation: i18n.t('solar_ideal_hint'),
         source: 'solar',
       });
     }
@@ -119,7 +121,7 @@ export class SeverityModel {
         text: 'Zieltemperatur erreicht',
         severity: 'ok',
         icon: 'mdi:check-circle',
-        recommendation: 'Solar kann auf Erhaltung laufen, um Überheizung zu vermeiden.',
+        recommendation: i18n.t('solar_maintain_hint'),
         source: 'solar',
       });
     }
@@ -129,7 +131,7 @@ export class SeverityModel {
         text: 'Sehr hoher Kollektorwert',
         severity: 'info',
         icon: 'mdi:solar-power-variant',
-        recommendation: 'Wärmeüberschuss kann für Boost-Betrieb oder Warmhaltephasen genutzt werden.',
+        recommendation: i18n.t('solar_surplus_hint'),
         source: 'solar',
       });
     }
@@ -147,16 +149,16 @@ export class SeverityModel {
           text: 'ORP unter Zielbereich',
           severity: 'warning',
           icon: 'mdi:lightning-bolt',
-          recommendation: 'Chlordosierung, Vorrat und Pumpenlaufzeit prüfen.',
+          recommendation: i18n.t('dosing_check_chlorine'),
           source: 'dosing',
         });
       }
       if (currentValue > targetValue + 40) {
         alerts.push({
-          text: 'ORP über Zielbereich',
+          text: i18n.t('orp_above_target'),
           severity: 'warning',
           icon: 'mdi:lightning-bolt-outline',
-          recommendation: 'Dosierung reduzieren und Messwert gegenprüfen.',
+          recommendation: i18n.t('dosing_reduce_verify'),
           source: 'dosing',
         });
       }
@@ -171,7 +173,7 @@ export class SeverityModel {
           text: 'pH zu niedrig',
           severity: 'warning',
           icon: 'mdi:ph',
-          recommendation: 'pH+ Vorrat und Dosierlogik prüfen.',
+          recommendation: i18n.t('dosing_check_ph_plus'),
           source: 'dosing',
         });
       }
@@ -180,7 +182,7 @@ export class SeverityModel {
           text: 'pH zu hoch',
           severity: 'warning',
           icon: 'mdi:ph',
-          recommendation: 'pH- Dosierung und Sensorwert prüfen.',
+          recommendation: i18n.t('dosing_check_ph_minus'),
           source: 'dosing',
         });
       }
@@ -191,17 +193,17 @@ export class SeverityModel {
         text: 'Dosierung blockiert',
         severity: 'critical',
         icon: 'mdi:alert-octagon',
-        recommendation: 'Freigaben, Kanisterstand und Sicherheitssperren prüfen.',
+        recommendation: i18n.t('dosing_check_release'),
         source: 'dosing',
       });
     }
 
     if (dosingState.some((entry) => entry.includes('ACTIVE'))) {
       alerts.push({
-        text: 'Dosierung läuft aktuell',
+        text: i18n.t('dosing_running'),
         severity: 'info',
         icon: 'mdi:water-sync',
-        recommendation: 'Während aktiver Dosierung auf ausreichenden Pumpenfluss achten.',
+        recommendation: i18n.t('dosing_flow_hint'),
         source: 'dosing',
       });
     }

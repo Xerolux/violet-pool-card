@@ -7,6 +7,7 @@
  * Created by Xerolux | MIT License
  */
 
+import { i18n } from '../utils/i18n';
 import { LitElement, html, css, TemplateResult, CSSResultGroup } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import type { VioletPoolCardConfig, CardSize, Theme, Animation } from '../violet-pool-card';
@@ -398,8 +399,7 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
             <div class="prefix-info">
               <ha-icon icon="mdi:information-outline"></ha-icon>
               <span>
-                Lege fest, welche Werte für deinen Pool "optimal" sind. Nur Abweichungen
-                ausserhalb dieser Bereiche werden gemeldet. Leer lassen = Standardwert.
+                ${i18n.t('thresholds_intro')}
               </span>
             </div>
 
@@ -412,7 +412,7 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
             ${this._renderThresholdRow('temperature', 'Wassertemperatur (°C)', 0.5)}
 
             <mwc-button class="threshold-reset" @click="${this._resetThresholds}">
-              Auf Standardwerte zurücksetzen
+              ${i18n.t('thresholds_reset')}
             </mwc-button>
           </div>
         ` : ''}
@@ -422,7 +422,7 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
           <details class="advanced-section">
             <summary>
               <ha-icon icon="mdi:swap-horizontal"></ha-icon>
-              <span>Entityen überschreiben</span>
+              <span>${i18n.t('override_entities')}</span>
             </summary>
             <div class="advanced-content">
               ${this._config.card_type === 'pump' || this._config.card_type === 'overview' || this._config.card_type === 'system' ? html`
