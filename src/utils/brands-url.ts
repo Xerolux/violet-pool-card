@@ -8,7 +8,7 @@
  * https://developers.home-assistant.io/blog/2026/02/24/brands-proxy-api/
  *
  * The API loads brand images (icons/logos) through the local
- * Home Assistant API statt direkt vom CDN. Dies ermöglicht:
+ * Home Assistant API instead of straight from the CDN. That allows:
  * - Works offline (images are cached locally)
  * - Better control over outbound requests
  * - Support for custom brand assets

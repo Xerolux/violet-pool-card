@@ -280,7 +280,7 @@ export function formatRange(band: ThresholdBand, decimals: number, unit = ''): s
   return `${band.min.toFixed(decimals)} – ${band.max.toFixed(decimals)}${suffix}`;
 }
 
-/** Übliche Nachkommastellen je Messgröße. */
+/** Usual number of decimals per metric. */
 export const METRIC_DECIMALS: Record<MetricKey, number> = {
   ph: 1,
   orp: 0,

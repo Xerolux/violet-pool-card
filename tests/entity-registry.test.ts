@@ -1,6 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import {
+  CARD_TYPES_REQUIRING_ENTITY,
+  CARD_TYPE_MAIN_ENTITY,
   LEGACY_SUFFIX_TO_SLOT,
   VIOLET_PLATFORM,
   buildEntityIndex,
@@ -174,6 +176,66 @@ describe('LEGACY_SUFFIX_TO_SLOT', () => {
     for (const [suffix, slot] of Object.entries(LEGACY_SUFFIX_TO_SLOT)) {
       expect(suffix.trim()).not.toBe('');
       expect(slot.translationKey.trim()).not.toBe('');
+    }
+  });
+});
+
+describe('CARD_TYPE_MAIN_ENTITY', () => {
+  /**
+   * Reported on the forum for 0.4.2: the pump card did not find its entities.
+   * The registry lookup existed, but the equipment cards never reached it -
+   * `setConfig` threw "You need to define an entity" first, and the renderers
+   * read `config.entity` directly.
+   */
+  it('covers the card types whose renderer reads the entity directly', () => {
+    // These four render from config.entity with no fallback of their own.
+    for (const cardType of ['pump', 'heater', 'solar', 'dosing']) {
+      expect(CARD_TYPE_MAIN_ENTITY[cardType], cardType).toBeDefined();
+    }
+  });
+
+  it('points every default at a suffix the registry can resolve', () => {
+    // A default naming a suffix LEGACY_SUFFIX_TO_SLOT does not know would fall
+    // straight back to the guessed id - the bug this replaces.
+    const unresolvable = Object.entries(CARD_TYPE_MAIN_ENTITY)
+      .filter(([, slot]) => {
+        const mapped = LEGACY_SUFFIX_TO_SLOT[slot.suffix];
+        return !mapped || mapped.domain !== slot.domain;
+      })
+      .map(([cardType, slot]) => `${cardType} -> ${slot.domain}.${slot.suffix}`);
+
+    // 'inlet' and 'counter_current' have no counterpart in the integration on
+    // purpose; they keep the guessed id.
+    expect(unresolvable).toEqual([
+      'inlet -> switch.inlet',
+      'counter_current -> switch.counter_current',
+    ]);
+  });
+
+  it('resolves the pump card to the registered pump', () => {
+    const index = buildEntityIndex(
+      registry(entry('switch.violet_pool_controller_filter_pump', 'pump'))
+    );
+    const slot = CARD_TYPE_MAIN_ENTITY.pump;
+
+    expect(resolveEntityId(index, slot.domain, slot.suffix)).toBe(
+      'switch.violet_pool_controller_filter_pump'
+    );
+  });
+
+  it('resolves the pump card even when the user renamed the entity', () => {
+    const index = buildEntityIndex(registry(entry('switch.hundepumpe', 'pump')));
+    const slot = CARD_TYPE_MAIN_ENTITY.pump;
+
+    expect(resolveEntityId(index, slot.domain, slot.suffix)).toBe('switch.hundepumpe');
+  });
+
+  it('requires an explicit entity only where none can be guessed', () => {
+    // The generic sensor card is the one that genuinely cannot guess.
+    expect([...CARD_TYPES_REQUIRING_ENTITY]).toEqual(['sensor']);
+
+    for (const cardType of CARD_TYPES_REQUIRING_ENTITY) {
+      expect(CARD_TYPE_MAIN_ENTITY[cardType]).toBeUndefined();
     }
   });
 });

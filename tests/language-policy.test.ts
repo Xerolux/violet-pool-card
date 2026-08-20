@@ -34,6 +34,20 @@ const GERMAN = new RegExp(
 /** A line that is a comment rather than code or a string. */
 const COMMENT = /^\s*(\/\/|\/\*|\*)/;
 
+/**
+ * Quoted text is a citation, not prose: a comment explaining why a German
+ * string was removed - or quoting the bug report that prompted the fix - has
+ * to be able to name it.
+ */
+const withoutQuotes = (line: string): string =>
+  line.replace(/"[^"]*"/g, '').replace(/`[^`]*`/g, '').replace(/'[^']*'/g, '');
+
+/**
+ * Umlauts catch what a word list misses. `diesem Präfix beginnen` survived an
+ * earlier pass precisely because none of the words below appear in it.
+ */
+const UMLAUT = /[äöüßÄÖÜ]/;
+
 const sourceFiles = (dir: string): string[] => {
   const out: string[] = [];
   for (const name of readdirSync(join(REPO, dir))) {
@@ -56,7 +70,11 @@ describe('language policy', () => {
     const offenders = readFileSync(join(REPO, file), 'utf-8')
       .split('\n')
       .map((line, index) => ({ line, number: index + 1 }))
-      .filter(({ line }) => COMMENT.test(line) && GERMAN.test(line))
+      .filter(({ line }) => {
+        if (!COMMENT.test(line)) return false;
+        const prose = withoutQuotes(line);
+        return GERMAN.test(prose) || UMLAUT.test(prose);
+      })
       .map(({ line, number }) => `${file}:${number}: ${line.trim()}`);
 
     expect(offenders).toEqual([]);

@@ -2,6 +2,7 @@ import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
+import { CARD_TYPE_MAIN_ENTITY, LEGACY_SUFFIX_TO_SLOT } from '../src/utils/entity-registry';
 import {
   ALARM_STYLE_OPTIONS,
   ACCESSIBILITY_OPTIONS,
@@ -131,5 +132,42 @@ describe('CARD_TYPE_OPTIONS', () => {
       (value) => !known.includes(value)
     );
     expect(unknown).toEqual([]);
+  });
+});
+
+describe('editor and card agree on entities', () => {
+  /**
+   * Both bugs in this area came from the same shape: the editor kept its own
+   * copy of "which card types need an entity" and "which domain to offer", and
+   * the copies drifted from the card. The forum saw it as "it always asks for
+   * an entity, and auto-discovery only works on the overview card".
+   */
+  const editorSource = readFileSync(
+    new URL('../src/editor/violet-pool-card-editor.ts', import.meta.url),
+    'utf-8'
+  );
+
+  it('reads the shared tables instead of keeping its own', () => {
+    expect(editorSource).toContain('CARD_TYPE_MAIN_ENTITY');
+    expect(editorSource).toContain('CARD_TYPES_REQUIRING_ENTITY');
+  });
+
+  it('has no hardcoded list of card types that need an entity', () => {
+    // The old line was:
+    //   const needsEntity = !['overview','system','details',...].includes(...)
+    expect(editorSource).not.toMatch(/needsEntity\s*=/);
+  });
+
+  it('has no second domain filter table', () => {
+    // The old table mapped card type -> domains and drifted from the card's.
+    expect(editorSource).not.toMatch(/domainFilter\s*:\s*Record/);
+  });
+
+  it('offers the domain the card actually resolves', () => {
+    // Whatever the picker filters to has to be the domain the default entity
+    // lives in, or the user is offered entities the card will never use.
+    for (const [cardType, slot] of Object.entries(CARD_TYPE_MAIN_ENTITY)) {
+      expect(LEGACY_SUFFIX_TO_SLOT[slot.suffix]?.domain ?? slot.domain, cardType).toBe(slot.domain);
+    }
   });
 });

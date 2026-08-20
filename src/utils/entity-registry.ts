@@ -44,11 +44,11 @@ export interface LegacyEntitySlot {
  * counterpart (`inlet`, `counter_current`, `salzgehalt`) are absent on purpose -
  * the integration does not know them, so the guessed name stays in place.
  *
- * `tests/entity-registry.test.ts` prüft jeden Eintrag gegen die
+ * `tests/entity-registry.test.ts` checks every entry against the
  * translation keys of the integration; `npm run keys:update` refreshes them.
  */
 export const LEGACY_SUFFIX_TO_SLOT: Record<string, LegacyEntitySlot> = {
-  // Ausgänge
+  // Outputs
   filterpumpe: { domain: 'switch', translationKey: 'pump' },
   beleuchtung: { domain: 'switch', translationKey: 'light' },
   ruckspulung: { domain: 'switch', translationKey: 'backwash' },
@@ -79,6 +79,39 @@ export const LEGACY_SUFFIX_TO_SLOT: Record<string, LegacyEntitySlot> = {
   dos_6_floc_remaining_range: { domain: 'sensor', translationKey: 'dos_6_floc_remaining_range' },
 };
 
+
+/**
+ * The entity a card type shows when the configuration names none.
+ *
+ * Reported on the forum for 0.4.2: the pump card did not find its entities.
+ * The overview card resolved its entities through the registry,
+ * but `renderPumpCard` read `config.entity` directly and `setConfig` refused
+ * to build the card at all without one - so the automatic resolution never
+ * reached the equipment cards, and `card_type: pump` on its own could not
+ * work. The suffixes are the same ones `resolveEntityId` maps.
+ */
+export const CARD_TYPE_MAIN_ENTITY: Record<string, { domain: string; suffix: string }> = {
+  pump: { domain: 'switch', suffix: 'filterpumpe' },
+  compact: { domain: 'switch', suffix: 'filterpumpe' },
+  heater: { domain: 'climate', suffix: 'heizung' },
+  solar: { domain: 'climate', suffix: 'solarabsorber' },
+  dosing: { domain: 'switch', suffix: 'chlor_dosierung' },
+  filter: { domain: 'sensor', suffix: 'filterdruck' },
+  backwash: { domain: 'switch', suffix: 'ruckspulung' },
+  refill: { domain: 'sensor', suffix: 'uberlaufbehalter' },
+  solar_surplus: { domain: 'sensor', suffix: 'pv_uberschuss_status' },
+  flow_rate: { domain: 'sensor', suffix: 'pumpen_durchfluss' },
+  inlet: { domain: 'switch', suffix: 'inlet' },
+  counter_current: { domain: 'switch', suffix: 'counter_current' },
+};
+
+/**
+ * Card types that cannot guess their entity, so the configuration must name
+ * one. Everything else either has a default above or resolves its entities
+ * itself while rendering.
+ */
+export const CARD_TYPES_REQUIRING_ENTITY = new Set(['sensor']);
+
 /** Index key: domain and translation key combined. */
 const indexKey = (domain: string, translationKey: string): string =>
   `${domain}:${translationKey}`;
@@ -88,8 +121,8 @@ const indexKey = (domain: string, translationKey: string): string =>
  *
  * @param entities `hass.entities`, the Home Assistant entity registry.
  * @param preferredPrefix Prefix from the card configuration. With several
- *   controllers on one installation, the one whose entity ids start with
- *   diesem Präfix beginnen.
+ *   controllers on one installation, the one whose entity ids start with this
+ *   prefix wins.
  * @returns The index; empty when no entity of the integration is registered.
  */
 export function buildEntityIndex(
@@ -141,7 +174,7 @@ export function buildEntityIndex(
  * @param domain The domain of the entity being looked for.
  * @param suffix The suffix the card used to guess.
  * @returns The registered entity id, or `undefined` when the integration
- *   nichts Passendes führt.
+ *   has no counterpart.
  */
 export function resolveEntityId(
   index: Map<string, string>,
