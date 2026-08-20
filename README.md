@@ -28,25 +28,25 @@ A premium Lovelace card for the [Violet Pool Controller](https://github.com/Xero
 ## Funktionen
 
 ### Neu im aktuellen UI-Ausbau
-- **Severity-Modell** mit `ok`, `info`, `warning`, `critical` für konsistentere Alarm-Priorisierung
-- **Empfehlungs-Engine** für Pumpe, Heizung, Solar, Dosierung und Filter
+- **Severity model** with `ok`, `info`, `warning`, `critical` for consistent alarm prioritisation
+- **Recommendation engine** for pump, heater, solar, dosing and filter
 - **Dashboard-Modi**: `default`, `operations`, `chemistry`, `maintenance`, `compact_mobile`, `alarm_center`
 - **Editor-Presets**: Modern Glass, Alarm Focus, Technikraum, Familienansicht
 - **Accessibility-Modi**: `standard`, `high_contrast`, `reduced_motion`
-- **Trend-Sparklines** für Snapshot-Kacheln und Filterdruck, wenn Sensoren Werte-Arrays mitliefern
-- **Spezialkarten verfeinert**: Rückspülung, Nachfüllung, Durchfluss, Anströmung, Gegenstrom, Kanister, Digital Rules und Diagnostics mit stärker differenzierten Layouts
-- **Themenbezogene Symbolsprache** für Pooltechnik und Chemie statt generischer Platzhalter-Icons
-- **Handlungshinweise auch für Support- und Wartungskarten**, nicht nur für Chemie und Alarme
+- **Trend sparklines** on snapshot tiles and filter pressure, where sensors supply value arrays
+- **Refined special cards**: backwash, refill, flow rate, inlet, counter current, canisters, digital rules and diagnostics with more distinct layouts
+- **Subject-specific iconography** for pool equipment and chemistry instead of generic placeholders
+- **Actionable hints on support and maintenance cards too**, not only on chemistry and alarms
 
 ### Spezialkarten mit eigener Rolle
-- **Backwash / Rückspülung**: Zyklus-Fortschritt, Restzeit und Wartungshinweise
-- **Refill / Nachfüllung**: Füllstand, Trend, Ventilstatus und Pegelwarnungen
-- **Flow Rate / Durchfluss**: Trend, Min/Max-Werte, Kalibrierung und Durchflusswarnungen
-- **Inlet / Anströmung**: Einström-Status, Trendprüfung und Flow-Plausibilität
-- **Counter Current / Gegenstrom**: Leistungsprofil für Training, Soft- und Power-Betrieb
-- **Canister Cards**: Reserveabschätzung, Verbrauchstrend und Nachfüllhinweise
-- **Digital Rules**: Regelübersicht mit visuellen Rollen und direkten Trigger/Lock/Unlock-Aktionen
-- **Diagnostics**: Support-Panel mit Schnellaktionen, Logik-Hinweisen und klarerem Health-Fokus
+- **Backwash**: cycle progress, remaining time and maintenance hints
+- **Refill**: level, trend, valve status and level warnings
+- **Flow rate**: trend, min/max values, calibration and flow warnings
+- **Inlet**: inflow status, trend check and flow plausibility
+- **Counter current**: power profile for training, soft and power mode
+- **Canister cards**: remaining-reserve estimate, consumption trend and refill hints
+- **Digital rules**: rule overview with visual roles and direct trigger / lock / unlock actions
+- **Diagnostics**: support panel with quick actions, logic hints and a clearer health focus
 
 ### 🎨 Design & Themes
 - **7 Premium-Themes** — Luxury (Glassmorphism), Modern, Minimalist, Glass, Neon, Premium, Lagoon (Dark)
@@ -54,65 +54,70 @@ A premium Lovelace card for the [Violet Pool Controller](https://github.com/Xero
 - **4 Größen-Varianten** — Small, Medium, Large, Fullscreen
 - **3 Animations-Stufen** — None, Subtle, Smooth, Energetic
 - **Dark/Light Mode Support** — Automatische Anpassung ans Home Assistant Theme
-- **Responsive Design** — Optimiert für Desktop, Tablet, Smartphone
+- **Responsive design** - optimised for desktop, tablet and phone
 
 ### 🎴 Card Types (28 Total)
 
-#### Standard Equipment Cards (13)
-1. **Pumpe** (`pump`) — Geschwindigkeitssteuerung mit ECO/Normal/Boost, RPM-Anzeige, animiertes Icon
-2. **Heizung** (`heater`) — Temperaturregler 18–35°C, Ist/Soll-Vergleich, Frostwarnungen
-3. **Solar** (`solar`) — Pool- vs. Absorbertemperatur, Delta-Analyse, Zieltemperatur-Steuerung
-4. **Dosierung** (`dosing`) — Chlor/pH+/pH-/Flockungsmittel mit animiertem Tropfen-SVG
-5. **Abdeckung** (`cover`) — Poolabdeckung mit Positionsregler und Steuerung
-6. **Licht** (`light`) — RGB-Farbwähler, Helligkeitsregler, animierte Leuchteffekte
-7. **Filter** (`filter`) — Druckmessung mit farbcodierter Warnung (Grün/Gelb/Rot)
-8. **Chemie** (`chemical`) — pH/ORP/Temperatur mit Empfehlungen
-9. **Sensor** (`sensor`) — Universale Sensoranzeige mit Einheiten
-10. **Übersicht** (`overview`) — Dashboard mit allen Geräten und Messwerten
-11. **Details** (`details`) — Detaillierte Entity-Liste mit Toggle-Steuerung
-12. **Kompakt** (`compact`) — Platzsparendes Layout mit Icons und Status
-13. **System** (`system`) — Vollbildansicht mit Mehrkanal-Übersicht
+#### Equipment (7)
+1. **Pump** (`pump`) — speed control with ECO/normal/boost, RPM readout, animated icon
+2. **Heater** (`heater`) — temperature control 18-35 °C, actual vs. target, frost warnings
+3. **Solar** (`solar`) — pool vs. absorber temperature, delta analysis, target control
+4. **Dosing** (`dosing`) — chlorine / pH+ / pH- / flocculant with an animated drop
+5. **Cover** (`cover`) — pool cover with position slider and controls
+6. **Light** (`light`) — RGB colour picker, brightness, animated glow
+7. **Filter** (`filter`) — pressure with colour-coded warning (green / yellow / red)
 
-#### Neue Zusatz- & Erweiterungskarten (10)
-14. **Rückspülung** (`backwash`) — Status und Steuerung der automatischen Rückspülung
-15. **Nachfüllung** (`refill`) — Füllstandanzeige und Ventilsteuerung
-16. **PV Überschuss** (`solar_surplus`) — Anzeige von Solarüberschuss und Einspeisung
-17. **Durchfluss** (`flow_rate`) — Durchflussrate in m³/h mit Minimal/Maximal-Warnungen
-18. **Anströmung** (`inlet`) — Steuerung und Status der Beckeneinströmung
-19. **Gegenstromanlage** (`counter_current`) — Steuerung der Gegenstromanlage
-20. **Chlor Kanister** (`chlorine_canister`) — Füllstandanzeige des Chlorkanisters
-21. **pH+ Kanister** (`ph_plus_canister`) — Füllstandanzeige des pH+ Kanisters
-22. **pH- Kanister** (`ph_minus_canister`) — Füllstandanzeige des pH- Kanisters
-23. **Flockung Kanister** (`flocculant_canister`) — Füllstandanzeige des Flockungsmittelkanisters
+#### Water treatment (8)
+8. **Backwash** (`backwash`) — cycle progress, remaining time, maintenance hints
+9. **Refill** (`refill`) — level, trend, valve status, level warnings
+10. **Overflow** (`overflow`) — overflow tank state and protection
+11. **PV Surplus** (`solar_surplus`) — solar surplus and grid export
+12. **Flow Rate** (`flow_rate`) — flow in m³/h with min/max warnings
+13. **Inlet** (`inlet`) — inlet status, trend check, flow plausibility
+14. **Counter Current** (`counter_current`) — power profile for training, soft and power mode
+15. **Chemistry** (`chemical`) — pH / ORP / temperature with recommendations
 
-#### New Analysis & Monitoring Cards (5)
-24. **Statistiken** (`statistics`) — Trendanalyse mit Linien-Charts und historische Daten
-25. **Wetter** (`weather`) — Aktuelle Wetterbedingungen und Pool-Auswirkungen
-26. **Wartung** (`maintenance`) — Service-Zeitplan mit Aufgabenverfolgung
-27. **Benachrichtigungen** (`alerts`) — Aktive Alarme und Notifications mit Severity-Levels
-28. **Vergleich** (`comparison`) — Ist-Wert vs. Sollwert mit Delta-Anzeige
+#### Canisters (4)
+16. **Chlorine Canister** (`chlorine_canister`) — chlorine canister level
+17. **pH+ Canister** (`ph_plus_canister`) — pH+ canister level
+18. **pH- Canister** (`ph_minus_canister`) — pH- canister level
+19. **Flocculant Canister** (`flocculant_canister`) — flocculant canister level
+
+#### Diagnostics & maintenance (5)
+20. **Error Dashboard** (`error`) — active errors with severity
+21. **Digital Rules** (`digital_rules`) — rule overview with trigger / lock / unlock actions
+22. **Calibration** (`calibration`) — sensor calibration history
+23. **Firmware Update** (`update`) — installed and available version, update from the card
+24. **Diagnostics** (`diagnostics`) — support panel with quick actions and health focus
+
+#### Dashboards (5)
+25. **Overview** (`overview`) — all devices and readings at a glance
+26. **Details** (`details`) — detailed entity list with toggle controls
+27. **Compact** (`compact`) — space-saving layout with icons and status
+28. **System** (`system`) — full-screen multi-channel view
+29. **Sensor** (`sensor`) — generic sensor display with units
 
 ### 🎬 Animations & Visualizations
-- **SVG-Animationen** für Pumpe (rotierend), Heizung (flackernd), Solar (atmend), Abdeckung (Motor), Licht (glühend)
+- **SVG animations** for pump (spinning), heater (flickering), solar (breathing), cover (motor), light (glowing)
 - **Neue Animationen** — Animierter Tropfen (Dosierung), Druckmesser-Nadel (Chemie), Filter-Gauge (Druck)
-- **Charts & Graphs** — Linien-Charts für Trends, Druckmesser mit Echtzeitanzeige
+- **Charts & graphs** - line charts for trends, pressure gauge with live readout
 - **Loading-Skelette** — Placeholder-Animation beim Laden von Entitäten
-- **Pulse-Animationen** — Pulserende Icons für aktive/kritische Zustände
+- **Pulse animations** - pulsing icons for active and critical states
 
 ### 📊 Features & Funktionen
 - **25+ Keyframe-Animationen** — Dropdown, Gauge-Fill, Alert-Pulse, Shimmer, Rainbow-Border, etc.
-- **Automatische Entity-Erkennung** — Basierend auf Entity-Prefix und Namen
+- **Automatic entity detection** - through the Home Assistant entity registry
 - **Tooltip-System** — Kontextabhängige Hilfetexte (Deutsch/Englisch)
 - **Dynamischer Entity-Prefix** — Unterstützung mehrerer Violet Controller
-- **Touch-optimiert** — 44px+ Mindesthöhe für alle Elemente
+- **Touch optimised** - 44 px minimum height on every element
 - **Visueller Editor** — Vollständige GUI-Konfiguration ohne YAML
-- **Mobile-First** — Optimiert für alle Bildschirmgrößen
+- **Mobile first** - optimised for every screen size
 - **Barrierefreiheit** — WCAG 2.1 AA Compliance
 
 ### 💾 Performance
 - **Memoization** — Optimierte Berechnung teurer Operationen
-- **GPU-Optimiert** — will-change Hints für Animations
-- **Kleine Bundle-Größe** — Minifizierte und optimierte Ausgabe
+- **GPU optimised** - will-change hints for animations
+- **Small bundle** - minified and optimised output
 - **Memory-Leak-Fixes** — Proper Event/Timer Cleanup
 
 ---
@@ -121,7 +126,7 @@ A premium Lovelace card for the [Violet Pool Controller](https://github.com/Xero
 
 ### Voraussetzung
 
-Die [Violet Pool Controller](https://github.com/Xerolux/violet-hass) Integration muss in Home Assistant installiert und eingerichtet sein.
+The [Violet Pool Controller](https://github.com/Xerolux/violet-hass) integration must be installed and set up in Home Assistant.
 
 ### HACS (Empfohlen)
 
@@ -158,21 +163,21 @@ type: custom:violet-pool-card
 card_type: pump
 ```
 
-### Wie die Karte ihre Entitäten findet
+### How the card finds its entities
 
-Die Karte fragt das Entitätsregister von Home Assistant: Sie nimmt die
-Entitäten, die von der Integration *Violet Pool Controller* stammen, und ordnet
-sie über deren sprachunabhängige Schlüssel den Anzeigen zu. Das funktioniert
-unabhängig davon, wie die Entity-IDs heißen — deutsch, englisch, umbenannt.
+The card queries the Home Assistant entity registry: it takes the entities
+that come from the *Violet Pool Controller* integration and maps them to its
+displays through their language-independent keys. That works no matter what the
+entity ids are called - German, English, renamed.
 
-Wer seine Filterpumpe in „Hundepumpe" umbenennt oder ihr die Entity-ID
-`switch.hundepumpe` gibt, findet sie in der Karte also weiterhin: Name und
-Entity-ID darf jeder ändern, der Schlüssel der Integration bleibt.
-**Nicht** gefunden wird, was gar nicht von der Integration stammt — ein eigener
-Template-Sensor etwa; den trägst du direkt mit `entity:` ein.
+So if you rename your filter pump to "Dog pump", or give it the entity id
+`switch.dog_pump`, the card still finds it: name and entity id belong to you,
+the integration's key stays put. What is **not** found is anything that does not
+come from the integration - your own template sensor, say; point at that one
+directly with `entity:`.
 
-Du musst also nichts angeben. Bei **mehreren Controllern** sagt `entity_prefix`,
-welcher gemeint ist:
+You therefore do not have to configure anything. With **several controllers**,
+`entity_prefix` says which one you mean:
 
 ```yaml
 type: custom:violet-pool-card
@@ -180,8 +185,8 @@ card_type: pump
 entity_prefix: garten_pool
 ```
 
-Und wer eine bestimmte Entität erzwingen will — etwa einen eigenen
-Template-Sensor — setzt sie weiterhin direkt:
+And to force a specific entity - your own template sensor, for instance -
+set it directly, as before:
 
 ```yaml
 type: custom:violet-pool-card
@@ -391,9 +396,9 @@ size: fullscreen
 
 **Funktionen:**
 - Mehrkanal-Grid-Layout
-- Alle Geräte und Sensoren
+- Every device and sensor
 - Vollbildansicht
-- Optimiert für Tablets
+- Optimised for tablets
 
 ### Diagnose & Wartung
 
@@ -405,7 +410,7 @@ entity_prefix: violet_pool_controller
 ```
 
 **Funktionen:**
-- Zustand der Schaltregeln 1–8
+- State of switching rules 1-8
 - Restlaufzeit laufender Regeln
 
 #### Diagnose (`diagnostics`)
@@ -438,8 +443,8 @@ entity_prefix: violet_pool_controller
 ```
 
 **Funktionen:**
-- Installierte und verfügbare Version
-- Update-Start aus der Karte
+- Installed and available version
+- Start the update from the card
 
 ### Allgemein
 
@@ -448,7 +453,7 @@ entity_prefix: violet_pool_controller
 | `type` | `custom:violet-pool-card` | — | Card-Typ |
 | `card_type` | String | — | Kartentyp (pump, heater, solar, etc.) |
 | `entity` | String | — | Primary Entity-ID |
-| `entities` | Array | — | Multiple Entities (für Details/System) |
+| `entities` | Array | - | Several entities (for details / system) |
 | `name` | String | Auto | Karten-Titel |
 | `icon` | String | Auto | MD-Icon |
 
@@ -461,8 +466,8 @@ entity_prefix: violet_pool_controller
 | `animation` | none/subtle/smooth/energetic | smooth | Animations-Stil |
 | `layout_variant` | standard/glass/dashboard/focus | glass | Visuelle Kartenhierarchie |
 | `dashboard_mode` | default/operations/chemistry/maintenance/compact_mobile/alarm_center | default | System-/Dashboard-Anordnung |
-| `alarm_style` | soft/outline/pulse | pulse | Warn- und Alarmdarstellung |
-| `accessibility_mode` | standard/high_contrast/reduced_motion | standard | Kontrast- und Bewegungsmodus |
+| `alarm_style` | soft/outline/pulse | pulse | How warnings and alarms are drawn |
+| `accessibility_mode` | standard/high_contrast/reduced_motion | standard | Contrast and motion mode |
 | `accent_color` | HEX | Auto | Akzentfarbe |
 | `icon_color` | HEX | Auto | Icon-Farbe |
 | `blur_intensity` | 0-100 | 10 | Backdrop-Blur |
@@ -477,11 +482,11 @@ entity_prefix: violet_pool_controller
 | `show_runtime` | boolean | false | Betriebsstunden anzeigen |
 | `show_history` | boolean | false | Historie anzeigen |
 
-### Grenzwerte (Zielbereiche der Wasserwerte)
+### Thresholds (target ranges for the water values)
 
-Bis v0.3.0 waren die "optimalen" Bereiche fest im Code verdrahtet (pH 7.0–7.4, Redox 650–750 mV …).
-Wer seinen Pool bewusst anders fährt, bekam dadurch dauerhaft Meldungen "Wert ausserhalb des Bereichs".
-Ab **v0.4.0** legst du die Zielbereiche selbst fest – im visuellen Editor unter **Grenzwerte** oder in YAML:
+Up to v0.3.0 the "optimal" ranges were hardcoded (pH 7.0-7.4, ORP 650-750 mV, ...).
+Anyone deliberately running their pool differently got a permanent "value out of range" notice.
+Since **v0.4.0** you set the target ranges yourself - in the visual editor under **Thresholds**, or in YAML:
 
 ```yaml
 type: custom:violet-pool-card
@@ -495,32 +500,32 @@ thresholds:
 alerts: warning
 ```
 
-| Feld | Typ | Beschreibung |
+| Field | Type | Description |
 |------|-----|--------------|
-| `min` | number | Untere Grenze des Optimalbereichs |
-| `max` | number | Obere Grenze des Optimalbereichs |
-| `warn` | number | Toleranz ausserhalb von `min`/`max`, die nur als **Warnung** statt als **kritisch** gilt |
-| `range` | `[von, bis]` | Anzeigebereich der Skala/Gauge. Wird automatisch geweitet, damit der Zielbereich immer sichtbar bleibt |
-| `ignore` | boolean | Diese Messgröße von der Bewertung ausnehmen – sie wird angezeigt, löst aber nie eine Meldung aus |
+| `min` | number | Lower bound of the optimal range |
+| `max` | number | Upper bound of the optimal range |
+| `warn` | number | Tolerance beyond `min`/`max` that counts as a **warning** rather than **critical** |
+| `range` | `[from, to]` | Displayed span of the scale/gauge. Widened automatically so the target range always stays visible |
+| `ignore` | boolean | Exclude this metric from evaluation - it is still displayed, but never raises a notice |
 
-Konfigurierbare Messgrößen: `ph`, `orp`, `chlorine`, `salt`, `temperature`, `cyanuric_acid`, `alkalinity`.
-Nicht gesetzte Felder behalten den Standardwert (angelehnt an DIN 19643).
+Configurable metrics: `ph`, `orp`, `chlorine`, `salt`, `temperature`, `cyanuric_acid`, `alkalinity`.
+Unset fields keep their default (based on DIN 19643).
 
-**Meldungsstufe** über `alerts` – damit die Karte nicht bei jeder kleinen Abweichung Alarm schlägt:
+**Alert level** through `alerts`, so the card does not shout at every small deviation:
 
-| Wert | Verhalten |
+| Value | Behaviour |
 |------|-----------|
-| `all` (Standard) | Jede Abweichung wird gemeldet |
-| `warning` | Warnungen und kritische Werte |
-| `critical` | Nur kritische Werte (ausserhalb von `min`/`max` **plus** `warn`) |
-| `none` | Keine Wasserwert-Meldungen – die Werte werden weiterhin angezeigt |
+| `all` (default) | Every deviation is reported |
+| `warning` | Warnings and critical values |
+| `critical` | Critical values only (beyond `min`/`max` **plus** `warn`) |
+| `none` | No water-value notices - the values are still displayed |
 
-Die Grenzwerte gelten für `chemical`, `overview`, `system`, `heater` und `dosing` und steuern dort
-Statustexte, Farben, die Optimalzone in den Gauges **und** die Meldungen – alles bleibt konsistent.
+The thresholds apply to `chemical`, `overview`, `system`, `heater` and `dosing`, where they drive
+status texts, colours, the optimal zone in the gauges **and** the notices - all consistent.
 
-### Trenddaten für Sparklines
+### Trend data for sparklines
 
-Wenn ein Sensor in seinen Attributen eines dieser Arrays mitliefert, zeichnet die Karte automatisch einen Mini-Trend:
+When a sensor supplies one of these arrays in its attributes, the card draws a mini trend automatically:
 
 - `history`
 - `values`
@@ -529,7 +534,7 @@ Wenn ein Sensor in seinen Attributen eines dieser Arrays mitliefert, zeichnet di
 - `samples`
 - `sparkline`
 
-Diese Trenddaten werden inzwischen nicht nur in `overview` und `filter`, sondern auch in spezialisierten Karten wie `refill`, `flow_rate`, `inlet` und den Chemie-Kanistern genutzt, sofern passende Attribut-Arrays vorhanden sind.
+This trend data is now used not only by `overview` and `filter` but also by specialised cards such as `refill`, `flow_rate`, `inlet` and the chemistry canisters, wherever matching attribute arrays exist.
 
 Beispiel:
 
@@ -541,7 +546,7 @@ sensor.violet_pool_filter_pressure:
 
 ### Entity-Mappings
 
-Die Karte unterstützt sowohl automatische als auch manuelle Entity-Zuordnung. Automatische Erkennung funktioniert basierend auf dem Entity-Prefix.
+The card supports both automatic and manual entity mapping. Automatic detection works through the entity registry, with `entity_prefix` as the tie-breaker.
 
 #### Automatische Erkennung (Empfohlen)
 
@@ -549,13 +554,13 @@ Die Karte unterstützt sowohl automatische als auch manuelle Entity-Zuordnung. A
 type: custom:violet-pool-card
 card_type: pump
 entity: switch.violet_pool_controller_filterpumpe
-# Erkennt automatisch alle zugehörigen Sensoren und Controls
+# Detects every matching sensor and control automatically
 ```
 
 #### Manuelle Entity-Zuordnung (Optional)
 
 ```yaml
-# Für Custom-Konfigurationen mit nicht-Standard Entity-IDs
+# For custom setups with non-standard entity ids
 entity_prefix: violet_pool_controller    # Basis-Prefix
 
 # Pumpen
@@ -609,7 +614,7 @@ eco_mode_entity: binary_sensor.violet_pool_controller_eco_mode
 
 #### Konfiguration über dashboard.yaml
 
-Eine vollständige `dashboard.yaml` mit allen Entities ist im Repository enthalten. Sie können diese als Basis für Ihre Konfiguration verwenden:
+A complete `dashboard.yaml` covering every entity ships with the repository. Use it as a starting point for your own configuration:
 
 ```yaml
 # dashboard.yaml - Vollständige Entitäten-Konfiguration
@@ -832,7 +837,7 @@ entities:
   - switch.violet_pool_controller_extension_2_8
 ```
 
-### Wartung, Support und Spezialkarten
+### Maintenance, support and special cards
 
 ```yaml
 type: custom:violet-pool-card
@@ -895,20 +900,20 @@ entities:
 
 ## Troubleshooting
 
-### Entity wird nicht erkannt
-1. Entity-ID in HA überprüfen (Einstellungen → Geräte & Services)
-2. Manuelle Entity-Zuordnung in Konfiguration verwenden
-3. Entity-Prefix anpassen
+### An entity is not detected
+1. Check the entity id in Home Assistant (Settings -> Devices & Services)
+2. Set the entity explicitly in the card configuration
+3. Adjust `entity_prefix`
 
-### Animationen flüssig nicht
-- `animation: subtle` oder `animation: none` versuchen
-- GPU-Beschleunigung in Browser aktivieren
-- Tablet-Hardware überprüfen
+### Animations are not smooth
+- Try `animation: subtle` or `animation: none`
+- Enable GPU acceleration in the browser
+- Check the tablet hardware
 
-### Karte wird nicht angezeigt
-1. Home Assistant **neustarten**
-2. Browser-Cache leeren
-3. Konsole auf Fehler überprüfen (F12 → Console)
+### The card does not appear
+1. **Restart** Home Assistant
+2. Clear the browser cache
+3. Check the console for errors (F12 -> Console)
 
 ---
 
@@ -916,9 +921,9 @@ entities:
 
 ### Performance
 - **Bundle-Size:** ~45KB (minified+gzipped)
-- **Runtime:** <5ms für Re-Render
+- **Runtime:** < 5 ms per re-render
 - **Memory:** ~2MB pro Karte-Instanz
-- **GPU-Optimiert:** will-change hints für Animationen
+- **GPU optimised:** will-change hints for animations
 
 ### Browser-Support
 - Chrome/Edge 90+
@@ -951,7 +956,7 @@ Im [Discussions](https://github.com/Xerolux/violet-pool-card/discussions) Forum
 ```bash
 npm install
 npm run dev      # Entwicklungs-Server
-npm run build    # Build für Produktion
+npm run build    # Production build
 npm test         # Tests ausführen
 ```
 
@@ -1089,17 +1094,17 @@ Z1Z2: sensor.violet_pool_controller_inputz1z2
 ### v2.1.0 (Aktuell)
 - ✨ Vollständige Entity-Referenz dokumentiert (100+ Entities)
 - ✨ dashboard.yaml mit allen Entitäten-Zuordnungen
-- ✨ Unterstützung für alle Violet Controller Module (EXT1, EXT2, DMX, Dosage)
+- ✨ Support for every Violet controller module (EXT1, EXT2, DMX, dosing)
 - ✨ Detaillierte OneWire-Sensor Dokumentation (Temp 1-12)
-- ✨ Digitale Eingänge und Schaltregeln vollständig integriert
-- 🔧 Entity-Mapping für erweiterte Konfiguration
+- ✨ Digital inputs and switching rules fully integrated
+- 🔧 Entity mapping for advanced configuration
 - 📊 System Health Monitoring erweitert
-- 📋 YAML-Beispiele für alle Kartentypen
+- 📋 YAML examples for every card type
 
 ### v2.0.0
 - ✨ 5 neue Analytics Card-Typen (Statistics, Weather, Maintenance, Alerts, Comparison)
 - ✨ 25+ neue Keyframe-Animationen
-- ✨ SVG-Animationen für Dosierung, Chemie, Filter
+- ✨ SVG animations for dosing, chemistry and filter
 - ✨ Gauge-Nadel-Animationen
 - 🐛 Memory-Leak-Fixes in Slider-Komponenten
 - 🔧 TypeScript-Typsicherheit erweitert
@@ -1117,7 +1122,7 @@ Z1Z2: sensor.violet_pool_controller_inputz1z2
 
 ## Danksagungen
 
-Entwickelt für die [Violet Pool Controller](https://github.com/Xerolux/violet-hass) Community.
+Built for the [Violet Pool Controller](https://github.com/Xerolux/violet-hass) community.
 
 ---
 

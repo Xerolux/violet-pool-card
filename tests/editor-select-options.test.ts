@@ -1,4 +1,6 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import {
   ALARM_STYLE_OPTIONS,
@@ -84,16 +86,39 @@ describe('CARD_TYPE_OPTIONS', () => {
   it('is what the documentation tells people to use', () => {
     // A README example naming a card type the card never had renders as
     // "unknown card type" in the dashboard - which is what a user hit.
-    const docs = ['README.md', 'info.md', 'QUICK_REFERENCE.md', 'VIOLET_CARD_EXAMPLES.yaml'];
+    //
+    // The first version of this test only scanned four files for `card_type:`
+    // YAML syntax. That missed two things at once: README.md listed five
+    // non-existent types in a numbered prose list, and dashboard_config.yaml
+    // and dashboard.yaml - the dashboards people copy - used them in real
+    // YAML. Both slipped through green. So: every markdown and YAML file in
+    // the repository, and both spellings.
     const offered = CARD_TYPE_OPTIONS.map((option) => option.value);
     const undocumented: string[] = [];
+    const root = fileURLToPath(new URL('..', import.meta.url));
 
-    for (const file of docs) {
-      const text = readFileSync(new URL(`../${file}`, import.meta.url), 'utf-8');
-      for (const match of text.matchAll(/card_type:\s*([a-z_]+)/g)) {
-        if (!offered.includes(match[1])) {
-          undocumented.push(`${file}: ${match[1]}`);
+    const docs = (dir: string): string[] => {
+      const out: string[] = [];
+      for (const name of readdirSync(join(root, dir))) {
+        if (['node_modules', '.git', 'dist', 'CHANGELOG.md', 'RELEASE_NOTES.md'].includes(name)) {
+          continue;
         }
+        const rel = join(dir, name);
+        if (statSync(join(root, rel)).isDirectory()) out.push(...docs(rel));
+        else if (/\.(md|ya?ml)$/.test(name)) out.push(rel);
+      }
+      return out;
+    };
+
+    for (const file of docs('.')) {
+      const text = readFileSync(join(root, file), 'utf-8');
+      // `card_type: pump` in a YAML example ...
+      for (const match of text.matchAll(/card_type:\s*([a-z_]+)/g)) {
+        if (!offered.includes(match[1])) undocumented.push(`${file}: card_type: ${match[1]}`);
+      }
+      // ... and "**Pump** (`pump`)" in a prose list of card types.
+      for (const match of text.matchAll(/^\d+\.\s+\*\*[^*]+\*\*\s+\(`([a-z_]+)`\)/gm)) {
+        if (!offered.includes(match[1])) undocumented.push(`${file}: listed as ${match[1]}`);
       }
     }
 

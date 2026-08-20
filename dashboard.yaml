@@ -649,26 +649,10 @@ lovelace:
           theme: luxury
           size: medium
 
-        - type: custom:violet-pool-card
-          card_type: maintenance
-          theme: luxury
-          size: large
-
     # 📊 STATISTIKEN
     - title: Statistiken
       icon: mdi:chart-line
       cards:
-        - type: custom:violet-pool-card
-          card_type: statistics
-          entity: sensor.violet_pool_controller_beckenwasser
-          theme: luxury
-          size: large
-
-        - type: custom:violet-pool-card
-          card_type: statistics
-          entity: sensor.violet_pool_controller_ph_wert
-          theme: luxury
-          size: large
 
     # 🎛️ SYSTEM
     - title: System
