@@ -30,13 +30,25 @@ anyone there either.
   `backwash`, `refill`, `solar_surplus`, `inlet`, `counter_current` and the
   canisters - were rejected by the same `setConfig()` check before their
   renderer ever ran.
+- **The visual editor asked for an entity on almost every card type.** It kept
+  its own copy of "which card types need an entity" and its own domain filter,
+  and both had drifted from the card - which is what made the automatic
+  resolution look as if it only worked on the overview card. Both now come
+  from the same table the card reads. Where a card type can resolve its own
+  entity the picker is optional and says so; leaving it empty is the normal
+  case.
 
 ### 🧪 Tests
 
-- 181 → 186. `CARD_TYPE_MAIN_ENTITY` must cover the card types whose renderer
+- 181 → 190. `CARD_TYPE_MAIN_ENTITY` must cover the card types whose renderer
   reads the entity directly, every default must name a suffix the registry can
   actually resolve (the two deliberate exceptions are asserted by name), and
   the pump card must resolve both the standard id and a renamed one.
+- Four tests guard the drift itself: the editor must read the shared tables,
+  must not reintroduce a `needsEntity` list or a second domain filter, and the
+  domain its picker offers must be the one the card resolves. Both bugs here
+  had the same shape - two copies of one decision - so the copies are what the
+  tests forbid.
 - The language guard now also flags umlauts in comments and ignores quoted
   text. The word list alone had missed `diesem Präfix beginnen`, which is
   exactly the kind of line it exists to catch; quoting a German string in order

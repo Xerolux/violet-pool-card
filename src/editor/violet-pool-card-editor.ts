@@ -8,6 +8,7 @@
  */
 
 import { i18n } from '../utils/i18n';
+import { CARD_TYPES_REQUIRING_ENTITY, CARD_TYPE_MAIN_ENTITY } from '../utils/entity-registry';
 import { LitElement, html, css, TemplateResult, CSSResultGroup } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import type { VioletPoolCardConfig, CardSize, Theme, Animation } from '../violet-pool-card';
@@ -108,30 +109,41 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
       return html``;
     }
 
-    const needsEntity = !['overview','system','details','chemical','cover','light','error'].includes(this._config.card_type);
+    // The editor used to keep its own list of card types that "need" an entity
+    // and its own domain filter. Both drifted from the card: it asked for an
+    // entity on every type but seven, which is why the automatic resolution
+    // looked as if it only worked on the overview card. Both now come from the
+    // same table the card reads.
+    const defaultEntity = CARD_TYPE_MAIN_ENTITY[this._config.card_type];
+    const entityRequired = CARD_TYPES_REQUIRING_ENTITY.has(this._config.card_type);
     const coverOrLight = this._config.card_type === 'cover' || this._config.card_type === 'light';
-    const domainFilter: Record<string, string[]> = {
-      pump: ['switch'], heater: ['climate'], solar: ['climate'],
-      dosing: ['switch'], compact: [], sensor: ['sensor'],
-      cover: ['cover'], light: ['light'],
-    };
-    const includeDomains = domainFilter[this._config.card_type] || [];
+    // Anything with a default is optional: leaving it empty is the normal case.
+    const showEntityPicker = entityRequired || coverOrLight || Boolean(defaultEntity);
+    const extraDomains: Record<string, string[]> = { cover: ['cover'], light: ['light'] };
+    const includeDomains =
+      extraDomains[this._config.card_type] ?? (defaultEntity ? [defaultEntity.domain] : []);
 
     return html` <div class="card-config"><!-- Card Type Selection --><div class="config-section"><div class="section-header"><ha-icon icon="mdi:card-outline"></ha-icon><span>Card Type</span></div>${this._renderSelect('Card Type', this._config.card_type, CARD_TYPE_OPTIONS, this._cardTypeChanged)}</div><!-- Controller Configuration --><div class="config-section"><div class="section-header"><ha-icon icon="mdi:chip"></ha-icon><span>Controller Configuration</span></div><ha-textfield label="Entity Prefix" .value="${this._config.entity_prefix || 'violet_pool_controller'}" @input="${this._entityPrefixChanged}" helper="Name of your pool controller (e.g., 'violet_pool_controller', 'pool_1', 'garden_pool')" ></ha-textfield><div class="prefix-info"><ha-icon icon="mdi:information-outline"></ha-icon><span> The entity prefix should match your Violet Pool Controller name in Home Assistant. All entities will be automatically discovered based on this prefix. </span></div></div><!-- Entity Selection -->
-        ${needsEntity || coverOrLight ? html`
+        ${showEntityPicker ? html`
           <div class="config-section">
             <div class="section-header">
               <ha-icon icon="mdi:lightning-bolt"></ha-icon>
-              <span>Entity</span>
+              <span>${i18n.t('editor_entity')}</span>
             </div>
             <ha-entity-picker
-              label="${coverOrLight ? (this._config.card_type === 'cover' ? 'Cover Entity' : 'Licht Entity') : 'Entity'}"
+              label="${entityRequired ? i18n.t('editor_entity') : i18n.t('editor_entity_optional')}"
               .hass="${this.hass}"
               .value="${this._config.entity}"
               .includeDomains="${includeDomains.length ? includeDomains : undefined}"
               @value-changed="${this._entityChanged}"
               allow-custom-entity
             ></ha-entity-picker>
+            ${entityRequired ? '' : html`
+              <div class="prefix-info">
+                <ha-icon icon="mdi:information-outline"></ha-icon>
+                <span>${i18n.t('editor_entity_auto')}</span>
+              </div>
+            `}
           </div>
         ` : ''}
 

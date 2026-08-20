@@ -11,6 +11,9 @@ export type TranslationKey = keyof typeof TRANSLATIONS.en;
 
 export const TRANSLATIONS = {
   en: {
+    editor_entity: 'Entity',
+    editor_entity_optional: 'Entity (optional)',
+    editor_entity_auto: 'Leave empty and the card finds the entity itself through the Home Assistant entity registry. Set one only to override that.',
     pump_idle_hint: 'Pump is idle. Enable ECO or AUTO for base circulation.',
     pump_boost_hint: 'Use boost only briefly, to limit energy use and wear.',
     pump_eco_hint: 'ECO runs efficiently. Ideal for continuous filtration and night operation.',
@@ -356,6 +359,9 @@ export const TRANSLATIONS = {
     color_magenta: 'Magenta',
   },
   de: {
+    editor_entity: 'Entität',
+    editor_entity_optional: 'Entität (optional)',
+    editor_entity_auto: 'Leer lassen — die Karte findet die Entität selbst über das Entitätsregister von Home Assistant. Nur setzen, wenn du das übersteuern willst.',
     pump_idle_hint: 'Pumpe steht. Für Grundzirkulation ECO oder AUTO aktivieren.',
     pump_boost_hint: 'Boost nur kurz nutzen, um Energieverbrauch und Verschleiß zu begrenzen.',
     pump_eco_hint: 'ECO läuft effizient. Ideal für Dauerfiltration und Nachtbetrieb.',
