@@ -50,7 +50,7 @@ async function fetchTranslations() {
 
 const entity = await fetchTranslations();
 
-/** Domain → sortierte Schlüsselliste. */
+/** Domain -> sorted list of keys. */
 const keys = Object.fromEntries(
   Object.entries(entity)
     .map(([domain, entries]) => [domain, Object.keys(entries).sort()])

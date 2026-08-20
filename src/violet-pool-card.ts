@@ -30,6 +30,8 @@ import type { QuickAction } from './components/quick-actions';
 import { ServiceCaller } from './utils/service-caller';
 import { EntityHelper } from './utils/entity-helper';
 import {
+  CARD_TYPES_REQUIRING_ENTITY,
+  CARD_TYPE_MAIN_ENTITY,
   buildEntityIndex,
   resolveEntityId,
   type RegistryDisplayEntry,
@@ -230,7 +232,10 @@ export class VioletPoolCard extends LitElement {
       throw new Error('You need to define a card_type');
     }
 
-    if (config.card_type !== 'overview' && config.card_type !== 'system' && config.card_type !== 'details' && config.card_type !== 'chemical' && config.card_type !== 'cover' && config.card_type !== 'light' && !config.entity) {
+    // Only card types that cannot resolve an entity themselves need one
+    // spelled out. Demanding it from every other type is what stopped
+    // `card_type: pump` from working on its own.
+    if (CARD_TYPES_REQUIRING_ENTITY.has(config.card_type) && !config.entity) {
       throw new Error('You need to define an entity');
     }
 
@@ -300,6 +305,18 @@ export class VioletPoolCard extends LitElement {
   private _buildEntityId(domain: string, suffix: string): string {
     const prefix = this.config.entity_prefix || 'violet_pool_controller';
     return resolveEntityId(this._registryIndex, domain, suffix) ?? `${domain}.${prefix}_${suffix}`;
+  }
+
+  /**
+   * The entity a card shows: the configured one, otherwise the default for its
+   * card type, resolved through the registry like every other entity.
+   */
+  private _mainEntityId(config: VioletPoolCardConfig): string | undefined {
+    if (config.entity) {
+      return config.entity;
+    }
+    const fallback = CARD_TYPE_MAIN_ENTITY[config.card_type];
+    return fallback ? this._buildEntityId(fallback.domain, fallback.suffix) : undefined;
   }
 
   private _getEntityId(
@@ -950,7 +967,7 @@ export class VioletPoolCard extends LitElement {
   }
 
   private renderPumpCard(config: VioletPoolCardConfig = this.config): TemplateResult {
-    const entity = this.hass.states[config.entity!];
+    const entity = this.hass.states[this._mainEntityId(config)!];
     if (!entity) return this._renderLoadingSkeleton(config);
     const state = entity.state;
     const name = config.name || entity.attributes.friendly_name || 'Pump';
@@ -1165,7 +1182,7 @@ export class VioletPoolCard extends LitElement {
 
 
   private renderHeaterCard(config: VioletPoolCardConfig = this.config): TemplateResult {
-    const entity = this.hass.states[config.entity!];
+    const entity = this.hass.states[this._mainEntityId(config)!];
     if (!entity) return this._renderLoadingSkeleton(config);
     const state = entity.state;
     const name = config.name || entity.attributes.friendly_name || 'Heater';
@@ -1334,7 +1351,7 @@ export class VioletPoolCard extends LitElement {
   }
 
   private renderSolarCard(config: VioletPoolCardConfig = this.config): TemplateResult {
-    const entity = this.hass.states[config.entity!];
+    const entity = this.hass.states[this._mainEntityId(config)!];
     if (!entity) return this._renderLoadingSkeleton(config);
     const state = entity.state;
     const name = config.name || entity.attributes.friendly_name || 'Solar';
@@ -1493,7 +1510,7 @@ export class VioletPoolCard extends LitElement {
   }
 
   private renderDosingCard(config: VioletPoolCardConfig = this.config): TemplateResult {
-    const entity = this.hass.states[config.entity!];
+    const entity = this.hass.states[this._mainEntityId(config)!];
     if (!entity) return this._renderLoadingSkeleton(config);
     const state = entity.state;
     const name = config.name || entity.attributes.friendly_name || 'Dosing';
@@ -1885,7 +1902,7 @@ export class VioletPoolCard extends LitElement {
       });
     }
 
-    // Pool level / Füllstand
+    // Pool level
     const poolLevelEntityId = this._getEntityId('pool_level_entity', 'sensor', 'uberlaufbehalter');
     const poolLevelEntity = this.hass.states[poolLevelEntityId];
     if (poolLevelEntity) {
@@ -1914,7 +1931,7 @@ export class VioletPoolCard extends LitElement {
       });
     }
 
-    // Inlet / Anströmung
+    // Inlet
     const inletEntityId = this._getEntityId('inlet_entity', 'sensor', 'inlet');
     const inletEntity = this.hass.states[inletEntityId];
     if (inletEntity) {
@@ -2301,7 +2318,7 @@ export class VioletPoolCard extends LitElement {
 
 
   private renderCompactCard(config: VioletPoolCardConfig = this.config): TemplateResult {
-    const entity = this.hass.states[config.entity!];
+    const entity = this.hass.states[this._mainEntityId(config)!];
     if (!entity) {
       return this._renderEntityNotFound(config.entity);
     }
@@ -2763,7 +2780,7 @@ export class VioletPoolCard extends LitElement {
   }
 
   private renderSensorCard(config: VioletPoolCardConfig = this.config): TemplateResult {
-    const entity = this.hass.states[config.entity!];
+    const entity = this.hass.states[this._mainEntityId(config)!];
     if (!entity) {
       return this._renderEntityNotFound(config.entity);
     }
@@ -3576,7 +3593,7 @@ export class VioletPoolCard extends LitElement {
    * Render Flow Rate Card - displays water flow rate with animation
    */
   private renderFlowRateCard(config: VioletPoolCardConfig = this.config): TemplateResult {
-    const entity = this.hass.states[config.entity!];
+    const entity = this.hass.states[this._mainEntityId(config)!];
     if (!entity) return this._renderLoadingSkeleton(config);
     const flowRate = parseFloat(entity.state);
     const unit = entity.attributes?.unit_of_measurement || 'm³/h';
