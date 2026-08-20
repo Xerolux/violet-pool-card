@@ -1,48 +1,49 @@
-## v0.4.2 – Violet Pool Card
+## v0.4.3 – Violet Pool Card
 
 ✅ **STABLE RELEASE**
 
-The first entry written under the language policy - and the release where the
-card finally speaks English to English users.
-
 ### 🐛 Bug Fixes
 
-- **The card was German even on an English installation.** 98 user-facing
-  strings were hardcoded in German in the render path - tooltips, status texts,
-  recommendations, button labels, the colour picker, the threshold editor.
-  Nothing translated them, so `i18n` never got a say. Every one of them now
-  goes through the translation table.
-- **Five card types the card does not have were still documented.**
-  `statistics`, `weather`, `maintenance`, `alerts` and `comparison` were listed
-  in README.md and, worse, used in `dashboard_config.yaml` and `dashboard.yaml`
-  - the dashboards people copy into their own setup. Eleven cards across those
-  two files rendered as "Unknown Card Type". They are gone, and the README card
-  list is now built from the editor's own option table, so it lists the 29
-  types that exist; six real ones had been missing from it (`overflow`,
-  `error`, `digital_rules`, `calibration`, `update`, `diagnostics`).
+- **The pump card did not find its entities.** Reported on the forum right
+  after 0.4.2: the card type selection worked and the overview card showed
+  data, but the pump card came up empty. The registry lookup added in 0.4.1
+  never reached it. Two things blocked it, and both had to go:
+  - `setConfig()` threw *"You need to define an entity"* for every card type
+    except six, so `card_type: pump` on its own was rejected before anything
+    could be resolved. It now demands an entity only from the card type that
+    genuinely cannot guess one - the generic `sensor` card.
+  - `renderPumpCard()` read `config.entity` directly, as did the heater, solar,
+    dosing, compact, sensor and flow-rate cards. They now go through the same
+    registry resolution as the rest, so a renamed pump is found too.
 
-### 🚀 Improvements
-
-- **`i18n.t()` takes placeholders.** 34 of those strings carry a value, and a
-  sentence split around its value only survives while every language keeps the
-  same word order. `i18n.t('backwash_desc', { duration })` keeps it one string
-  per language. An unfilled placeholder stays visible instead of rendering
-  "undefined" - a missing value should look wrong, not plausible.
-- English is binding for everything written into this repository; the rule and
-  its one exception - the German table in `i18n.ts`, which *is* the
-  localisation - are in the new `CLAUDE.md`.
-- `CHANGELOG.md` is a source file now: the release workflow lifts this section
-  onto the release page instead of generating text from commit subjects.
+  The README already promised that `card_type: pump` alone works. It does now.
+- Seven card types that resolve their entities while rendering - `filter`,
+  `backwash`, `refill`, `solar_surplus`, `inlet`, `counter_current` and the
+  canisters - were rejected by the same `setConfig()` check before their
+  renderer ever ran.
+- **The visual editor asked for an entity on almost every card type.** It kept
+  its own copy of "which card types need an entity" and its own domain filter,
+  and both had drifted from the card - which is what made the automatic
+  resolution look as if it only worked on the overview card. Both now come
+  from the same table the card reads. Where a card type can resolve its own
+  entity the picker is optional and says so; leaving it empty is the normal
+  case.
 
 ### 🧪 Tests
 
-- 127 → 181. The new ones guard what silently rots: no German outside
-  `i18n.ts`, both language tables holding the same keys, no empty translation,
-  and the same placeholders on both sides - one present in only one language
-  would drop the value for those users. The card-type check now walks every
-  markdown and YAML file in the repository and matches both the `card_type:`
-  key and the prose form, which is how the five phantom types slipped past it
-  the first time.
+- 181 → 190. `CARD_TYPE_MAIN_ENTITY` must cover the card types whose renderer
+  reads the entity directly, every default must name a suffix the registry can
+  actually resolve (the two deliberate exceptions are asserted by name), and
+  the pump card must resolve both the standard id and a renamed one.
+- Four tests guard the drift itself: the editor must read the shared tables,
+  must not reintroduce a `needsEntity` list or a second domain filter, and the
+  domain its picker offers must be the one the card resolves. Both bugs here
+  had the same shape - two copies of one decision - so the copies are what the
+  tests forbid.
+- The language guard now also flags umlauts in comments and ignores quoted
+  text. The word list alone had missed `diesem Präfix beginnen`, which is
+  exactly the kind of line it exists to catch; quoting a German string in order
+  to explain its removal is legitimate and no longer fails.
 
 ### 📦 Installation
 
