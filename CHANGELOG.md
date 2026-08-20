@@ -1,8 +1,13 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
-Jeder Abschnitt hier wird beim Release zum Text der GitHub-Release-Seite —
-was hier nicht steht, erfährt also auch niemand dort.
+This changelog is written in English (see the language policy in
+[CLAUDE.md](./CLAUDE.md)). The section for a version becomes the text of its
+GitHub release page automatically — what is not written here is not told to
+anyone there either.
+
+> **Historical note:** entries up to and including 0.4.1 were written in
+> German, before the language policy existed. They are kept as published.
 
 ## [0.4.1] - 2026-08-19
 

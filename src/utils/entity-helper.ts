@@ -2,8 +2,8 @@
  * Violet Pool Card – Custom Lovelace Card for Home Assistant
  * © 2026 Xerolux | https://github.com/Xerolux/violet-pool-card
  *
- * Utility: Entity Helper – Hilfsfunktionen zur Verarbeitung von Home Assistant Entitäten
- * Erstellt von Xerolux | MIT License
+ * Utility: Entity Helper - helpers for working with Home Assistant entities
+ * Created by Xerolux | MIT License
  */
 
 export interface EntityState {

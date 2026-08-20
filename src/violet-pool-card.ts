@@ -3,8 +3,8 @@
  * © 2026 Xerolux | https://github.com/Xerolux/violet-pool-card
  *
  * Main Component – Violet Pool Card LitElement
- * Steuert und visualisiert den Violet Pool Controller in Home Assistant.
- * Erstellt von Xerolux | MIT License
+ * Controls and visualises the Violet Pool Controller in Home Assistant.
+ * Created by Xerolux | MIT License
  */
 
 import { LitElement, html, css, TemplateResult, CSSResultGroup } from 'lit';

@@ -2,8 +2,8 @@
  * Violet Pool Card – Custom Lovelace Card for Home Assistant
  * © 2026 Xerolux | https://github.com/Xerolux/violet-pool-card
  *
- * Styles: Component Styles – Wiederverwendbare CSS-Stile für alle Kartenkomponenten
- * Erstellt von Xerolux | MIT License
+ * Styles: Component Styles - reusable CSS styles shared by every card component
+ * Created by Xerolux | MIT License
  */
 
 import { css } from 'lit';

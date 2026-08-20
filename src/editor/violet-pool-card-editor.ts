@@ -3,8 +3,8 @@
  * © 2026 Xerolux | https://github.com/Xerolux/violet-pool-card
  *
  * Visual Editor – Lovelace Card Konfigurationseditor
- * Ermöglicht die visuelle Konfiguration der Karte ohne YAML.
- * Erstellt von Xerolux | MIT License
+ * Lets the card be configured visually, without YAML.
+ * Created by Xerolux | MIT License
  */
 
 import { LitElement, html, css, TemplateResult, CSSResultGroup } from 'lit';

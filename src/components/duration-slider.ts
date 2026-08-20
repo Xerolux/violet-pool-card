@@ -2,8 +2,8 @@
  * Violet Pool Card – Custom Lovelace Card for Home Assistant
  * © 2026 Xerolux | https://github.com/Xerolux/violet-pool-card
  *
- * Component: Duration Slider – Zeitsteuerung für Pool-Geräte (Laufzeit-Schieberegler)
- * Erstellt von Xerolux | MIT License
+ * Component: Duration Slider - runtime control for pool devices (runtime slider)
+ * Created by Xerolux | MIT License
  */
 
 import { LitElement, html, css } from 'lit';

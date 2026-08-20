@@ -2,8 +2,8 @@
  * Violet Pool Card – Custom Lovelace Card for Home Assistant
  * © 2026 Xerolux | https://github.com/Xerolux/violet-pool-card
  *
- * Component: Detail Status – Detailansicht des Pool-Systemstatus
- * Erstellt von Xerolux | MIT License
+ * Component: Detail Status - detailed view of the pool system status
+ * Created by Xerolux | MIT License
  */
 
 import { LitElement, html, css, TemplateResult, CSSResultGroup } from 'lit';

@@ -4,20 +4,20 @@
  *
  * Utility: Brands Proxy API Helper – Home Assistant Brand Images via Local API
  *
- * Integration mit Home Assistant Brands Proxy API (ab HA 2026.3)
+ * Integrates with the Home Assistant brands proxy API (HA 2026.3+)
  * https://developers.home-assistant.io/blog/2026/02/24/brands-proxy-api/
  *
- * Die API dient zum Laden von Brand-Images (Icons/Logos) über die lokale
+ * The API loads brand images (icons/logos) through the local
  * Home Assistant API statt direkt vom CDN. Dies ermöglicht:
- * - Offline-Funktionalität (Bilder werden lokal gecacht)
- * - Bessere Kontrolle über externe Anfragen
- * - Unterstützung für benutzerdefinierte Brand-Assets
+ * - Works offline (images are cached locally)
+ * - Better control over outbound requests
+ * - Support for custom brand assets
  *
  * Beispiel:
  *   const url = await brandsUrl(hass, 'integration', 'violet_pool', 'icon.png');
  *   const hwUrl = await brandsUrl(hass, 'hardware', 'raspberry_pi', 'logo.png');
  *
- * Erstellt von Xerolux | MIT License
+ * Created by Xerolux | MIT License
  */
 
 import type { HomeAssistant } from '../types/index';

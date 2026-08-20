@@ -2,23 +2,22 @@
  * Violet Pool Card – Custom Lovelace Card for Home Assistant
  * © 2026 Xerolux | https://github.com/Xerolux/violet-pool-card
  *
- * Utility: Entity Registry – findet die Entitäten der Integration, statt ihre
+ * Utility: Entity Registry - finds the integration's entities instead of
  * IDs zu raten.
  *
- * Bis hierher hat die Karte jede Entität aus dem Präfix zusammengesetzt
+ * Until now the card assembled every entity id from the prefix
  * (`switch.<präfix>_filterpumpe`). Die Integration bildet ihre Entity-IDs seit
- * 2.5.0 aber aus den *englischen* Namen, damit sie auf jeder Installation
- * gleich heißen – aus `filterpumpe` wurde `filter_pump`. Auf einer neu
- * eingerichteten Anlage traf deshalb keiner der geratenen Namen mehr.
+ * builds its ids from the *English* names since 2.5.0, so that they are the
+ * same on every installation - `filterpumpe` became `filter_pump`. On a newly
+ * set up system none of the guessed names matched any more.
  *
- * Home Assistant stellt jeder Karte mit `hass.entities` das Entitätsregister
- * zur Verfügung: darin steht zu jeder Entität, von welcher Integration sie
- * stammt (`platform`) und welchen sprachunabhängigen Schlüssel sie trägt
- * (`translation_key`). Damit lässt sich die richtige Entität nachschlagen,
- * unabhängig von Sprache, Umbenennungen und Präfix.
+ * Home Assistant hands every card the entity registry in `hass.entities`: it
+ * records, per entity, which integration it comes from (`platform`) and which
+ * language-independent key it carries (`translation_key`). That is enough to
+ * look up the right entity regardless of language, renaming or prefix.
  */
 
-/** Der Ausschnitt von `hass.entities`, den die Karte braucht. */
+/** The part of `hass.entities` the card needs. */
 export interface RegistryDisplayEntry {
   entity_id: string;
   platform?: string;
@@ -26,27 +25,27 @@ export interface RegistryDisplayEntry {
   device_id?: string;
 }
 
-/** Die Integration, deren Entitäten diese Karte anzeigt. */
+/** The integration whose entities this card displays. */
 export const VIOLET_PLATFORM = 'violet_pool_controller';
 
-/** Wo eine geratene Entity-ID-Endung bei der Integration wirklich liegt. */
+/** Where a guessed entity-id suffix actually lives in the integration. */
 export interface LegacyEntitySlot {
-  /** Die Domain, in der die Karte diese Entität sucht. */
+  /** The domain the card looks this entity up in. */
   domain: string;
-  /** Der Schlüssel, unter dem die Integration sie führt. */
+  /** The key the integration files it under. */
   translationKey: string;
 }
 
 /**
- * Geratene Entity-ID-Endung → Eintrag bei der Integration.
+ * Guessed entity-id suffix -> the matching entry in the integration.
  *
- * Die Endungen links sind die deutschen IDs, die die Karte bisher geraten hat;
- * rechts steht, wo dieselbe Entität bei der Integration liegt. Endungen ohne
- * Gegenstück (`inlet`, `counter_current`, `salzgehalt`) fehlen hier bewusst –
- * die Integration kennt sie nicht, dafür bleibt es beim geratenen Namen.
+ * The suffixes on the left are the German ids the card used to guess; on the
+ * right is where the same entity lives in the integration. Suffixes without a
+ * counterpart (`inlet`, `counter_current`, `salzgehalt`) are absent on purpose -
+ * the integration does not know them, so the guessed name stays in place.
  *
  * `tests/entity-registry.test.ts` prüft jeden Eintrag gegen die
- * Übersetzungsschlüssel der Integration; `npm run keys:update` holt sie neu.
+ * translation keys of the integration; `npm run keys:update` refreshes them.
  */
 export const LEGACY_SUFFIX_TO_SLOT: Record<string, LegacyEntitySlot> = {
   // Ausgänge
@@ -56,7 +55,7 @@ export const LEGACY_SUFFIX_TO_SLOT: Record<string, LegacyEntitySlot> = {
   chlor_dosierung: { domain: 'switch', translationKey: 'dos_1_cl' },
   dosierung_ph_2: { domain: 'switch', translationKey: 'dos_4_phm' },
   schaltregel_1: { domain: 'switch', translationKey: 'dirule_1' },
-  // Klima und Abdeckung
+  // Climate and cover
   heizung: { domain: 'climate', translationKey: 'heater' },
   solarabsorber: { domain: 'climate', translationKey: 'solar' },
   abdeckung: { domain: 'cover', translationKey: 'pool_cover' },
@@ -73,25 +72,25 @@ export const LEGACY_SUFFIX_TO_SLOT: Record<string, LegacyEntitySlot> = {
   pumpen_durchfluss: { domain: 'sensor', translationKey: 'flow_rate' },
   pv_uberschuss_status: { domain: 'sensor', translationKey: 'pvsurplus' },
   diagnostics_status: { domain: 'sensor', translationKey: 'system_health' },
-  // Reichweiten der Dosierkanäle (gleicher Name auf beiden Seiten)
+  // Dosing channel ranges (same name on both sides)
   dos_1_cl_remaining_range: { domain: 'sensor', translationKey: 'dos_1_cl_remaining_range' },
   dos_4_phm_remaining_range: { domain: 'sensor', translationKey: 'dos_4_phm_remaining_range' },
   dos_5_php_remaining_range: { domain: 'sensor', translationKey: 'dos_5_php_remaining_range' },
   dos_6_floc_remaining_range: { domain: 'sensor', translationKey: 'dos_6_floc_remaining_range' },
 };
 
-/** Schlüssel im Index: Domain und Übersetzungsschlüssel zusammen. */
+/** Index key: domain and translation key combined. */
 const indexKey = (domain: string, translationKey: string): string =>
   `${domain}:${translationKey}`;
 
 /**
- * Baut den Index „Domain + Übersetzungsschlüssel → Entity-ID" auf.
+ * Builds the "domain + translation key -> entity id" index.
  *
- * @param entities `hass.entities`, das Entitätsregister von Home Assistant.
- * @param preferredPrefix Präfix aus der Kartenkonfiguration. Hängen mehrere
- *   Controller an einer Installation, gewinnt der, dessen Entity-IDs mit
+ * @param entities `hass.entities`, the Home Assistant entity registry.
+ * @param preferredPrefix Prefix from the card configuration. With several
+ *   controllers on one installation, the one whose entity ids start with
  *   diesem Präfix beginnen.
- * @returns Den Index; leer, wenn keine Entität der Integration registriert ist.
+ * @returns The index; empty when no entity of the integration is registered.
  */
 export function buildEntityIndex(
   entities: Record<string, RegistryDisplayEntry> | undefined,
@@ -104,7 +103,7 @@ export function buildEntityIndex(
 
   const prefix = preferredPrefix || undefined;
 
-  // Sortiert, damit bei mehreren Treffern immer dieselbe Entität gewinnt.
+  // Sorted so the same entity always wins when several match.
   for (const entry of Object.values(entities).sort((a, b) =>
     a.entity_id.localeCompare(b.entity_id)
   )) {
@@ -124,7 +123,7 @@ export function buildEntityIndex(
       continue;
     }
 
-    // Bereits belegt: nur das konfigurierte Präfix darf den Eintrag ersetzen.
+    // Already taken: only the configured prefix may replace the entry.
     if (prefix && entry.entity_id.startsWith(`${domain}.${prefix}_`)) {
       if (!current.startsWith(`${domain}.${prefix}_`)) {
         index.set(key, entry.entity_id);
@@ -136,12 +135,12 @@ export function buildEntityIndex(
 }
 
 /**
- * Schlägt die Entität nach, die hinter einer geratenen ID-Endung steckt.
+ * Looks up the entity behind a guessed id suffix.
  *
- * @param index Ergebnis von {@link buildEntityIndex}.
- * @param domain Die Domain der gesuchten Entität.
- * @param suffix Die Endung, die die Karte bisher geraten hat.
- * @returns Die registrierte Entity-ID oder `undefined`, wenn die Integration
+ * @param index Result of {@link buildEntityIndex}.
+ * @param domain The domain of the entity being looked for.
+ * @param suffix The suffix the card used to guess.
+ * @returns The registered entity id, or `undefined` when the integration
  *   nichts Passendes führt.
  */
 export function resolveEntityId(

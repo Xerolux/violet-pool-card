@@ -2,8 +2,8 @@
  * Violet Pool Card – Custom Lovelace Card for Home Assistant
  * © 2026 Xerolux | https://github.com/Xerolux/violet-pool-card
  *
- * Utility: Memoize – Caching von aufwendigen Berechnungen zur Performance-Optimierung
- * Erstellt von Xerolux | MIT License
+ * Utility: Memoize - caches expensive computations to keep rendering fast
+ * Created by Xerolux | MIT License
  */
 
 const MAX_CACHE_SIZE = 100;

@@ -2,8 +2,8 @@
  * Violet Pool Card – Custom Lovelace Card for Home Assistant
  * © 2026 Xerolux | https://github.com/Xerolux/violet-pool-card
  *
- * Styles: Animation Keyframes – CSS-Animationen für visuelle Effekte (Pulse, Shimmer, Rainbow)
- * Erstellt von Xerolux | MIT License
+ * Styles: Animation Keyframes - CSS animations for visual effects (pulse, shimmer, rainbow)
+ * Created by Xerolux | MIT License
  */
 
 import { css } from 'lit';

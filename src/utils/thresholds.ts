@@ -2,12 +2,12 @@
  * Violet Pool Card – Custom Lovelace Card for Home Assistant
  * © 2026 Xerolux | https://github.com/Xerolux/violet-pool-card
  *
- * Utility: Thresholds – benutzerdefinierte Grenzwerte für die Wasserwerte
+ * Utility: Thresholds - user-configurable limits for the water values
  *
- * Bis v0.3.0 waren alle Grenzwerte (pH 7.0–7.4, ORP 650–750 mV, …) fest im
- * Code verdrahtet. Dadurch meldete die Karte Werte als "außerhalb des
- * Bereichs", die für den jeweiligen Pool völlig in Ordnung waren.
- * Ab v0.4.0 lassen sich alle Bereiche über die Karten-Konfiguration setzen:
+ * Up to v0.3.0 every limit (pH 7.0-7.4, ORP 650-750 mV, ...) was hardcoded.
+ * The card therefore reported values as "out of range" that were perfectly
+ * fine for the pool in question. Since v0.4.0 every range can be set from the
+ * card configuration:
  *
  * ```yaml
  * type: custom:violet-pool-card
@@ -20,41 +20,42 @@
  * alerts: warning   # all | warning | critical | none
  * ```
  *
- * Erstellt von Xerolux | MIT License
+ * Created by Xerolux | MIT License
  */
 
 import { i18n } from './i18n';
 
-/** Bewertung eines Messwerts relativ zum konfigurierten Zielbereich. */
+/** How a reading rates against its configured target range. */
 export type ThresholdLevel = 'ok' | 'warning' | 'critical' | 'unknown';
 
-/** Auf welcher Seite des Zielbereichs der Wert liegt. */
+/** Which side of the target range the value sits on. */
 export type ThresholdSide = 'low' | 'in' | 'high' | 'unknown';
 
-/** Welche Messgröße – bestimmt Standardwerte und Statustexte. */
+/** Which metric - decides the defaults and the status texts. */
 export type MetricKey = 'ph' | 'orp' | 'chlorine' | 'salt' | 'temperature' | 'cyanuric_acid' | 'alkalinity';
 
 /**
- * Vom Benutzer konfigurierbarer Grenzwert-Block.
- * Alle Felder sind optional; nicht gesetzte Felder fallen auf die Defaults zurück.
+ * A user-configurable threshold block.
+ * Every field is optional; unset fields fall back to the defaults.
  */
 export interface ThresholdBandConfig {
-  /** Untere Grenze des Optimalbereichs. */
+  /** Lower bound of the optimal range. */
   min?: number;
-  /** Obere Grenze des Optimalbereichs. */
+  /** Upper bound of the optimal range. */
   max?: number;
   /**
-   * Toleranz ausserhalb von min/max, die nur als "Warnung" (nicht "kritisch")
-   * gilt. Beispiel pH: min 7.0, warn 0.2 → 6.8–7.0 ist Warnung, < 6.8 kritisch.
+   * Tolerance beyond min/max that still counts as "warning" rather than
+   * "critical". Example pH: min 7.0, warn 0.2 -> 6.8-7.0 warns, < 6.8 is
+   * critical.
    */
   warn?: number;
-  /** Anzeigebereich der Skala/Gauge als [von, bis]. */
+  /** Displayed span of the scale/gauge as [from, to]. */
   range?: [number, number];
-  /** Diese Messgröße komplett von der Alarm-/Statusbewertung ausnehmen. */
+  /** Exclude this metric from alarm and status evaluation entirely. */
   ignore?: boolean;
 }
 
-/** Vollständig aufgelöster Grenzwert-Block (keine optionalen Felder mehr). */
+/** A fully resolved threshold block - no optional fields left. */
 export interface ThresholdBand {
   min: number;
   max: number;
@@ -67,17 +68,17 @@ export type ThresholdsConfig = Partial<Record<MetricKey, ThresholdBandConfig>>;
 export type ResolvedThresholds = Record<MetricKey, ThresholdBand>;
 
 /**
- * Wie geschwätzig die Karte bei Abweichungen sein soll.
- * - `all`      – jede Abweichung wird gemeldet (Standard, Verhalten bis v0.3.0)
- * - `warning`  – nur Warnungen und kritische Werte (kein Info-Rauschen)
- * - `critical` – nur kritische Werte
- * - `none`     – keine Wasserwert-Hinweise
+ * How talkative the card should be about deviations.
+ * - `all`      - every deviation is reported (default, the behaviour up to v0.3.0)
+ * - `warning`  - warnings and critical values only (no informational noise)
+ * - `critical` - critical values only
+ * - `none`     - no water-value notices at all
  */
 export type AlertLevel = 'all' | 'warning' | 'critical' | 'none';
 
 /**
- * Standard-Zielbereiche.
- * Orientiert an DIN 19643 / typischen Empfehlungen für private Pools.
+ * Default target ranges.
+ * Based on DIN 19643 and the usual recommendations for private pools.
  */
 export const DEFAULT_THRESHOLDS: ResolvedThresholds = {
   ph: { min: 7.0, max: 7.4, warn: 0.2, range: [6.5, 8.0], ignore: false },
@@ -103,8 +104,8 @@ const isFiniteNumber = (value: unknown): value is number =>
   typeof value === 'number' && Number.isFinite(value);
 
 /**
- * Liest einen konfigurierten Zahlenwert und fällt bei Unsinn (null, NaN,
- * String aus dem YAML-Editor …) auf den Default zurück.
+ * Reads a configured number and falls back to the default on nonsense
+ * (null, NaN, a string typed into the YAML editor, ...).
  */
 function num(value: unknown, fallback: number): number {
   if (isFiniteNumber(value)) return value;
@@ -116,8 +117,8 @@ function num(value: unknown, fallback: number): number {
 }
 
 /**
- * Löst einen einzelnen Grenzwert-Block gegen die Defaults auf und repariert
- * widersprüchliche Eingaben, damit die Karte niemals mit min > max rendert.
+ * Resolves a single threshold block against the defaults and repairs
+ * contradictory input, so the card never renders with min > max.
  */
 export function resolveBand(metric: MetricKey, config?: ThresholdBandConfig): ThresholdBand {
   const base = DEFAULT_THRESHOLDS[metric];
@@ -129,8 +130,8 @@ export function resolveBand(metric: MetricKey, config?: ThresholdBandConfig): Th
 
   const warn = Math.max(0, num(config.warn, base.warn));
 
-  // Anzeigebereich: konfiguriert, sonst Default – aber immer so weit, dass der
-  // Zielbereich samt Warntoleranz vollständig sichtbar bleibt.
+  // Displayed span: configured, otherwise the default - but always wide enough
+  // to keep the target range and its warning tolerance fully visible.
   const rawRange = Array.isArray(config.range) && config.range.length === 2 ? config.range : base.range;
   let rangeMin = num(rawRange[0], base.range[0]);
   let rangeMax = num(rawRange[1], base.range[1]);
@@ -151,7 +152,7 @@ export function resolveBand(metric: MetricKey, config?: ThresholdBandConfig): Th
   };
 }
 
-/** Löst alle Grenzwerte einer Karten-Konfiguration auf. */
+/** Resolves every threshold of a card configuration. */
 export function resolveThresholds(config?: ThresholdsConfig): ResolvedThresholds {
   const resolved = {} as ResolvedThresholds;
   for (const metric of METRIC_KEYS) {
@@ -178,17 +179,17 @@ export function resolveAlertLevel(value?: string, showAlerts?: boolean): AlertLe
 export interface ThresholdEvaluation {
   level: ThresholdLevel;
   side: ThresholdSide;
-  /** true, solange der Wert im Zielbereich liegt (oder bewusst ignoriert wird). */
+  /** true while the value is inside the target range (or deliberately ignored). */
   ok: boolean;
-  /** Position 0–100 des Werts innerhalb des Anzeigebereichs. */
+  /** Position of the value inside the displayed span, 0-100. */
   percent: number;
   band: ThresholdBand;
   value?: number;
 }
 
 /**
- * Bewertet einen Messwert gegen seinen Zielbereich.
- * Innerhalb `warn` ausserhalb von min/max → Warnung, darüber hinaus → kritisch.
+ * Rates a reading against its target range.
+ * Within `warn` beyond min/max -> warning, anything further -> critical.
  */
 export function evaluate(value: number | undefined, band: ThresholdBand): ThresholdEvaluation {
   if (value === undefined || !Number.isFinite(value)) {
@@ -214,7 +215,7 @@ export function evaluate(value: number | undefined, band: ThresholdBand): Thresh
   return { level: 'ok', side: 'in', ok: true, percent, band, value };
 }
 
-/** Position eines Werts (0–100) innerhalb eines Bereichs, geklemmt. */
+/** Position of a value inside a range, 0-100, clamped. */
 export function percentOfRange(value: number, range: [number, number]): number {
   const [min, max] = range;
   if (!(max > min)) return 0;
@@ -222,12 +223,12 @@ export function percentOfRange(value: number, range: [number, number]): number {
 }
 
 /**
- * Farbe passend zur Bewertung – konsistent über die ganze Karte.
+ * Colour matching the rating - consistent across the whole card.
  *
- * Bewusst als Hex-Literal und nicht als `var(--vpc-…)`: Die Farbe landet auch
- * in SVG-Präsentationsattributen (`fill`, `stroke`), und dort ist `var()`
- * ungültig – der Zeiger und der Wertbogen der Gauges blieben dadurch unsichtbar.
- * Die Werte entsprechen den Defaults aus `:host`.
+ * Deliberately a hex literal rather than `var(--vpc-...)`: the colour also
+ * ends up in SVG presentation attributes (`fill`, `stroke`), where `var()` is
+ * invalid - which left the gauge needle and value arc invisible. The values
+ * match the defaults from `:host`.
  */
 export function levelColor(level: ThresholdLevel): string {
   switch (level) {
@@ -243,8 +244,8 @@ export function levelColor(level: ThresholdLevel): string {
 }
 
 /**
- * Statustext zu einer Bewertung – nutzt die vorhandenen i18n-Schlüssel und
- * bleibt dadurch mit der bestehenden Übersetzung konsistent.
+ * Status text for a rating - uses the existing i18n keys and therefore stays
+ * consistent with the translations already in place.
  */
 export function levelLabel(evaluation: ThresholdEvaluation): string {
   if (evaluation.level === 'unknown') return i18n.t('unknown');
@@ -255,7 +256,7 @@ export function levelLabel(evaluation: ThresholdEvaluation): string {
   return evaluation.level === 'critical' ? i18n.t('status_too_high') : i18n.t('status_elevated');
 }
 
-/** true, wenn eine Abweichung dieser Stufe beim gewählten Alarm-Level gemeldet wird. */
+/** true when a deviation of this level is reported at the chosen alert level. */
 export function shouldReport(level: ThresholdLevel, alertLevel: AlertLevel): boolean {
   if (level === 'ok' || level === 'unknown') return false;
   switch (alertLevel) {
@@ -271,8 +272,8 @@ export function shouldReport(level: ThresholdLevel, alertLevel: AlertLevel): boo
 }
 
 /**
- * Formatiert einen Zielbereich für Tooltips ("7.0 – 7.4").
- * `decimals` steuert die Nachkommastellen der jeweiligen Messgröße.
+ * Formats a target range for tooltips ("7.0 - 7.4").
+ * `decimals` controls the decimal places of the metric in question.
  */
 export function formatRange(band: ThresholdBand, decimals: number, unit = ''): string {
   const suffix = unit ? ` ${unit}` : '';
@@ -290,7 +291,7 @@ export const METRIC_DECIMALS: Record<MetricKey, number> = {
   alkalinity: 0,
 };
 
-/** Einheit je Messgröße (für Tooltips und Gauge-Beschriftung). */
+/** Unit per metric, for tooltips and gauge labels. */
 export const METRIC_UNITS: Record<MetricKey, string> = {
   ph: '',
   orp: 'mV',

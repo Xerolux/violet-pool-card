@@ -232,9 +232,9 @@ jobs:
               "4. Restart Home Assistant"
           )
           parts.append(
-              "### ❤️ Support | Unterstützung\n\n"
-              "Diese Karte entsteht in meiner Freizeit. Wenn sie dir hilft, freue ich "
-              "mich über Unterstützung:\n\n"
+              "### ❤️ Support\n\n"
+              "This card is built in my spare time. If it helps you, support is very "
+              "welcome:\n\n"
               "- ☕ **[Buy Me a Coffee](https://buymeacoffee.com/xerolux)**\n"
               "- 🚗 **[Tesla Referral Code](https://ts.la/sebastian564489)**\n"
               "- ⭐ **Star this repository**"
