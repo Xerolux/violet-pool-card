@@ -171,3 +171,43 @@ describe('editor and card agree on entities', () => {
     }
   });
 });
+
+describe('example entity ids', () => {
+  /**
+   * The example dashboards named entities in the old German spelling
+   * (`sensor.…_beckenwasser`). The integration derives its ids from the
+   * English names since 2.5.0, so anyone copying `dashboard.yaml` into a
+   * current installation got cards pointing at entities that do not exist -
+   * the same failure the card itself had before it started resolving through
+   * the registry.
+   */
+  const GERMAN_ID = /violet_pool_controller_[a-z0-9_]*(pumpe|heizung|kanister|behalter|dosierung_ph\b|rucklauf|ruckspulung|beckenwasser|beleuchtung|modus|sollwert|abdeckung|zieltemperatur|aussentemperatur|redoxpotential|ph_wert|filterdruck|uberlauf)/;
+
+  const examples = (dir: string): string[] => {
+    const out: string[] = [];
+    for (const name of readdirSync(join(fileURLToPath(new URL('..', import.meta.url)), dir))) {
+      if (['node_modules', '.git', 'dist', 'CHANGELOG.md', 'RELEASE_NOTES.md'].includes(name)) {
+        continue;
+      }
+      const rel = join(dir, name);
+      const full = join(fileURLToPath(new URL('..', import.meta.url)), rel);
+      if (statSync(full).isDirectory()) out.push(...examples(rel));
+      else if (/\.(md|ya?ml)$/.test(name)) out.push(rel);
+    }
+    return out;
+  };
+
+  it.each(examples('.'))('%s names entities the integration creates', (file) => {
+    const text = readFileSync(
+      join(fileURLToPath(new URL('..', import.meta.url)), file),
+      'utf-8'
+    );
+    const offenders = text
+      .split('\n')
+      .map((line, index) => ({ line: line.trim(), number: index + 1 }))
+      .filter(({ line }) => GERMAN_ID.test(line))
+      .map(({ line, number }) => `${file}:${number}: ${line.slice(0, 90)}`);
+
+    expect(offenders).toEqual([]);
+  });
+});

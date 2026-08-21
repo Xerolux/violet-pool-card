@@ -15,15 +15,15 @@ views:
         show_state: true
         show_detail_status: true
         show_controls: true
-        pool_temp_entity: sensor.violet_pool_controller_beckenwasser
-        ph_value_entity: sensor.violet_pool_controller_ph_wert
-        orp_value_entity: sensor.violet_pool_controller_redoxpotential
-        target_ph_entity: number.violet_pool_controller_ph_sollwert
-        target_orp_entity: number.violet_pool_controller_redox_sollwert
+        pool_temp_entity: sensor.violet_pool_controller_pool_water
+        ph_value_entity: sensor.violet_pool_controller_ph_value
+        orp_value_entity: sensor.violet_pool_controller_orp_value
+        target_ph_entity: number.violet_pool_controller_ph_setpoint
+        target_orp_entity: number.violet_pool_controller_orp_setpoint
         pool_level_entity: sensor.violet_pool_controller_pool_level
-        flow_rate_entity: sensor.violet_pool_controller_pumpen_durchfluss
+        flow_rate_entity: sensor.violet_pool_controller_pump_flow_rate
         inlet_entity: sensor.violet_pool_controller_inlet
-        chlorine_value_entity: sensor.violet_pool_controller_chlorgehalt
+        chlorine_value_entity: sensor.violet_pool_controller_chlorine_content
 
       - type: custom:violet-pool-card
         card_type: chemical
@@ -32,11 +32,11 @@ views:
         size: large
         theme: luxury
         animation: smooth
-        pool_temp_entity: sensor.violet_pool_controller_beckenwasser
-        ph_value_entity: sensor.violet_pool_controller_ph_wert
-        orp_value_entity: sensor.violet_pool_controller_redoxpotential
-        target_ph_entity: number.violet_pool_controller_ph_sollwert
-        target_orp_entity: number.violet_pool_controller_redox_sollwert
+        pool_temp_entity: sensor.violet_pool_controller_pool_water
+        ph_value_entity: sensor.violet_pool_controller_ph_value
+        orp_value_entity: sensor.violet_pool_controller_orp_value
+        target_ph_entity: number.violet_pool_controller_ph_setpoint
+        target_orp_entity: number.violet_pool_controller_orp_setpoint
 
       - type: custom:violet-pool-card
         card_type: compact
@@ -93,7 +93,7 @@ views:
     cards:
       - type: custom:violet-pool-card
         card_type: pump
-        entity: switch.violet_pool_controller_filterpumpe
+        entity: switch.violet_pool_controller_filter_pump
         name: 💨 Filterpumpe
         entity_prefix: violet_pool_controller
         size: large
@@ -106,11 +106,11 @@ views:
 
       - type: custom:violet-pool-card
         card_type: filter
-        entity: sensor.violet_pool_controller_filterdruck
+        entity: sensor.violet_pool_controller_filter_pressure
         name: 🔧 Filterdruck
         entity_prefix: violet_pool_controller
-        filter_pressure_entity: sensor.violet_pool_controller_filterdruck
-        backwash_entity: switch.violet_pool_controller_ruckspulung
+        filter_pressure_entity: sensor.violet_pool_controller_filter_pressure
+        backwash_entity: switch.violet_pool_controller_backwash
         size: large
         theme: luxury
         animation: smooth
@@ -119,7 +119,7 @@ views:
 
       - type: custom:violet-pool-card
         card_type: backwash
-        entity: switch.violet_pool_controller_ruckspulung
+        entity: switch.violet_pool_controller_backwash
         name: 🔄 Rückspülung
         entity_prefix: violet_pool_controller
         size: large
@@ -131,7 +131,7 @@ views:
 
       - type: custom:violet-pool-card
         card_type: flow_rate
-        entity: sensor.violet_pool_controller_pumpen_durchfluss
+        entity: sensor.violet_pool_controller_pump_flow_rate
         name: 💧 Durchfluss
         entity_prefix: violet_pool_controller
         size: medium
@@ -147,9 +147,9 @@ views:
         theme: minimalist
         show_state: true
         entities:
-          - select.violet_pool_controller_pumpen_modus
-          - sensor.violet_pool_controller_pumpen_status
-          - sensor.violet_pool_controller_pumpen_detail_status
+          - select.violet_pool_controller_pump_mode
+          - sensor.violet_pool_controller_pump_status
+          - sensor.violet_pool_controller_pump_detail_status
           - sensor.violet_pool_controller_pump_runtime
           - sensor.violet_pool_controller_pump_last_on
           - sensor.violet_pool_controller_pump_last_off
@@ -161,7 +161,7 @@ views:
     cards:
       - type: custom:violet-pool-card
         card_type: heater
-        entity: climate.violet_pool_controller_heizung
+        entity: climate.violet_pool_controller_pool_heater
         name: 🔥 Heizung
         entity_prefix: violet_pool_controller
         size: large
@@ -170,11 +170,11 @@ views:
         show_controls: true
         show_state: true
         show_detail_status: true
-        pool_temp_entity: sensor.violet_pool_controller_beckenwasser
+        pool_temp_entity: sensor.violet_pool_controller_pool_water
 
       - type: custom:violet-pool-card
         card_type: solar
-        entity: climate.violet_pool_controller_solarabsorber
+        entity: climate.violet_pool_controller_solar_heater
         name: ☀️ Solar
         entity_prefix: violet_pool_controller
         size: large
@@ -183,11 +183,11 @@ views:
         show_controls: true
         show_state: true
         show_detail_status: true
-        pool_temp_entity: sensor.violet_pool_controller_beckenwasser
+        pool_temp_entity: sensor.violet_pool_controller_pool_water
 
       - type: custom:violet-pool-card
         card_type: sensor
-        entity: sensor.violet_pool_controller_beckenwasser
+        entity: sensor.violet_pool_controller_pool_water
         name: 🌊 Beckenwasser
         entity_prefix: violet_pool_controller
         size: medium
@@ -205,7 +205,7 @@ views:
 
       - type: custom:violet-pool-card
         card_type: sensor
-        entity: sensor.violet_pool_controller_aussentemperatur
+        entity: sensor.violet_pool_controller_outside_temperature
         name: 🌡 Außentemp.
         entity_prefix: violet_pool_controller
         size: medium
@@ -214,7 +214,7 @@ views:
 
       - type: custom:violet-pool-card
         card_type: sensor
-        entity: sensor.violet_pool_controller_absorber_rucklauf
+        entity: sensor.violet_pool_controller_absorber_return
         name: 📉 Absorber Rücklauf
         entity_prefix: violet_pool_controller
         size: medium
@@ -229,15 +229,15 @@ views:
         theme: minimalist
         show_state: true
         entities:
-          - select.violet_pool_controller_heizungs_modus
-          - number.violet_pool_controller_heizung_zieltemperatur
-          - sensor.violet_pool_controller_heizungs_status
+          - select.violet_pool_controller_heater_mode
+          - number.violet_pool_controller_heater_target_temperature
+          - sensor.violet_pool_controller_heater_status
           - sensor.violet_pool_controller_heater_runtime
-          - select.violet_pool_controller_solar_modus
-          - number.violet_pool_controller_solar_zieltemperatur
+          - select.violet_pool_controller_solar_mode
+          - number.violet_pool_controller_solar_target_temperature
           - sensor.violet_pool_controller_solar_status
-          - sensor.violet_pool_controller_warmetauscher
-          - sensor.violet_pool_controller_heizungs_speicher
+          - sensor.violet_pool_controller_heat_exchanger
+          - sensor.violet_pool_controller_heat_storage
 
   - title: Dosierung
     path: dosierung
@@ -246,7 +246,7 @@ views:
     cards:
       - type: custom:violet-pool-card
         card_type: dosing
-        entity: switch.violet_pool_controller_chlor_dosierung
+        entity: switch.violet_pool_controller_chlorine_dosing
         name: 🟡 Chlor Dosierung
         entity_prefix: violet_pool_controller
         dosing_type: chlorine
@@ -257,12 +257,12 @@ views:
         show_controls: true
         show_state: true
         show_detail_status: true
-        orp_value_entity: sensor.violet_pool_controller_redoxpotential
-        target_orp_entity: number.violet_pool_controller_redox_sollwert
+        orp_value_entity: sensor.violet_pool_controller_orp_value
+        target_orp_entity: number.violet_pool_controller_orp_setpoint
 
       - type: custom:violet-pool-card
         card_type: dosing
-        entity: switch.violet_pool_controller_dosierung_ph
+        entity: switch.violet_pool_controller_dosing_ph_plus
         name: 📉 pH− Dosierung
         entity_prefix: violet_pool_controller
         dosing_type: ph_minus
@@ -272,12 +272,12 @@ views:
         show_history: true
         show_state: true
         show_detail_status: true
-        ph_value_entity: sensor.violet_pool_controller_ph_wert
-        target_ph_entity: number.violet_pool_controller_ph_sollwert
+        ph_value_entity: sensor.violet_pool_controller_ph_value
+        target_ph_entity: number.violet_pool_controller_ph_setpoint
 
       - type: custom:violet-pool-card
         card_type: dosing
-        entity: switch.violet_pool_controller_dosierung_ph_plus
+        entity: switch.violet_pool_controller_dosing_ph_plus
         name: 📈 pH+ Dosierung
         entity_prefix: violet_pool_controller
         dosing_type: ph_plus
@@ -287,8 +287,8 @@ views:
         show_history: true
         show_state: true
         show_detail_status: true
-        ph_value_entity: sensor.violet_pool_controller_ph_wert
-        target_ph_entity: number.violet_pool_controller_ph_sollwert
+        ph_value_entity: sensor.violet_pool_controller_ph_value
+        target_ph_entity: number.violet_pool_controller_ph_setpoint
 
       - type: custom:violet-pool-card
         card_type: dosing
@@ -309,11 +309,11 @@ views:
         size: large
         theme: luxury
         animation: smooth
-        pool_temp_entity: sensor.violet_pool_controller_beckenwasser
-        ph_value_entity: sensor.violet_pool_controller_ph_wert
-        orp_value_entity: sensor.violet_pool_controller_redoxpotential
-        target_ph_entity: number.violet_pool_controller_ph_sollwert
-        target_orp_entity: number.violet_pool_controller_redox_sollwert
+        pool_temp_entity: sensor.violet_pool_controller_pool_water
+        ph_value_entity: sensor.violet_pool_controller_ph_value
+        orp_value_entity: sensor.violet_pool_controller_orp_value
+        target_ph_entity: number.violet_pool_controller_ph_setpoint
+        target_orp_entity: number.violet_pool_controller_orp_setpoint
 
       - type: custom:violet-pool-card
         card_type: details
@@ -323,18 +323,18 @@ views:
         theme: minimalist
         show_state: true
         entities:
-          - select.violet_pool_controller_chlor_dosierung_modus
-          - sensor.violet_pool_controller_chlor_dosierung_status
-          - number.violet_pool_controller_chlor_sollwert
-          - sensor.violet_pool_controller_chlorgehalt
+          - select.violet_pool_controller_chlorine_dosing_mode
+          - sensor.violet_pool_controller_chlorine_dosing_state
+          - number.violet_pool_controller_chlorine_setpoint
+          - sensor.violet_pool_controller_chlorine_content
           - sensor.violet_pool_controller_dos_1_cl_daily_dosing_amount_ml
-          - sensor.violet_pool_controller_dos_1_cl_remaining_range
-          - select.violet_pool_controller_ph_dosierung_modus
-          - sensor.violet_pool_controller_ph_dosierung_status
-          - number.violet_pool_controller_ph_sollwert
-          - sensor.violet_pool_controller_ph_wert
+          - sensor.violet_pool_controller_chlorine_remaining_range
+          - select.violet_pool_controller_ph_plus_dosing_mode
+          - sensor.violet_pool_controller_ph_plus_dosing_state
+          - number.violet_pool_controller_ph_setpoint
+          - sensor.violet_pool_controller_ph_value
           - sensor.violet_pool_controller_dos_4_phm_daily_dosing_amount_ml
-          - sensor.violet_pool_controller_dos_4_phm_remaining_range
+          - sensor.violet_pool_controller_ph_minus_remaining_range
 
   - title: Licht & Abdeckung
     path: licht-abdeckung
@@ -343,9 +343,9 @@ views:
     cards:
       - type: custom:violet-pool-card
         card_type: light
-        entity: switch.violet_pool_controller_beleuchtung
+        entity: switch.violet_pool_controller_lighting
         name: 💡 Poolbeleuchtung
-        light_entity: light.violet_pool_controller_beleuchtung
+        light_entity: light.violet_pool_controller_lighting
         entity_prefix: violet_pool_controller
         size: large
         theme: neon
@@ -356,7 +356,7 @@ views:
 
       - type: custom:violet-pool-card
         card_type: cover
-        entity: cover.violet_pool_controller_abdeckung
+        entity: cover.violet_pool_controller_pool_cover
         name: 🎭 Poolabdeckung
         entity_prefix: violet_pool_controller
         size: large
@@ -374,9 +374,9 @@ views:
         theme: minimalist
         show_state: true
         entities:
-          - switch.violet_pool_controller_beleuchtung
-          - select.violet_pool_controller_licht_modus
-          - sensor.violet_pool_controller_beleuchtung_status
+          - switch.violet_pool_controller_lighting
+          - select.violet_pool_controller_light_mode
+          - sensor.violet_pool_controller_lighting_status
           - sensor.violet_pool_controller_light_runtime
 
       - type: custom:violet-pool-card
@@ -387,7 +387,7 @@ views:
         theme: minimalist
         show_state: true
         entities:
-          - cover.violet_pool_controller_abdeckung
+          - cover.violet_pool_controller_pool_cover
           - sensor.violet_pool_controller_cover_state
           - sensor.violet_pool_controller_last_moving_direction
 
@@ -421,7 +421,7 @@ views:
 
       - type: custom:violet-pool-card
         card_type: sensor
-        entity: sensor.violet_pool_controller_uberlaufbehalter
+        entity: sensor.violet_pool_controller_overflow_tank
         name: 🪣 Überlaufbehälter
         entity_prefix: violet_pool_controller
         size: medium
@@ -444,8 +444,8 @@ views:
         theme: minimalist
         show_state: true
         entities:
-          - select.violet_pool_controller_pv_uberschuss_modus
-          - sensor.violet_pool_controller_pv_uberschuss_status
+          - select.violet_pool_controller_pv_surplus_mode
+          - sensor.violet_pool_controller_pv_surplus_status
           - binary_sensor.violet_pool_controller_pv_surplus
           - sensor.violet_pool_controller_refill_state
           - sensor.violet_pool_controller_refill_runtime
@@ -458,7 +458,7 @@ views:
     cards:
       - type: custom:violet-pool-card
         card_type: sensor
-        entity: sensor.violet_pool_controller_beckenwasser
+        entity: sensor.violet_pool_controller_pool_water
         name: 🌊 Beckenwasser
         entity_prefix: violet_pool_controller
         size: medium
@@ -467,7 +467,7 @@ views:
 
       - type: custom:violet-pool-card
         card_type: sensor
-        entity: sensor.violet_pool_controller_aussentemperatur
+        entity: sensor.violet_pool_controller_outside_temperature
         name: 🌡 Außentemperatur
         entity_prefix: violet_pool_controller
         size: medium
@@ -476,7 +476,7 @@ views:
 
       - type: custom:violet-pool-card
         card_type: sensor
-        entity: sensor.violet_pool_controller_ph_wert
+        entity: sensor.violet_pool_controller_ph_value
         name: pH-Wert
         entity_prefix: violet_pool_controller
         size: medium
@@ -485,7 +485,7 @@ views:
 
       - type: custom:violet-pool-card
         card_type: sensor
-        entity: sensor.violet_pool_controller_redoxpotential
+        entity: sensor.violet_pool_controller_orp_value
         name: ⚡ Redox (ORP)
         entity_prefix: violet_pool_controller
         size: medium
@@ -494,7 +494,7 @@ views:
 
       - type: custom:violet-pool-card
         card_type: sensor
-        entity: sensor.violet_pool_controller_chlorgehalt
+        entity: sensor.violet_pool_controller_chlorine_content
         name: 🟡 Chlorgehalt
         entity_prefix: violet_pool_controller
         size: medium
@@ -503,7 +503,7 @@ views:
 
       - type: custom:violet-pool-card
         card_type: sensor
-        entity: sensor.violet_pool_controller_filterdruck
+        entity: sensor.violet_pool_controller_filter_pressure
         name: 🔧 Filterdruck
         entity_prefix: violet_pool_controller
         size: medium
@@ -521,7 +521,7 @@ views:
 
       - type: custom:violet-pool-card
         card_type: sensor
-        entity: sensor.violet_pool_controller_absorber_rucklauf
+        entity: sensor.violet_pool_controller_absorber_return
         name: 📉 Absorber Rücklauf
         entity_prefix: violet_pool_controller
         size: medium
@@ -530,7 +530,7 @@ views:
 
       - type: custom:violet-pool-card
         card_type: sensor
-        entity: sensor.violet_pool_controller_warmetauscher
+        entity: sensor.violet_pool_controller_heat_exchanger
         name: 🔥 Wärmetauscher
         entity_prefix: violet_pool_controller
         size: medium
@@ -539,7 +539,7 @@ views:
 
       - type: custom:violet-pool-card
         card_type: sensor
-        entity: sensor.violet_pool_controller_heizungs_speicher
+        entity: sensor.violet_pool_controller_heat_storage
         name: 🪣 Heizungsspeicher
         entity_prefix: violet_pool_controller
         size: medium
@@ -548,7 +548,7 @@ views:
 
       - type: custom:violet-pool-card
         card_type: sensor
-        entity: sensor.violet_pool_controller_pumpen_durchfluss
+        entity: sensor.violet_pool_controller_pump_flow_rate
         name: 💧 Durchfluss
         entity_prefix: violet_pool_controller
         size: medium
@@ -599,7 +599,7 @@ views:
 
       - type: custom:violet-pool-card
         card_type: backwash
-        entity: switch.violet_pool_controller_ruckspulung
+        entity: switch.violet_pool_controller_backwash
         name: 🔄 Rückspülung Status
         entity_prefix: violet_pool_controller
         size: large
@@ -632,12 +632,12 @@ views:
         theme: minimalist
         show_state: true
         entities:
-          - sensor.violet_pool_controller_dos_1_cl_remaining_range
-          - number.violet_pool_controller_chlor_kanister_volumen
-          - sensor.violet_pool_controller_dos_4_phm_remaining_range
-          - number.violet_pool_controller_ph_kanister_volumen
-          - sensor.violet_pool_controller_dos_6_floc_remaining_range
-          - number.violet_pool_controller_flockulant_kanister_volumen
+          - sensor.violet_pool_controller_chlorine_remaining_range
+          - number.violet_pool_controller_chlorine_canister_volume
+          - sensor.violet_pool_controller_ph_minus_remaining_range
+          - number.violet_pool_controller_ph_plus_canister_volume
+          - sensor.violet_pool_controller_flocculant_remaining_range
+          - number.violet_pool_controller_flocculant_canister_volume
 
   - title: Erweiterungen
     path: erweiterungen
@@ -686,12 +686,12 @@ views:
         theme: minimalist
         show_state: true
         entities:
-          - switch.violet_pool_controller_dmx_szene_1
-          - switch.violet_pool_controller_dmx_szene_2
-          - switch.violet_pool_controller_dmx_szene_3
-          - switch.violet_pool_controller_dmx_szene_4
-          - switch.violet_pool_controller_dmx_szene_5
-          - switch.violet_pool_controller_dmx_szene_6
+          - switch.violet_pool_controller_dmx_scene_1
+          - switch.violet_pool_controller_dmx_scene_2
+          - switch.violet_pool_controller_dmx_scene_3
+          - switch.violet_pool_controller_dmx_scene_4
+          - switch.violet_pool_controller_dmx_scene_5
+          - switch.violet_pool_controller_dmx_scene_6
 
       - type: custom:violet-pool-card
         card_type: details
@@ -701,12 +701,12 @@ views:
         theme: minimalist
         show_state: true
         entities:
-          - switch.violet_pool_controller_dmx_szene_7
-          - switch.violet_pool_controller_dmx_szene_8
-          - switch.violet_pool_controller_dmx_szene_9
-          - switch.violet_pool_controller_dmx_szene_10
-          - switch.violet_pool_controller_dmx_szene_11
-          - switch.violet_pool_controller_dmx_szene_12
+          - switch.violet_pool_controller_dmx_scene_7
+          - switch.violet_pool_controller_dmx_scene_8
+          - switch.violet_pool_controller_dmx_scene_9
+          - switch.violet_pool_controller_dmx_scene_10
+          - switch.violet_pool_controller_dmx_scene_11
+          - switch.violet_pool_controller_dmx_scene_12
 
       - type: custom:violet-pool-card
         card_type: details
@@ -716,13 +716,13 @@ views:
         theme: minimalist
         show_state: true
         entities:
-          - switch.violet_pool_controller_schaltregel_1
-          - switch.violet_pool_controller_schaltregel_2
-          - switch.violet_pool_controller_schaltregel_3
-          - switch.violet_pool_controller_schaltregel_4
-          - switch.violet_pool_controller_schaltregel_5
-          - switch.violet_pool_controller_schaltregel_6
-          - switch.violet_pool_controller_schaltregel_7
+          - switch.violet_pool_controller_switching_rule_1
+          - switch.violet_pool_controller_switching_rule_2
+          - switch.violet_pool_controller_switching_rule_3
+          - switch.violet_pool_controller_switching_rule_4
+          - switch.violet_pool_controller_switching_rule_5
+          - switch.violet_pool_controller_switching_rule_6
+          - switch.violet_pool_controller_switching_rule_7
 
   - title: Eingänge & Sensoren
     path: eingaenge
@@ -780,7 +780,7 @@ views:
         theme: minimalist
         show_state: true
         entities:
-          - sensor.violet_pool_controller_durchflussmesser_4_20ma
+          - sensor.violet_pool_controller_flow_meter_4_20ma
           - sensor.violet_pool_controller_analogsensor_4_4_20ma
           - sensor.violet_pool_controller_analogsensor_5_0_10v
           - sensor.violet_pool_controller_adc6_value
@@ -792,7 +792,7 @@ views:
     cards:
       - type: custom:violet-pool-card
         card_type: sensor
-        entity: sensor.violet_pool_controller_beckenwasser
+        entity: sensor.violet_pool_controller_pool_water
         name: 🌊 OneWire 1 - Beckenwasser
         entity_prefix: violet_pool_controller
         size: medium
@@ -801,7 +801,7 @@ views:
 
       - type: custom:violet-pool-card
         card_type: sensor
-        entity: sensor.violet_pool_controller_aussentemperatur
+        entity: sensor.violet_pool_controller_outside_temperature
         name: 🌡 OneWire 2 - Außentemperatur
         entity_prefix: violet_pool_controller
         size: medium
@@ -819,7 +819,7 @@ views:
 
       - type: custom:violet-pool-card
         card_type: sensor
-        entity: sensor.violet_pool_controller_absorber_rucklauf
+        entity: sensor.violet_pool_controller_absorber_return
         name: 📉 OneWire 4 - Absorber Rücklauf
         entity_prefix: violet_pool_controller
         size: medium
@@ -828,7 +828,7 @@ views:
 
       - type: custom:violet-pool-card
         card_type: sensor
-        entity: sensor.violet_pool_controller_warmetauscher
+        entity: sensor.violet_pool_controller_heat_exchanger
         name: 🔥 OneWire 5 - Wärmetauscher
         entity_prefix: violet_pool_controller
         size: medium
@@ -837,7 +837,7 @@ views:
 
       - type: custom:violet-pool-card
         card_type: sensor
-        entity: sensor.violet_pool_controller_heizungs_speicher
+        entity: sensor.violet_pool_controller_heat_storage
         name: 🪣 OneWire 6 - Heizungsspeicher
         entity_prefix: violet_pool_controller
         size: medium
