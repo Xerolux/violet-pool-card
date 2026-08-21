@@ -1,49 +1,40 @@
-## v0.4.3 – Violet Pool Card
+## v0.4.4 – Violet Pool Card
 
 ✅ **STABLE RELEASE**
 
+Reported on the forum after 0.4.3: only the overview card worked, the pump card
+showed the pump as off while it was running, and the dosing card was broken.
+Two separate causes.
+
 ### 🐛 Bug Fixes
 
-- **The pump card did not find its entities.** Reported on the forum right
-  after 0.4.2: the card type selection worked and the overview card showed
-  data, but the pump card came up empty. The registry lookup added in 0.4.1
-  never reached it. Two things blocked it, and both had to go:
-  - `setConfig()` threw *"You need to define an entity"* for every card type
-    except six, so `card_type: pump` on its own was rejected before anything
-    could be resolved. It now demands an entity only from the card type that
-    genuinely cannot guess one - the generic `sensor` card.
-  - `renderPumpCard()` read `config.entity` directly, as did the heater, solar,
-    dosing, compact, sensor and flow-rate cards. They now go through the same
-    registry resolution as the rest, so a renamed pump is found too.
-
-  The README already promised that `card_type: pump` alone works. It does now.
-- Seven card types that resolve their entities while rendering - `filter`,
-  `backwash`, `refill`, `solar_surplus`, `inlet`, `counter_current` and the
-  canisters - were rejected by the same `setConfig()` check before their
-  renderer ever ran.
-- **The visual editor asked for an entity on almost every card type.** It kept
-  its own copy of "which card types need an entity" and its own domain filter,
-  and both had drifted from the card - which is what made the automatic
-  resolution look as if it only worked on the overview card. Both now come
-  from the same table the card reads. Where a card type can resolve its own
-  entity the picker is optional and says so; leaving it empty is the normal
-  case.
+- **The dosing card crashed, and every control on the equipment cards was
+  dead.** 0.4.3 made the entity optional and resolved it for *display*, but
+  roughly twenty other places still read the unresolved `config.entity`,
+  including every service call. With no entity configured - now the normal
+  case - `_detectDosingType(undefined)` threw, and the pump, heater and solar
+  buttons called their services with `undefined`. Each card resolves its
+  entity id once now and uses that everywhere.
+- **A running pump was drawn as "OFF".** The card read raw controller keys off
+  the entity (`PUMPSTATE`, `PUMP_RPM_0..3`, `DOS_*_STATE`), but the
+  integration does not pass those through - it publishes its own attributes:
+  `pump_speed_level`, `mode`, `dosing_status`, `daily_amount_ml`. Every one of
+  those reads came back undefined, so the speed fell back to 0. The card reads
+  the integration's attributes now and keeps the raw keys as a fallback.
+- **The daily runtime always showed 0.** The controller delivers
+  `"04h 33m 12s"` and the integration passes the string through; the card did
+  `Number(...) / 3600`, which is `NaN`. That format, `HH:MM:SS` and plain
+  seconds are all parsed now.
+- The "entity not found" message named the configured entity, which is empty
+  when the card resolved one itself. It names the id actually looked up.
 
 ### 🧪 Tests
 
-- 181 → 190. `CARD_TYPE_MAIN_ENTITY` must cover the card types whose renderer
-  reads the entity directly, every default must name a suffix the registry can
-  actually resolve (the two deliberate exceptions are asserted by name), and
-  the pump card must resolve both the standard id and a renamed one.
-- Four tests guard the drift itself: the editor must read the shared tables,
-  must not reintroduce a `needsEntity` list or a second domain filter, and the
-  domain its picker offers must be the one the card resolves. Both bugs here
-  had the same shape - two copies of one decision - so the copies are what the
-  tests forbid.
-- The language guard now also flags umlauts in comments and ignores quoted
-  text. The word list alone had missed `diesem Präfix beginnen`, which is
-  exactly the kind of line it exists to catch; quoting a German string in order
-  to explain its removal is legitimate and no longer fails.
+- 190 → 208. `src/utils/integration-attributes.ts` is covered against fixtures
+  taken from what the integration's switch platform really publishes, so the
+  contract between the two repositories is pinned on this side: a running pump
+  must not read as level 0, `"04h 33m 12s"` must be 16392 seconds, and a
+  reported level of 0 stays distinct from "no level reported".
 
 ### 📦 Installation
 
