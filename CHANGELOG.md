@@ -9,6 +9,31 @@ anyone there either.
 > **Historical note:** entries up to and including 0.4.1 were written in
 > German, before the language policy existed. They are kept as published.
 
+## [0.4.5] - 2026-08-21
+
+### 🐛 Bug Fixes
+
+- **The example dashboards named entities that no longer exist.** Every id in
+  `dashboard.yaml`, `dashboard_config.yaml`, `VIOLET_CARD_EXAMPLES.yaml`,
+  README.md and `info.md` used the old German spelling -
+  `sensor.…_beckenwasser`, `switch.…_filterpumpe`, `climate.…_heizung`. The
+  integration derives its ids from the English names since 2.5.0, so anyone
+  copying a dashboard into a current installation got cards pointing at
+  nothing. 322 ids rewritten, resolved from the integration's own English
+  translations rather than guessed.
+- Two of them could not be resolved mechanically: the German names for pH plus
+  and pH minus differ only by a character that slugifies away, so both
+  collapsed to `dosierung_ph` and Home Assistant appended `_2` to whichever
+  came second. That is where the old `dosierung_ph_2` came from. The examples
+  label them, so they are now `dosing_ph_plus` and `dosing_ph_minus`.
+
+### 🧪 Tests
+
+- 208 → 224. Every markdown and YAML file is checked for German entity ids, so
+  an example cannot drift back to a spelling the integration stopped using.
+
+---
+
 ## [0.4.4] - 2026-08-21
 
 Reported on the forum after 0.4.3: only the overview card worked, the pump card

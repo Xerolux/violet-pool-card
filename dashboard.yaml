@@ -7,9 +7,9 @@
 
 ## Pumpe & Durchfluss
 pump:
-  pump_entity: switch.violet_pool_controller_filterpumpe
-  pump_status: sensor.violet_pool_controller_pumpen_status
-  pump_detail_status: sensor.violet_pool_controller_pumpen_detail_status
+  pump_entity: switch.violet_pool_controller_filter_pump
+  pump_status: sensor.violet_pool_controller_pump_status
+  pump_detail_status: sensor.violet_pool_controller_pump_detail_status
   pump_last_on: sensor.violet_pool_controller_pump_last_on
   pump_last_off: sensor.violet_pool_controller_pump_last_off
   pump_runtime: sensor.violet_pool_controller_pump_runtime
@@ -17,50 +17,50 @@ pump:
   pump_rpm_1: sensor.violet_pool_controller_pump_rpm_1
   pump_rpm_2: sensor.violet_pool_controller_pump_rpm_2
   pump_rpm_3: sensor.violet_pool_controller_pump_rpm_3
-  pump_speed: number.violet_pool_controller_pumpengeschwindigkeit
-  pump_mode: select.violet_pool_controller_pumpen_modus
-  pump_flow: sensor.violet_pool_controller_pumpen_durchfluss
+  pump_speed: number.violet_pool_controller_pump_speed
+  pump_mode: select.violet_pool_controller_pump_mode
+  pump_flow: sensor.violet_pool_controller_pump_flow_rate
   flow_switch: sensor.violet_pool_controller_flow_switch
-  flow_rate_4_20ma: sensor.violet_pool_controller_durchflussmesser_4_20ma
+  flow_rate_4_20ma: sensor.violet_pool_controller_flow_meter_4_20ma
 
 ## Heizung
 heating:
-  heater_entity: switch.violet_pool_controller_heizung
-  heater_climate: climate.violet_pool_controller_heizung
-  heater_status: sensor.violet_pool_controller_heizungs_status
-  heater_detail_status: sensor.violet_pool_controller_heizung_detail_status
-  heater_target_temp: number.violet_pool_controller_heizung_zieltemperatur
-  heater_mode: select.violet_pool_controller_heizungs_modus
+  heater_entity: switch.violet_pool_controller_heater
+  heater_climate: climate.violet_pool_controller_pool_heater
+  heater_status: sensor.violet_pool_controller_heater_status
+  heater_detail_status: sensor.violet_pool_controller_heater_detail_status
+  heater_target_temp: number.violet_pool_controller_heater_target_temperature
+  heater_mode: select.violet_pool_controller_heater_mode
   heater_last_on: sensor.violet_pool_controller_heater_last_on
   heater_last_off: sensor.violet_pool_controller_heater_last_off
   heater_runtime: sensor.violet_pool_controller_heater_runtime
   heater_postrun_time: sensor.violet_pool_controller_heater_postrun_time
-  pool_water_temp: sensor.violet_pool_controller_beckenwasser
+  pool_water_temp: sensor.violet_pool_controller_pool_water
 
 ## Solar & Absorber
 solar:
   solar_entity: switch.violet_pool_controller_solarabsorber
-  solar_climate: climate.violet_pool_controller_solarabsorber
+  solar_climate: climate.violet_pool_controller_solar_heater
   solar_status: sensor.violet_pool_controller_solar_status
   solar_detail_status: sensor.violet_pool_controller_solar_detail_status
-  solar_target_temp: number.violet_pool_controller_solar_zieltemperatur
-  solar_mode: select.violet_pool_controller_solar_modus
+  solar_target_temp: number.violet_pool_controller_solar_target_temperature
+  solar_mode: select.violet_pool_controller_solar_mode
   solar_last_on: sensor.violet_pool_controller_solar_last_on
   solar_last_off: sensor.violet_pool_controller_solar_last_off
   solar_runtime: sensor.violet_pool_controller_solar_runtime
   absorber_temp: sensor.violet_pool_controller_solarabsorber
-  absorber_return: sensor.violet_pool_controller_absorber_rucklauf
+  absorber_return: sensor.violet_pool_controller_absorber_return
 
 ## Abdeckung
 cover:
-  cover_entity: cover.violet_pool_controller_abdeckung
+  cover_entity: cover.violet_pool_controller_pool_cover
   cover_state: sensor.violet_pool_controller_cover_state
   cover_last_direction: sensor.violet_pool_controller_last_moving_direction
 
 ## Beleuchtung
 light:
-  light_entity: switch.violet_pool_controller_beleuchtung
-  light_status: sensor.violet_pool_controller_beleuchtung_status
+  light_entity: switch.violet_pool_controller_lighting
+  light_status: sensor.violet_pool_controller_lighting_status
   light_last_on: sensor.violet_pool_controller_light_last_on
   light_last_off: sensor.violet_pool_controller_light_last_off
   light_runtime: sensor.violet_pool_controller_light_runtime
@@ -72,48 +72,48 @@ light:
 dosing:
   ## Chlor Dosierung (Dosage 1)
   chlorine:
-    entity: switch.violet_pool_controller_chlor_dosierung
-    mode: select.violet_pool_controller_chlor_dosierung_modus
-    status: sensor.violet_pool_controller_chlor_dosierung_status
+    entity: switch.violet_pool_controller_chlorine_dosing
+    mode: select.violet_pool_controller_chlorine_dosing_mode
+    status: sensor.violet_pool_controller_chlorine_dosing_state
     last_on: sensor.violet_pool_controller_dos_1_cl_last_on
     last_off: sensor.violet_pool_controller_dos_1_cl_last_off
     runtime: sensor.violet_pool_controller_dos_1_cl_runtime
     daily_amount: sensor.violet_pool_controller_dos_1_cl_daily_dosing_amount_ml
     total_amount: sensor.violet_pool_controller_dos_1_cl_total_can_amount_ml
-    remaining_range: sensor.violet_pool_controller_dos_1_cl_remaining_range
-    canister_volume: number.violet_pool_controller_chlor_kanister_volumen
-    target_value: number.violet_pool_controller_chlor_sollwert
+    remaining_range: sensor.violet_pool_controller_chlorine_remaining_range
+    canister_volume: number.violet_pool_controller_chlorine_canister_volume
+    target_value: number.violet_pool_controller_chlorine_setpoint
     can_reset: sensor.violet_pool_controller_dos_1_cl_last_can_reset
 
   ## pH+ Dosierung (Dosage 4)
   ph_plus:
-    entity: switch.violet_pool_controller_dosierung_ph
-    status: sensor.violet_pool_controller_ph_dosierung_status
+    entity: switch.violet_pool_controller_dosing_ph_plus
+    status: sensor.violet_pool_controller_ph_plus_dosing_state
     last_on: sensor.violet_pool_controller_dos_4_phm_last_on
     last_off: sensor.violet_pool_controller_dos_4_phm_last_off
     runtime: sensor.violet_pool_controller_dos_4_phm_runtime
     daily_amount: sensor.violet_pool_controller_dos_4_phm_daily_dosing_amount_ml
     total_amount: sensor.violet_pool_controller_dos_4_phm_total_can_amount_ml
-    remaining_range: sensor.violet_pool_controller_dos_4_phm_remaining_range
-    canister_volume: number.violet_pool_controller_ph_kanister_volumen
-    target_value: number.violet_pool_controller_ph_sollwert
+    remaining_range: sensor.violet_pool_controller_ph_minus_remaining_range
+    canister_volume: number.violet_pool_controller_ph_plus_canister_volume
+    target_value: number.violet_pool_controller_ph_setpoint
     can_reset: sensor.violet_pool_controller_dos_4_phm_last_can_reset
 
   ## pH- Dosierung (Dosage 2)
   ph_minus:
-    entity: switch.violet_pool_controller_dosierung_ph_2
-    mode: select.violet_pool_controller_ph_dosierung_modus_2
-    status: sensor.violet_pool_controller_ph_dosierung_status_2
+    entity: switch.violet_pool_controller_dosing_ph_minus
+    mode: select.violet_pool_controller_ph_minus_dosing_mode
+    status: sensor.violet_pool_controller_ph_minus_dosing_state
     last_on: sensor.violet_pool_controller_dos_2_elo_last_on
     last_off: sensor.violet_pool_controller_dos_2_elo_last_off
     runtime: sensor.violet_pool_controller_dos_2_elo_runtime
     daily_amount: sensor.violet_pool_controller_dos_2_elo_daily_dosing_amount_ml
     total_amount: sensor.violet_pool_controller_dos_2_elo_total_can_amount_ml
-    canister_volume: number.violet_pool_controller_ph_kanister_volumen_2
+    canister_volume: number.violet_pool_controller_ph_minus_canister_volume
 
   ## pH- Reverse Dosierung (Dosage 3)
   ph_minus_reverse:
-    entity: switch.violet_pool_controller_dosierung_ph
+    entity: switch.violet_pool_controller_dosing_ph_plus
     runtime: sensor.violet_pool_controller_dos_3_elo_rev_runtime
     last_on: sensor.violet_pool_controller_dos_3_elo_rev_last_on
     last_off: sensor.violet_pool_controller_dos_3_elo_rev_last_off
@@ -127,25 +127,25 @@ dosing:
     runtime: sensor.violet_pool_controller_dos_6_floc_runtime
     daily_amount: sensor.violet_pool_controller_dos_6_floc_daily_dosing_amount_ml
     total_amount: sensor.violet_pool_controller_dos_6_floc_total_can_amount_ml
-    remaining_range: sensor.violet_pool_controller_dos_6_floc_remaining_range
-    canister_volume: number.violet_pool_controller_flockulant_kanister_volumen
+    remaining_range: sensor.violet_pool_controller_flocculant_remaining_range
+    canister_volume: number.violet_pool_controller_flocculant_canister_volume
 
 ## Chemie Messwerte
 chemistry:
-  ph_value: sensor.violet_pool_controller_ph_wert
+  ph_value: sensor.violet_pool_controller_ph_value
   ph_value_max: sensor.violet_pool_controller_ph_value_max
   ph_value_min: sensor.violet_pool_controller_ph_value_min
-  ph_target: number.violet_pool_controller_ph_sollwert
+  ph_target: number.violet_pool_controller_ph_setpoint
 
-  orp_value: sensor.violet_pool_controller_redoxpotential
+  orp_value: sensor.violet_pool_controller_orp_value
   orp_value_max: sensor.violet_pool_controller_orp_value_max
   orp_value_min: sensor.violet_pool_controller_orp_value_min
-  orp_target: number.violet_pool_controller_redox_sollwert
+  orp_target: number.violet_pool_controller_orp_setpoint
 
-  chlorine_value: sensor.violet_pool_controller_chlorgehalt
+  chlorine_value: sensor.violet_pool_controller_chlorine_content
   chlorine_max: sensor.violet_pool_controller_pot_value_max
   chlorine_min: sensor.violet_pool_controller_pot_value_min
-  chlorine_target: number.violet_pool_controller_chlor_sollwert
+  chlorine_target: number.violet_pool_controller_chlorine_setpoint
 
 # =============================
 # 🌡️ TEMPERATUR SENSOREN (Temperature Sensors)
@@ -153,12 +153,12 @@ chemistry:
 
 temperatures:
   # OneWire Sensoren
-  pool_water: sensor.violet_pool_controller_beckenwasser              # Beckenwasser (Temp 1)
-  outside_temp: sensor.violet_pool_controller_aussentemperatur        # Außentemperatur (Temp 2)
+  pool_water: sensor.violet_pool_controller_pool_water              # Beckenwasser (Temp 1)
+  outside_temp: sensor.violet_pool_controller_outside_temperature        # Außentemperatur (Temp 2)
   solar_absorber: sensor.violet_pool_controller_solarabsorber         # Solar Absorber (Temp 3)
-  absorber_return: sensor.violet_pool_controller_absorber_rucklauf    # Absorber Rücklauf (Temp 4)
-  heat_exchanger: sensor.violet_pool_controller_warmetauscher         # Wärmetauscher (Temp 5)
-  heating_storage: sensor.violet_pool_controller_heizungs_speicher    # Heizungsspeicher (Temp 6)
+  absorber_return: sensor.violet_pool_controller_absorber_return    # Absorber Rücklauf (Temp 4)
+  heat_exchanger: sensor.violet_pool_controller_heat_exchanger         # Wärmetauscher (Temp 5)
+  heating_storage: sensor.violet_pool_controller_heat_storage    # Heizungsspeicher (Temp 6)
   onewire7: sensor.violet_pool_controller_onewire7_value              # OneWire 7
   onewire8: sensor.violet_pool_controller_onewire8_value              # OneWire 8
   onewire9: sensor.violet_pool_controller_onewire9_value              # OneWire 9
@@ -179,15 +179,15 @@ water:
   refill_last_off: sensor.violet_pool_controller_refill_last_off
   refill_runtime: sensor.violet_pool_controller_refill_runtime
   max_refill_time: sensor.violet_pool_controller_max_refill_time
-  overflow_container: sensor.violet_pool_controller_uberlaufbehalter
+  overflow_container: sensor.violet_pool_controller_overflow_tank
 
 # =============================
 # 🔄 RÜCKSPÜLUNG & WARTUNG (Backwash & Maintenance)
 # =============================
 
 backwash:
-  backwash_entity: switch.violet_pool_controller_ruckspulung
-  backwash_status: sensor.violet_pool_controller_ruckspul_status
+  backwash_entity: switch.violet_pool_controller_backwash
+  backwash_status: sensor.violet_pool_controller_backwash_status
   backwash_runtime: sensor.violet_pool_controller_backwash_runtime
   backwash_step: sensor.violet_pool_controller_backwash_step
   backwash_state: sensor.violet_pool_controller_backwash_state
@@ -212,8 +212,8 @@ filter_rinse:
 # =============================
 
 filter:
-  filter_pressure: sensor.violet_pool_controller_filterdruck
-  filter_pressure_status: sensor.violet_pool_controller_filterdruck
+  filter_pressure: sensor.violet_pool_controller_filter_pressure
+  filter_pressure_status: sensor.violet_pool_controller_filter_pressure
 
 # =============================
 # 🌊 BECKEN & UMWÄLZUNG (Pool & Circulation)
@@ -232,9 +232,9 @@ pool:
 # =============================
 
 pv_surplus:
-  pv_entity: switch.violet_pool_controller_pv_uberschuss
-  pv_status: sensor.violet_pool_controller_pv_uberschuss_status
-  pv_mode: select.violet_pool_controller_pv_uberschuss_modus
+  pv_entity: switch.violet_pool_controller_pv_surplus
+  pv_status: sensor.violet_pool_controller_pv_surplus_status
+  pv_mode: select.violet_pool_controller_pv_surplus_mode
   pv_binary: binary_sensor.violet_pool_controller_pv_surplus
 
 eco_mode:
@@ -273,18 +273,18 @@ extensions:
 # =============================
 
 dmx_scenes:
-  scene_1: switch.violet_pool_controller_dmx_szene_1
-  scene_2: switch.violet_pool_controller_dmx_szene_2
-  scene_3: switch.violet_pool_controller_dmx_szene_3
-  scene_4: switch.violet_pool_controller_dmx_szene_4
-  scene_5: switch.violet_pool_controller_dmx_szene_5
-  scene_6: switch.violet_pool_controller_dmx_szene_6
-  scene_7: switch.violet_pool_controller_dmx_szene_7
-  scene_8: switch.violet_pool_controller_dmx_szene_8
-  scene_9: switch.violet_pool_controller_dmx_szene_9
-  scene_10: switch.violet_pool_controller_dmx_szene_10
-  scene_11: switch.violet_pool_controller_dmx_szene_11
-  scene_12: switch.violet_pool_controller_dmx_szene_12
+  scene_1: switch.violet_pool_controller_dmx_scene_1
+  scene_2: switch.violet_pool_controller_dmx_scene_2
+  scene_3: switch.violet_pool_controller_dmx_scene_3
+  scene_4: switch.violet_pool_controller_dmx_scene_4
+  scene_5: switch.violet_pool_controller_dmx_scene_5
+  scene_6: switch.violet_pool_controller_dmx_scene_6
+  scene_7: switch.violet_pool_controller_dmx_scene_7
+  scene_8: switch.violet_pool_controller_dmx_scene_8
+  scene_9: switch.violet_pool_controller_dmx_scene_9
+  scene_10: switch.violet_pool_controller_dmx_scene_10
+  scene_11: switch.violet_pool_controller_dmx_scene_11
+  scene_12: switch.violet_pool_controller_dmx_scene_12
 
   sensors:
     scene_1_sensor: sensor.violet_pool_controller_dmx_scene1
@@ -305,7 +305,7 @@ dmx_scenes:
 # =============================
 
 analog_sensors:
-  durchflussmesser_4_20ma: sensor.violet_pool_controller_durchflussmesser_4_20ma
+  durchflussmesser_4_20ma: sensor.violet_pool_controller_flow_meter_4_20ma
   analogsensor_4_4_20ma: sensor.violet_pool_controller_analogsensor_4_4_20ma
   analogsensor_5_0_10v: sensor.violet_pool_controller_analogsensor_5_0_10v
   adc6_value: sensor.violet_pool_controller_adc6_value
@@ -362,13 +362,13 @@ digital_inputs:
 # =============================
 
 switching_rules:
-  rule_1: switch.violet_pool_controller_schaltregel_1
-  rule_2: switch.violet_pool_controller_schaltregel_2
-  rule_3: switch.violet_pool_controller_schaltregel_3
-  rule_4: switch.violet_pool_controller_schaltregel_4
-  rule_5: switch.violet_pool_controller_schaltregel_5
-  rule_6: switch.violet_pool_controller_schaltregel_6
-  rule_7: switch.violet_pool_controller_schaltregel_7
+  rule_1: switch.violet_pool_controller_switching_rule_1
+  rule_2: switch.violet_pool_controller_switching_rule_2
+  rule_3: switch.violet_pool_controller_switching_rule_3
+  rule_4: switch.violet_pool_controller_switching_rule_4
+  rule_5: switch.violet_pool_controller_switching_rule_5
+  rule_6: switch.violet_pool_controller_switching_rule_6
+  rule_7: switch.violet_pool_controller_switching_rule_7
 
   rule_state_1: sensor.violet_pool_controller_digitalinputrule_state_digitalinput_rule_1
   rule_state_2: sensor.violet_pool_controller_digitalinputrule_state_digitalinput_rule_2
@@ -465,7 +465,7 @@ system:
 onewire_sensors:
   # OneWire 1 - Beckenwasser
   onewire_1:
-    value: sensor.violet_pool_controller_beckenwasser
+    value: sensor.violet_pool_controller_pool_water
     value_max: sensor.violet_pool_controller_onewire1_value_max
     value_min: sensor.violet_pool_controller_onewire1_value_min
     faultcount: sensor.violet_pool_controller_onewire1_faultcount
@@ -474,7 +474,7 @@ onewire_sensors:
 
   # OneWire 2 - Außentemperatur
   onewire_2:
-    value: sensor.violet_pool_controller_aussentemperatur
+    value: sensor.violet_pool_controller_outside_temperature
     value_max: sensor.violet_pool_controller_onewire2_value_max
     value_min: sensor.violet_pool_controller_onewire2_value_min
     faultcount: sensor.violet_pool_controller_onewire2_faultcount
@@ -492,7 +492,7 @@ onewire_sensors:
 
   # OneWire 4 - Absorber Rücklauf
   onewire_4:
-    value: sensor.violet_pool_controller_absorber_rucklauf
+    value: sensor.violet_pool_controller_absorber_return
     value_max: sensor.violet_pool_controller_onewire4_value_max
     value_min: sensor.violet_pool_controller_onewire4_value_min
     faultcount: sensor.violet_pool_controller_onewire4_faultcount
@@ -501,7 +501,7 @@ onewire_sensors:
 
   # OneWire 5 - Wärmetauscher
   onewire_5:
-    value: sensor.violet_pool_controller_warmetauscher
+    value: sensor.violet_pool_controller_heat_exchanger
     value_max: sensor.violet_pool_controller_onewire5_value_max
     value_min: sensor.violet_pool_controller_onewire5_value_min
     faultcount: sensor.violet_pool_controller_onewire5_faultcount
@@ -510,7 +510,7 @@ onewire_sensors:
 
   # OneWire 6 - Heizungsspeicher
   onewire_6:
-    value: sensor.violet_pool_controller_heizungs_speicher
+    value: sensor.violet_pool_controller_heat_storage
     value_max: sensor.violet_pool_controller_onewire6_value_max
     value_min: sensor.violet_pool_controller_onewire6_value_min
     faultcount: sensor.violet_pool_controller_onewire6_faultcount
@@ -596,19 +596,19 @@ lovelace:
 
         - type: custom:violet-pool-card
           card_type: pump
-          entity: switch.violet_pool_controller_filterpumpe
+          entity: switch.violet_pool_controller_filter_pump
           theme: luxury
           size: medium
 
         - type: custom:violet-pool-card
           card_type: heater
-          entity: climate.violet_pool_controller_heizung
+          entity: climate.violet_pool_controller_pool_heater
           theme: luxury
           size: medium
 
         - type: custom:violet-pool-card
           card_type: solar
-          entity: climate.violet_pool_controller_solarabsorber
+          entity: climate.violet_pool_controller_solar_heater
           theme: luxury
           size: medium
 
@@ -618,23 +618,23 @@ lovelace:
       cards:
         - type: custom:violet-pool-card
           card_type: chemical
-          pool_temp_entity: sensor.violet_pool_controller_beckenwasser
-          ph_value_entity: sensor.violet_pool_controller_ph_wert
-          orp_value_entity: sensor.violet_pool_controller_redoxpotential
-          target_ph_entity: number.violet_pool_controller_ph_sollwert
-          target_orp_entity: number.violet_pool_controller_redox_sollwert
+          pool_temp_entity: sensor.violet_pool_controller_pool_water
+          ph_value_entity: sensor.violet_pool_controller_ph_value
+          orp_value_entity: sensor.violet_pool_controller_orp_value
+          target_ph_entity: number.violet_pool_controller_ph_setpoint
+          target_orp_entity: number.violet_pool_controller_orp_setpoint
           theme: luxury
 
         - type: custom:violet-pool-card
           card_type: dosing
-          entity: switch.violet_pool_controller_chlor_dosierung
+          entity: switch.violet_pool_controller_chlorine_dosing
           dosing_type: chlorine
           theme: luxury
           size: medium
 
         - type: custom:violet-pool-card
           card_type: dosing
-          entity: switch.violet_pool_controller_dosierung_ph
+          entity: switch.violet_pool_controller_dosing_ph_plus
           dosing_type: ph_plus
           theme: luxury
           size: medium
@@ -645,7 +645,7 @@ lovelace:
       cards:
         - type: custom:violet-pool-card
           card_type: backwash
-          entity: switch.violet_pool_controller_ruckspulung
+          entity: switch.violet_pool_controller_backwash
           theme: luxury
           size: medium
 
