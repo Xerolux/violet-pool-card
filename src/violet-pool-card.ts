@@ -1716,8 +1716,8 @@ export class VioletPoolCard extends LitElement {
       detectDosingType(entityId, this._translationKeyOf(entityId)) ??
       'chlorine';
     const channel = dosingChannel(dosingType);
-    /** Map from config dosing_type to the service-layer literal expected by ServiceCaller. */
-    const dosName = (dosingType === 'chlorine' ? 'Chlor' : dosingType === 'ph_minus' ? 'pH-' : dosingType === 'ph_plus' ? 'pH+' : 'Flockmittel') as 'Chlor' | 'pH-' | 'pH+' | 'Flockmittel';
+    /** What the `smart_dosing` service calls this channel. */
+    const dosName = channel.serviceValue;
 
     // The switch publishes the status; the sensor standing in for it does not,
     // so the channel's own status sensor answers for it.
@@ -1787,7 +1787,7 @@ export class VioletPoolCard extends LitElement {
         label: 'Dose 30s',
         action: async () => {
           const serviceCaller = new ServiceCaller(this.hass);
-          await serviceCaller.manualDosing(entityId, 30);
+          await serviceCaller.manualDose(entityId, dosName, 30);
         },
         color: '#4CAF50',
         confirmMessage: 'Start manual dosing for 30 seconds?',
@@ -1797,7 +1797,7 @@ export class VioletPoolCard extends LitElement {
         label: 'Dose 60s',
         action: async () => {
           const serviceCaller = new ServiceCaller(this.hass);
-          await serviceCaller.manualDosing(entityId, 60);
+          await serviceCaller.manualDose(entityId, dosName, 60);
         },
         color: '#FF9800',
         confirmMessage: 'Start manual dosing for 60 seconds?',
@@ -1807,8 +1807,7 @@ export class VioletPoolCard extends LitElement {
         label: 'STOP',
         action: async () => {
           const serviceCaller = new ServiceCaller(this.hass);
-          const dosType = (dosingType === 'chlorine' ? 'Chlor' : dosingType === 'ph_minus' ? 'pH-' : dosingType === 'ph_plus' ? 'pH+' : 'Flockmittel') as 'Chlor' | 'pH-' | 'pH+' | 'Flockmittel';
-          await serviceCaller.stopDosing(dosType);
+          await serviceCaller.stopDosing(entityId, dosName);
         },
         color: '#FF3B30',
         confirmMessage: 'Stop current dosing?',
@@ -1905,19 +1904,19 @@ export class VioletPoolCard extends LitElement {
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
                   <button style="padding: 8px; border: none; border-radius: 6px; background: ${accentColor}; color: white; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
-                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).manualDose(dosName, 30, false); }}">
+                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).manualDose(entityId, dosName, 30, false); }}">
                     <ha-icon icon="mdi:play" style="--mdc-icon-size: 14px;"></ha-icon> 30s
                   </button>
                   <button style="padding: 8px; border: none; border-radius: 6px; background: ${accentColor}; color: white; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
-                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).manualDose(dosName, 60, false); }}">
+                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).manualDose(entityId, dosName, 60, false); }}">
                     <ha-icon icon="mdi:play" style="--mdc-icon-size: 14px;"></ha-icon> 60s
                   </button>
                   <button style="padding: 8px; border: none; border-radius: 6px; background: #34C759; color: white; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
-                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).autoDose(dosName); }}">
+                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).autoDose(entityId, dosName); }}">
                     <ha-icon icon="mdi:auto-fix" style="--mdc-icon-size: 14px;"></ha-icon> Auto
                   </button>
                   <button style="padding: 8px; border: none; border-radius: 6px; background: #FF3B30; color: white; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
-                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).stopDosing(dosName); }}">
+                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).stopDosing(entityId, dosName); }}">
                     <ha-icon icon="mdi:stop" style="--mdc-icon-size: 14px;"></ha-icon> Stop
                   </button>
                 </div>
