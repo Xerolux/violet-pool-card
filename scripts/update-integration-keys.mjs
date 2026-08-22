@@ -33,17 +33,17 @@ const TARGET = join(
 );
 
 /**
- * @returns {Promise<Record<string, Record<string, unknown>>>} Die
+ * @returns {Promise<Record<string, Record<string, unknown>>>} The
  *   `entity` section of the translation file.
  */
 async function fetchTranslations() {
   const response = await fetch(SOURCE);
   if (!response.ok) {
-    throw new Error(`${SOURCE} lieferte HTTP ${response.status}`);
+    throw new Error(`${SOURCE} returned HTTP ${response.status}`);
   }
   const data = await response.json();
   if (!data.entity || typeof data.entity !== 'object') {
-    throw new Error(`${SOURCE} enthält keine "entity"-Sektion`);
+    throw new Error(`${SOURCE} has no "entity" section`);
   }
   return data.entity;
 }
@@ -54,6 +54,28 @@ const entity = await fetchTranslations();
 const keys = Object.fromEntries(
   Object.entries(entity)
     .map(([domain, entries]) => [domain, Object.keys(entries).sort()])
+    .sort(([a], [b]) => a.localeCompare(b))
+);
+
+/**
+ * Domain -> key -> the English name.
+ *
+ * Home Assistant derives an entity id from the English name, so this is what
+ * decides how an entity is actually called on an installation. The card needs
+ * it for the id it falls back to when the registry cannot resolve an entity,
+ * and `tests/entity-registry.test.ts` checks the card's table against it.
+ */
+const names = Object.fromEntries(
+  Object.entries(entity)
+    .map(([domain, entries]) => [
+      domain,
+      Object.fromEntries(
+        Object.entries(entries)
+          .filter(([, value]) => value && typeof value === 'object' && 'name' in value)
+          .map(([key, value]) => [key, value.name])
+          .sort(([a], [b]) => a.localeCompare(b))
+      ),
+    ])
     .sort(([a], [b]) => a.localeCompare(b))
 );
 
@@ -68,6 +90,7 @@ writeFileSync(
         'Entity translation keys of the Violet Pool Controller integration.',
       source: SOURCE,
       keys,
+      names,
     },
     null,
     2
@@ -75,4 +98,4 @@ writeFileSync(
   'utf-8'
 );
 
-console.log(`${total} Schlüssel aus ${Object.keys(keys).length} Domains -> ${TARGET}`);
+console.log(`${total} keys from ${Object.keys(keys).length} Domains -> ${TARGET}`);

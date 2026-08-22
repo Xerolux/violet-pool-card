@@ -9,6 +9,42 @@ anyone there either.
 > **Historical note:** entries up to and including 0.4.1 were written in
 > German, before the language policy existed. They are kept as published.
 
+## [0.5.1] - 2026-08-22
+
+### 🐛 Bug Fixes
+
+- **The dosing, backwash and refill cards looked for a switch that is disabled
+  by default.** Reported on the forum for 0.5.0: the dosing card said it wanted
+  `switch.violet_pool_controller_chlor_dosierung`, and no
+  `switch.…_chlorine_dosing` existed either. Both observations were right, for
+  two separate reasons.
+
+  The integration creates `DOS_1_CL`, `DOS_4_PHM`, `DOS_5_PHP`, `DOS_6_FLOC`,
+  `BACKWASH` and `REFILL` with `entity_registry_enabled_default: False`. Unless
+  someone enables them by hand they carry no state, and Home Assistant does not
+  hand a disabled entity to a card at all - so the registry lookup found
+  nothing and the card fell back to a guessed id. Each of those switches has an
+  **enabled sensor** under the same translation key, so the cards now fall back
+  to it: the state is shown, the control buttons are hidden, and a note names
+  the disabled switch and how to enable it.
+
+- **The guessed id was the old German spelling.** The German suffixes are index
+  keys into the card's slot table, not entity ids, but on a failed lookup the
+  card built one literally - sending people to look for an entity that has not
+  existed since 2.5.0. Every slot now carries the id the integration produces
+  today, and that is what a fallback names. A test derives all 25 of them from
+  the integration's own English names, so a rename over there turns this
+  repository red.
+
+### 🧪 Tests
+
+- 276 → 284. The disabled-switch case is pinned in both directions (switch
+  present, switch missing, switch registered but stateless), and every slot's
+  fallback id is checked against the integration's English names, which the
+  key-refresh script now records alongside the keys.
+
+---
+
 ## [0.5.0] - 2026-08-22
 
 ### ✨ Features
