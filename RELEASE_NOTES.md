@@ -1,41 +1,59 @@
-## v0.4.6 – Violet Pool Card
+## v0.5.0 – Violet Pool Card
 
 ✅ **STABLE RELEASE**
 
-### 🐛 Bug Fixes
+### ✨ Features
 
-- **The dosing card showed the wrong channel.** Reported on the forum after
-  0.4.5: the pump card finds its entities now, the dosing card does not. The
-  card decided which channel it was showing by searching the entity id for
-  `_cl`, `_phm`, `_php` and `_floc` - the integration's translation keys, which
-  never appear in an entity id. Since 2.5.0 the ids come from the English names
-  (`switch.…_chlorine_dosing`, `switch.…_dosing_ph_minus`), so three of the four
-  channels fell through to the `chlorine` default: a pH card read the ORP
-  sensor, showed it in mV, judged it against the ORP thresholds and pointed its
-  controls at the ORP setpoint. The channel now comes from the registry's
-  `translation_key`; matching the id remains only for entities the registry
-  cannot explain, and covers the English and the old German spellings.
-- **`card_type: dosing` could only ever show chlorine.** The card type resolved
-  the chlorine switch and nothing else, so any other channel had to be reached
-  by naming the entity by hand. `dosing_type: ph_minus | ph_plus | flocculant`
-  now resolves that channel's switch itself.
-- **A missing dosing entity showed an endless loading skeleton.** The card
-  rendered the shimmer placeholder for ever instead of saying what it could not
-  find - which is what "the card is completely broken" looks like when a dosing
-  channel is not configured. It now reports the entity it looked for, like the
-  backwash and refill cards already did.
+- **The chemistry card can show the water balance.** Requested on the forum:
+  "CSI bzw. LSI". What it computes is the **Langelier** index, in its classic
+  continuous form, and the card says so - the Calcite Saturation Index used by
+  some pool calculators additionally models ionic strength and activity
+  coefficients, and labelling one as the other would be misleading about a
+  number people dose their pool by. Enable it with `show_saturation_index: true`
+  or the switch in the card editor.
+
+  The controller measures pH and water temperature. Calcium hardness and
+  alkalinity come from a test kit, so they are configured - each field takes
+  either a number or the id of an entity holding one, so an `input_number`
+  helper can carry the last test result:
+
+  ```yaml
+  type: custom:violet-pool-card
+  card_type: chemical
+  show_saturation_index: true
+  calcium_hardness: 300            # ppm CaCO3, or input_number.pool_calcium
+  total_alkalinity: input_number.pool_alkalinity
+  cyanuric_acid: 40                # optional
+  total_dissolved_solids: 1000     # optional, this is the default
+  ```
+
+  Cyanuric acid is optional and corrects the alkalinity when given: a
+  stabilised pool's alkalinity reading includes cyanurate, which does not
+  buffer like carbonate. An input that is missing is **named** rather than
+  assumed - an index computed from a guessed hardness would look authoritative
+  and be wrong.
+
+- **The details card proposes a list when none is configured.** It used to
+  refuse to render without `entities:`, which left no clue what belonged in it.
+  It now falls back to the readings and outputs the installation actually has -
+  water temperature, pH, ORP, chlorine, filter pressure, flow, pump, backwash,
+  dosing, light, heater, solar, cover - resolved through the entity registry, so
+  a pool without solar or without a cover simply lists fewer rows. An explicit
+  `entities:` list still wins.
 
 ### 🌍 Language
 
-- The dosing card's remaining hard-coded German labels (`Typ`, `Soll`,
-  `ORP – Chlorwirksamkeit`, `pH-Wert`, …) and the refill and PV cards' German
-  error messages now go through the translation table, per the language policy.
+- The chemistry card's remaining hard-coded German strings (`pH-Wert`,
+  `Redoxwert`, `… Werte ausserhalb`, the thresholds hint) now go through the
+  translation table, per the language policy.
 
 ### 🧪 Tests
 
-- 225 → 243. `tests/dosing-type.test.ts` pins every channel against the entity
-  ids the integration really creates, both current and legacy, and asserts that
-  an unrecognised entity returns nothing rather than guessing a channel.
+- 243 → 276. `tests/saturation-index.test.ts` pins the formula against the
+  textbook balanced pool worked through by hand (pH 7.5, 25 °C, 300 ppm
+  hardness, 100 ppm alkalinity → LSI ≈ 0.00), checks which way each input moves
+  the index, and asserts that missing inputs are reported rather than defaulted.
+  The details-card default list is pinned against the registry.
 
 ### 📦 Installation
 
