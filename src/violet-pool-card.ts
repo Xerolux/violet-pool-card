@@ -41,7 +41,10 @@ import {
   CARD_TYPE_MAIN_ENTITY,
   buildEntityIndex,
   defaultDetailEntities,
+  fallbackSuffix,
   resolveEntityId,
+  resolveSlotEntity,
+  type SlotResolution,
   type RegistryDisplayEntry,
 } from './utils/entity-registry';
 import {
@@ -339,7 +342,33 @@ export class VioletPoolCard extends LitElement {
    */
   private _buildEntityId(domain: string, suffix: string): string {
     const prefix = this.config.entity_prefix || 'violet_pool_controller';
-    return resolveEntityId(this._registryIndex, domain, suffix) ?? `${domain}.${prefix}_${suffix}`;
+    return (
+      resolveEntityId(this._registryIndex, domain, suffix) ??
+      `${domain}.${prefix}_${fallbackSuffix(suffix)}`
+    );
+  }
+
+  /**
+   * Resolves a slot, accepting the read-only sensor when the switch that would
+   * carry the controls is not available.
+   */
+  private _resolveSlot(domain: string, suffix: string): SlotResolution | undefined {
+    return resolveSlotEntity(this._registryIndex, domain, suffix, (id) =>
+      Boolean(this.hass?.states[id])
+    );
+  }
+
+  /**
+   * The note shown when a card is reading the sensor because its switch is
+   * disabled in the entity registry - the state is there, the buttons are not.
+   */
+  private _renderDisabledSwitchNote(switchId: string | undefined): TemplateResult {
+    return html`
+      <div class="chem-alert-hint">
+        <ha-icon icon="mdi:eye-off-outline"></ha-icon>
+        <span>${i18n.t('switch_disabled_hint', { entity: switchId ?? '' })}</span>
+      </div>
+    `;
   }
 
   /**
@@ -1621,10 +1650,26 @@ export class VioletPoolCard extends LitElement {
     `;
   }
 
+  /**
+   * The entity the dosing card shows: the channel's switch when it is
+   * available, otherwise the sensor of the same channel.
+   */
+  private _dosingSlot(config: VioletPoolCardConfig): SlotResolution | undefined {
+    if (config.entity) {
+      return undefined;
+    }
+    const channel = isDosingType(config.dosing_type)
+      ? dosingChannel(config.dosing_type)
+      : dosingChannel('chlorine');
+    return this._resolveSlot('switch', channel.legacySuffix);
+  }
+
   private renderDosingCard(config: VioletPoolCardConfig = this.config): TemplateResult {
-    const entityId = this._mainEntityId(config)!;
+    const slot = this._dosingSlot(config);
+    const entityId = slot?.entityId ?? this._mainEntityId(config)!;
     const entity = this.hass.states[entityId];
     if (!entity) return this._renderEntityNotFound(entityId);
+    const readOnly = slot ? !slot.controllable : false;
     const state = entity.state;
     const name = config.name || entity.attributes.friendly_name || 'Dosing';
     const accentColor = this._getAccentColor('dosing', config);
@@ -1799,7 +1844,9 @@ export class VioletPoolCard extends LitElement {
             ? html`<vpc-warning-chips .warnings="${dosingState}" defaultType="warning" styleVariant="${this._getEffectiveAlarmStyle(config)}"></vpc-warning-chips>`
             : ''}
 
-          ${config.show_controls
+          ${readOnly ? this._renderDisabledSwitchNote(slot?.unavailableSwitch) : ''}
+
+          ${config.show_controls && !readOnly
             ? html`
               <!-- Enhanced Dosing Controls -->
               <div style="background: var(--vpc-surface); border-radius: 10px; padding: 12px; margin-bottom: 12px;">
@@ -3485,7 +3532,16 @@ export class VioletPoolCard extends LitElement {
    * Render Backwash Card - shows backwash status and controls
    */
   private renderBackwashCard(config: VioletPoolCardConfig = this.config): TemplateResult {
-    const entityId = config.backwash_entity || config.entity || this._buildEntityId('switch', 'ruckspulung');
+    const slot =
+      config.backwash_entity || config.entity
+        ? undefined
+        : this._resolveSlot('switch', 'ruckspulung');
+    const entityId =
+      config.backwash_entity ||
+      config.entity ||
+      slot?.entityId ||
+      this._buildEntityId('switch', 'ruckspulung');
+    const readOnly = slot ? !slot.controllable : false;
     const entity = this.hass.states[entityId];
     if (!entity) {
       return html`<ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">${i18n.t('backwash_not_found')}</span><span class="error-entity">${entityId}</span></div></div></ha-card>`;
@@ -3495,6 +3551,9 @@ export class VioletPoolCard extends LitElement {
     const isRunning = state === 'on';
     const name = config.name || entity.attributes.friendly_name || i18n.t('backwash_name');
     const accentColor = this._getAccentColor('backwash', config);
+    const disabledNote = readOnly
+      ? this._renderDisabledSwitchNote(slot?.unavailableSwitch)
+      : '';
 
     // Get optional duration info
     const duration = Number(entity.attributes?.duration || 0); // in minutes
@@ -3532,6 +3591,7 @@ export class VioletPoolCard extends LitElement {
                @click="${() => this._showMoreInfo(entityId)}">
         <div class="accent-bar"></div>
         <div class="card-content">
+          ${disabledNote}
           <div class="header">
             <div class="header-icon ${isRunning ? 'icon-active' : ''}" style="--icon-accent: ${accentColor}">
               ${config.icon
@@ -3606,7 +3666,12 @@ export class VioletPoolCard extends LitElement {
    */
   private renderRefillCard(config: VioletPoolCardConfig = this.config): TemplateResult {
     const levelSensorId = config.water_level_entity || config.entity || this._buildEntityId('sensor', 'uberlaufbehalter');
-    const valveEntityId = config.refill_valve_entity;
+    // The refill valve is one of the switches the integration creates
+    // disabled, so it is resolved the same way as the dosing channels.
+    const valveSlot = config.refill_valve_entity
+      ? undefined
+      : this._resolveSlot('switch', 'refill');
+    const valveEntityId = config.refill_valve_entity ?? valveSlot?.entityId;
 
     const levelSensor = this.hass.states[levelSensorId];
     if (!levelSensor) {

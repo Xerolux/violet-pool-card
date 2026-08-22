@@ -34,6 +34,17 @@ export interface LegacyEntitySlot {
   domain: string;
   /** The key the integration files it under. */
   translationKey: string;
+  /**
+   * The id suffix the integration produces today, from the English name.
+   *
+   * The suffix on the left of the table is the *old* German guess and is only
+   * an index key. It must never reach an installation: when the registry
+   * cannot resolve an entity, the card falls back to this one, so what it
+   * reports looking for is a name that could actually exist. Reported on the
+   * forum for 0.5.0 - the dosing card said it was looking for
+   * `switch.…_chlor_dosierung`, an id no installation has had since 2.5.0.
+   */
+  currentSuffix: string;
 }
 
 /**
@@ -49,45 +60,48 @@ export interface LegacyEntitySlot {
  */
 export const LEGACY_SUFFIX_TO_SLOT: Record<string, LegacyEntitySlot> = {
   // Outputs
-  filterpumpe: { domain: 'switch', translationKey: 'pump' },
-  beleuchtung: { domain: 'switch', translationKey: 'light' },
-  ruckspulung: { domain: 'switch', translationKey: 'backwash' },
-  chlor_dosierung: { domain: 'switch', translationKey: 'dos_1_cl' },
-  dosierung_ph_2: { domain: 'switch', translationKey: 'dos_4_phm' },
-  schaltregel_1: { domain: 'switch', translationKey: 'dirule_1' },
+  filterpumpe: { domain: 'switch', translationKey: 'pump', currentSuffix: 'filter_pump' },
+  beleuchtung: { domain: 'switch', translationKey: 'light', currentSuffix: 'lighting' },
+  ruckspulung: { domain: 'switch', translationKey: 'backwash', currentSuffix: 'backwash' },
+  // Also created disabled by default, like the dosing channels.
+  refill: { domain: 'switch', translationKey: 'refill', currentSuffix: 'water_refill' },
+  chlor_dosierung: { domain: 'switch', translationKey: 'dos_1_cl', currentSuffix: 'chlorine_dosing' },
+  dosierung_ph_2: { domain: 'switch', translationKey: 'dos_4_phm', currentSuffix: 'dosing_ph_minus' },
+  schaltregel_1: { domain: 'switch', translationKey: 'dirule_1', currentSuffix: 'switching_rule_1' },
   // Climate and cover
-  heizung: { domain: 'climate', translationKey: 'heater' },
-  solarabsorber: { domain: 'climate', translationKey: 'solar' },
-  abdeckung: { domain: 'cover', translationKey: 'pool_cover' },
+  heizung: { domain: 'climate', translationKey: 'heater', currentSuffix: 'pool_heater' },
+  solarabsorber: { domain: 'climate', translationKey: 'solar', currentSuffix: 'solar_heater' },
+  abdeckung: { domain: 'cover', translationKey: 'pool_cover', currentSuffix: 'pool_cover' },
   // Sollwerte
-  ph_sollwert: { domain: 'number', translationKey: 'ph_setpoint' },
-  redox_sollwert: { domain: 'number', translationKey: 'orp_setpoint' },
+  ph_sollwert: { domain: 'number', translationKey: 'ph_setpoint', currentSuffix: 'ph_setpoint' },
+  redox_sollwert: { domain: 'number', translationKey: 'orp_setpoint', currentSuffix: 'orp_setpoint' },
   // Messwerte
-  beckenwasser: { domain: 'sensor', translationKey: 'onewire1_value' },
-  ph_wert: { domain: 'sensor', translationKey: 'ph_value' },
-  redoxpotential: { domain: 'sensor', translationKey: 'orp_value' },
-  chlorgehalt: { domain: 'sensor', translationKey: 'pot_value' },
-  filterdruck: { domain: 'sensor', translationKey: 'adc1_value' },
-  uberlaufbehalter: { domain: 'sensor', translationKey: 'adc2_value' },
-  pumpen_durchfluss: { domain: 'sensor', translationKey: 'flow_rate' },
-  pv_uberschuss_status: { domain: 'sensor', translationKey: 'pvsurplus' },
-  diagnostics_status: { domain: 'sensor', translationKey: 'system_health' },
+  beckenwasser: { domain: 'sensor', translationKey: 'onewire1_value', currentSuffix: 'pool_water' },
+  ph_wert: { domain: 'sensor', translationKey: 'ph_value', currentSuffix: 'ph_value' },
+  redoxpotential: { domain: 'sensor', translationKey: 'orp_value', currentSuffix: 'orp_value' },
+  chlorgehalt: { domain: 'sensor', translationKey: 'pot_value', currentSuffix: 'chlorine_content' },
+  filterdruck: { domain: 'sensor', translationKey: 'adc1_value', currentSuffix: 'filter_pressure' },
+  uberlaufbehalter: { domain: 'sensor', translationKey: 'adc2_value', currentSuffix: 'overflow_tank' },
+  pumpen_durchfluss: { domain: 'sensor', translationKey: 'flow_rate', currentSuffix: 'flow_rate' },
+  pv_uberschuss_status: { domain: 'sensor', translationKey: 'pvsurplus', currentSuffix: 'pv_surplus_status' },
+  diagnostics_status: { domain: 'sensor', translationKey: 'system_health', currentSuffix: 'system_health' },
   // Dosing channel ranges (same name on both sides)
-  dos_1_cl_remaining_range: { domain: 'sensor', translationKey: 'dos_1_cl_remaining_range' },
-  dos_4_phm_remaining_range: { domain: 'sensor', translationKey: 'dos_4_phm_remaining_range' },
-  dos_5_php_remaining_range: { domain: 'sensor', translationKey: 'dos_5_php_remaining_range' },
-  dos_6_floc_remaining_range: { domain: 'sensor', translationKey: 'dos_6_floc_remaining_range' },
-  chlor_kanisterinhalt_ml: { domain: 'sensor', translationKey: 'dos_1_cl_remaining_range' },
-  ph_kanisterinhalt_ml: { domain: 'sensor', translationKey: 'dos_4_phm_remaining_range' },
-  ph_kanisterinhalt_ml_2: { domain: 'sensor', translationKey: 'dos_5_php_remaining_range' },
-  flockmittel_kanisterinhalt_ml: { domain: 'sensor', translationKey: 'dos_6_floc_remaining_range' },
-  poolwasser: { domain: 'sensor', translationKey: 'onewire1_value' },
-  orp_wert: { domain: 'sensor', translationKey: 'orp_value' },
-  sonnenkollektor: { domain: 'sensor', translationKey: 'onewire3_value' },
-  pool_heizer: { domain: 'climate', translationKey: 'heater' },
-  solar_heizer: { domain: 'climate', translationKey: 'solar' },
-  pool_abdeckung: { domain: 'cover', translationKey: 'pool_cover' },
-  durchfluss: { domain: 'sensor', translationKey: 'flow_rate' },
+  dos_1_cl_remaining_range: { domain: 'sensor', translationKey: 'dos_1_cl_remaining_range', currentSuffix: 'chlorine_remaining_range' },
+  dos_4_phm_remaining_range: { domain: 'sensor', translationKey: 'dos_4_phm_remaining_range', currentSuffix: 'ph_minus_remaining_range' },
+  dos_5_php_remaining_range: { domain: 'sensor', translationKey: 'dos_5_php_remaining_range', currentSuffix: 'ph_plus_remaining_range' },
+  dos_6_floc_remaining_range: { domain: 'sensor', translationKey: 'dos_6_floc_remaining_range', currentSuffix: 'flocculant_remaining_range' },
+  // Aliases for controllers whose entities carry other German spellings.
+  chlor_kanisterinhalt_ml: { domain: 'sensor', translationKey: 'dos_1_cl_remaining_range', currentSuffix: 'chlorine_remaining_range' },
+  ph_kanisterinhalt_ml: { domain: 'sensor', translationKey: 'dos_4_phm_remaining_range', currentSuffix: 'ph_minus_remaining_range' },
+  ph_kanisterinhalt_ml_2: { domain: 'sensor', translationKey: 'dos_5_php_remaining_range', currentSuffix: 'ph_plus_remaining_range' },
+  flockmittel_kanisterinhalt_ml: { domain: 'sensor', translationKey: 'dos_6_floc_remaining_range', currentSuffix: 'flocculant_remaining_range' },
+  poolwasser: { domain: 'sensor', translationKey: 'onewire1_value', currentSuffix: 'pool_water' },
+  orp_wert: { domain: 'sensor', translationKey: 'orp_value', currentSuffix: 'orp_value' },
+  sonnenkollektor: { domain: 'sensor', translationKey: 'onewire3_value', currentSuffix: 'solar_absorber' },
+  pool_heizer: { domain: 'climate', translationKey: 'heater', currentSuffix: 'pool_heater' },
+  solar_heizer: { domain: 'climate', translationKey: 'solar', currentSuffix: 'solar_heater' },
+  pool_abdeckung: { domain: 'cover', translationKey: 'pool_cover', currentSuffix: 'pool_cover' },
+  durchfluss: { domain: 'sensor', translationKey: 'flow_rate', currentSuffix: 'flow_rate' },
 };
 
 
@@ -252,4 +266,77 @@ export function defaultDetailEntities(
     }
   }
   return resolved;
+}
+
+/**
+ * The id the card falls back to when the registry cannot resolve a slot.
+ *
+ * Never the German index key: that spelling stopped existing with 2.5.0, and
+ * naming it only sends people looking for an entity that cannot be there.
+ */
+export function fallbackSuffix(suffix: string): string {
+  return LEGACY_SUFFIX_TO_SLOT[suffix]?.currentSuffix ?? suffix;
+}
+
+/** What the card found for a slot, and what it can do with it. */
+export interface SlotResolution {
+  /** The entity to read. */
+  entityId: string;
+  /** False when this is the read-only sensor standing in for a switch. */
+  controllable: boolean;
+  /**
+   * The switch that would carry the controls but has no state - almost always
+   * because it is disabled in the entity registry. Set only when
+   * `controllable` is false and the registry knows the switch.
+   */
+  unavailableSwitch?: string;
+}
+
+/**
+ * Resolves the entity a card should show for a slot.
+ *
+ * Reported on the forum for 0.5.0: a switch.…_chlorine_dosing is nowhere to be
+ * found on his installation. He is right - the integration creates the dosing,
+ * backwash and refill switches with `entity_registry_enabled_default: False`,
+ * so on an installation where nobody enabled them by hand they have no state,
+ * and Home Assistant does not even hand them to a card. The card then fell
+ * back to a guessed id and reported an entity that does not exist.
+ *
+ * Every one of those switches has a sensor counterpart under the same
+ * translation key, and that one is enabled. So the switch is preferred - it is
+ * the one that can be operated - and the sensor stands in for it when the
+ * switch is not available, which at least shows the state.
+ *
+ * @param index Result of {@link buildEntityIndex}.
+ * @param domain The domain the card would like.
+ * @param suffix The slot, as the card names it.
+ * @param hasState Whether an entity currently carries a state.
+ */
+export function resolveSlotEntity(
+  index: Map<string, string>,
+  domain: string,
+  suffix: string,
+  hasState: (entityId: string) => boolean
+): SlotResolution | undefined {
+  const slot = LEGACY_SUFFIX_TO_SLOT[suffix];
+  const preferred = resolveEntityId(index, domain, suffix);
+
+  if (preferred && hasState(preferred)) {
+    return { entityId: preferred, controllable: true };
+  }
+
+  // Only a switch has a sensor to fall back to; for anything else the
+  // requested entity is the only answer there is.
+  if (slot && domain !== 'sensor') {
+    const sensor = index.get(indexKey('sensor', slot.translationKey));
+    if (sensor && hasState(sensor)) {
+      return {
+        entityId: sensor,
+        controllable: false,
+        unavailableSwitch: preferred,
+      };
+    }
+  }
+
+  return preferred ? { entityId: preferred, controllable: true } : undefined;
 }

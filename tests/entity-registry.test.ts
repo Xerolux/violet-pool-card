@@ -8,7 +8,9 @@ import {
   VIOLET_PLATFORM,
   buildEntityIndex,
   defaultDetailEntities,
+  fallbackSuffix,
   resolveEntityId,
+  resolveSlotEntity,
   type RegistryDisplayEntry,
 } from '../src/utils/entity-registry';
 
@@ -315,5 +317,126 @@ describe('the details card default list', () => {
     for (const { domain, suffix } of DETAILS_DEFAULT_SUFFIXES) {
       expect(LEGACY_SUFFIX_TO_SLOT[suffix].domain, suffix).toBe(domain);
     }
+  });
+});
+
+describe('a switch the integration creates disabled', () => {
+  /**
+   * Reported on the forum for 0.5.0: the dosing card said it was looking for
+   * `switch.violet_pool_controller_chlor_dosierung` - a German id no
+   * installation has had since 2.5.0 - and the reporter had no
+   * `switch.…_chlorine_dosing` either.
+   *
+   * Both observations were right. The integration creates DOS_1_CL, DOS_4_PHM,
+   * DOS_5_PHP, DOS_6_FLOC, BACKWASH and REFILL with
+   * `entity_registry_enabled_default: False`, so unless someone enables them
+   * by hand they carry no state and never reach a card. Each has an enabled
+   * sensor under the same translation key, and that is what the card falls
+   * back to.
+   */
+  const CHLORINE_SENSOR = 'sensor.violet_pool_controller_chlorine_dosing_system';
+  const CHLORINE_SWITCH = 'switch.violet_pool_controller_chlorine_dosing';
+
+  /** What Home Assistant hands the card when the switch is enabled too. */
+  const BOTH = {
+    a: { entity_id: CHLORINE_SWITCH, platform: VIOLET_PLATFORM, translation_key: 'dos_1_cl' },
+    b: { entity_id: CHLORINE_SENSOR, platform: VIOLET_PLATFORM, translation_key: 'dos_1_cl' },
+  };
+
+  /** A disabled entity is not in the registry the frontend sees. */
+  const SENSOR_ONLY = {
+    b: { entity_id: CHLORINE_SENSOR, platform: VIOLET_PLATFORM, translation_key: 'dos_1_cl' },
+  };
+
+  it('prefers the switch when it is there', () => {
+    const resolution = resolveSlotEntity(
+      buildEntityIndex(BOTH),
+      'switch',
+      'chlor_dosierung',
+      () => true
+    );
+
+    expect(resolution).toEqual({ entityId: CHLORINE_SWITCH, controllable: true });
+  });
+
+  it('falls back to the sensor when the switch is disabled', () => {
+    const resolution = resolveSlotEntity(
+      buildEntityIndex(SENSOR_ONLY),
+      'switch',
+      'chlor_dosierung',
+      () => true
+    );
+
+    expect(resolution?.entityId).toBe(CHLORINE_SENSOR);
+    expect(resolution?.controllable).toBe(false);
+  });
+
+  it('falls back when the switch is registered but carries no state', () => {
+    const resolution = resolveSlotEntity(
+      buildEntityIndex(BOTH),
+      'switch',
+      'chlor_dosierung',
+      (id) => id !== CHLORINE_SWITCH
+    );
+
+    expect(resolution?.entityId).toBe(CHLORINE_SENSOR);
+    expect(resolution?.controllable).toBe(false);
+    expect(resolution?.unavailableSwitch).toBe(CHLORINE_SWITCH);
+  });
+
+  it('reports nothing when neither exists', () => {
+    expect(
+      resolveSlotEntity(buildEntityIndex({}), 'switch', 'chlor_dosierung', () => true)
+    ).toBeUndefined();
+  });
+
+  it('does not invent a sensor fallback for a slot that is already a sensor', () => {
+    const index = buildEntityIndex({
+      a: { entity_id: 'sensor.ph', platform: VIOLET_PLATFORM, translation_key: 'ph_value' },
+    });
+
+    const resolution = resolveSlotEntity(index, 'sensor', 'ph_wert', () => false);
+    expect(resolution?.controllable).toBe(true);
+  });
+});
+
+describe('the id the card falls back to', () => {
+  /**
+   * The German suffixes are index keys into the slot table, not entity ids.
+   * When the registry cannot resolve a slot the card builds an id from the
+   * *current* spelling - naming a German one only sent the reporter looking
+   * for an entity that cannot exist.
+   */
+  const names: Record<string, Record<string, string>> = JSON.parse(
+    readFileSync(new URL('./fixtures/integration-entity-keys.json', import.meta.url), 'utf-8')
+  ).names;
+
+  const slugify = (name: string): string =>
+    name
+      .normalize('NFKD')
+      // eslint-disable-next-line no-control-regex
+      .replace(/[^\x00-\x7F]/g, '')
+      .replace(/[^a-zA-Z0-9]+/g, '_')
+      .replace(/^_+|_+$/g, '')
+      .toLowerCase()
+      .replace(/_+/g, '_');
+
+  it('is never the German spelling', () => {
+    expect(fallbackSuffix('chlor_dosierung')).toBe('chlorine_dosing');
+    expect(fallbackSuffix('filterpumpe')).toBe('filter_pump');
+    expect(fallbackSuffix('ruckspulung')).toBe('backwash');
+  });
+
+  it('matches what the integration would name the entity, for every slot', () => {
+    for (const [suffix, slot] of Object.entries(LEGACY_SUFFIX_TO_SLOT)) {
+      const name = names[slot.domain]?.[slot.translationKey];
+      expect(name, `${suffix}: ${slot.domain}.${slot.translationKey} has no English name`)
+        .toBeDefined();
+      expect(slot.currentSuffix, suffix).toBe(slugify(name as string));
+    }
+  });
+
+  it('leaves an unknown suffix alone', () => {
+    expect(fallbackSuffix('something_else')).toBe('something_else');
   });
 });

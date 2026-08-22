@@ -200,11 +200,11 @@ export class EntityHelper {
       return options.preferred;
     }
 
-    // 6. Default constructed fallback using first domain and suffix
-    if (domainList.length && suffixes.length) {
-      return `${domainList[0]}.${prefix}_${suffixes[0]}`;
-    }
-
+    // Nothing matched. Constructing `domain.prefix_suffix` from the first
+    // suffix used to happen here, which is what put a German id in front of
+    // the reporter on the forum - the card named an entity that has not
+    // existed since 2.5.0 and sent him looking for it. Saying nothing is the
+    // honest answer; the caller decides what to show for it.
     return undefined;
   }
 
