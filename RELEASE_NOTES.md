@@ -1,59 +1,70 @@
-## v0.5.0 – Violet Pool Card
+## v0.5.2 – Violet Pool Card
 
 ✅ **STABLE RELEASE**
 
+> **This is 0.5.1, released from the commit that contains it.** The v0.5.1
+> tag was pushed before these fixes were merged, so it points at a commit
+> that does not have them - the file published under it was built from a
+> later checkout and is correct, but the tag does not lead there. 0.5.2 is
+> the same card with tag, source and asset in agreement. Coming from 0.5.1
+> there is nothing new to install; coming from 0.5.0 the entries below are.
+
+### 🐛 Bug Fixes
+
+- **The dosing, backwash and refill cards looked for a switch that is disabled
+  by default.** Reported on the forum for 0.5.0: the dosing card said it wanted
+  `switch.violet_pool_controller_chlor_dosierung`, and no
+  `switch.…_chlorine_dosing` existed either. Both observations were right, for
+  two separate reasons.
+
+  The integration creates `DOS_1_CL`, `DOS_4_PHM`, `DOS_5_PHP`, `DOS_6_FLOC`,
+  `BACKWASH` and `REFILL` with `entity_registry_enabled_default: False`. Unless
+  someone enables them by hand they carry no state, and Home Assistant does not
+  hand a disabled entity to a card at all - so the registry lookup found
+  nothing and the card fell back to a guessed id. Each of those switches has an
+  **enabled sensor** under the same translation key, so the cards now fall back
+  to it: the state is shown, the control buttons are hidden, and a note names
+  the disabled switch and how to enable it.
+
+- **`EntityHelper.findEntityId` invented an id when nothing matched.** Its last
+  step built `domain.prefix_suffix` from the first suffix, so a lookup that
+  found nothing still answered with a German id - the same failure one layer
+  down. It reports nothing now, and the test that expected exactly that passes.
+
+- **The guessed id was the old German spelling.** The German suffixes are index
+  keys into the card's slot table, not entity ids, but on a failed lookup the
+  card built one literally - sending people to look for an entity that has not
+  existed since 2.5.0. Every slot now carries the id the integration produces
+  today, and that is what a fallback names. A test derives all 25 of them from
+  the integration's own English names, so a rename over there turns this
+  repository red.
+
 ### ✨ Features
 
-- **The chemistry card can show the water balance.** Requested on the forum:
-  "CSI bzw. LSI". What it computes is the **Langelier** index, in its classic
-  continuous form, and the card says so - the Calcite Saturation Index used by
-  some pool calculators additionally models ionic strength and activity
-  coefficients, and labelling one as the other would be misleading about a
-  number people dose their pool by. Enable it with `show_saturation_index: true`
-  or the switch in the card editor.
-
-  The controller measures pH and water temperature. Calcium hardness and
-  alkalinity come from a test kit, so they are configured - each field takes
-  either a number or the id of an entity holding one, so an `input_number`
-  helper can carry the last test result:
-
-  ```yaml
-  type: custom:violet-pool-card
-  card_type: chemical
-  show_saturation_index: true
-  calcium_hardness: 300            # ppm CaCO3, or input_number.pool_calcium
-  total_alkalinity: input_number.pool_alkalinity
-  cyanuric_acid: 40                # optional
-  total_dissolved_solids: 1000     # optional, this is the default
-  ```
-
-  Cyanuric acid is optional and corrects the alkalinity when given: a
-  stabilised pool's alkalinity reading includes cyanurate, which does not
-  buffer like carbonate. An input that is missing is **named** rather than
-  assumed - an index computed from a guessed hardness would look authoritative
-  and be wrong.
-
-- **The details card proposes a list when none is configured.** It used to
-  refuse to render without `entities:`, which left no clue what belonged in it.
-  It now falls back to the readings and outputs the installation actually has -
-  water temperature, pH, ORP, chlorine, filter pressure, flow, pump, backwash,
-  dosing, light, heater, solar, cover - resolved through the entity registry, so
-  a pool without solar or without a cover simply lists fewer rows. An explicit
-  `entities:` list still wins.
-
-### 🌍 Language
-
-- The chemistry card's remaining hard-coded German strings (`pH-Wert`,
-  `Redoxwert`, `… Werte ausserhalb`, the thresholds hint) now go through the
-  translation table, per the language policy.
+- **Live entity discovery covers more controllers.** The slot table gained
+  aliases for installations whose entities carry other German spellings
+  (`poolwasser`, `orp_wert`, `sonnenkollektor`, `pool_heizer`, `solar_heizer`,
+  `pool_abdeckung`, `durchfluss` and the four canister readings), and the four
+  canister cards resolve their sensor from the card type alone.
+- **Calibration, error and update cards discover their own entities** through
+  the entity helper, instead of being told which to use.
 
 ### 🧪 Tests
 
-- 243 → 276. `tests/saturation-index.test.ts` pins the formula against the
-  textbook balanced pool worked through by hand (pH 7.5, 25 °C, 300 ppm
-  hardness, 100 ppm alkalinity → LSI ≈ 0.00), checks which way each input moves
-  the index, and asserts that missing inputs are reported rather than defaulted.
-  The details-card default list is pinned against the registry.
+- 287 → 295, and the suite is green again: `main` carried three failures - two
+  because the version was bumped to 0.5.1 without a changelog section, one
+  because `findEntityId` constructed an id instead of reporting that nothing
+  matched.
+
+  The disabled-switch case is pinned in both directions (switch present, switch
+  missing, switch registered but stateless), and every slot's fallback id is
+  checked against the integration's English names, which the key-refresh script
+  now records alongside the keys.
+
+### 🔧 Maintenance
+
+- `brace-expansion` 1.1.13 → 1.1.18, a development dependency pulled in
+  through the toolchain. Nothing the card ships changes.
 
 ### 📦 Installation
 
@@ -79,3 +90,11 @@ This card is built in my spare time. If it helps you, support is very welcome:
 - ☕ **[Buy Me a Coffee](https://buymeacoffee.com/xerolux)**
 - 🚗 **[Tesla Referral Code](https://ts.la/sebastian564489)**
 - ⭐ **Star this repository**
+
+
+## What's Changed
+* 0.5.1: fall back to the sensor when a switch is disabled by default by @Xerolux in https://github.com/Xerolux/violet-pool-card/pull/85
+* build(deps-dev): bump brace-expansion from 1.1.13 to 1.1.18 in the npm_and_yarn group across 1 directory by @dependabot[bot] in https://github.com/Xerolux/violet-pool-card/pull/73
+
+
+**Full Changelog**: https://github.com/Xerolux/violet-pool-card/compare/v0.5.1...v0.5.2

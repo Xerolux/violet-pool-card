@@ -272,6 +272,11 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
+          # A tag push checks the tag out, which leaves this job on a detached
+          # HEAD with nowhere to push - it failed that way for v0.5.1 and
+          # v0.5.2. The commit belongs on the default branch either way, so
+          # ask for it by name instead of taking whatever the event points at.
+          ref: ${{ github.event.repository.default_branch }}
 
       - name: Update version in package.json
         run: |
@@ -300,6 +305,10 @@ jobs:
           fi
 
           git commit -m "📝 Release v${{ needs.prepare-release.outputs.version }} - Update version, release notes and info.md"
+
+          # Someone may have pushed to the branch while the release was being
+          # built; rebasing onto it costs nothing and saves the run.
+          git pull --rebase
           git push
           echo "✅ Pushed version, release notes and info.md updates"
 
