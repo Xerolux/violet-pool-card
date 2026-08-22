@@ -125,8 +125,53 @@ export class ErrorDashboard extends LitElement {
     };
   }
 
+  private _getEffectiveErrors(): PoolError[] {
+    if (this.errors.length > 0) {
+      return this.errors;
+    }
+
+    if (!this.hass?.states) return [];
+    const states = this.hass.states as Record<string, any>;
+    const discovered: PoolError[] = [];
+
+    // Check active error sensors
+    for (const [entityId, entity] of Object.entries(states)) {
+      if (!entityId.startsWith('sensor.')) continue;
+      const lower = entityId.toLowerCase();
+
+      if (lower.includes('active_errors') || lower.includes('last_error') || lower.includes('fehler')) {
+        const stateStr = String(entity.state || '');
+        if (stateStr && stateStr !== 'none' && stateStr !== '0' && stateStr !== 'unknown' && stateStr !== 'unavailable' && stateStr !== 'OK' && stateStr !== 'Keine Fehler') {
+          // Check if state is a number code or text
+          const numCode = parseInt(stateStr, 10);
+          const code = !isNaN(numCode) && numCode > 0 ? numCode : 9004;
+          const info = ERROR_CODE_MAP[code] || {
+            message: stateStr,
+            severity: 'warning' as const,
+            suggestion: 'Check controller web interface or reset blockings',
+          };
+
+          discovered.push({
+            code,
+            message: info.message || stateStr,
+            severity: info.severity || 'warning',
+            type: 'error',
+            timestamp: new Date(entity.last_updated || Date.now()),
+            device: (entity.attributes?.friendly_name as string) || 'Violet Pool Controller',
+            suggestion: info.suggestion,
+            context: entity.attributes || undefined,
+          });
+        }
+      }
+    }
+
+    return discovered;
+  }
+
   private renderCurrentErrors(): TemplateResult {
-    if (this.errors.length === 0) {
+    const effectiveErrors = this._getEffectiveErrors();
+
+    if (effectiveErrors.length === 0) {
       return html`
         <div class="empty-state">
           <div class="empty-icon">✓</div>
@@ -136,7 +181,7 @@ export class ErrorDashboard extends LitElement {
       `;
     }
 
-    const sorted = [...this.errors].sort((a, b) => {
+    const sorted = [...effectiveErrors].sort((a, b) => {
       const severityOrder = { critical: 0, warning: 1, info: 2 };
       return severityOrder[a.severity] - severityOrder[b.severity];
     });

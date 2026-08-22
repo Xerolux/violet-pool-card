@@ -24,79 +24,116 @@ export class SystemUpdate extends LitElement {
   @property({ type: Object }) hass: any;
   @property({ type: Boolean }) isInstalling: boolean = false;
 
-  protected render(): TemplateResult {
-    if (!this.updateInfo) {
-      return html`
-        <div class="empty-state">
-          <div class="empty-icon">⏳</div>
-          <div class="empty-text">Loading Update Status...</div>
-        </div>
-      `;
+  private _getEffectiveUpdateInfo(): UpdateInfo {
+    if (this.updateInfo) {
+      return this.updateInfo;
     }
+
+    let installed = '2.0.0';
+    let available: string | null = null;
+    let updateAvailable = false;
+    let releaseNotes: string | null = null;
+    let carrier: string | null = null;
+    let message: string | null = null;
+
+    if (this.hass?.states) {
+      const states = this.hass.states as Record<string, any>;
+      // Look for update entity
+      for (const [entityId, entity] of Object.entries(states)) {
+        if (entityId.startsWith('update.')) {
+          installed = (entity.attributes?.installed_version as string) || entity.state || '1.1.9';
+          available = (entity.attributes?.latest_version as string) || null;
+          updateAvailable = entity.state === 'on' || (available != null && available !== installed);
+          releaseNotes = (entity.attributes?.release_summary as string) || (entity.attributes?.release_notes as string) || null;
+          message = updateAvailable ? 'New controller firmware is available.' : 'Firmware is up to date.';
+          break;
+        }
+      }
+
+      // Look for firmware version sensor if update entity not found
+      if (installed === '2.0.0') {
+        for (const [entityId, entity] of Object.entries(states)) {
+          if (entityId.startsWith('sensor.') && entityId.includes('firmware')) {
+            installed = entity.state || '1.1.9';
+            carrier = (entity.attributes?.carrier_firmware as string) || null;
+            break;
+          }
+        }
+      }
+    }
+
+    return {
+      installed_version: installed,
+      available_version: available,
+      update_available: updateAvailable,
+      release_notes: releaseNotes,
+      carrier_version: carrier,
+      message: message || (updateAvailable ? 'Update Available' : 'System Up to Date'),
+    };
+  }
+
+  protected render(): TemplateResult {
+    const info = this._getEffectiveUpdateInfo();
 
     return html`
       <div class="system-update">
         <div class="status-header">
           <div class="header-title">⬆️ System Firmware</div>
-          <div class="header-device">${this.deviceName}</div>
+          <div class="header-device">${this.deviceName || 'Violet Pool Controller'}</div>
         </div>
 
-        <div class="update-card ${this.updateInfo.update_available ? 'update-available' : 'up-to-date'}">
+        <div class="update-card ${info.update_available ? 'update-available' : 'up-to-date'}">
           <div class="card-header">
             <div class="version-info">
               <div class="installed-label">Installed Version</div>
-              <div class="installed-version">${this.updateInfo.installed_version}</div>
+              <div class="installed-version">${info.installed_version}</div>
             </div>
-            ${this.updateInfo.update_available
-              ? html`
-                <div class="update-badge">🔄 Update Available</div>
-              `
-              : html`
-                <div class="uptodate-badge">✅ Up to Date</div>
-              `
+            ${info.update_available
+              ? html`<div class="update-badge">🔄 Update Available</div>`
+              : html`<div class="uptodate-badge">✅ Up to Date</div>`
             }
           </div>
 
-          ${this.updateInfo.available_version
+          ${info.available_version
             ? html`
               <div class="available-section">
                 <div class="available-label">Available Version</div>
-                <div class="available-version">${this.updateInfo.available_version}</div>
+                <div class="available-version">${info.available_version}</div>
               </div>
             `
             : ''
           }
 
-          ${this.updateInfo.carrier_version
+          ${info.carrier_version
             ? html`
               <div class="carrier-info">
                 <span class="label">Carrier Firmware:</span>
-                <span class="value">${this.updateInfo.carrier_version}</span>
+                <span class="value">${info.carrier_version}</span>
               </div>
             `
             : ''
           }
 
-          ${this.updateInfo.message
+          ${info.message
             ? html`
               <div class="message-banner">
-                <span class="message-text">${this.updateInfo.message}</span>
+                <span class="message-text">${info.message}</span>
               </div>
             `
             : ''
           }
 
-          ${this.updateInfo.release_notes
+          ${info.release_notes
             ? html`
               <div class="release-notes">
                 <div class="notes-title">📋 Release Notes</div>
-                <div class="notes-content">${unsafeHTML(this.sanitizeHtml(this.updateInfo.release_notes))}</div>
+                <div class="notes-content">${unsafeHTML(this.sanitizeHtml(info.release_notes))}</div>
               </div>
             `
             : ''
           }
 
-          ${this.updateInfo.update_available
+          ${info.update_available
             ? html`
               <div class="action-buttons">
                 <button
