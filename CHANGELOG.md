@@ -9,7 +9,11 @@ anyone there either.
 > **Historical note:** entries up to and including 0.4.1 were written in
 > German, before the language policy existed. They are kept as published.
 
-## [0.5.1] - 2026-08-22
+## [0.5.2] - 2026-08-22
+
+> **0.5.1 was tagged but never released.** The tag was pushed before its
+> changelog section existed, so the release workflow refused it - correctly,
+> that is what it is there for. Everything written for 0.5.1 ships here.
 
 ### 🐛 Bug Fixes
 
@@ -62,6 +66,11 @@ anyone there either.
   missing, switch registered but stateless), and every slot's fallback id is
   checked against the integration's English names, which the key-refresh script
   now records alongside the keys.
+
+### 🔧 Maintenance
+
+- `brace-expansion` 1.1.13 → 1.1.18, a development dependency pulled in
+  through the toolchain. Nothing the card ships changes.
 
 ---
 
