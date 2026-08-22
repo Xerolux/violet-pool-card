@@ -2,7 +2,11 @@ import { describe, expect, it } from 'vitest';
 import {
   dosedTodayMl,
   dosingStatus,
+  dosingStatusEntries,
+  isDosingActive,
+  isDosingBlocked,
   operatingMode,
+  outputStateFromCode,
   pumpSpeedLevel,
   runtimeSeconds,
 } from '../src/utils/integration-attributes';
@@ -120,5 +124,108 @@ describe('dosing attributes', () => {
   it('reads the daily amount', () => {
     expect(dosedTodayMl(INTEGRATION_DOSING)).toBe(150);
     expect(dosedTodayMl({ dosing_volume_24h: 90 })).toBe(90);
+  });
+});
+
+/**
+ * Reported on the forum for 0.5.2: the dosing card showed `0` where the state
+ * belongs and `n/a` for the volume dosed today.
+ *
+ * Both come from the same place. The dosing switches are disabled by default,
+ * so the card shows the channel's sensor instead - and that one passes the
+ * controller's state code through unchanged and carries no attributes at all.
+ * The states below are the ones the integration publishes
+ * (`DOSING_STATE_DESCRIPTIONS` in const.py) and the raw codes the controller
+ * sends inside `DOS_*_STATE`.
+ */
+describe('dosingStatusEntries', () => {
+  it('splits what the integration publishes', () => {
+    expect(dosingStatusEntries('Blocked (Thresholds), Waiting for Pump')).toEqual([
+      'Blocked (Thresholds)',
+      'Waiting for Pump',
+    ]);
+  });
+
+  it('takes the raw list as it stands', () => {
+    expect(dosingStatusEntries(['BLOCKED_BY_TRESHOLDS', 'DOSING'])).toEqual([
+      'BLOCKED_BY_TRESHOLDS',
+      'DOSING',
+    ]);
+  });
+
+  it('reads the state sensor, which carries the list as a string', () => {
+    expect(dosingStatusEntries("['BLOCKED_BY_PUMP_OFF', 'DOSING']")).toEqual([
+      'BLOCKED_BY_PUMP_OFF',
+      'DOSING',
+    ]);
+  });
+
+  it('reports nothing for an empty status', () => {
+    expect(dosingStatusEntries('')).toEqual([]);
+    expect(dosingStatusEntries([])).toEqual([]);
+    expect(dosingStatusEntries(undefined)).toEqual([]);
+    expect(dosingStatusEntries('None')).toEqual([]);
+    expect(dosingStatusEntries('unknown')).toEqual([]);
+    expect(dosingStatusEntries('unavailable')).toEqual([]);
+  });
+});
+
+describe('isDosingActive', () => {
+  it('recognises a running channel in both spellings', () => {
+    expect(isDosingActive(['DOSING'])).toBe(true);
+    expect(isDosingActive(['Dosing'])).toBe(true);
+    expect(isDosingActive(['MANUAL_DOSING'])).toBe(true);
+    expect(isDosingActive(['Manual Dosing'])).toBe(true);
+  });
+
+  it('does not mistake a paused or waiting channel for a running one', () => {
+    expect(isDosingActive(['Dosing Paused'])).toBe(false);
+    expect(isDosingActive(['Waiting for Dosing Controllers'])).toBe(false);
+    expect(isDosingActive(['Blocked (Thresholds)'])).toBe(false);
+    expect(isDosingActive([])).toBe(false);
+  });
+
+  it('never matched what the card used to look for', () => {
+    // The card asked for `ACTIVE`, a spelling the controller does not use.
+    expect(['DOSING', 'Manual Dosing'].some((entry) => entry.includes('ACTIVE'))).toBe(false);
+  });
+});
+
+describe('isDosingBlocked', () => {
+  it('recognises the blocked states in both spellings', () => {
+    expect(isDosingBlocked(['BLOCKED_BY_TRESHOLDS'])).toBe(true);
+    expect(isDosingBlocked(['Blocked (Pump Off)'])).toBe(true);
+    expect(isDosingBlocked(['Blocked (Sensor Fault)'])).toBe(true);
+  });
+
+  it('leaves a healthy channel alone', () => {
+    expect(isDosingBlocked(['Dosing'])).toBe(false);
+    expect(isDosingBlocked(['Waiting for Start Time'])).toBe(false);
+  });
+});
+
+describe('outputStateFromCode', () => {
+  it.each([
+    ['0', 'off'],
+    ['1', 'on'],
+    ['2', 'off'],
+    ['3', 'on'],
+    ['4', 'on'],
+    ['5', 'off'],
+    ['6', 'off'],
+  ])('reads the state code %s as %s', (code, expected) => {
+    expect(outputStateFromCode(code)).toBe(expected);
+  });
+
+  it('leaves an entity that reports on/off itself alone', () => {
+    expect(outputStateFromCode('on')).toBeUndefined();
+    expect(outputStateFromCode('off')).toBeUndefined();
+    expect(outputStateFromCode('unavailable')).toBeUndefined();
+    expect(outputStateFromCode(undefined)).toBeUndefined();
+  });
+
+  it('does not read a measurement as a state code', () => {
+    expect(outputStateFromCode('7.2')).toBeUndefined();
+    expect(outputStateFromCode('728')).toBeUndefined();
   });
 });

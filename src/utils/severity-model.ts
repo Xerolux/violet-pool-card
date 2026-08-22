@@ -1,4 +1,5 @@
 import { i18n } from './i18n';
+import { isDosingActive, isDosingBlocked } from './integration-attributes';
 
 export type Severity = 'ok' | 'info' | 'warning' | 'critical';
 
@@ -188,7 +189,7 @@ export class SeverityModel {
       }
     }
 
-    if (dosingState.some((entry) => entry.includes('BLOCKED') || entry.includes('ERROR'))) {
+    if (isDosingBlocked(dosingState)) {
       alerts.push({
         text: 'Dosierung blockiert',
         severity: 'critical',
@@ -198,7 +199,7 @@ export class SeverityModel {
       });
     }
 
-    if (dosingState.some((entry) => entry.includes('ACTIVE'))) {
+    if (isDosingActive(dosingState)) {
       alerts.push({
         text: i18n.t('dosing_running'),
         severity: 'info',

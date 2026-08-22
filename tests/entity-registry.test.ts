@@ -13,6 +13,7 @@ import {
   resolveSlotEntity,
   type RegistryDisplayEntry,
 } from '../src/utils/entity-registry';
+import { DOSING_CHANNELS } from '../src/utils/dosing-type';
 
 /** One entry as Home Assistant hands it over in hass.entities. */
 const entry = (
@@ -181,6 +182,77 @@ describe('LEGACY_SUFFIX_TO_SLOT', () => {
       expect(suffix.trim()).not.toBe('');
       expect(slot.translationKey.trim()).not.toBe('');
     }
+  });
+
+  /**
+   * Reported on the forum for 0.5.2: `dosing_type` produced nothing but an
+   * error. Only two of the four channels had an entry here, so for pH+ and
+   * flocculant the registry was never asked - the card guessed a German id,
+   * found nothing and rendered "entity not found" whatever the installation
+   * had. The dosing card cannot show a channel this table does not know.
+   */
+  it.each(DOSING_CHANNELS)('knows the switch of the $type channel', (channel) => {
+    const slot = LEGACY_SUFFIX_TO_SLOT[channel.legacySuffix];
+
+    expect(slot, channel.legacySuffix).toBeDefined();
+    expect(slot.domain).toBe('switch');
+    expect(slot.translationKey).toBe(channel.translationKey);
+  });
+
+  it.each(DOSING_CHANNELS)('resolves the $type channel from the registry', (channel) => {
+    const index = buildEntityIndex(
+      registry(entry(`switch.violet_pool_controller_${channel.type}`, channel.translationKey))
+    );
+
+    expect(resolveEntityId(index, 'switch', channel.legacySuffix)).toBe(
+      `switch.violet_pool_controller_${channel.type}`
+    );
+  });
+
+  /**
+   * The dosing switches are created with `entity_registry_enabled_default:
+   * False`, so on most installations only the sensor of the channel exists.
+   */
+  it.each(DOSING_CHANNELS)(
+    'falls back to the sensor of the $type channel when the switch is disabled',
+    (channel) => {
+      const index = buildEntityIndex(
+        registry(
+          entry(`switch.violet_pool_controller_${channel.type}`, channel.translationKey),
+          entry(`sensor.violet_pool_controller_${channel.type}`, channel.translationKey)
+        )
+      );
+
+      const resolution = resolveSlotEntity(
+        index,
+        'switch',
+        channel.legacySuffix,
+        (id) => id.startsWith('sensor.')
+      );
+
+      expect(resolution?.entityId).toBe(`sensor.violet_pool_controller_${channel.type}`);
+      expect(resolution?.controllable).toBe(false);
+      expect(resolution?.unavailableSwitch).toBe(
+        `switch.violet_pool_controller_${channel.type}`
+      );
+    }
+  );
+
+  it.each(DOSING_CHANNELS)(
+    'reads the status and daily amount of the $type channel from their own sensors',
+    (channel) => {
+      // What the dosing card asks the registry for when the switch it would
+      // read the attributes off is disabled.
+      for (const suffix of ['state', 'daily']) {
+        expect(integrationKeys.sensor, `${channel.translationKey}_${suffix}`).toContain(
+          `${channel.translationKey}_${suffix}`
+        );
+      }
+    }
+  );
+
+  it.each(DOSING_CHANNELS)('names the mode select of the $type channel', (channel) => {
+    expect(integrationKeys.select).toContain(channel.modeTranslationKey);
   });
 });
 
