@@ -77,6 +77,17 @@ export const LEGACY_SUFFIX_TO_SLOT: Record<string, LegacyEntitySlot> = {
   dos_4_phm_remaining_range: { domain: 'sensor', translationKey: 'dos_4_phm_remaining_range' },
   dos_5_php_remaining_range: { domain: 'sensor', translationKey: 'dos_5_php_remaining_range' },
   dos_6_floc_remaining_range: { domain: 'sensor', translationKey: 'dos_6_floc_remaining_range' },
+  chlor_kanisterinhalt_ml: { domain: 'sensor', translationKey: 'dos_1_cl_remaining_range' },
+  ph_kanisterinhalt_ml: { domain: 'sensor', translationKey: 'dos_4_phm_remaining_range' },
+  ph_kanisterinhalt_ml_2: { domain: 'sensor', translationKey: 'dos_5_php_remaining_range' },
+  flockmittel_kanisterinhalt_ml: { domain: 'sensor', translationKey: 'dos_6_floc_remaining_range' },
+  poolwasser: { domain: 'sensor', translationKey: 'onewire1_value' },
+  orp_wert: { domain: 'sensor', translationKey: 'orp_value' },
+  sonnenkollektor: { domain: 'sensor', translationKey: 'onewire3_value' },
+  pool_heizer: { domain: 'climate', translationKey: 'heater' },
+  solar_heizer: { domain: 'climate', translationKey: 'solar' },
+  pool_abdeckung: { domain: 'cover', translationKey: 'pool_cover' },
+  durchfluss: { domain: 'sensor', translationKey: 'flow_rate' },
 };
 
 
@@ -103,6 +114,10 @@ export const CARD_TYPE_MAIN_ENTITY: Record<string, { domain: string; suffix: str
   flow_rate: { domain: 'sensor', suffix: 'pumpen_durchfluss' },
   inlet: { domain: 'switch', suffix: 'inlet' },
   counter_current: { domain: 'switch', suffix: 'counter_current' },
+  chlorine_canister: { domain: 'sensor', suffix: 'dos_1_cl_remaining_range' },
+  ph_plus_canister: { domain: 'sensor', suffix: 'dos_5_php_remaining_range' },
+  ph_minus_canister: { domain: 'sensor', suffix: 'dos_4_phm_remaining_range' },
+  flocculant_canister: { domain: 'sensor', suffix: 'dos_6_floc_remaining_range' },
 };
 
 /**
