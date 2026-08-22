@@ -40,6 +40,7 @@ import {
   CARD_TYPES_REQUIRING_ENTITY,
   CARD_TYPE_MAIN_ENTITY,
   buildEntityIndex,
+  defaultDetailEntities,
   resolveEntityId,
   type RegistryDisplayEntry,
 } from './utils/entity-registry';
@@ -51,6 +52,11 @@ import {
 } from './utils/dosing-type';
 import { StateColorHelper } from './utils/state-color';
 import { i18n, type TranslationKey } from './utils/i18n';
+import {
+  SATURATION_BALANCED_RANGE,
+  isMissing,
+  saturationIndex,
+} from './utils/saturation-index';
 import { PerformanceMonitor } from './utils/performance';
 import { pumpSVG, heaterSVG, solarSVG, coverSVG, lightSVG, chemGaugeSVG, filterGaugeSVG, chartSVG, backwashSVG, refillSVG, solarSurplusSVG, flowRateSVG, inletSVG, counterCurrentSVG, chlorineCanisterSVG, phPlusCanisterSVG, phMinusCanisterSVG, flocculantCanisterSVG, waterThermometerSVG, phOrbSVG, chlorineOrbSVG, saltCrystalSVG, orpEnergySVG, automationRulesSVG, diagnosticsPulseSVG } from './utils/animated-icons';
 import { SeverityModel, type SeverityAlert } from './utils/severity-model';
@@ -212,6 +218,22 @@ export interface VioletPoolCardConfig extends LovelaceCardConfig {
 
   // User-configurable target ranges for the water values (see utils/thresholds)
   thresholds?: ThresholdsConfig;
+  /**
+   * Show the Langelier saturation index on the chemistry card.
+   *
+   * The controller measures pH and water temperature; calcium hardness and
+   * alkalinity come from a test kit, so they are configured here - as a fixed
+   * number, or as the entity id of an `input_number` holding the last result.
+   */
+  show_saturation_index?: boolean;
+  /** Calcium hardness as ppm CaCO3: a number, or an entity holding one. */
+  calcium_hardness?: number | string;
+  /** Total alkalinity as ppm CaCO3: a number, or an entity holding one. */
+  total_alkalinity?: number | string;
+  /** Cyanuric acid in ppm. Optional; corrects the alkalinity when present. */
+  cyanuric_acid?: number | string;
+  /** Total dissolved solids in ppm. Defaults to 1000 when absent. */
+  total_dissolved_solids?: number | string;
   /** How chatty the card is about out-of-range readings: all | warning | critical | none. */
   alerts?: AlertLevel;
   /** Legacy shorthand for `alerts: none`. */
@@ -2232,8 +2254,13 @@ export class VioletPoolCard extends LitElement {
 
   private renderDetailsCard(config: VioletPoolCardConfig = this.config): TemplateResult {
     const title = config.name || config.title || 'Details';
-    const entities = config.entities || [];
     const icon = config.icon;
+    // Without a configured list the card used to refuse to render, which left
+    // the reporter no way of knowing what belonged in it. It now falls back to
+    // the readings and outputs this installation actually has.
+    const entities: (string | EntityConfig)[] = config.entities?.length
+      ? config.entities
+      : defaultDetailEntities(this._registryIndex, (id) => Boolean(this.hass?.states[id]));
 
     if (!entities.length) {
       return html`
@@ -2241,8 +2268,8 @@ export class VioletPoolCard extends LitElement {
           <div class="error-state">
             <div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div>
             <div class="error-info">
-              <span class="error-title">No Entities Configured</span>
-              <span class="error-entity">Please provide 'entities' list in card config</span>
+              <span class="error-title">${i18n.t('details_no_entities_title')}</span>
+              <span class="error-entity">${i18n.t('details_no_entities_hint')}</span>
             </div>
           </div>
         </ha-card>
@@ -2452,6 +2479,133 @@ export class VioletPoolCard extends LitElement {
     `;
   }
 
+  /**
+   * Reads a value the controller cannot measure.
+   *
+   * Calcium hardness, alkalinity and cyanuric acid come from a test kit, so
+   * the configuration carries either the number itself or the id of an entity
+   * holding it - typically an `input_number` the owner updates after testing.
+   */
+  private _configuredNumber(value: number | string | undefined): number | undefined {
+    if (typeof value === 'number') {
+      return Number.isFinite(value) ? value : undefined;
+    }
+    if (typeof value !== 'string' || value.trim() === '') {
+      return undefined;
+    }
+    const asNumber = Number(value);
+    if (Number.isFinite(asNumber)) {
+      return asNumber;
+    }
+    const state = this.hass?.states[value];
+    if (!state) {
+      return undefined;
+    }
+    const parsed = parseFloat(state.state);
+    return Number.isFinite(parsed) ? parsed : undefined;
+  }
+
+  /** The saturation-index block of the chemistry card. */
+  private _renderSaturationIndex(
+    config: VioletPoolCardConfig,
+    ph: number | undefined,
+    temperatureC: number | undefined
+  ): TemplateResult {
+    const result = saturationIndex({
+      ph,
+      temperatureC,
+      calciumHardness: this._configuredNumber(config.calcium_hardness),
+      totalAlkalinity: this._configuredNumber(config.total_alkalinity),
+      cyanuricAcid: this._configuredNumber(config.cyanuric_acid),
+      tds: this._configuredNumber(config.total_dissolved_solids),
+    });
+
+    if (isMissing(result)) {
+      const names: Record<string, string> = {
+        ph: i18n.t('saturation_missing_ph'),
+        temperatureC: i18n.t('saturation_missing_temperature'),
+        calciumHardness: i18n.t('saturation_missing_calcium'),
+        totalAlkalinity: i18n.t('saturation_missing_alkalinity'),
+      };
+      const fields = result.missing.map((field) => names[field] ?? field).join(', ');
+      return html`
+        <div class="chem-alert-panel is-warning">
+          <div class="chem-alert-head">
+            <ha-icon icon="mdi:scale-balance"></ha-icon>
+            <span>${i18n.t('saturation_missing_title')}</span>
+          </div>
+          <div class="chem-alert-hint">
+            <ha-icon icon="mdi:tune-variant"></ha-icon>
+            <span>${i18n.t('saturation_missing_hint', { fields })}</span>
+          </div>
+        </div>
+      `;
+    }
+
+    const color =
+      result.level === 'balanced'
+        ? 'var(--vpc-success, #34C759)'
+        : result.level === 'scaling'
+          ? 'var(--vpc-warning, #FF9F0A)'
+          : 'var(--vpc-danger, #FF3B30)';
+    const label =
+      result.level === 'balanced'
+        ? i18n.t('saturation_balanced')
+        : result.level === 'scaling'
+          ? i18n.t('saturation_scaling')
+          : i18n.t('saturation_corrosive');
+    // The scale runs -1 .. +1; anything beyond that is pinned to the end.
+    const markerPct = Math.min(100, Math.max(0, (result.index + 1) * 50));
+    const balancedStart = (1 - SATURATION_BALANCED_RANGE) * 50;
+    const balancedWidth = SATURATION_BALANCED_RANGE * 100;
+    const signed = `${result.index > 0 ? '+' : ''}${result.index.toFixed(2)}`;
+
+    return html`
+      <div class="dosing-value-block" style="position: relative">
+        <div class="dosing-value-row">
+          <div class="dosing-value-main" style="color: ${color}">
+            <span class="dosing-label-tag">${i18n.t('saturation_index_short')}</span>
+            <span class="dosing-current-value">${signed}</span>
+          </div>
+          <div
+            class="dosing-status-pill"
+            style="background: color-mix(in srgb, ${color} 12%, transparent); color: ${color}"
+          >
+            ${label}
+          </div>
+        </div>
+        <div class="chem-range-bar">
+          <div class="chem-range-track">
+            <div
+              class="chem-range-zone"
+              style="left: ${balancedStart}%; width: ${balancedWidth}%"
+            ></div>
+            <div class="chem-range-target" style="left: ${markerPct}%">
+              <div class="chem-target-line"></div>
+              <div class="chem-target-label">${signed}</div>
+            </div>
+          </div>
+          <div class="chem-range-labels">
+            <span>-1.0</span>
+            <span>+1.0</span>
+          </div>
+        </div>
+        <div class="chem-alert-hint">
+          <ha-icon icon="mdi:scale-balance"></ha-icon>
+          <span>
+            ${i18n.t('saturation_method')} ·
+            ${i18n.t('saturation_ph_saturation', { value: result.phSaturation.toFixed(2) })}${result.cyaCorrected
+              ? html` ·
+                  ${i18n.t('saturation_cya_note', {
+                    value: String(result.carbonateAlkalinity),
+                  })}`
+              : ''}
+          </span>
+        </div>
+      </div>
+    `;
+  }
+
   private renderChemicalCard(config: VioletPoolCardConfig = this.config): TemplateResult {
     const name = config.name || i18n.t('water_chemistry');
     const accentColor = '#4CAF50';
@@ -2545,7 +2699,7 @@ export class VioletPoolCard extends LitElement {
         visible: showPh,
         evaluation: phEval,
         kind: 'ph' as const,
-        label: 'pH-Wert',
+        label: i18n.t('chem_label_ph'),
         reading: phValue !== undefined ? phValue.toFixed(METRIC_DECIMALS.ph) : '',
         advice: phEval.side === 'low' ? i18n.t('rec_ph_low') : i18n.t('rec_ph_high'),
         color: phColor.color,
@@ -2554,7 +2708,7 @@ export class VioletPoolCard extends LitElement {
         visible: showOrp,
         evaluation: orpEval,
         kind: 'orp' as const,
-        label: 'Redoxwert',
+        label: i18n.t('chem_label_orp'),
         reading: orpValue !== undefined ? `${orpValue.toFixed(METRIC_DECIMALS.orp)} mV` : '',
         advice: orpEval.side === 'low' ? i18n.t('rec_orp_low') : i18n.t('rec_orp_high'),
         color: orpColor.color,
@@ -2627,7 +2781,10 @@ export class VioletPoolCard extends LitElement {
               <span class="name">${name}</span>
               <span class="header-subtitle">${outOfRangeCount === 0
                 ? i18n.t('water_quality_optimal')
-                : `${outOfRangeCount} ${outOfRangeCount === 1 ? 'Wert' : 'Werte'} ausserhalb`}</span>
+                : i18n.t('chem_values_out_of_range', {
+                    count: String(outOfRangeCount),
+                    total: String(reported.filter((item) => item.visible).length),
+                  })}</span>
             </div>
             <!-- Compact badge: the subtitle already spells the status out, so
                  repeating the full wording here only squeezed the card title. -->
@@ -2777,6 +2934,10 @@ export class VioletPoolCard extends LitElement {
             </div>
           ` : ''}
 
+          ${config.show_saturation_index
+            ? this._renderSaturationIndex(config, phValue, poolTemp)
+            : ''}
+
           ${issuesCount > 0 ? html`
             <div class="chem-alert-panel ${criticalCount > 0 ? 'is-critical' : 'is-warning'}">
               <div class="chem-alert-head">
@@ -2795,7 +2956,7 @@ export class VioletPoolCard extends LitElement {
               `)}
               <div class="chem-alert-hint">
                 <ha-icon icon="mdi:tune-variant"></ha-icon>
-                <span>Zielbereiche und Meldungsstufe lassen sich im Karten-Editor unter „Grenzwerte“ anpassen.</span>
+                <span>${i18n.t('chem_threshold_hint')}</span>
               </div>
             </div>
           ` : outOfRangeCount === 0 ? html`

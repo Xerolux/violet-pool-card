@@ -202,6 +202,22 @@ export interface VioletPoolCardConfig {
 
   // Water value thresholds (all optional – unset metrics use the defaults)
   thresholds?: import('../utils/thresholds').ThresholdsConfig;
+  /**
+   * Show the Langelier saturation index on the chemistry card.
+   *
+   * The controller measures pH and water temperature; calcium hardness and
+   * alkalinity come from a test kit, so they are configured here - as a fixed
+   * number, or as the entity id of an `input_number` holding the last result.
+   */
+  show_saturation_index?: boolean;
+  /** Calcium hardness as ppm CaCO3: a number, or an entity holding one. */
+  calcium_hardness?: number | string;
+  /** Total alkalinity as ppm CaCO3: a number, or an entity holding one. */
+  total_alkalinity?: number | string;
+  /** Cyanuric acid in ppm. Optional; corrects the alkalinity when present. */
+  cyanuric_acid?: number | string;
+  /** Total dissolved solids in ppm. Defaults to 1000 when absent. */
+  total_dissolved_solids?: number | string;
   /** How chatty the card is about out-of-range readings: all | warning | critical | none. */
   alerts?: import('../utils/thresholds').AlertLevel;
   /** Legacy shorthand for `alerts: none`. */

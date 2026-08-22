@@ -187,3 +187,54 @@ export function resolveEntityId(
   }
   return index.get(indexKey(domain, slot.translationKey));
 }
+
+/**
+ * What the details card lists when the configuration names no entities.
+ *
+ * Asked for on the forum: the card refused to render without an `entities:`
+ * list, which is correct but unhelpful - the reporter had no way of knowing
+ * what to put in it. These are the readings and outputs a pool owner looks at
+ * first, given as the same suffixes `resolveEntityId` maps, so they resolve
+ * through the registry like everything else.
+ *
+ * Only the ones the installation actually has are shown: a pool without solar
+ * or without a cover simply lists fewer rows, rather than showing entities
+ * that do not exist.
+ */
+export const DETAILS_DEFAULT_SUFFIXES: ReadonlyArray<{ domain: string; suffix: string }> = [
+  { domain: 'sensor', suffix: 'beckenwasser' },
+  { domain: 'sensor', suffix: 'ph_wert' },
+  { domain: 'sensor', suffix: 'redoxpotential' },
+  { domain: 'sensor', suffix: 'chlorgehalt' },
+  { domain: 'sensor', suffix: 'filterdruck' },
+  { domain: 'sensor', suffix: 'pumpen_durchfluss' },
+  { domain: 'switch', suffix: 'filterpumpe' },
+  { domain: 'switch', suffix: 'ruckspulung' },
+  { domain: 'switch', suffix: 'chlor_dosierung' },
+  { domain: 'switch', suffix: 'dosierung_ph_2' },
+  { domain: 'switch', suffix: 'beleuchtung' },
+  { domain: 'climate', suffix: 'heizung' },
+  { domain: 'climate', suffix: 'solarabsorber' },
+  { domain: 'cover', suffix: 'abdeckung' },
+];
+
+/**
+ * Resolves the default list against one installation.
+ *
+ * @param index Result of {@link buildEntityIndex}.
+ * @param exists Whether an entity id is present in `hass.states`.
+ * @returns The entity ids that exist here, in the order above.
+ */
+export function defaultDetailEntities(
+  index: Map<string, string>,
+  exists: (entityId: string) => boolean
+): string[] {
+  const resolved: string[] = [];
+  for (const { domain, suffix } of DETAILS_DEFAULT_SUFFIXES) {
+    const entityId = resolveEntityId(index, domain, suffix);
+    if (entityId && exists(entityId) && !resolved.includes(entityId)) {
+      resolved.push(entityId);
+    }
+  }
+  return resolved;
+}

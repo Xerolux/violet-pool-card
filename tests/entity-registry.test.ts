@@ -3,9 +3,11 @@ import { describe, expect, it } from 'vitest';
 import {
   CARD_TYPES_REQUIRING_ENTITY,
   CARD_TYPE_MAIN_ENTITY,
+  DETAILS_DEFAULT_SUFFIXES,
   LEGACY_SUFFIX_TO_SLOT,
   VIOLET_PLATFORM,
   buildEntityIndex,
+  defaultDetailEntities,
   resolveEntityId,
   type RegistryDisplayEntry,
 } from '../src/utils/entity-registry';
@@ -236,6 +238,82 @@ describe('CARD_TYPE_MAIN_ENTITY', () => {
 
     for (const cardType of CARD_TYPES_REQUIRING_ENTITY) {
       expect(CARD_TYPE_MAIN_ENTITY[cardType]).toBeUndefined();
+    }
+  });
+});
+
+describe('the details card default list', () => {
+  /**
+   * Asked for on the forum: the details card refused to render without an
+   * `entities:` list, and gave no hint what belonged in it. It now falls back
+   * to the readings and outputs an installation actually has.
+   */
+  const registryEntry = (entityId: string, translationKey: string) => ({
+    entity_id: entityId,
+    platform: VIOLET_PLATFORM,
+    translation_key: translationKey,
+  });
+
+  const FULL_POOL = {
+    a: registryEntry('sensor.pool_water', 'onewire1_value'),
+    b: registryEntry('sensor.ph', 'ph_value'),
+    c: registryEntry('sensor.orp', 'orp_value'),
+    d: registryEntry('switch.pump', 'pump'),
+    e: registryEntry('climate.heater', 'heater'),
+    f: registryEntry('climate.solar', 'solar'),
+    g: registryEntry('cover.pool_cover', 'pool_cover'),
+  };
+
+  it('lists what the installation has, in the documented order', () => {
+    const index = buildEntityIndex(FULL_POOL);
+    const resolved = defaultDetailEntities(index, () => true);
+
+    expect(resolved).toEqual([
+      'sensor.pool_water',
+      'sensor.ph',
+      'sensor.orp',
+      'switch.pump',
+      'climate.heater',
+      'climate.solar',
+      'cover.pool_cover',
+    ]);
+  });
+
+  it('leaves out what this pool does not have', () => {
+    const withoutSolar = { ...FULL_POOL };
+    delete (withoutSolar as Record<string, unknown>).f;
+    const resolved = defaultDetailEntities(buildEntityIndex(withoutSolar), () => true);
+
+    expect(resolved).not.toContain('climate.solar');
+    expect(resolved).toContain('climate.heater');
+  });
+
+  it('skips entities the registry knows but that carry no state', () => {
+    const index = buildEntityIndex(FULL_POOL);
+    const resolved = defaultDetailEntities(index, (id) => id !== 'sensor.ph');
+
+    expect(resolved).not.toContain('sensor.ph');
+    expect(resolved).toContain('sensor.orp');
+  });
+
+  it('returns nothing when the integration is not installed', () => {
+    expect(defaultDetailEntities(buildEntityIndex({}), () => true)).toEqual([]);
+  });
+
+  it('never lists the same entity twice', () => {
+    const resolved = defaultDetailEntities(buildEntityIndex(FULL_POOL), () => true);
+    expect(new Set(resolved).size).toBe(resolved.length);
+  });
+
+  it('every default suffix is one the registry can map', () => {
+    for (const { suffix } of DETAILS_DEFAULT_SUFFIXES) {
+      expect(LEGACY_SUFFIX_TO_SLOT[suffix], `${suffix} has no slot`).toBeDefined();
+    }
+  });
+
+  it('every default suffix is looked up in the domain its slot lives in', () => {
+    for (const { domain, suffix } of DETAILS_DEFAULT_SUFFIXES) {
+      expect(LEGACY_SUFFIX_TO_SLOT[suffix].domain, suffix).toBe(domain);
     }
   });
 });
