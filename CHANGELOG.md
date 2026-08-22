@@ -28,6 +28,11 @@ anyone there either.
   to it: the state is shown, the control buttons are hidden, and a note names
   the disabled switch and how to enable it.
 
+- **`EntityHelper.findEntityId` invented an id when nothing matched.** Its last
+  step built `domain.prefix_suffix` from the first suffix, so a lookup that
+  found nothing still answered with a German id - the same failure one layer
+  down. It reports nothing now, and the test that expected exactly that passes.
+
 - **The guessed id was the old German spelling.** The German suffixes are index
   keys into the card's slot table, not entity ids, but on a failed lookup the
   card built one literally - sending people to look for an entity that has not
@@ -36,12 +41,27 @@ anyone there either.
   the integration's own English names, so a rename over there turns this
   repository red.
 
+### ✨ Features
+
+- **Live entity discovery covers more controllers.** The slot table gained
+  aliases for installations whose entities carry other German spellings
+  (`poolwasser`, `orp_wert`, `sonnenkollektor`, `pool_heizer`, `solar_heizer`,
+  `pool_abdeckung`, `durchfluss` and the four canister readings), and the four
+  canister cards resolve their sensor from the card type alone.
+- **Calibration, error and update cards discover their own entities** through
+  the entity helper, instead of being told which to use.
+
 ### 🧪 Tests
 
-- 276 → 284. The disabled-switch case is pinned in both directions (switch
-  present, switch missing, switch registered but stateless), and every slot's
-  fallback id is checked against the integration's English names, which the
-  key-refresh script now records alongside the keys.
+- 287 → 295, and the suite is green again: `main` carried three failures - two
+  because the version was bumped to 0.5.1 without a changelog section, one
+  because `findEntityId` constructed an id instead of reporting that nothing
+  matched.
+
+  The disabled-switch case is pinned in both directions (switch present, switch
+  missing, switch registered but stateless), and every slot's fallback id is
+  checked against the integration's English names, which the key-refresh script
+  now records alongside the keys.
 
 ---
 

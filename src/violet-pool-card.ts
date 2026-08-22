@@ -382,8 +382,22 @@ export class VioletPoolCard extends LitElement {
     // The dosing card serves four channels. Without this the card type alone
     // always resolved the chlorine switch, so `dosing_type: ph_minus` could
     // only be reached by naming the entity by hand.
-    if (config.card_type === 'dosing' && isDosingType(config.dosing_type)) {
-      const channel = dosingChannel(config.dosing_type);
+    if (config.card_type === 'dosing') {
+      const type = isDosingType(config.dosing_type) ? config.dosing_type : 'chlorine';
+      const channel = dosingChannel(type);
+      const prefix = this.config.entity_prefix || 'violet_pool_controller';
+      const candidates = [
+        `select.${prefix}_${type === 'chlorine' ? 'chlordosier_modus' : type === 'ph_minus' ? 'ph_dosier_modus' : type === 'ph_plus' ? 'ph_dosier_modus_2' : 'flockungsmittel_modus'}`,
+        `sensor.${prefix}_${type === 'chlorine' ? 'chlor_dosiersystem' : type === 'ph_minus' ? 'ph_dosiersystem' : type === 'ph_plus' ? 'ph_dosiersystem_2' : 'flockmittel_dosiersystem'}`,
+        `sensor.${prefix}_${type === 'chlorine' ? 'chlordosierung' : type === 'ph_minus' ? 'ph_dosierung' : type === 'ph_plus' ? 'ph_dosierung_2' : 'flockungsmitteldosierung'}`,
+        `sensor.${prefix}_${type === 'chlorine' ? 'chlorine_dosing_system' : type === 'ph_minus' ? 'ph_minus_dosing_system' : type === 'ph_plus' ? 'ph_plus_dosing_system' : 'flocculant_dosing_system'}`,
+        `switch.${prefix}_${channel.legacySuffix}`,
+      ];
+      for (const cand of candidates) {
+        if (this.hass?.states && this.hass.states[cand]) {
+          return cand;
+        }
+      }
       return (
         resolveEntityId(this._registryIndex, 'switch', channel.legacySuffix) ??
         this._registryIndex.get(`switch:${channel.translationKey}`) ??
@@ -391,7 +405,7 @@ export class VioletPoolCard extends LitElement {
       );
     }
     const fallback = CARD_TYPE_MAIN_ENTITY[config.card_type];
-    return fallback ? this._buildEntityId(fallback.domain, fallback.suffix) : undefined;
+    return fallback ? this._getEntityId(config.card_type as keyof VioletPoolCardConfig, fallback.domain, fallback.suffix) : undefined;
   }
 
   /** The registry's translation key for an entity, when it reports one. */
@@ -416,7 +430,48 @@ export class VioletPoolCard extends LitElement {
       const entry = this.config.entities[entitiesIndex];
       return typeof entry === 'string' ? entry : entry.entity;
     }
-    return this._buildEntityId(domain, suffix);
+    const direct = this._buildEntityId(domain, suffix);
+    if (this.hass?.states && this.hass.states[direct]) {
+      return direct;
+    }
+
+    const candidateMap: Record<string, string[]> = {
+      beckenwasser: ['poolwasser', 'wassertemperatur', 'pool_temperature', 'water_temperature', 'pool_temp'],
+      poolwasser: ['beckenwasser', 'pool_temperature', 'wassertemperatur'],
+      redoxpotential: ['orp_wert', 'redox_potential', 'orp_value', 'orp', 'redox'],
+      orp_wert: ['redoxpotential', 'redox_potential', 'orp_value'],
+      solarabsorber: ['solar_heizer', 'sonnenkollektor', 'solar', 'solar_absorber'],
+      sonnenkollektor: ['solar_heizer', 'solarabsorber', 'solar'],
+      chlor_dosierung: ['chlordosierung', 'chlorine_dosing_system', 'chlorine_dosing', 'chlordosier_modus'],
+      dosierung_ph_2: ['ph_dosierung', 'ph_minus_dosing_system', 'ph_minus_dosing', 'ph_dosier_modus'],
+      dosierung_ph_1: ['ph_dosierung_2', 'ph_plus_dosing_system', 'ph_plus_dosing', 'ph_dosier_modus_2'],
+      flockmittel: ['flockungsmitteldosierung', 'flocculant_dosing_system', 'flocculant_dosing', 'flockungsmittel_modus'],
+      abdeckung: ['pool_abdeckung', 'cover', 'pool_cover'],
+      redox_sollwert: ['orp_sollwert', 'orp_setpoint', 'target_orp', 'redox_sollwert'],
+      dos_1_cl_remaining_range: ['chlor_kanisterinhalt_ml', 'chlorine_level', 'dos_1_cl_remaining_range'],
+      dos_4_phm_remaining_range: ['ph_kanisterinhalt_ml', 'ph_minus_level', 'dos_4_phm_remaining_range'],
+      dos_5_php_remaining_range: ['ph_kanisterinhalt_ml_2', 'ph_plus_level', 'dos_5_php_remaining_range'],
+      dos_6_floc_remaining_range: ['flockmittel_kanisterinhalt_ml', 'flocculant_level', 'dos_6_floc_remaining_range'],
+      chlorine_level: ['chlor_kanisterinhalt_ml', 'dos_1_cl_remaining_range', 'chlorine_canister_level'],
+      ph_minus_level: ['ph_kanisterinhalt_ml', 'dos_4_phm_remaining_range', 'ph_minus_canister_level'],
+      ph_plus_level: ['ph_kanisterinhalt_ml_2', 'dos_5_php_remaining_range', 'ph_plus_canister_level'],
+      flocculant_level: ['flockmittel_kanisterinhalt_ml', 'dos_6_floc_remaining_range', 'flocculant_canister_level'],
+      filterdruck: ['filter_pressure'],
+      uberlaufbehalter: ['overflow_level', 'water_level'],
+      pumpen_durchfluss: ['durchfluss', 'flow_rate'],
+      durchfluss: ['pumpen_durchfluss', 'flow_rate'],
+      heizung: ['pool_heizer', 'heater', 'pool_heater', 'heizer'],
+    };
+
+    const candidates = candidateMap[suffix] || [];
+    for (const alt of candidates) {
+      const altId = this._buildEntityId(domain, alt);
+      if (this.hass?.states && this.hass.states[altId]) {
+        return altId;
+      }
+    }
+
+    return direct;
   }
 
   /**
@@ -4320,7 +4375,13 @@ export class VioletPoolCard extends LitElement {
     defaultIcon: string,
     svgFunction: (fillLevel: number, maxLevel: number, color: string) => TemplateResult
   ): TemplateResult {
-    const sensorEntityId = config.level_entity || config.entity || this._buildEntityId('sensor', `${entitySuffix}_level`);
+    const sensorEntityId = config.level_entity || config.entity || this._getEntityId(
+      (entitySuffix === 'chlorine' ? 'chlorine_level_entity' :
+       entitySuffix === 'ph_plus' ? 'ph_plus_level_entity' :
+       entitySuffix === 'ph_minus' ? 'ph_minus_level_entity' : 'flocculant_level_entity') as keyof VioletPoolCardConfig,
+      'sensor',
+      `${entitySuffix}_level`
+    );
     const sensorEntity = this.hass.states[sensorEntityId];
 
     if (!sensorEntity) {

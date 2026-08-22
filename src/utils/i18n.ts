@@ -387,6 +387,15 @@ export const TRANSLATIONS = {
     rec_chlorine_high: 'Chlorine too high: wait or dilute',
     rec_salt_low: 'Salt too low: add salt',
     rec_salt_high: 'Salt too high: dilute or partially drain water',
+    csi_lsi_title: 'Saturation Index (CSI / LSI)',
+    csi_balanced: 'Balanced',
+    csi_corrosive: 'Corrosive',
+    csi_scaling: 'Scale-forming',
+    csi_desc_balanced: 'Water is chemically balanced. Equipment and surfaces protected.',
+    csi_desc_corrosive: 'Water is corrosive. May damage heaters, seals, or etch plaster.',
+    csi_desc_scaling: 'Water is scale-forming. May create calcium deposits on cells/heaters.',
+    dosing_system: 'Dosing System',
+    canister_level: 'Canister Level',
 
     // Light color names
     color_none: 'No color',
@@ -778,6 +787,15 @@ export const TRANSLATIONS = {
     rec_chlorine_high: 'Chlor zu hoch: Abwarten oder verdünnen',
     rec_salt_low: 'Salz zu niedrig: Salz nachfüllen',
     rec_salt_high: 'Salz zu hoch: Wasser verdünnen oder teilweise ablassen',
+    csi_lsi_title: 'Sättigungsindex (CSI / LSI)',
+    csi_balanced: 'Ausgeglichen',
+    csi_corrosive: 'Korrosiv',
+    csi_scaling: 'Kalkbildend',
+    csi_desc_balanced: 'Wasser ist im Gleichgewicht. Becken und Wärmetauscher optimal geschützt.',
+    csi_desc_corrosive: 'Wasser ist korrosiv/aggressiv. Kann Metalle, Fugen und Heizer angreifen.',
+    csi_desc_scaling: 'Wasser neigt zu Kalkausfällung. Kann Elektrolysezellen und Heizer verkalken.',
+    dosing_system: 'Dosiersystem',
+    canister_level: 'Kanisterstand',
 
     // Light color names
     color_none: 'Keine Farbe',
