@@ -397,6 +397,35 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
                   @change="${this._showInletChanged}"
                 ></ha-switch>
               </ha-formfield>
+
+              <ha-formfield label="${i18n.t('editor_show_saturation_index')}">
+                <ha-switch
+                  .checked="${this._config.show_saturation_index === true}"
+                  @change="${this._showSaturationIndexChanged}"
+                ></ha-switch>
+              </ha-formfield>
+
+              ${this._config.show_saturation_index
+                ? html`
+                    <div class="hint">${i18n.t('editor_saturation_hint')}</div>
+                    ${this._renderWaterBalanceInput(
+                      'calcium_hardness',
+                      i18n.t('editor_calcium_hardness')
+                    )}
+                    ${this._renderWaterBalanceInput(
+                      'total_alkalinity',
+                      i18n.t('editor_total_alkalinity')
+                    )}
+                    ${this._renderWaterBalanceInput(
+                      'cyanuric_acid',
+                      i18n.t('editor_cyanuric_acid')
+                    )}
+                    ${this._renderWaterBalanceInput(
+                      'total_dissolved_solids',
+                      i18n.t('editor_tds')
+                    )}
+                  `
+                : ''}
             </div>
           `
           : ''}
@@ -739,6 +768,51 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
       ...this._config,
       show_salt: target.checked,
     };
+    this._fireConfigChanged();
+  }
+
+  private _showSaturationIndexChanged(ev: Event): void {
+    const target = ev.target as HaElement;
+    this._config = {
+      ...this._config,
+      show_saturation_index: target.checked,
+    };
+    this._fireConfigChanged();
+  }
+
+  /**
+   * One water-balance input. The value is a number the owner reads off a test
+   * kit, or the id of an entity holding it - an `input_number` that an
+   * automation or the owner updates. Both are accepted in the same field, so
+   * there is no mode to pick first.
+   */
+  private _renderWaterBalanceInput(
+    key: 'calcium_hardness' | 'total_alkalinity' | 'cyanuric_acid' | 'total_dissolved_solids',
+    label: string
+  ): TemplateResult {
+    const current = this._config[key];
+    return html`
+      <ha-textfield
+        .label="${label}"
+        .value="${current === undefined ? '' : String(current)}"
+        @change="${(ev: Event) => this._waterBalanceChanged(key, ev)}"
+      ></ha-textfield>
+    `;
+  }
+
+  private _waterBalanceChanged(
+    key: 'calcium_hardness' | 'total_alkalinity' | 'cyanuric_acid' | 'total_dissolved_solids',
+    ev: Event
+  ): void {
+    const raw = (ev.target as HaElement).value?.trim() ?? '';
+    const next = { ...this._config };
+    if (raw === '') {
+      delete next[key];
+    } else {
+      const asNumber = Number(raw);
+      next[key] = Number.isFinite(asNumber) ? asNumber : raw;
+    }
+    this._config = next;
     this._fireConfigChanged();
   }
 
