@@ -1,27 +1,41 @@
-## v0.4.5 – Violet Pool Card
+## v0.4.6 – Violet Pool Card
 
 ✅ **STABLE RELEASE**
 
 ### 🐛 Bug Fixes
 
-- **The example dashboards named entities that no longer exist.** Every id in
-  `dashboard.yaml`, `dashboard_config.yaml`, `VIOLET_CARD_EXAMPLES.yaml`,
-  README.md and `info.md` used the old German spelling -
-  `sensor.…_beckenwasser`, `switch.…_filterpumpe`, `climate.…_heizung`. The
-  integration derives its ids from the English names since 2.5.0, so anyone
-  copying a dashboard into a current installation got cards pointing at
-  nothing. 322 ids rewritten, resolved from the integration's own English
-  translations rather than guessed.
-- Two of them could not be resolved mechanically: the German names for pH plus
-  and pH minus differ only by a character that slugifies away, so both
-  collapsed to `dosierung_ph` and Home Assistant appended `_2` to whichever
-  came second. That is where the old `dosierung_ph_2` came from. The examples
-  label them, so they are now `dosing_ph_plus` and `dosing_ph_minus`.
+- **The dosing card showed the wrong channel.** Reported on the forum after
+  0.4.5: the pump card finds its entities now, the dosing card does not. The
+  card decided which channel it was showing by searching the entity id for
+  `_cl`, `_phm`, `_php` and `_floc` - the integration's translation keys, which
+  never appear in an entity id. Since 2.5.0 the ids come from the English names
+  (`switch.…_chlorine_dosing`, `switch.…_dosing_ph_minus`), so three of the four
+  channels fell through to the `chlorine` default: a pH card read the ORP
+  sensor, showed it in mV, judged it against the ORP thresholds and pointed its
+  controls at the ORP setpoint. The channel now comes from the registry's
+  `translation_key`; matching the id remains only for entities the registry
+  cannot explain, and covers the English and the old German spellings.
+- **`card_type: dosing` could only ever show chlorine.** The card type resolved
+  the chlorine switch and nothing else, so any other channel had to be reached
+  by naming the entity by hand. `dosing_type: ph_minus | ph_plus | flocculant`
+  now resolves that channel's switch itself.
+- **A missing dosing entity showed an endless loading skeleton.** The card
+  rendered the shimmer placeholder for ever instead of saying what it could not
+  find - which is what "the card is completely broken" looks like when a dosing
+  channel is not configured. It now reports the entity it looked for, like the
+  backwash and refill cards already did.
+
+### 🌍 Language
+
+- The dosing card's remaining hard-coded German labels (`Typ`, `Soll`,
+  `ORP – Chlorwirksamkeit`, `pH-Wert`, …) and the refill and PV cards' German
+  error messages now go through the translation table, per the language policy.
 
 ### 🧪 Tests
 
-- 208 → 224. Every markdown and YAML file is checked for German entity ids, so
-  an example cannot drift back to a spelling the integration stopped using.
+- 225 → 243. `tests/dosing-type.test.ts` pins every channel against the entity
+  ids the integration really creates, both current and legacy, and asserts that
+  an unrecognised entity returns nothing rather than guessing a channel.
 
 ### 📦 Installation
 
