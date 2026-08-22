@@ -9,6 +9,54 @@ anyone there either.
 > **Historical note:** entries up to and including 0.4.1 were written in
 > German, before the language policy existed. They are kept as published.
 
+## [0.5.4] - 2026-08-22
+
+### 🐛 Bug Fixes
+
+- **The dosing card's buttons never reached the service.** Every call to
+  `smart_dosing` was rejected by its schema before the handler ran, for three
+  independent reasons: the card named no entity, while the schema requires
+  `entity_id` or `device_id`; it sent the controller's German channel names
+  (`Chlor`, `Flockmittel`) where the service takes `pH-`, `pH+`, `Chlorine`,
+  `Flocculant` and translates them itself; and it left out `duration`, which is
+  required on every action, not just a manual dose. So "Dose 30s", "Auto" and
+  "STOP" raised an error and did nothing. Each channel now carries the name the
+  service knows it by, the calls name their entity, and a duration is always
+  sent, clamped to the 5-300 seconds the service accepts.
+
+  `npm run keys:update` now copies the accepted values and that range out of
+  the integration's `services.yaml` as well, so a change over there turns this
+  repository red instead of silently breaking a button.
+
+- **`manualDosing` looked for German entity ids.** It derived the channel from
+  spellings no installation has had since integration 2.5.0; it asks
+  `detectDosingType` now, which reads the registry.
+
+- **The service rate limiter compared against a timestamp of `0`**, which would
+  drop the first call of a session while the clock read under half a second.
+
+### 🌍 Language
+
+- **Every text the user reads is in the localisation table now.** About 90
+  German strings still lived in the card, the editor and the severity model:
+  `Modus`, `Leistung`, `Stoppen`, `Wartung ok`, the flow, canister, rule and
+  diagnostics hints, the sensor tooltips, the editor's presets and threshold
+  labels. On an English installation they stayed German - the card is on HACS
+  and read by people who do not speak it.
+
+- **The test that was supposed to prevent this can now see it.** It checked
+  three files for umlauts, which `Modus` and `Leistung` do not have - and
+  someone had already written `Hauefige ... koennen` and `Fuer Boost-Betrieb`
+  with the umlauts spelled out, passing the check while being exactly what it
+  exists to stop. It reads every source file now, knows the transliterations,
+  and looks at template text as well as string literals. Comments in
+  `i18n.ts` are held to the English rule too; its own header was German.
+
+- **The editor's presets and its alert-level dropdown are built per render.**
+  They were evaluated when the module was imported and when the element was
+  constructed - both before `hass` says which language to use, which would
+  have frozen them in German for everyone.
+
 ## [0.5.3] - 2026-08-22
 
 ### 🐛 Bug Fixes

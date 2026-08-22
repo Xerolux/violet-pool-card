@@ -6,6 +6,8 @@
  * handling can be tested without a browser.
  */
 
+import { i18n } from '../utils/i18n';
+
 /** One entry of a dropdown. */
 export interface SelectOption {
   value: string;
@@ -103,11 +105,18 @@ export const CHEMISTRY_TYPE_OPTIONS: SelectOption[] = [
   { value: 'ozone', label: '🌊 Ozone Pool' },
 ];
 
-export const ALERT_LEVEL_OPTIONS: SelectOption[] = [
-  { value: 'all', label: '🔔 Alle Abweichungen' },
-  { value: 'warning', label: '⚠️ Warnungen und kritische Werte' },
-  { value: 'critical', label: '🚨 Nur kritische Werte' },
-  { value: 'none', label: '🔕 Keine Wasserwert-Meldungen' },
+/**
+ * The alert levels, translated.
+ *
+ * A function rather than a table: the card learns the user's language from
+ * `hass`, which arrives long after this module is imported, so a table built
+ * at import time would be German for everyone.
+ */
+export const alertLevelOptions = (): SelectOption[] => [
+  { value: 'all', label: `🔔 ${i18n.t('alerts_all')}` },
+  { value: 'warning', label: `⚠️ ${i18n.t('alerts_warning')}` },
+  { value: 'critical', label: `🚨 ${i18n.t('alerts_critical')}` },
+  { value: 'none', label: `🔕 ${i18n.t('alerts_none')}` },
 ];
 
 export function selectedValue(ev: Event): string | undefined {

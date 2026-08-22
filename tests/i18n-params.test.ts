@@ -1,6 +1,66 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { TRANSLATIONS, i18n } from '../src/utils/i18n';
+
+/**
+ * German that is not a German *string*: values the controller's HTTP API
+ * uses. `smart_dosing` takes the English names and translates them to these
+ * itself, so they are protocol, not prose.
+ */
+const PROTOCOL_VALUES = new Set(['Chlor', 'Flockmittel', 'Elektrolyse']);
+
+/** German words that are not also English words, plus the umlaut-free spellings. */
+const GERMAN_WORDS = [
+  'der', 'das', 'den', 'dem', 'des', 'und', 'ist', 'sind', 'eine', 'einen',
+  'einem', 'nicht', 'oder', 'ohne', 'damit', 'kann', 'koennen', 'muss', 'soll',
+  'wenn', 'weil', 'diese', 'dieser', 'keine', 'kein', 'nur', 'noch', 'auch',
+  'aber', 'sich', 'durch', 'bei', 'vor', 'nach', 'zwischen', 'waehrend',
+  'fuer', 'ueber', 'unter', 'pruefen', 'starten', 'stoppen', 'aktuell',
+  'niedrig', 'hoch', 'erhoeht', 'haeufig', 'moeglich', 'Modus', 'Leistung',
+  'Wert', 'Werte', 'Zeit', 'Dauer', 'Menge', 'Stufe', 'Betrieb', 'Anlage',
+  'Becken', 'Wasser', 'Heizung', 'Abdeckung', 'Beleuchtung', 'Dosierung',
+  'Kanister', 'Durchfluss', 'Druck', 'Wartung', 'Reinigung', 'Fehler',
+  'Warnung', 'Zustand', 'Verbrauch', 'Laufzeit', 'Filterdruck', 'Sollwert',
+  'Sollbereich', 'Zielbereich', 'Trend',
+];
+
+const GERMAN = new RegExp(`\\b(${GERMAN_WORDS.join('|')})\\b`);
+const UMLAUT = /[äöüßÄÖÜ]/;
+const COMMENT = /^\s*(\/\/|\/\*|\*)/;
+
+/** True when a piece of text reads as German rather than as English or an id. */
+const isGerman = (text: string): boolean =>
+  !PROTOCOL_VALUES.has(text.trim()) && (UMLAUT.test(text) || GERMAN.test(text));
+
+/**
+ * The parts of a line a user could end up reading: quoted strings, and the
+ * text between two tags of a lit template. Identifier-shaped strings - entity
+ * ids, css classes, icon names - are left out.
+ */
+const userFacingText = (line: string): string[] => {
+  const found: string[] = [];
+  for (const match of line.matchAll(/'([^'\\]{2,})'|"([^"\\]{2,})"/g)) {
+    const text = match[1] ?? match[2];
+    if (text && !/^[a-z0-9_.:#/\- ]+$/.test(text)) found.push(text);
+  }
+  for (const match of line.matchAll(/>([^<>{}`$]{3,})</g)) found.push(match[1].trim());
+  return found;
+};
+
+/** Every TypeScript file of the card, relative to this test. */
+const sourceFiles = (dir = '../src'): string[] => {
+  const out: string[] = [];
+  for (const name of readdirSync(new URL(dir, import.meta.url))) {
+    const entry = `${dir}/${name}`;
+    if (statSync(new URL(entry, import.meta.url)).isDirectory()) {
+      out.push(...sourceFiles(entry));
+    } else if (name.endsWith('.ts')) {
+      out.push(entry);
+    }
+  }
+  return out;
+};
+
 
 /**
  * `i18n.t` gained placeholder support so a sentence carrying a value stays one
@@ -86,19 +146,26 @@ describe('translation tables', () => {
   it('leaves no user-facing German outside this table', () => {
     // The whole point of the refactor: strings the user reads live in i18n.ts,
     // so an English installation is actually English.
-    const german = /[äöüßÄÖÜ]/;
-    const comment = /^\s*(\/\/|\/\*|\*)/;
-    const files = ['../src/violet-pool-card.ts', '../src/utils/severity-model.ts',
-                   '../src/editor/violet-pool-card-editor.ts'];
+    //
+    // This used to look at three files for umlauts alone, which let a lot
+    // through: `Modus`, `Leistung`, `Stoppen`, `ORP unter Zielbereich` carry
+    // none - and someone had already written `Hauefige ... koennen` and
+    // `Fuer Boost-Betrieb`, umlauts spelled out, which passed the check while
+    // being exactly what it exists to stop. It reads every source file now,
+    // and it knows the transliterations.
     const offenders: string[] = [];
 
-    for (const file of files) {
-      const text = readFileSync(new URL(file, import.meta.url), 'utf-8');
-      text.split('\n').forEach((line, index) => {
-        if (german.test(line) && !comment.test(line)) {
-          offenders.push(`${file}:${index + 1}: ${line.trim().slice(0, 80)}`);
-        }
-      });
+    for (const file of sourceFiles()) {
+      if (file.endsWith('utils/i18n.ts')) continue;
+      readFileSync(new URL(file, import.meta.url), 'utf-8')
+        .split('\n')
+        .forEach((line, index) => {
+          if (COMMENT.test(line)) return;
+          const german = userFacingText(line).filter(isGerman);
+          if (german.length) {
+            offenders.push(`${file}:${index + 1}: ${german.join(' | ')}`);
+          }
+        });
     }
 
     expect(offenders).toEqual([]);

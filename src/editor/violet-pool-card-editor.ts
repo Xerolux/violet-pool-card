@@ -16,7 +16,7 @@ import { DEFAULT_THRESHOLDS, type MetricKey } from '../utils/thresholds';
 import {
   ACCESSIBILITY_OPTIONS,
   ALARM_STYLE_OPTIONS,
-  ALERT_LEVEL_OPTIONS,
+  alertLevelOptions,
   CARD_TYPE_OPTIONS,
   CHEMISTRY_TYPE_OPTIONS,
   DASHBOARD_MODE_OPTIONS,
@@ -60,13 +60,22 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
   @property({ attribute: false }) public hass!: HomeAssistant;
   @state() private _config!: VioletPoolCardConfig;
 
-  private readonly _presets = [
-    { id: 'modern_glass', label: 'Modern Glass', description: 'Frost + Glass + sanfte Bewegung', config: { theme: 'frost', layout_variant: 'glass', alarm_style: 'pulse', animation: 'smooth', shadow_intensity: 'medium' } },
-    { id: 'alarm_focus', label: 'Alarm Focus', description: 'Kontraststark mit klaren Alarmen', config: { theme: 'midnight', layout_variant: 'focus', alarm_style: 'outline', animation: 'subtle', shadow_intensity: 'high' } },
-    { id: 'tech_room', label: 'Technikraum', description: 'Kompakt, sachlich, dashboard-orientiert', config: { theme: 'metallic', layout_variant: 'dashboard', alarm_style: 'soft', animation: 'subtle', shadow_intensity: 'low' } },
-    { id: 'family_view', label: 'Familienansicht', description: 'Ruhiger Look mit klarer Lesbarkeit', config: { theme: 'ocean', layout_variant: 'glass', alarm_style: 'soft', animation: 'smooth', shadow_intensity: 'medium' } },
-    { id: 'dark_lagoon', label: 'Dark Lagoon', description: 'Tiefer Dark-Modus mit Violet-Akzent', config: { theme: 'lagoon', layout_variant: 'glass', alarm_style: 'pulse', animation: 'smooth', shadow_intensity: 'high' } },
-  ] as const;
+  /**
+   * The one-click presets.
+   *
+   * A getter, not a field: a field is evaluated when the editor element is
+   * constructed, which can be before `hass` has told the card which language
+   * to use.
+   */
+  private get _presets() {
+    return [
+      { id: 'modern_glass', label: 'Modern Glass', description: i18n.t('preset_modern_glass_desc'), config: { theme: 'frost', layout_variant: 'glass', alarm_style: 'pulse', animation: 'smooth', shadow_intensity: 'medium' } },
+      { id: 'alarm_focus', label: 'Alarm Focus', description: i18n.t('preset_alarm_focus_desc'), config: { theme: 'midnight', layout_variant: 'focus', alarm_style: 'outline', animation: 'subtle', shadow_intensity: 'high' } },
+      { id: 'tech_room', label: i18n.t('preset_tech_room'), description: i18n.t('preset_tech_room_desc'), config: { theme: 'metallic', layout_variant: 'dashboard', alarm_style: 'soft', animation: 'subtle', shadow_intensity: 'low' } },
+      { id: 'family_view', label: i18n.t('preset_family_view'), description: i18n.t('preset_family_view_desc'), config: { theme: 'ocean', layout_variant: 'glass', alarm_style: 'soft', animation: 'smooth', shadow_intensity: 'medium' } },
+      { id: 'dark_lagoon', label: 'Dark Lagoon', description: i18n.t('preset_dark_lagoon_desc'), config: { theme: 'lagoon', layout_variant: 'glass', alarm_style: 'pulse', animation: 'smooth', shadow_intensity: 'high' } },
+    ] as const;
+  }
 
   public setConfig(config: VioletPoolCardConfig): void {
     this._config = config;
@@ -435,7 +444,7 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
           <div class="config-section">
             <div class="section-header">
               <ha-icon icon="mdi:tune-variant"></ha-icon>
-              <span>Grenzwerte</span>
+              <span>${i18n.t('editor_thresholds')}</span>
             </div>
             <div class="prefix-info">
               <ha-icon icon="mdi:information-outline"></ha-icon>
@@ -444,13 +453,13 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
               </span>
             </div>
 
-            ${this._renderSelect('Meldungen anzeigen', this._config.alerts || 'all', ALERT_LEVEL_OPTIONS, this._alertLevelChanged)}
+            ${this._renderSelect(i18n.t('editor_show_alerts'), this._config.alerts || 'all', alertLevelOptions(), this._alertLevelChanged)}
 
-            ${this._renderThresholdRow('ph', 'pH-Wert', 0.1)}
+            ${this._renderThresholdRow('ph', i18n.t('metric_ph'), 0.1)}
             ${this._renderThresholdRow('orp', 'Redox (mV)', 10)}
-            ${this._renderThresholdRow('chlorine', 'Chlor (mg/l)', 0.1)}
-            ${this._renderThresholdRow('salt', 'Salz (ppm)', 100)}
-            ${this._renderThresholdRow('temperature', 'Wassertemperatur (°C)', 0.5)}
+            ${this._renderThresholdRow('chlorine', i18n.t('metric_chlorine'), 0.1)}
+            ${this._renderThresholdRow('salt', i18n.t('metric_salt'), 100)}
+            ${this._renderThresholdRow('temperature', i18n.t('metric_water_temp'), 0.5)}
 
             <mwc-button class="threshold-reset" @click="${this._resetThresholds}">
               ${i18n.t('thresholds_reset')}
@@ -467,7 +476,7 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
             </summary>
             <div class="advanced-content">
               ${this._config.card_type === 'pump' || this._config.card_type === 'overview' || this._config.card_type === 'system' ? html`
-                <ha-entity-picker label="Pumpe (override)" .hass="${this.hass}" .value="${this._config.pump_entity || ''}" .includeDomains="${['switch']}" @value-changed="${(e: CustomEvent) => this._overrideChanged('pump_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker>
+                <ha-entity-picker label="${i18n.t('editor_override_pump')}" .hass="${this.hass}" .value="${this._config.pump_entity || ''}" .includeDomains="${['switch']}" @value-changed="${(e: CustomEvent) => this._overrideChanged('pump_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker>
               ` : ''}
               ${this._config.card_type === 'heater' || this._config.card_type === 'overview' || this._config.card_type === 'system' ? html`
                 <ha-entity-picker label="Heater (override)" .hass="${this.hass}" .value="${this._config.heater_entity || ''}" .includeDomains="${['climate']}" @value-changed="${(e: CustomEvent) => this._overrideChanged('heater_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker>
@@ -479,11 +488,11 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
                 <ha-entity-picker label="Chlorine Dosing (override)" .hass="${this.hass}" .value="${this._config.chlorine_entity || ''}" .includeDomains="${['switch']}" @value-changed="${(e: CustomEvent) => this._overrideChanged('chlorine_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker>
               ` : ''}
               ${['dosing','overview','system','chemical'].includes(this._config.card_type) ? html`
-                <ha-entity-picker label="pH-Sensor (override)" .hass="${this.hass}" .value="${this._config.ph_value_entity || ''}" .includeDomains="${['sensor']}" @value-changed="${(e: CustomEvent) => this._overrideChanged('ph_value_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker>
+                <ha-entity-picker label="${i18n.t('editor_override_ph')}" .hass="${this.hass}" .value="${this._config.ph_value_entity || ''}" .includeDomains="${['sensor']}" @value-changed="${(e: CustomEvent) => this._overrideChanged('ph_value_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker>
                 <ha-entity-picker label="ORP-Sensor (override)" .hass="${this.hass}" .value="${this._config.orp_value_entity || ''}" .includeDomains="${['sensor']}" @value-changed="${(e: CustomEvent) => this._overrideChanged('orp_value_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker>
               ` : ''}
               ${['heater','solar','overview','system','chemical'].includes(this._config.card_type) ? html`
-                <ha-entity-picker label="Pool-Temperatur (override)" .hass="${this.hass}" .value="${this._config.pool_temp_entity || ''}" .includeDomains="${['sensor']}" @value-changed="${(e: CustomEvent) => this._overrideChanged('pool_temp_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker>
+                <ha-entity-picker label="${i18n.t('editor_override_pool_temp')}" .hass="${this.hass}" .value="${this._config.pool_temp_entity || ''}" .includeDomains="${['sensor']}" @value-changed="${(e: CustomEvent) => this._overrideChanged('pool_temp_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker>
               ` : ''}
             </div>
           </details>
@@ -935,11 +944,11 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
         ></ha-textfield>
         <ha-textfield
           type="number"
-          label="Toleranz"
+          label="${i18n.t('editor_tolerance')}"
           .step="${String(step)}"
           .value="${band?.warn !== undefined ? String(band.warn) : ''}"
           placeholder="${String(fallback.warn)}"
-          helper="Warnung statt Alarm"
+          helper="${i18n.t('editor_tolerance_hint')}"
           @change="${(e: Event) => this._thresholdChanged(metric, 'warn', e)}"
         ></ha-textfield>
       </div>
