@@ -35,6 +35,12 @@ export interface DosingChannel {
   type: DosingType;
   /** The integration's translation key for the channel's switch. */
   translationKey: string;
+  /**
+   * The translation key of the channel's mode select - the entity that says
+   * whether the channel runs automatically, and the last one the card can fall
+   * back to when neither the switch nor the sensor is registered.
+   */
+  modeTranslationKey: string;
   /** The suffix the card used to guess before it read the registry. */
   legacySuffix: string;
   /**
@@ -53,24 +59,28 @@ export const DOSING_CHANNELS: readonly DosingChannel[] = [
   {
     type: 'ph_minus',
     translationKey: 'dos_4_phm',
+    modeTranslationKey: 'dos_phm_mode',
     legacySuffix: 'dosierung_ph_2',
     idFragments: ['_phm', 'ph_minus', 'ph_min', 'dosierung_ph_2', 'ph_dosierung_2'],
   },
   {
     type: 'ph_plus',
     translationKey: 'dos_5_php',
+    modeTranslationKey: 'dos_php_mode',
     legacySuffix: 'dosierung_ph_plus',
     idFragments: ['_php', 'ph_plus', 'ph_pl'],
   },
   {
     type: 'flocculant',
     translationKey: 'dos_6_floc',
+    modeTranslationKey: 'dos_floc_mode',
     legacySuffix: 'flockmittel',
     idFragments: ['_floc', 'flocculant', 'flockmittel'],
   },
   {
     type: 'chlorine',
     translationKey: 'dos_1_cl',
+    modeTranslationKey: 'dos_cl_mode',
     legacySuffix: 'chlor_dosierung',
     idFragments: ['_cl', 'chlorine', 'chlor'],
   },

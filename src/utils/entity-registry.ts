@@ -67,6 +67,13 @@ export const LEGACY_SUFFIX_TO_SLOT: Record<string, LegacyEntitySlot> = {
   refill: { domain: 'switch', translationKey: 'refill', currentSuffix: 'water_refill' },
   chlor_dosierung: { domain: 'switch', translationKey: 'dos_1_cl', currentSuffix: 'chlorine_dosing' },
   dosierung_ph_2: { domain: 'switch', translationKey: 'dos_4_phm', currentSuffix: 'dosing_ph_minus' },
+  // Reported on the forum for 0.5.2: `dosing_type` produced nothing but an
+  // error. Two of the four channels had no entry here, so the registry was
+  // never asked for them - the card guessed a German id, found nothing and
+  // rendered its "entity not found" card. `tests/entity-registry.test.ts`
+  // now checks that every channel in DOSING_CHANNELS has its slot.
+  dosierung_ph_plus: { domain: 'switch', translationKey: 'dos_5_php', currentSuffix: 'dosing_ph_plus' },
+  flockmittel: { domain: 'switch', translationKey: 'dos_6_floc', currentSuffix: 'flocculant' },
   schaltregel_1: { domain: 'switch', translationKey: 'dirule_1', currentSuffix: 'switching_rule_1' },
   // Climate and cover
   heizung: { domain: 'climate', translationKey: 'heater', currentSuffix: 'pool_heater' },

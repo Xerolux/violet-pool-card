@@ -116,6 +116,85 @@ export function dosingStatus(attributes: Attributes): string | undefined {
 }
 
 /**
+ * The dosing status split into the entries it is made of.
+ *
+ * The card asked whether any entry `includes('ACTIVE')` - a spelling that
+ * occurs nowhere. The controller's detail codes for a running channel are
+ * `DOSING` and `MANUAL_DOSING`, and the integration translates them before
+ * publishing, so what actually arrives is `"Dosing"` or
+ * `"Blocked (Thresholds), Waiting for Pump"`. The dosing card therefore never
+ * saw itself dosing and the blocked alert never fired.
+ *
+ * @param raw The `dosing_status` attribute, the raw `DOS_*_STATE` list, or the
+ *   state of the channel's `dos_*_state` sensor.
+ * @returns One entry per reported state, in the order reported.
+ */
+export function dosingStatusEntries(raw: unknown): string[] {
+  if (Array.isArray(raw)) {
+    return raw.map((entry) => String(entry).trim()).filter((entry) => entry !== '');
+  }
+  if (typeof raw !== 'string') return [];
+  return raw
+    // The state sensor may carry the list as the controller sent it.
+    .replace(/^\[|\]$/g, '')
+    .split(',')
+    .map((entry) => entry.trim().replace(/^['"]|['"]$/g, ''))
+    // A state sensor without a value says so in the words Home Assistant uses
+    // for it; none of them is a dosing state.
+    .filter((entry) => entry !== '' && !EMPTY_STATUS.has(entry.toLowerCase()));
+}
+
+const EMPTY_STATUS = new Set(['none', 'unknown', 'unavailable', '-']);
+
+/** An entry compared without caring about spelling: `MANUAL_DOSING` = `Manual Dosing`. */
+const normalizeStatus = (entry: string): string =>
+  entry.toLowerCase().replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
+
+/**
+ * Whether the channel is dosing right now.
+ *
+ * Only `DOSING` and `MANUAL_DOSING` mean that. `DOSING_PAUSED` does not, and
+ * neither does `WAITING_FOR_DOSAGECONTROLLERS` - which is why this matches the
+ * whole entry instead of looking for the word inside it.
+ */
+export function isDosingActive(entries: readonly string[]): boolean {
+  return entries.some((entry) => {
+    const status = normalizeStatus(entry);
+    return status === 'dosing' || status === 'manual dosing';
+  });
+}
+
+/** Whether something is keeping the channel from dosing. */
+export function isDosingBlocked(entries: readonly string[]): boolean {
+  return entries.some((entry) => {
+    const status = normalizeStatus(entry);
+    return status.startsWith('blocked') || status.includes('error') || status.includes('fault');
+  });
+}
+
+/**
+ * The on/off meaning of the controller's numeric state code.
+ *
+ * A card that shows the read-only sensor standing in for a switch disabled by
+ * default reads that sensor's state, and the sensor passes the controller's
+ * value through unchanged: `0`, not `off`. Comparing it with `'on'` made every
+ * such card report the output as off - the dosing card in the forum report for
+ * 0.5.2 showed `0` where the state belongs.
+ *
+ * The codes are the integration's state hierarchy: 0 auto standby, 1 auto
+ * active, 2 blocked by a rule, 3 priority on, 4 manual on, 5 emergency off,
+ * 6 manual off.
+ *
+ * @returns `'on'` or `'off'`, or `undefined` when the state is not a code -
+ *   an entity that reports `on`/`off` itself is already the answer.
+ */
+export function outputStateFromCode(state: string | number | undefined): 'on' | 'off' | undefined {
+  const code = num(state);
+  if (code === undefined || !Number.isInteger(code) || code < 0 || code > 6) return undefined;
+  return code === 1 || code === 3 || code === 4 ? 'on' : 'off';
+}
+
+/**
  * Millilitres dosed today.
  */
 export function dosedTodayMl(attributes: Attributes): number | undefined {

@@ -32,7 +32,10 @@ import { EntityHelper } from './utils/entity-helper';
 import {
   dosedTodayMl,
   dosingStatus,
+  dosingStatusEntries,
+  isDosingActive,
   operatingMode,
+  outputStateFromCode,
   pumpSpeedLevel,
   runtimeSeconds as integrationRuntimeSeconds,
 } from './utils/integration-attributes';
@@ -48,9 +51,11 @@ import {
   type RegistryDisplayEntry,
 } from './utils/entity-registry';
 import {
+  DOSING_CHANNELS,
   detectDosingType,
   dosingChannel,
   isDosingType,
+  type DosingChannel,
   type DosingType,
 } from './utils/dosing-type';
 import { StateColorHelper } from './utils/state-color';
@@ -277,6 +282,20 @@ export class VioletPoolCard extends LitElement {
       throw new Error('You need to define an entity');
     }
 
+    // A `dosing_type` the card does not know used to be carried through the
+    // whole render: it picked no channel, translated to nothing and left the
+    // card half drawn. Saying which values exist is the shortest way out of
+    // that - reported on the forum for 0.5.2, from a configuration pasted as
+    // `dosing_type: ph_minus | ph_plus | flocculant`, which YAML reads as one
+    // string rather than a choice of three.
+    if (config.dosing_type !== undefined && !isDosingType(config.dosing_type)) {
+      throw new Error(
+        `dosing_type must be one of ${DOSING_CHANNELS.map((channel) => channel.type).join(
+          ', '
+        )} - got "${String(config.dosing_type)}"`
+      );
+    }
+
     // Enable performance monitoring in development
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
       PerformanceMonitor.enable();
@@ -387,6 +406,8 @@ export class VioletPoolCard extends LitElement {
       const channel = dosingChannel(type);
       const prefix = this.config.entity_prefix || 'violet_pool_controller';
       const candidates = [
+        // The registry knows the mode select by its key, whatever it is named.
+        this._registryIndex.get(`select:${channel.modeTranslationKey}`),
         `select.${prefix}_${type === 'chlorine' ? 'chlordosier_modus' : type === 'ph_minus' ? 'ph_dosier_modus' : type === 'ph_plus' ? 'ph_dosier_modus_2' : 'flockungsmittel_modus'}`,
         `sensor.${prefix}_${type === 'chlorine' ? 'chlor_dosiersystem' : type === 'ph_minus' ? 'ph_dosiersystem' : type === 'ph_plus' ? 'ph_dosiersystem_2' : 'flockmittel_dosiersystem'}`,
         `sensor.${prefix}_${type === 'chlorine' ? 'chlordosierung' : type === 'ph_minus' ? 'ph_dosierung' : type === 'ph_plus' ? 'ph_dosierung_2' : 'flockungsmitteldosierung'}`,
@@ -394,7 +415,7 @@ export class VioletPoolCard extends LitElement {
         `switch.${prefix}_${channel.legacySuffix}`,
       ];
       for (const cand of candidates) {
-        if (this.hass?.states && this.hass.states[cand]) {
+        if (cand && this.hass?.states && this.hass.states[cand]) {
           return cand;
         }
       }
@@ -1664,13 +1685,29 @@ export class VioletPoolCard extends LitElement {
     return this._resolveSlot('switch', channel.legacySuffix);
   }
 
+  /**
+   * A reading of the channel the dosing card is showing, by the suffix the
+   * integration files it under - `dos_1_cl_daily`, `dos_4_phm_state`.
+   *
+   * The switch carries the status and the dosed volume as attributes, but the
+   * switches are disabled by default: on the reporter's installation the card
+   * shows the read-only sensor instead, and that one has no attributes at all.
+   * The same figures have their own sensors, and those are enabled.
+   */
+  private _dosingChannelState(channel: DosingChannel, suffix: string): HassEntity | undefined {
+    const entityId = this._registryIndex.get(`sensor:${channel.translationKey}_${suffix}`);
+    return entityId ? this.hass?.states[entityId] : undefined;
+  }
+
   private renderDosingCard(config: VioletPoolCardConfig = this.config): TemplateResult {
     const slot = this._dosingSlot(config);
     const entityId = slot?.entityId ?? this._mainEntityId(config)!;
     const entity = this.hass.states[entityId];
     if (!entity) return this._renderEntityNotFound(entityId);
     const readOnly = slot ? !slot.controllable : false;
-    const state = entity.state;
+    // The sensor standing in for a disabled switch passes the controller's
+    // numeric state through, so `0` arrives where `off` belongs.
+    const state = outputStateFromCode(entity.state) ?? entity.state;
     const name = config.name || entity.attributes.friendly_name || 'Dosing';
     const accentColor = this._getAccentColor('dosing', config);
 
@@ -1678,10 +1715,15 @@ export class VioletPoolCard extends LitElement {
       config.dosing_type ??
       detectDosingType(entityId, this._translationKeyOf(entityId)) ??
       'chlorine';
+    const channel = dosingChannel(dosingType);
     /** Map from config dosing_type to the service-layer literal expected by ServiceCaller. */
     const dosName = (dosingType === 'chlorine' ? 'Chlor' : dosingType === 'ph_minus' ? 'pH-' : dosingType === 'ph_plus' ? 'pH+' : 'Flockmittel') as 'Chlor' | 'pH-' | 'pH+' | 'Flockmittel';
 
-    const dosingState = dosingStatus(entity.attributes);
+    // The switch publishes the status; the sensor standing in for it does not,
+    // so the channel's own status sensor answers for it.
+    const dosingState = dosingStatusEntries(
+      dosingStatus(entity.attributes) ?? this._dosingChannelState(channel, 'state')?.state
+    );
 
     let currentValue: number | undefined;
     let targetValue: number | undefined;
@@ -1711,7 +1753,13 @@ export class VioletPoolCard extends LitElement {
       unit = '';
     }
 
-    const dosingVolume24h = dosedTodayMl(entity.attributes);
+    const dosingVolume24h =
+      dosedTodayMl(entity.attributes) ??
+      (() => {
+        const daily = this._dosingChannelState(channel, 'daily')?.state;
+        const parsed = daily !== undefined ? Number(daily) : NaN;
+        return Number.isFinite(parsed) ? parsed : undefined;
+      })();
 
     const quickActions: QuickAction[] = [
       {
@@ -1767,8 +1815,10 @@ export class VioletPoolCard extends LitElement {
       },
     ];
 
-    // Safely check dosingState is an array before calling .some()
-    const isDosing = state === 'on' && Array.isArray(dosingState) && dosingState.some((s: string) => s.includes('ACTIVE'));
+    // On means the channel is switched on right now; the status says so a
+    // second time while it runs. Neither is `ACTIVE`, which is what this used
+    // to look for - so the card never once showed itself dosing.
+    const isDosing = state === 'on' || isDosingActive(dosingState);
 
     // Get color and percent for current value – judged against the same
     // user-configurable target ranges the chemistry card uses.
@@ -1793,7 +1843,7 @@ export class VioletPoolCard extends LitElement {
       dosingType,
       currentValue,
       targetValue,
-      dosingState: Array.isArray(dosingState) ? dosingState as string[] : [],
+      dosingState,
     });
 
     return html` <ha-card class="${this._getCardClasses(isDosing, config)}" style="--card-accent: ${accentColor}" @click="${() => this._showMoreInfo(entityId)}" ><div class="accent-bar"></div><div class="card-content"><div class="header"><div class="header-icon ${isDosing ? 'icon-active' : ''}" style="--icon-accent: ${accentColor}">${config.icon ? html`<ha-icon icon="${config.icon}" class="${isDosing ? 'dosing-active' : ''}" ></ha-icon>` : this._renderDosingVisual(dosingType, accentColor, currentValue, maxValue)}</div><div class="header-info"><span class="name">${name}</span><span class="header-subtitle">${this._getFriendlyState(state)}</span></div> ${config.show_state ? html`<vpc-status-badge .state="${state}" .pulse="${isDosing}"></vpc-status-badge>`
@@ -3547,7 +3597,10 @@ export class VioletPoolCard extends LitElement {
       return html`<ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">${i18n.t('backwash_not_found')}</span><span class="error-entity">${entityId}</span></div></div></ha-card>`;
     }
 
-    const state = entity.state;
+    // Same as the dosing card: when the backwash switch is disabled by default
+    // the card shows the sensor, and that one reports the controller's state
+    // code rather than on/off.
+    const state = outputStateFromCode(entity.state) ?? entity.state;
     const isRunning = state === 'on';
     const name = config.name || entity.attributes.friendly_name || i18n.t('backwash_name');
     const accentColor = this._getAccentColor('backwash', config);
