@@ -11,9 +11,12 @@ anyone there either.
 
 ## [0.5.2] - 2026-08-22
 
-> **0.5.1 was tagged but never released.** The tag was pushed before its
-> changelog section existed, so the release workflow refused it - correctly,
-> that is what it is there for. Everything written for 0.5.1 ships here.
+> **This is 0.5.1, released from the commit that contains it.** The v0.5.1
+> tag was pushed before these fixes were merged, so it points at a commit
+> that does not have them - the file published under it was built from a
+> later checkout and is correct, but the tag does not lead there. 0.5.2 is
+> the same card with tag, source and asset in agreement. Coming from 0.5.1
+> there is nothing new to install; coming from 0.5.0 the entries below are.
 
 ### 🐛 Bug Fixes
 
