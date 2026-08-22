@@ -43,8 +43,14 @@ import {
   resolveEntityId,
   type RegistryDisplayEntry,
 } from './utils/entity-registry';
+import {
+  detectDosingType,
+  dosingChannel,
+  isDosingType,
+  type DosingType,
+} from './utils/dosing-type';
 import { StateColorHelper } from './utils/state-color';
-import { i18n } from './utils/i18n';
+import { i18n, type TranslationKey } from './utils/i18n';
 import { PerformanceMonitor } from './utils/performance';
 import { pumpSVG, heaterSVG, solarSVG, coverSVG, lightSVG, chemGaugeSVG, filterGaugeSVG, chartSVG, backwashSVG, refillSVG, solarSurplusSVG, flowRateSVG, inletSVG, counterCurrentSVG, chlorineCanisterSVG, phPlusCanisterSVG, phMinusCanisterSVG, flocculantCanisterSVG, waterThermometerSVG, phOrbSVG, chlorineOrbSVG, saltCrystalSVG, orpEnergySVG, automationRulesSVG, diagnosticsPulseSVG } from './utils/animated-icons';
 import { SeverityModel, type SeverityAlert } from './utils/severity-model';
@@ -322,8 +328,27 @@ export class VioletPoolCard extends LitElement {
     if (config.entity) {
       return config.entity;
     }
+    // The dosing card serves four channels. Without this the card type alone
+    // always resolved the chlorine switch, so `dosing_type: ph_minus` could
+    // only be reached by naming the entity by hand.
+    if (config.card_type === 'dosing' && isDosingType(config.dosing_type)) {
+      const channel = dosingChannel(config.dosing_type);
+      return (
+        resolveEntityId(this._registryIndex, 'switch', channel.legacySuffix) ??
+        this._registryIndex.get(`switch:${channel.translationKey}`) ??
+        this._buildEntityId('switch', channel.legacySuffix)
+      );
+    }
     const fallback = CARD_TYPE_MAIN_ENTITY[config.card_type];
     return fallback ? this._buildEntityId(fallback.domain, fallback.suffix) : undefined;
+  }
+
+  /** The registry's translation key for an entity, when it reports one. */
+  private _translationKeyOf(entityId: string | undefined): string | undefined {
+    if (!entityId) {
+      return undefined;
+    }
+    return this.hass?.entities?.[entityId]?.translation_key;
   }
 
   private _getEntityId(
@@ -1522,12 +1547,15 @@ export class VioletPoolCard extends LitElement {
   private renderDosingCard(config: VioletPoolCardConfig = this.config): TemplateResult {
     const entityId = this._mainEntityId(config)!;
     const entity = this.hass.states[entityId];
-    if (!entity) return this._renderLoadingSkeleton(config);
+    if (!entity) return this._renderEntityNotFound(entityId);
     const state = entity.state;
     const name = config.name || entity.attributes.friendly_name || 'Dosing';
     const accentColor = this._getAccentColor('dosing', config);
 
-    const dosingType = config.dosing_type || this._detectDosingType(entityId);
+    const dosingType: DosingType =
+      config.dosing_type ??
+      detectDosingType(entityId, this._translationKeyOf(entityId)) ??
+      'chlorine';
     /** Map from config dosing_type to the service-layer literal expected by ServiceCaller. */
     const dosName = (dosingType === 'chlorine' ? 'Chlor' : dosingType === 'ph_minus' ? 'pH-' : dosingType === 'ph_plus' ? 'pH+' : 'Flockmittel') as 'Chlor' | 'pH-' | 'pH+' | 'Flockmittel';
 
@@ -1652,15 +1680,15 @@ export class VioletPoolCard extends LitElement {
 
           <div class="insight-grid">
             <div class="insight-card">
-              <span class="insight-label">Typ</span>
-              <span class="insight-value">${dosingType.replace('_', ' ').toUpperCase()}</span>
+              <span class="insight-label">${i18n.t('dosing_type_label')}</span>
+              <span class="insight-value">${i18n.t(`dosing_type_${dosingType}` as TranslationKey)}</span>
             </div>
             <div class="insight-card">
-              <span class="insight-label">Soll</span>
+              <span class="insight-label">${i18n.t('dosing_target_label')}</span>
               <span class="insight-value">${targetValue !== undefined ? `${targetValue.toFixed(decimals)}${unit}` : 'n/a'}</span>
             </div>
             <div class="insight-card">
-              <span class="insight-label">24h</span>
+              <span class="insight-label">${i18n.t('dosing_24h_label')}</span>
               <span class="insight-value">${typeof dosingVolume24h === 'number' ? `${dosingVolume24h.toFixed(0)} ml` : 'n/a'}</span>
             </div>
           </div>
@@ -1668,9 +1696,9 @@ export class VioletPoolCard extends LitElement {
           ${currentValue !== undefined
             ? html` <!-- Dosing value hero with progress bar --><div class="dosing-value-block tooltip-wrap" style="position:relative"><div class="dosing-value-row"><div class="dosing-value-main" style="color: ${valueColor?.color || 'var(--vpc-text)'}"><span class="dosing-label-tag">${dosingLabel}</span><span class="dosing-current-value">${currentValue.toFixed(decimals)}</span><span class="dosing-current-unit">${unit}</span></div><div class="dosing-status-pill" style="background: ${valueColor?.color ? valueColor.color + '18' : 'rgba(0,0,0,0.05)'}; color: ${valueColor?.color || 'var(--vpc-text-secondary)'}"> ${valueStatusLabel} </div></div>
               <div class="t-tip t-up">
-                <div class="t-tip-title"><ha-icon icon="${this._getDosingIcon(dosingType)}"></ha-icon>${dosingType === 'chlorine' ? 'ORP – Chlorwirksamkeit' : 'pH-Wert'}</div>
+                <div class="t-tip-title"><ha-icon icon="${this._getDosingIcon(dosingType)}"></ha-icon>${dosingType === 'chlorine' ? i18n.t('dosing_tooltip_orp') : i18n.t('dosing_tooltip_ph')}</div>
                 <div class="t-tip-desc">${dosingType === 'chlorine' ? i18n.t('orp_desc_value', { value: currentValue.toFixed(0), target: targetValue !== undefined ? i18n.t('target_suffix_mv', { value: targetValue.toFixed(0) }) : '' }) : i18n.t('ph_desc_value', { value: currentValue.toFixed(1), target: targetValue !== undefined ? i18n.t('target_suffix', { value: targetValue.toFixed(1) }) : '' })}</div>
-                <div class="t-tip-ideal"><ha-icon icon="mdi:target"></ha-icon>${dosingType === 'chlorine' ? '650 – 750 mV Optimal' : '7.0 – 7.4 Optimal'}</div>
+                <div class="t-tip-ideal"><ha-icon icon="mdi:target"></ha-icon>${dosingType === 'chlorine' ? i18n.t('dosing_optimal_orp') : i18n.t('dosing_optimal_ph')}</div>
               </div> ${valuePct !== undefined ? html`
                         <div class="chem-range-bar">
                           <div class="chem-range-track">
@@ -1699,7 +1727,7 @@ export class VioletPoolCard extends LitElement {
               <!-- Enhanced Dosing Controls -->
               <div style="background: var(--vpc-surface); border-radius: 10px; padding: 12px; margin-bottom: 12px;">
                 <div style="font-size: 11px; font-weight: 600; color: var(--vpc-text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">
-                  Manual Dosing Control
+                  ${i18n.t('dosing_manual_control')}
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
                   <button style="padding: 8px; border: none; border-radius: 6px; background: ${accentColor}; color: white; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
@@ -1726,20 +1754,12 @@ export class VioletPoolCard extends LitElement {
             : ''}
 
           ${config.show_history && dosingVolume24h !== undefined
-            ? html` <div class="info-row"><ha-icon icon="mdi:chart-line"></ha-icon><span class="info-label">Last 24h</span><span class="info-value">${dosingVolume24h}ml</span></div> `
+            ? html` <div class="info-row"><ha-icon icon="mdi:chart-line"></ha-icon><span class="info-label">${i18n.t('dosing_last_24h')}</span><span class="info-value">${dosingVolume24h}ml</span></div> `
             : ''}
           ${this._renderRecommendationList(dosingRecommendations)}
         </div>
       </ha-card>
     `;
-  }
-
-  private _detectDosingType(entity: string): string {
-    if (entity.includes('_cl')) return 'chlorine';
-    if (entity.includes('_phm')) return 'ph_minus';
-    if (entity.includes('_php')) return 'ph_plus';
-    if (entity.includes('_floc')) return 'flocculant';
-    return 'chlorine';
   }
 
   private _getDosingIcon(dosingType: string): string {
@@ -2388,7 +2408,8 @@ export class VioletPoolCard extends LitElement {
         detailStatus = EntityHelper.formatSnakeCase(dosingState[0]);
       }
 
-      const dosingType = this._detectDosingType(entityId);
+      const dosingType =
+        detectDosingType(entityId, this._translationKeyOf(entityId)) ?? 'chlorine';
       if (dosingType === 'chlorine') {
         const orpSensorId = this._getEntityId('orp_value_entity', 'sensor', 'redoxpotential');
         const orpSensor = this.hass.states[orpSensorId];
@@ -3373,12 +3394,12 @@ export class VioletPoolCard extends LitElement {
 
     const levelSensor = this.hass.states[levelSensorId];
     if (!levelSensor) {
-      return html`<ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">Wassersensor nicht gefunden</span><span class="error-entity">${levelSensorId}</span></div></div></ha-card>`;
+      return html`<ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">${i18n.t('water_sensor_not_found')}</span><span class="error-entity">${levelSensorId}</span></div></div></ha-card>`;
     }
 
     const level = parseFloat(levelSensor.state) || 0;
     const maxLevel = config.max_level || 100;
-    const name = config.name || levelSensor.attributes.friendly_name || 'Wasserstand';
+    const name = config.name || levelSensor.attributes.friendly_name || i18n.t('water_level_name');
     const accentColor = this._getAccentColor('refill', config);
 
     const valveEntity = valveEntityId ? this.hass.states[valveEntityId] : undefined;
@@ -3512,7 +3533,7 @@ export class VioletPoolCard extends LitElement {
 
     const powerSensor = this.hass.states[powerSensorId];
     if (!powerSensor) {
-      return html`<ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">PV-Sensor nicht gefunden</span><span class="error-entity">${powerSensorId}</span></div></div></ha-card>`;
+      return html`<ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">${i18n.t('pv_sensor_not_found')}</span><span class="error-entity">${powerSensorId}</span></div></div></ha-card>`;
     }
 
     const power = parseFloat(powerSensor.state) || 0;
