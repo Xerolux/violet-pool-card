@@ -73,6 +73,7 @@ export const LEGACY_SUFFIX_TO_SLOT: Record<string, LegacyEntitySlot> = {
   // rendered its "entity not found" card. `tests/entity-registry.test.ts`
   // now checks that every channel in DOSING_CHANNELS has its slot.
   dosierung_ph_plus: { domain: 'switch', translationKey: 'dos_5_php', currentSuffix: 'dosing_ph_plus' },
+  dosierung_ph_1: { domain: 'switch', translationKey: 'dos_5_php', currentSuffix: 'dosing_ph_plus' },
   flockmittel: { domain: 'switch', translationKey: 'dos_6_floc', currentSuffix: 'flocculant' },
   schaltregel_1: { domain: 'switch', translationKey: 'dirule_1', currentSuffix: 'switching_rule_1' },
   // Climate and cover

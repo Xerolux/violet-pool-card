@@ -9,7 +9,7 @@ anyone there either.
 > **Historical note:** entries up to and including 0.4.1 were written in
 > German, before the language policy existed. They are kept as published.
 
-## [0.5.4] - 2026-08-22
+## [0.5.5] - 2026-08-23
 
 ### 🐛 Bug Fixes
 
@@ -56,6 +56,27 @@ anyone there either.
   They were evaluated when the module was imported and when the element was
   constructed - both before `hass` says which language to use, which would
   have frozen them in German for everyone.
+- **The language guard could not see `Ist`, `Ziel` or `Min. Freigabetemperatur:`.**
+  It only looked at template text without a value in it, and matched its word
+  list case-sensitively - so a label that is one capitalised noun, or a
+  sentence with `${...}` in the middle, walked straight through. It now cuts
+  the expressions out and checks the literal parts around them. That found 18
+  more strings, the ones 0.5.4 added among them; they are in the table now.
+
+- **The pump card's recommendation list is rendered again.** 0.5.4 computed it
+  and dropped the line that showed it.
+
+
+## [0.5.4] - 2026-08-23
+
+### 🐛 Bug Fixes
+
+- **Universal Auto-Discovery for Dosing, Solar, Backwash, Refill, and Flow Rate Cards:**
+  - Solved entity lookup issues where cards failed to find their entities on installations without active entity registry access in dashboard mode.
+  - Multi-channel dosing (`chlorine`, `ph_minus`, `ph_plus`, `flocculant`) now searches mode select entities (`select.*_mode`), sensor stand-ins (`sensor.*_dosing_system`), and switches across all languages seamlessly.
+  - Relaxed `dosing_type` validation with lenient normalization (e.g. `ph-`, `ph+`, `ph_minus`, `flocculant`, `chlorine`) so pasted configuration choices no longer cause hard fatal errors in Lovelace.
+  - Solar and heater cards now seamlessly discover temperature sensors and target setpoints whether configured as climate entities, switch entities, or discrete sensor/number entities.
+  - Backwash and refill cards resolve sensors, switches, and binary sensors gracefully across both German and English integration naming schemes.
 
 ## [0.5.3] - 2026-08-22
 

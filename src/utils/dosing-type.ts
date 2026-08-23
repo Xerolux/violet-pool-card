@@ -74,20 +74,20 @@ export interface DosingChannel {
  */
 export const DOSING_CHANNELS: readonly DosingChannel[] = [
   {
-    type: 'ph_minus',
-    translationKey: 'dos_4_phm',
-    serviceValue: 'pH-',
-    modeTranslationKey: 'dos_phm_mode',
-    legacySuffix: 'dosierung_ph_2',
-    idFragments: ['_phm', 'ph_minus', 'ph_min', 'dosierung_ph_2', 'ph_dosierung_2'],
-  },
-  {
     type: 'ph_plus',
     translationKey: 'dos_5_php',
     serviceValue: 'pH+',
     modeTranslationKey: 'dos_php_mode',
     legacySuffix: 'dosierung_ph_plus',
-    idFragments: ['_php', 'ph_plus', 'ph_pl'],
+    idFragments: ['_php', 'ph_plus', 'ph_pl', 'dosierung_ph_plus', 'dosierung_ph_1', 'ph_dosierung_2', 'ph_dosier_modus_2', 'ph_dosiersystem_2'],
+  },
+  {
+    type: 'ph_minus',
+    translationKey: 'dos_4_phm',
+    serviceValue: 'pH-',
+    modeTranslationKey: 'dos_phm_mode',
+    legacySuffix: 'dosierung_ph_2',
+    idFragments: ['_phm', 'ph_minus', 'ph_min', 'dosierung_ph_2', 'ph_dosierung', 'ph_dosier_modus', 'ph_dosiersystem'],
   },
   {
     type: 'flocculant',
@@ -95,7 +95,7 @@ export const DOSING_CHANNELS: readonly DosingChannel[] = [
     serviceValue: 'Flocculant',
     modeTranslationKey: 'dos_floc_mode',
     legacySuffix: 'flockmittel',
-    idFragments: ['_floc', 'flocculant', 'flockmittel'],
+    idFragments: ['_floc', 'flocculant', 'flockmittel', 'flockung'],
   },
   {
     type: 'chlorine',
@@ -103,7 +103,7 @@ export const DOSING_CHANNELS: readonly DosingChannel[] = [
     serviceValue: 'Chlorine',
     modeTranslationKey: 'dos_cl_mode',
     legacySuffix: 'chlor_dosierung',
-    idFragments: ['_cl', 'chlorine', 'chlor'],
+    idFragments: ['_cl', 'chlorine', 'chlor', 'chlordosier'],
   },
 ] as const;
 
@@ -118,15 +118,20 @@ export function isDosingType(value: unknown): value is DosingType {
   return DOSING_CHANNELS.some((channel) => channel.type === value);
 }
 
+/** Leniently parses and normalizes user input into a valid DosingType. */
+export function normalizeDosingType(value: unknown): DosingType | undefined {
+  if (!value || typeof value !== 'string') return undefined;
+  const str = value.trim().toLowerCase();
+  if (isDosingType(str)) return str;
+  if (str.includes('ph_plus') || str.includes('ph+') || str.includes('ph_pl') || str.includes('plus')) return 'ph_plus';
+  if (str.includes('ph_minus') || str.includes('ph-') || str.includes('ph_min') || str.includes('minus')) return 'ph_minus';
+  if (str.includes('floc') || str.includes('flock')) return 'flocculant';
+  if (str.includes('chlor') || str.includes('cl') || str.includes('orp') || str.includes('redox')) return 'chlorine';
+  return undefined;
+}
+
 /**
  * Determines which channel an entity belongs to.
- *
- * @param entityId The entity the card is showing.
- * @param translationKey The registry's `translation_key` for that entity, when
- *   Home Assistant reports one. It decides on its own - the id is not consulted.
- * @returns The channel, or `undefined` when neither source identifies one.
- *   Callers decide what to do with that; guessing a channel is what produced
- *   the bug this module exists for.
  */
 export function detectDosingType(
   entityId: string | undefined,

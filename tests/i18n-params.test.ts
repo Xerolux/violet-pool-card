@@ -21,10 +21,12 @@ const GERMAN_WORDS = [
   'Becken', 'Wasser', 'Heizung', 'Abdeckung', 'Beleuchtung', 'Dosierung',
   'Kanister', 'Durchfluss', 'Druck', 'Wartung', 'Reinigung', 'Fehler',
   'Warnung', 'Zustand', 'Verbrauch', 'Laufzeit', 'Filterdruck', 'Sollwert',
-  'Sollbereich', 'Zielbereich', 'Trend',
+  'Sollbereich', 'Zielbereich', 'Trend', 'Pumpe', 'Ziel', 'Ist', 'Soll',
+  'Freigabe', 'Freigabetemperatur', 'Komfort', 'Dosier', 'Dosiersystem',
+  'Kanisterinhalt', 'Vorlauf', 'Ruecklauf', 'Zulauf', 'Ablauf',
 ];
 
-const GERMAN = new RegExp(`\\b(${GERMAN_WORDS.join('|')})\\b`);
+const GERMAN = new RegExp(`\\b(${GERMAN_WORDS.join('|')})\\b`, 'i');
 const UMLAUT = /[äöüßÄÖÜ]/;
 const COMMENT = /^\s*(\/\/|\/\*|\*)/;
 
@@ -43,7 +45,16 @@ const userFacingText = (line: string): string[] => {
     const text = match[1] ?? match[2];
     if (text && !/^[a-z0-9_.:#/\- ]+$/.test(text)) found.push(text);
   }
-  for (const match of line.matchAll(/>([^<>{}`$]{3,})</g)) found.push(match[1].trim());
+  // Template text with a value in it - `Min. Freigabetemperatur: ${x}°C` - is
+  // still text the user reads, so the expressions are cut out and the literal
+  // parts around them are checked. Leaving them out is how `Ist`, `Ziel` and
+  // `Min. Freigabetemperatur` walked back in.
+  for (const match of line.matchAll(/>([^<>]{2,})</g)) {
+    for (const part of match[1].split(/\$\{[^}]*\}/)) {
+      const text = part.trim();
+      if (text && !/^[a-z0-9_.:#/\- ]+$/.test(text)) found.push(text);
+    }
+  }
   return found;
 };
 
