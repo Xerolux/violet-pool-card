@@ -75,6 +75,7 @@ export const LEGACY_SUFFIX_TO_SLOT: Record<string, LegacyEntitySlot> = {
   dosierung_ph_plus: { domain: 'switch', translationKey: 'dos_5_php', currentSuffix: 'dosing_ph_plus' },
   dosierung_ph_1: { domain: 'switch', translationKey: 'dos_5_php', currentSuffix: 'dosing_ph_plus' },
   flockmittel: { domain: 'switch', translationKey: 'dos_6_floc', currentSuffix: 'flocculant' },
+  elektrolyse: { domain: 'switch', translationKey: 'dos_2_elo', currentSuffix: 'electrolysis_dosing' },
   schaltregel_1: { domain: 'switch', translationKey: 'dirule_1', currentSuffix: 'switching_rule_1' },
   // Climate and cover
   heizung: { domain: 'climate', translationKey: 'heater', currentSuffix: 'pool_heater' },
@@ -83,6 +84,7 @@ export const LEGACY_SUFFIX_TO_SLOT: Record<string, LegacyEntitySlot> = {
   // Sollwerte
   ph_sollwert: { domain: 'number', translationKey: 'ph_setpoint', currentSuffix: 'ph_setpoint' },
   redox_sollwert: { domain: 'number', translationKey: 'orp_setpoint', currentSuffix: 'orp_setpoint' },
+  chlor_sollwert: { domain: 'number', translationKey: 'chlorine_setpoint', currentSuffix: 'chlorine_setpoint' },
   // Messwerte
   beckenwasser: { domain: 'sensor', translationKey: 'onewire1_value', currentSuffix: 'pool_water' },
   ph_wert: { domain: 'sensor', translationKey: 'ph_value', currentSuffix: 'ph_value' },
@@ -147,7 +149,7 @@ export const CARD_TYPE_MAIN_ENTITY: Record<string, { domain: string; suffix: str
  * one. Everything else either has a default above or resolves its entities
  * itself while rendering.
  */
-export const CARD_TYPES_REQUIRING_ENTITY = new Set(['sensor']);
+export const CARD_TYPES_REQUIRING_ENTITY = new Set(['sensor', 'statistics', 'comparison']);
 
 /** Index key: domain and translation key combined. */
 const indexKey = (domain: string, translationKey: string): string =>

@@ -8,6 +8,7 @@
 import { LitElement, html, css, TemplateResult, CSSResultGroup } from 'lit';
 import { property } from 'lit/decorators.js';
 import { ServiceCaller } from '../utils/service-caller';
+import { VIOLET_PLATFORM, type RegistryDisplayEntry } from '../utils/entity-registry';
 
 export interface PoolError {
   code: number;
@@ -79,6 +80,68 @@ const ERROR_CODE_MAP: Record<number, { message: string; severity: 'info' | 'warn
   9004: { message: 'Internal Error', severity: 'critical', suggestion: 'Restart controller or contact support' },
 };
 
+interface ErrorStateEntity {
+  state: string;
+  last_updated?: string;
+  attributes?: Record<string, unknown>;
+}
+
+const NO_ERROR_STATES = new Set([
+  '', '0', 'none', 'no error', 'no errors', 'ok', 'unknown', 'unavailable',
+  'keine fehler', 'kein fehler', '[]',
+]);
+
+export function discoverVioletErrors(
+  states: Record<string, ErrorStateEntity>,
+  registry?: Record<string, RegistryDisplayEntry>,
+  includeLastError = false
+): PoolError[] {
+  const discovered: PoolError[] = [];
+
+  for (const [entityId, entity] of Object.entries(states)) {
+    if (!entityId.startsWith('sensor.')) continue;
+
+    const registryEntry = registry?.[entityId];
+    if (registryEntry?.platform) {
+      if (registryEntry.platform !== VIOLET_PLATFORM) continue;
+    } else if (!entityId.toLowerCase().includes('violet_pool')) {
+      continue;
+    }
+
+    const lower = entityId.toLowerCase();
+    const activeErrorSensor = lower.includes('active_errors') || lower.includes('active_error');
+    const currentGermanErrorSensor = lower.includes('fehler') && !lower.includes('last');
+    const historicalErrorSensor = includeLastError && lower.includes('last_error');
+    if (!activeErrorSensor && !currentGermanErrorSensor && !historicalErrorSensor) continue;
+
+    const attributes = entity.attributes || {};
+    const reportedCount = Number(attributes.error_count);
+    const reportedErrors = attributes.errors;
+    if (reportedCount === 0 || (Array.isArray(reportedErrors) && reportedErrors.length === 0)) {
+      continue;
+    }
+
+    const stateStr = String(entity.state || '').trim();
+    if (NO_ERROR_STATES.has(stateStr.toLowerCase())) continue;
+
+    const numCode = Number.parseInt(stateStr, 10);
+    const code = Number.isFinite(numCode) && numCode > 0 ? numCode : 0;
+    const mapped = code > 0 ? ERROR_CODE_MAP[code] : undefined;
+    discovered.push({
+      code,
+      message: mapped?.message || stateStr,
+      severity: mapped?.severity || 'warning',
+      type: 'error',
+      timestamp: new Date(entity.last_updated || Date.now()),
+      device: String(attributes.friendly_name || 'Violet Pool Controller'),
+      suggestion: mapped?.suggestion || 'Check controller web interface or reset blockings',
+      context: attributes,
+    });
+  }
+
+  return discovered;
+}
+
 export class ErrorDashboard extends LitElement {
   @property({ type: Array }) errors: PoolError[] = [];
   @property({ type: String }) view: 'current' | 'history' | 'stats' = 'current';
@@ -117,55 +180,13 @@ export class ErrorDashboard extends LitElement {
     }
   }
 
-  private getErrorInfo(code: number) {
-    return ERROR_CODE_MAP[code] || {
-      message: `Unknown Error (${code})`,
-      severity: 'critical' as const,
-      suggestion: 'Contact pool controller support',
-    };
-  }
-
   private _getEffectiveErrors(): PoolError[] {
     if (this.errors.length > 0) {
       return this.errors;
     }
 
     if (!this.hass?.states) return [];
-    const states = this.hass.states as Record<string, any>;
-    const discovered: PoolError[] = [];
-
-    // Check active error sensors
-    for (const [entityId, entity] of Object.entries(states)) {
-      if (!entityId.startsWith('sensor.')) continue;
-      const lower = entityId.toLowerCase();
-
-      if (lower.includes('active_errors') || lower.includes('last_error') || lower.includes('fehler')) {
-        const stateStr = String(entity.state || '');
-        if (stateStr && stateStr !== 'none' && stateStr !== '0' && stateStr !== 'unknown' && stateStr !== 'unavailable' && stateStr !== 'OK' && stateStr !== 'Keine Fehler') {
-          // Check if state is a number code or text
-          const numCode = parseInt(stateStr, 10);
-          const code = !isNaN(numCode) && numCode > 0 ? numCode : 9004;
-          const info = ERROR_CODE_MAP[code] || {
-            message: stateStr,
-            severity: 'warning' as const,
-            suggestion: 'Check controller web interface or reset blockings',
-          };
-
-          discovered.push({
-            code,
-            message: info.message || stateStr,
-            severity: info.severity || 'warning',
-            type: 'error',
-            timestamp: new Date(entity.last_updated || Date.now()),
-            device: (entity.attributes?.friendly_name as string) || 'Violet Pool Controller',
-            suggestion: info.suggestion,
-            context: entity.attributes || undefined,
-          });
-        }
-      }
-    }
-
-    return discovered;
+    return discoverVioletErrors(this.hass.states, this.hass.entities, this.showResolved);
   }
 
   private renderCurrentErrors(): TemplateResult {
@@ -188,13 +209,15 @@ export class ErrorDashboard extends LitElement {
 
     return html`
       <div class="errors-list">
-        ${sorted.map((error, idx) => this.renderErrorCard(error, idx))}
+        ${sorted.map((error, idx) => this.renderErrorCard(error, idx, this.errors.length > 0))}
       </div>
     `;
   }
 
-  private renderErrorCard(error: PoolError, idx: number): TemplateResult {
-    const info = this.getErrorInfo(error.code);
+  private renderErrorCard(error: PoolError, idx: number, canDismiss: boolean): TemplateResult {
+    const mapped = error.code > 0 ? ERROR_CODE_MAP[error.code] : undefined;
+    const message = mapped?.message || error.message;
+    const suggestion = error.suggestion || mapped?.suggestion || 'Contact pool controller support';
     const severityEmoji = { critical: '🔴', warning: '🟡', info: '🔵' };
 
     return html`
@@ -206,21 +229,19 @@ export class ErrorDashboard extends LitElement {
           <div class="error-time">
             ${error.timestamp.toLocaleString()}
           </div>
-          <button class="dismiss-btn" @click="${() => this.dismissError(idx)}" title="Dismiss error">
-            ✕
-          </button>
+          ${canDismiss ? html`<button class="dismiss-btn" @click="${() => this.dismissError(idx)}" title="Dismiss error">✕</button>` : ''}
         </div>
 
         <div class="error-content">
-          <div class="error-code">#${error.code.toString().padStart(4, '0')}</div>
-          <div class="error-message">${info.message}</div>
+          ${error.code > 0 ? html`<div class="error-code">#${error.code.toString().padStart(4, '0')}</div>` : ''}
+          <div class="error-message">${message}</div>
           <div class="error-device">Device: ${error.device}</div>
         </div>
 
         <div class="error-details">
           <div class="suggestion">
             <div class="suggestion-title">💡 Suggestion:</div>
-            <div class="suggestion-text">${info.suggestion}</div>
+            <div class="suggestion-text">${suggestion}</div>
           </div>
           ${error.context ? html`
             <details class="context">
@@ -234,23 +255,24 @@ export class ErrorDashboard extends LitElement {
   }
 
   private renderStats(): TemplateResult {
+    const effectiveErrors = this._getEffectiveErrors();
     const bySeverity = {
-      critical: this.errors.filter(e => e.severity === 'critical').length,
-      warning: this.errors.filter(e => e.severity === 'warning').length,
-      info: this.errors.filter(e => e.severity === 'info').length,
+      critical: effectiveErrors.filter(e => e.severity === 'critical').length,
+      warning: effectiveErrors.filter(e => e.severity === 'warning').length,
+      info: effectiveErrors.filter(e => e.severity === 'info').length,
     };
 
     const byType = {
-      error: this.errors.filter(e => e.type === 'error').length,
-      alert: this.errors.filter(e => e.type === 'alert').length,
-      message: this.errors.filter(e => e.type === 'message').length,
+      error: effectiveErrors.filter(e => e.type === 'error').length,
+      alert: effectiveErrors.filter(e => e.type === 'alert').length,
+      message: effectiveErrors.filter(e => e.type === 'message').length,
     };
 
     return html`
       <div class="stats-grid">
         <div class="stat-card">
           <div class="stat-label">Total Errors</div>
-          <div class="stat-value">${this.errors.length}</div>
+          <div class="stat-value">${effectiveErrors.length}</div>
         </div>
         <div class="stat-card critical">
           <div class="stat-label">🔴 Critical</div>
@@ -269,17 +291,17 @@ export class ErrorDashboard extends LitElement {
       <div class="type-stats">
         <div class="type-stat">
           <div class="type-label">Errors</div>
-          <div class="type-bar" style="width: ${(byType.error / this.errors.length * 100) || 0}%"></div>
+          <div class="type-bar" style="width: ${(byType.error / effectiveErrors.length * 100) || 0}%"></div>
           <div class="type-count">${byType.error}</div>
         </div>
         <div class="type-stat">
           <div class="type-label">Alerts</div>
-          <div class="type-bar" style="width: ${(byType.alert / this.errors.length * 100) || 0}%"></div>
+          <div class="type-bar" style="width: ${(byType.alert / effectiveErrors.length * 100) || 0}%"></div>
           <div class="type-count">${byType.alert}</div>
         </div>
         <div class="type-stat">
           <div class="type-label">Messages</div>
-          <div class="type-bar" style="width: ${(byType.message / this.errors.length * 100) || 0}%"></div>
+          <div class="type-bar" style="width: ${(byType.message / effectiveErrors.length * 100) || 0}%"></div>
           <div class="type-count">${byType.message}</div>
         </div>
       </div>
@@ -287,14 +309,15 @@ export class ErrorDashboard extends LitElement {
   }
 
   protected render(): TemplateResult {
+    const effectiveErrors = this._getEffectiveErrors();
     return html`
       <div class="error-dashboard">
         <!-- Header -->
         <div class="dashboard-header">
           <div class="header-title">
             Error Dashboard
-            ${this.errors.length > 0 ? html`
-              <span class="error-badge">${this.errors.length}</span>
+            ${effectiveErrors.length > 0 ? html`
+              <span class="error-badge">${effectiveErrors.length}</span>
             ` : ''}
           </div>
           <div class="header-controls">
@@ -347,8 +370,9 @@ export class ErrorDashboard extends LitElement {
     }
 
     .error-dashboard {
-      background: linear-gradient(135deg, rgba(139, 0, 0, 0.05) 0%, rgba(255, 69, 0, 0.03) 100%);
-      border: 1px solid rgba(255, 69, 0, 0.2);
+      background: var(--card-background-color, #fff);
+      color: var(--primary-text-color, #212121);
+      border: 1px solid var(--divider-color, rgba(127, 127, 127, 0.2));
       border-radius: 12px;
       padding: 20px;
       display: flex;
@@ -366,7 +390,7 @@ export class ErrorDashboard extends LitElement {
     .header-title {
       font-size: 18px;
       font-weight: 700;
-      color: #fff;
+      color: var(--primary-text-color, #212121);
       display: flex;
       align-items: center;
       gap: 12px;
@@ -392,7 +416,7 @@ export class ErrorDashboard extends LitElement {
     .view-tabs {
       display: flex;
       gap: 4px;
-      background: rgba(0, 0, 0, 0.2);
+      background: var(--secondary-background-color, rgba(127, 127, 127, 0.12));
       padding: 4px;
       border-radius: 8px;
     }
@@ -401,7 +425,7 @@ export class ErrorDashboard extends LitElement {
       padding: 6px 12px;
       background: transparent;
       border: none;
-      color: rgba(255, 255, 255, 0.6);
+      color: var(--secondary-text-color, #727272);
       font-size: 12px;
       font-weight: 600;
       cursor: pointer;
@@ -410,19 +434,19 @@ export class ErrorDashboard extends LitElement {
     }
 
     .tab:hover {
-      color: rgba(255, 255, 255, 0.8);
+      color: var(--primary-text-color, #212121);
     }
 
     .tab.active {
       background: rgba(255, 69, 0, 0.3);
-      color: #fff;
+      color: var(--primary-text-color, #212121);
     }
 
     .clear-btn {
       padding: 6px 12px;
       background: rgba(255, 69, 0, 0.2);
       border: 1px solid rgba(255, 69, 0, 0.4);
-      color: #fff;
+      color: var(--primary-text-color, #212121);
       border-radius: 6px;
       font-size: 12px;
       font-weight: 600;
@@ -462,7 +486,7 @@ export class ErrorDashboard extends LitElement {
 
     .empty-subtext {
       font-size: 13px;
-      color: rgba(255, 255, 255, 0.5);
+      color: var(--secondary-text-color, #727272);
     }
 
     .errors-list {
@@ -472,7 +496,7 @@ export class ErrorDashboard extends LitElement {
     }
 
     .error-card {
-      background: rgba(0, 0, 0, 0.2);
+      background: var(--secondary-background-color, rgba(127, 127, 127, 0.12));
       border-left: 4px solid;
       border-radius: 8px;
       overflow: hidden;
@@ -495,7 +519,7 @@ export class ErrorDashboard extends LitElement {
     }
 
     .error-card:hover {
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(127, 127, 127, 0.08);
     }
 
     .error-header {
@@ -503,7 +527,7 @@ export class ErrorDashboard extends LitElement {
       justify-content: space-between;
       align-items: center;
       padding: 12px 16px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      border-bottom: 1px solid var(--divider-color, rgba(127, 127, 127, 0.2));
       gap: 12px;
     }
 
@@ -532,14 +556,14 @@ export class ErrorDashboard extends LitElement {
 
     .error-time {
       font-size: 11px;
-      color: rgba(255, 255, 255, 0.4);
+      color: var(--secondary-text-color, #727272);
       flex: 1;
     }
 
     .dismiss-btn {
       background: none;
       border: none;
-      color: rgba(255, 255, 255, 0.4);
+      color: var(--secondary-text-color, #727272);
       cursor: pointer;
       font-size: 18px;
       padding: 0;
@@ -548,7 +572,7 @@ export class ErrorDashboard extends LitElement {
     }
 
     .dismiss-btn:hover {
-      color: rgba(255, 255, 255, 0.8);
+      color: var(--primary-text-color, #212121);
     }
 
     .error-content {
@@ -560,7 +584,7 @@ export class ErrorDashboard extends LitElement {
 
     .error-code {
       font-size: 11px;
-      color: rgba(255, 255, 255, 0.4);
+      color: var(--secondary-text-color, #727272);
       font-family: 'Courier New', monospace;
       font-weight: 600;
     }
@@ -568,18 +592,18 @@ export class ErrorDashboard extends LitElement {
     .error-message {
       font-size: 14px;
       font-weight: 600;
-      color: #fff;
+      color: var(--primary-text-color, #212121);
     }
 
     .error-device {
       font-size: 12px;
-      color: rgba(255, 255, 255, 0.6);
+      color: var(--secondary-text-color, #727272);
     }
 
     .error-details {
       padding: 12px 16px;
-      background: rgba(0, 0, 0, 0.1);
-      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      background: rgba(127, 127, 127, 0.06);
+      border-top: 1px solid var(--divider-color, rgba(127, 127, 127, 0.2));
     }
 
     .suggestion {
@@ -591,24 +615,24 @@ export class ErrorDashboard extends LitElement {
     .suggestion-title {
       font-size: 12px;
       font-weight: 600;
-      color: rgba(255, 255, 255, 0.7);
+      color: var(--secondary-text-color, #727272);
     }
 
     .suggestion-text {
       font-size: 13px;
-      color: rgba(255, 255, 255, 0.8);
+      color: var(--primary-text-color, #212121);
       line-height: 1.4;
     }
 
     .context {
       margin-top: 12px;
       padding-top: 12px;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      border-top: 1px solid var(--divider-color, rgba(127, 127, 127, 0.2));
     }
 
     .context summary {
       font-size: 12px;
-      color: rgba(255, 255, 255, 0.5);
+      color: var(--secondary-text-color, #727272);
       cursor: pointer;
       user-select: none;
     }
@@ -616,10 +640,10 @@ export class ErrorDashboard extends LitElement {
     .context pre {
       margin-top: 8px;
       padding: 8px;
-      background: rgba(0, 0, 0, 0.3);
+      background: var(--secondary-background-color, rgba(127, 127, 127, 0.12));
       border-radius: 4px;
       font-size: 10px;
-      color: rgba(255, 255, 255, 0.6);
+      color: var(--secondary-text-color, #727272);
       overflow-x: auto;
     }
 
@@ -632,8 +656,8 @@ export class ErrorDashboard extends LitElement {
     }
 
     .stat-card {
-      background: rgba(0, 0, 0, 0.2);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: var(--secondary-background-color, rgba(127, 127, 127, 0.12));
+      border: 1px solid var(--divider-color, rgba(127, 127, 127, 0.2));
       border-radius: 8px;
       padding: 16px;
       text-align: center;
@@ -656,14 +680,14 @@ export class ErrorDashboard extends LitElement {
 
     .stat-label {
       font-size: 12px;
-      color: rgba(255, 255, 255, 0.6);
+      color: var(--secondary-text-color, #727272);
       margin-bottom: 8px;
     }
 
     .stat-value {
       font-size: 32px;
       font-weight: 700;
-      color: #fff;
+      color: var(--primary-text-color, #212121);
     }
 
     .type-stats {
@@ -680,7 +704,7 @@ export class ErrorDashboard extends LitElement {
 
     .type-label {
       font-size: 12px;
-      color: rgba(255, 255, 255, 0.6);
+      color: var(--secondary-text-color, #727272);
       min-width: 60px;
     }
 
@@ -695,7 +719,7 @@ export class ErrorDashboard extends LitElement {
     .type-count {
       font-size: 12px;
       font-weight: 600;
-      color: rgba(255, 255, 255, 0.8);
+      color: var(--primary-text-color, #212121);
       min-width: 30px;
       text-align: right;
     }
@@ -703,7 +727,7 @@ export class ErrorDashboard extends LitElement {
     .history-placeholder {
       padding: 40px;
       text-align: center;
-      color: rgba(255, 255, 255, 0.5);
+      color: var(--secondary-text-color, #727272);
     }
 
     @media (max-width: 600px) {
@@ -728,4 +752,6 @@ export class ErrorDashboard extends LitElement {
   `;
 }
 
-customElements.define('error-dashboard', ErrorDashboard);
+if (typeof customElements !== 'undefined' && !customElements.get('error-dashboard')) {
+  customElements.define('error-dashboard', ErrorDashboard);
+}

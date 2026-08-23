@@ -64,6 +64,14 @@ describe('option tables', () => {
       expect(option.label.trim()).not.toBe('');
     }
   });
+
+  it('offers ORP and free chlorine as distinct dosing measurements', () => {
+    const orp = DOSING_TYPE_OPTIONS.find((option) => option.value === 'chlorine');
+    const free = DOSING_TYPE_OPTIONS.find((option) => option.value === 'free_chlorine');
+
+    expect(orp?.label).toMatch(/ORP/i);
+    expect(free?.label).toMatch(/mg\/l/i);
+  });
 });
 
 describe('CARD_TYPE_OPTIONS', () => {

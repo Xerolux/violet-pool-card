@@ -112,6 +112,7 @@ describe('resolveEntityId', () => {
       entry('sensor.violet_pool_controller_ph_value', 'ph_value'),
       entry('climate.violet_pool_controller_pool_heater', 'heater'),
       entry('number.violet_pool_controller_orp_setpoint', 'orp_setpoint'),
+      entry('number.violet_pool_controller_chlorine_setpoint', 'chlorine_setpoint'),
       entry('sensor.violet_pool_controller_filter_pressure', 'adc1_value')
     )
   );
@@ -121,6 +122,7 @@ describe('resolveEntityId', () => {
     ['sensor', 'ph_wert', 'sensor.violet_pool_controller_ph_value'],
     ['climate', 'heizung', 'climate.violet_pool_controller_pool_heater'],
     ['number', 'redox_sollwert', 'number.violet_pool_controller_orp_setpoint'],
+    ['number', 'chlor_sollwert', 'number.violet_pool_controller_chlorine_setpoint'],
     ['sensor', 'filterdruck', 'sensor.violet_pool_controller_filter_pressure'],
   ])('resolves the %s the card used to guess as "%s"', (domain, suffix, expected) => {
     expect(resolveEntityId(index, domain, suffix)).toBe(expected);
@@ -307,8 +309,9 @@ describe('CARD_TYPE_MAIN_ENTITY', () => {
   });
 
   it('requires an explicit entity only where none can be guessed', () => {
-    // The generic sensor card is the one that genuinely cannot guess.
-    expect([...CARD_TYPES_REQUIRING_ENTITY]).toEqual(['sensor']);
+    // Generic, statistics and comparison cards need a user-selected source;
+    // comparison additionally asks for its target in the editor.
+    expect([...CARD_TYPES_REQUIRING_ENTITY]).toEqual(['sensor', 'statistics', 'comparison']);
 
     for (const cardType of CARD_TYPES_REQUIRING_ENTITY) {
       expect(CARD_TYPE_MAIN_ENTITY[cardType]).toBeUndefined();
