@@ -1809,16 +1809,33 @@ export class VioletPoolCard extends LitElement {
     let maxValue: number | undefined;
     let unit = '';
 
+    const chlorineSensorId = this._getEntityId('chlorine_value_entity', 'sensor', 'chlorgehalt');
+    const chlorineSensor = this.hass.states[chlorineSensorId];
+    const hasDirectChlorine = Boolean(
+      config.chlorine_value_entity ||
+      (chlorineSensor && !isNaN(parseFloat(chlorineSensor.state)))
+    );
+
     if (dosingType === 'chlorine') {
-      const orpSensorId = this._getEntityId('orp_value_entity', 'sensor', 'redoxpotential');
-      const orpSensor = this.hass.states[orpSensorId];
-      currentValue = orpSensor ? parseFloat(orpSensor.state) : undefined;
-      const targetOrpId = this._getEntityId('target_orp_entity', 'number', 'redox_sollwert');
-      const targetEntity = this.hass.states[targetOrpId];
-      targetValue = targetEntity ? parseFloat(targetEntity.state) : undefined;
-      minValue = Number(targetEntity?.attributes?.min) || 600;
-      maxValue = Number(targetEntity?.attributes?.max) || 800;
-      unit = 'mV';
+      if (hasDirectChlorine && chlorineSensor) {
+        currentValue = parseFloat(chlorineSensor.state);
+        const targetClId = this._getEntityId('target_chlorine_entity' as any, 'number', 'chlor_sollwert');
+        const targetEntity = this.hass.states[targetClId];
+        targetValue = targetEntity ? parseFloat(targetEntity.state) : undefined;
+        minValue = Number(targetEntity?.attributes?.min) || 0.1;
+        maxValue = Number(targetEntity?.attributes?.max) || 2.5;
+        unit = (chlorineSensor.attributes?.unit_of_measurement as string) || 'mg/l';
+      } else {
+        const orpSensorId = this._getEntityId('orp_value_entity', 'sensor', 'redoxpotential');
+        const orpSensor = this.hass.states[orpSensorId];
+        currentValue = orpSensor ? parseFloat(orpSensor.state) : undefined;
+        const targetOrpId = this._getEntityId('target_orp_entity', 'number', 'redox_sollwert');
+        const targetEntity = this.hass.states[targetOrpId];
+        targetValue = targetEntity ? parseFloat(targetEntity.state) : undefined;
+        minValue = Number(targetEntity?.attributes?.min) || 600;
+        maxValue = Number(targetEntity?.attributes?.max) || 800;
+        unit = 'mV';
+      }
     } else if (dosingType === 'ph_minus' || dosingType === 'ph_plus') {
       const phSensorId = this._getEntityId('ph_value_entity', 'sensor', 'ph_wert');
       const phSensor = this.hass.states[phSensorId];
@@ -1926,7 +1943,9 @@ export class VioletPoolCard extends LitElement {
     // Get color and percent for current value – judged against the same
     // user-configurable target ranges the chemistry card uses.
     const dosingBands = resolveThresholds(config.thresholds);
-    const dosingBand = dosingType === 'chlorine' ? dosingBands.orp : dosingBands.ph;
+    const dosingBand = dosingType === 'chlorine'
+      ? (hasDirectChlorine ? (dosingBands.chlorine ?? { min: 0.3, max: 1.5, low: 0.1, high: 2.0, range: [0, 3] as [number, number] }) : dosingBands.orp)
+      : dosingBands.ph;
     const dosingEval = evaluate(currentValue, dosingBand);
     const valueColor = currentValue !== undefined
       ? { color: levelColor(dosingEval.level), intensity: 'medium' as const }
@@ -1939,8 +1958,8 @@ export class VioletPoolCard extends LitElement {
       ? this._getValuePercent(targetValue, minValue, maxValue)
       : undefined;
 
-    const decimals = dosingType === 'chlorine' ? 0 : 1;
-    const dosingLabel = dosingType === 'chlorine' ? 'ORP' : dosingType === 'ph_minus' ? 'pH' : dosingType === 'ph_plus' ? 'pH' : 'Floc';
+    const decimals = dosingType === 'chlorine' ? (hasDirectChlorine ? 2 : 0) : 1;
+    const dosingLabel = dosingType === 'chlorine' ? (hasDirectChlorine ? 'Chlor' : 'ORP') : dosingType === 'ph_minus' ? 'pH' : dosingType === 'ph_plus' ? 'pH' : 'Floc';
     const valueStatusLabel = valueColor ? levelLabel(dosingEval) : '';
     const dosingRecommendations = SeverityModel.getDosingRecommendations({
       dosingType,
@@ -1971,9 +1990,9 @@ export class VioletPoolCard extends LitElement {
           ${currentValue !== undefined
             ? html` <!-- Dosing value hero with progress bar --><div class="dosing-value-block tooltip-wrap" style="position:relative"><div class="dosing-value-row"><div class="dosing-value-main" style="color: ${valueColor?.color || 'var(--vpc-text)'}"><span class="dosing-label-tag">${dosingLabel}</span><span class="dosing-current-value">${currentValue.toFixed(decimals)}</span><span class="dosing-current-unit">${unit}</span></div><div class="dosing-status-pill" style="background: ${valueColor?.color ? valueColor.color + '18' : 'rgba(0,0,0,0.05)'}; color: ${valueColor?.color || 'var(--vpc-text-secondary)'}"> ${valueStatusLabel} </div></div>
               <div class="t-tip t-up">
-                <div class="t-tip-title"><ha-icon icon="${this._getDosingIcon(dosingType)}"></ha-icon>${dosingType === 'chlorine' ? i18n.t('dosing_tooltip_orp') : i18n.t('dosing_tooltip_ph')}</div>
-                <div class="t-tip-desc">${dosingType === 'chlorine' ? i18n.t('orp_desc_value', { value: currentValue.toFixed(0), target: targetValue !== undefined ? i18n.t('target_suffix_mv', { value: targetValue.toFixed(0) }) : '' }) : i18n.t('ph_desc_value', { value: currentValue.toFixed(1), target: targetValue !== undefined ? i18n.t('target_suffix', { value: targetValue.toFixed(1) }) : '' })}</div>
-                <div class="t-tip-ideal"><ha-icon icon="mdi:target"></ha-icon>${dosingType === 'chlorine' ? i18n.t('dosing_optimal_orp') : i18n.t('dosing_optimal_ph')}</div>
+                <div class="t-tip-title"><ha-icon icon="${this._getDosingIcon(dosingType)}"></ha-icon>${dosingType === 'chlorine' ? (hasDirectChlorine ? i18n.t('dosing_tooltip_chlorine') : i18n.t('dosing_tooltip_orp')) : i18n.t('dosing_tooltip_ph')}</div>
+                <div class="t-tip-desc">${dosingType === 'chlorine' ? (hasDirectChlorine ? i18n.t('chlorine_desc_value', { value: currentValue.toFixed(2), unit, target: targetValue !== undefined ? i18n.t('target_suffix', { value: `${targetValue.toFixed(2)} ${unit}` }) : '' }) : i18n.t('orp_desc_value', { value: currentValue.toFixed(0), target: targetValue !== undefined ? i18n.t('target_suffix_mv', { value: targetValue.toFixed(0) }) : '' })) : i18n.t('ph_desc_value', { value: currentValue.toFixed(1), target: targetValue !== undefined ? i18n.t('target_suffix', { value: targetValue.toFixed(1) }) : '' })}</div>
+                <div class="t-tip-ideal"><ha-icon icon="mdi:target"></ha-icon>${dosingType === 'chlorine' ? (hasDirectChlorine ? i18n.t('dosing_optimal_chlorine') : i18n.t('dosing_optimal_orp')) : i18n.t('dosing_optimal_ph')}</div>
               </div> ${valuePct !== undefined ? html`
                         <div class="chem-range-bar">
                           <div class="chem-range-track">

@@ -9,7 +9,7 @@ anyone there either.
 > **Historical note:** entries up to and including 0.4.1 were written in
 > German, before the language policy existed. They are kept as published.
 
-## [0.5.5] - 2026-08-23
+## [0.5.6] - 2026-08-23
 
 ### 🐛 Bug Fixes
 
@@ -66,6 +66,34 @@ anyone there either.
 - **The pump card's recommendation list is rendered again.** 0.5.4 computed it
   and dropped the line that showed it.
 
+### 🚀 Enhancements & Bug Fixes
+
+- **Direct Chlorine Sensor Display in Dosing Card:**
+  - When a direct free chlorine sensor (`sensor.*_chlorine_value`, `sensor.*_chlorgehalt`, `sensor.*_pot_value` in mg/l or ppm) is present or configured, the Chlorine Dosing Card now shows free chlorine (e.g. `0.65 mg/l` or `0.23 mg/l`) instead of defaulting strictly to ORP (mV).
+  - Automatically discovers chlorine setpoints (`number.*_chlor_sollwert` / `number.*_chlorine_setpoint`) and evaluates optimal ranges (0.3 – 1.5 mg/l).
+  - Falls back seamlessly to ORP (mV) if only a redox probe is installed.
+- **Visual Editor UX Overhaul:**
+  - Reorganized the card editor so all functional options (`dosing_type`, entity overrides, chemistry settings) appear right at the top directly under Card Type and Entity selection.
+  - Sizing, theming, layout, animations, and presets moved to subsequent sections so configuration is fast and intuitive.
+
+- **0.5.5's two new editor labels are in the table too.** `Chlor-Sensor
+  (override)` and `Chlor-Sensor (optional mg/l / ppm)` came in with the direct
+  chlorine sensor; the second is one the guard cannot see yet, since a label
+  that is a single German noun followed by an English parenthesis has no word
+  the list knows.
+
+
+## [0.5.5] - 2026-08-23
+
+### 🚀 Enhancements & Bug Fixes
+
+- **Direct Chlorine Sensor Display in Dosing Card:**
+  - When a direct free chlorine sensor (`sensor.*_chlorine_value`, `sensor.*_chlorgehalt`, `sensor.*_pot_value` in mg/l or ppm) is present or configured, the Chlorine Dosing Card now shows free chlorine (e.g. `0.65 mg/l` or `0.23 mg/l`) instead of defaulting strictly to ORP (mV).
+  - Automatically discovers chlorine setpoints (`number.*_chlor_sollwert` / `number.*_chlorine_setpoint`) and evaluates optimal ranges (0.3 – 1.5 mg/l).
+  - Falls back seamlessly to ORP (mV) if only a redox probe is installed.
+- **Visual Editor UX Overhaul:**
+  - Reorganized the card editor so all functional options (`dosing_type`, entity overrides, chemistry settings) appear right at the top directly under Card Type and Entity selection.
+  - Sizing, theming, layout, animations, and presets moved to subsequent sections so configuration is fast and intuitive.
 
 ## [0.5.4] - 2026-08-23
 
