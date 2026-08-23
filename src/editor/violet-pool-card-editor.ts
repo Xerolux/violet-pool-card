@@ -146,193 +146,51 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
             `}
           </div>
         ` : ''}
-
-        <!-- Premium Design Options -->
-        <div class="config-section premium-section">
-          <div class="section-header premium-header">
-            <ha-icon icon="mdi:palette"></ha-icon>
-            <span>✨ Premium Design</span>
-          </div>
-
-          <!-- Size Picker -->
-          <div class="picker-container">
-            <label>Card Size</label>
-            <div class="size-picker">
-              ${['small', 'medium', 'large', 'fullscreen'].map(
-                (size) => html` <button class="size-button ${this._config.size === size ? 'active' : ''}" @click="${() => this._sizeChanged(size)}" ><div class="size-preview size-${size}"></div><span>${this._formatSizeName(size)}</span></button> `
-              )}
-            </div>
-          </div>
-
-          <!-- Theme Picker -->
-          <div class="picker-container">
-            <label>Theme Style</label>
-            <div class="theme-picker">
-              ${[
-                { value: 'classic', icon: '', label: 'Classic', desc: 'Clean & Timeless', preview: '#fff' },
-                { value: 'midnight', icon: '', label: 'Midnight', desc: 'Deep Dark', preview: '#1C1C1E' },
-                { value: 'elegance', icon: '', label: 'Elegance', desc: 'Luxury Gold', preview: '#FFD700' },
-                { value: 'vibrant', icon: '', label: 'Vibrant', desc: 'Bold Colors', preview: '#FF6B6B' },
-                { value: 'pure', icon: '', label: 'Pure', desc: 'Ultra Minimal', preview: '#fff' },
-                { value: 'frost', icon: '', label: 'Frost', desc: 'Frosted Glass', preview: 'rgba(255,255,255,0.7)' },
-                { value: 'glow', icon: '', label: 'Glow', desc: 'Neon Nights', preview: '#0D0D14' },
-                { value: 'metallic', icon: '', label: 'Metallic', desc: 'Chrome Shine', preview: '#C0C0C0' },
-                { value: 'ocean', icon: '', label: 'Ocean', desc: 'Sea Blue', preview: '#0077BE' },
-                { value: 'sunset', icon: '', label: 'Sunset', desc: 'Warm Orange', preview: '#FF6B35' },
-                { value: 'forest', icon: '', label: 'Forest', desc: 'Natural Green', preview: '#228B22' },
-                { value: 'aurora', icon: '', label: 'Aurora', desc: 'Northern Lights', preview: 'linear-gradient(45deg, #00C9FF 0%, #92FE9D 100%)' },
-                { value: 'lagoon', icon: '', label: 'Lagoon', desc: 'Dark · Violet Accent', preview: 'linear-gradient(160deg, #0d1b2a 0%, #9b6dff 100%)' },
-              ].map(
-                (theme) => html` <button class="theme-button ${this._config.theme === theme.value || (!this._config.theme && theme.value === 'classic') ? 'active' : ''}" @click="${() => this._themeChanged(theme.value)}" ><div class="theme-preview theme-${theme.value}"><div class="theme-dot" style="background:${theme.preview}"></div></div><div class="theme-info"><span class="theme-label">${theme.label}</span><span class="theme-desc">${theme.desc}</span></div></button> `
-              )}
-            </div>
-          </div>
-
-          <!-- Advanced Customization -->
-          <div class="config-section">
-            <div class="section-header">
-              <ha-icon icon="mdi:tune"></ha-icon>
-              <span>Advanced Customization</span>
-            </div>
-
-            <ha-textfield
-              label="Custom Width (px)"
-              type="number"
-              .value="${this._config.custom_width || ''}"
-              placeholder="Auto"
-              @input="${this._customWidthChanged}"
-            ></ha-textfield>
-
-            <ha-textfield
-              label="Custom Height (px)"
-              type="number"
-              .value="${this._config.custom_height || ''}"
-              placeholder="Auto"
-              @input="${this._customHeightChanged}"
-            ></ha-textfield>
-
-            <ha-textfield
-              label="Custom Padding (px)"
-              type="number"
-              .value="${this._config.custom_padding || ''}"
-              placeholder="Auto"
-              @input="${this._customPaddingChanged}"
-            ></ha-textfield>
-
-            <ha-textfield
-              label="Border Radius (px)"
-              type="number"
-              .value="${this._config.border_radius || ''}"
-              placeholder="Auto"
-              @input="${this._borderRadiusChanged}"
-            ></ha-textfield>
-
-            ${this._renderSelect('Shadow Intensity', this._config.shadow_intensity || '', SHADOW_INTENSITY_OPTIONS, this._shadowIntensityChanged)}
-          </div>
-
-          <!-- Animation Picker -->
-          <div class="picker-container">
-            <label>Animation Level</label>
-            <div class="animation-picker">
-              ${[
-                { value: 'none', icon: '⏸️', label: 'None', desc: 'Static' },
-                { value: 'subtle', icon: '🌙', label: 'Subtle', desc: 'Professional' },
-                { value: 'smooth', icon: '✨', label: 'Smooth', desc: 'Balanced' },
-                { value: 'energetic', icon: '🚀', label: 'Energetic', desc: 'Dynamic' },
-              ].map(
-                (anim) => html` <button class="animation-button ${this._config.animation === anim.value ? 'active' : ''}" @click="${() => this._animationChanged(anim.value)}" ><span class="anim-icon">${anim.icon}</span><div class="anim-info"><span class="anim-label">${anim.label}</span><span class="anim-desc">${anim.desc}</span></div></button> `
-              )}
-            </div>
-          </div>
-
-          <div class="picker-container">
-            <label>Quick Presets</label>
-            <div class="preset-picker">
-              ${this._presets.map((preset) => html`
-                <button class="preset-button" @click="${() => this._applyPreset(preset.id)}">
-                  <span class="preset-label">${preset.label}</span>
-                  <span class="preset-desc">${preset.description}</span>
-                </button>
-              `)}
-            </div>
-          </div>
-
-          <div class="config-section">
-            <div class="section-header">
-              <ha-icon icon="mdi:view-dashboard-variant"></ha-icon>
-              <span>Dashboard Layout</span>
-            </div>
-            ${this._renderSelect('Layout Variant', this._config.layout_variant || 'glass', LAYOUT_VARIANT_OPTIONS, this._layoutVariantChanged)}
-
-            ${this._renderSelect('Alarm Style', this._config.alarm_style || 'pulse', ALARM_STYLE_OPTIONS, this._alarmStyleChanged)}
-
-            ${this._renderSelect('Accessibility', this._config.accessibility_mode || 'standard', ACCESSIBILITY_OPTIONS, this._accessibilityModeChanged)}
-
-            ${this._renderSelect('Dashboard Mode', this._config.dashboard_mode || 'default', DASHBOARD_MODE_OPTIONS, this._dashboardModeChanged)}
-          </div>
-        </div>
-
-        <!-- Basic Options -->
-        <div class="config-section">
-          <div class="section-header">
-            <ha-icon icon="mdi:cog"></ha-icon>
-            <span>Basic Options</span>
-          </div>
-
-          <ha-textfield
-            label="Custom Name (optional)"
-            .value="${this._config.name || ''}"
-            @input="${this._nameChanged}"
-          ></ha-textfield>
-
-          <ha-icon-picker
-            label="Custom Icon (optional)"
-            .hass="${this.hass}"
-            .value="${this._config.icon || ''}"
-            @value-changed="${this._iconChanged}"
-          ></ha-icon-picker>
-        </div>
-
-        <!-- Display Options -->
-        <div class="config-section">
-          <div class="section-header">
-            <ha-icon icon="mdi:eye"></ha-icon>
-            <span>Display Options</span>
-          </div>
-
-          <ha-formfield label="Show state badge">
-            <ha-switch
-              .checked="${this._config.show_state !== false}"
-              @change="${this._showStateChanged}"
-            ></ha-switch>
-          </ha-formfield>
-
-          <ha-formfield label="Show detail status">
-            <ha-switch
-              .checked="${this._config.show_detail_status !== false}"
-              @change="${this._showDetailStatusChanged}"
-            ></ha-switch>
-          </ha-formfield>
-
-          <ha-formfield label="Show controls">
-            <ha-switch
-              .checked="${this._config.show_controls !== false}"
-              @change="${this._showControlsChanged}"
-            ></ha-switch>
-          </ha-formfield>
-
-          ${this._config.card_type === 'pump'
-            ? html` <ha-formfield label="Show runtime counter"><ha-switch .checked="${this._config.show_runtime === true}" @change="${this._showRuntimeChanged}" ></ha-switch></ha-formfield> `
-            : ''}
-
-          ${this._config.card_type === 'dosing'
-            ? html` <ha-formfield label="Show dosing history"><ha-switch .checked="${this._config.show_history === true}" @change="${this._showHistoryChanged}" ></ha-switch></ha-formfield> `
-            : ''}
-        </div>
-
-        <!-- Dosing Type (for dosing cards) -->
+        <!-- Dosing Card Configuration -->
         ${this._config.card_type === 'dosing'
-          ? html` <div class="config-section"><div class="section-header"><ha-icon icon="mdi:flask"></ha-icon><span>Dosing Type</span></div>${this._renderSelect('Dosing Type', this._config.dosing_type || 'chlorine', DOSING_TYPE_OPTIONS, this._dosingTypeChanged)}</div> `
+          ? html`
+            <div class="config-section">
+              <div class="section-header">
+                <ha-icon icon="mdi:flask"></ha-icon>
+                <span>Dosing Configuration</span>
+              </div>
+              ${this._renderSelect('Dosing Type', this._config.dosing_type || 'chlorine', DOSING_TYPE_OPTIONS, this._dosingTypeChanged)}
+              ${this._config.dosing_type === 'chlorine' || !this._config.dosing_type ? html`
+                <ha-entity-picker
+                  label="Chlor-Sensor (optional mg/l / ppm)"
+                  .hass="${this.hass}"
+                  .value="${this._config.chlorine_value_entity || ''}"
+                  .includeDomains="${['sensor']}"
+                  @value-changed="${(e: CustomEvent) => this._overrideChanged('chlorine_value_entity', e.detail.value)}"
+                  allow-custom-entity
+                ></ha-entity-picker>
+                <ha-entity-picker
+                  label="ORP / Redox Sensor (optional mV)"
+                  .hass="${this.hass}"
+                  .value="${this._config.orp_value_entity || ''}"
+                  .includeDomains="${['sensor']}"
+                  @value-changed="${(e: CustomEvent) => this._overrideChanged('orp_value_entity', e.detail.value)}"
+                  allow-custom-entity
+                ></ha-entity-picker>
+              ` : ''}
+              ${this._config.dosing_type === 'ph_minus' || this._config.dosing_type === 'ph_plus' ? html`
+                <ha-entity-picker
+                  label="pH-Sensor (optional)"
+                  .hass="${this.hass}"
+                  .value="${this._config.ph_value_entity || ''}"
+                  .includeDomains="${['sensor']}"
+                  @value-changed="${(e: CustomEvent) => this._overrideChanged('ph_value_entity', e.detail.value)}"
+                  allow-custom-entity
+                ></ha-entity-picker>
+              ` : ''}
+              <ha-formfield label="Show dosing history">
+                <ha-switch
+                  .checked="${this._config.show_history === true}"
+                  @change="${this._showHistoryChanged}"
+                ></ha-switch>
+              </ha-formfield>
+            </div>
+          `
           : ''}
 
         <!-- Chemistry Card Configuration -->
@@ -430,6 +288,60 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
           `
           : ''}
 
+        <!-- Basic Options -->
+        <div class="config-section">
+          <div class="section-header">
+            <ha-icon icon="mdi:cog"></ha-icon>
+            <span>Basic Options</span>
+          </div>
+
+          <ha-textfield
+            label="Custom Name (optional)"
+            .value="${this._config.name || ''}"
+            @input="${this._nameChanged}"
+          ></ha-textfield>
+
+          <ha-icon-picker
+            label="Custom Icon (optional)"
+            .hass="${this.hass}"
+            .value="${this._config.icon || ''}"
+            @value-changed="${this._iconChanged}"
+          ></ha-icon-picker>
+        </div>
+
+        <!-- Display Options -->
+        <div class="config-section">
+          <div class="section-header">
+            <ha-icon icon="mdi:eye"></ha-icon>
+            <span>Display Options</span>
+          </div>
+
+          <ha-formfield label="Show state badge">
+            <ha-switch
+              .checked="${this._config.show_state !== false}"
+              @change="${this._showStateChanged}"
+            ></ha-switch>
+          </ha-formfield>
+
+          <ha-formfield label="Show detail status">
+            <ha-switch
+              .checked="${this._config.show_detail_status !== false}"
+              @change="${this._showDetailStatusChanged}"
+            ></ha-switch>
+          </ha-formfield>
+
+          <ha-formfield label="Show controls">
+            <ha-switch
+              .checked="${this._config.show_controls !== false}"
+              @change="${this._showControlsChanged}"
+            ></ha-switch>
+          </ha-formfield>
+
+          ${this._config.card_type === 'pump'
+            ? html` <ha-formfield label="Show runtime counter"><ha-switch .checked="${this._config.show_runtime === true}" @change="${this._showRuntimeChanged}" ></ha-switch></ha-formfield> `
+            : ''}
+        </div>
+
         <!-- Water value thresholds -->
         ${THRESHOLD_CARD_TYPES.includes(this._config.card_type) ? html`
           <div class="config-section">
@@ -479,6 +391,7 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
                 <ha-entity-picker label="Chlorine Dosing (override)" .hass="${this.hass}" .value="${this._config.chlorine_entity || ''}" .includeDomains="${['switch']}" @value-changed="${(e: CustomEvent) => this._overrideChanged('chlorine_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker>
               ` : ''}
               ${['dosing','overview','system','chemical'].includes(this._config.card_type) ? html`
+                <ha-entity-picker label="Chlor-Sensor (override)" .hass="${this.hass}" .value="${this._config.chlorine_value_entity || ''}" .includeDomains="${['sensor']}" @value-changed="${(e: CustomEvent) => this._overrideChanged('chlorine_value_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker>
                 <ha-entity-picker label="pH-Sensor (override)" .hass="${this.hass}" .value="${this._config.ph_value_entity || ''}" .includeDomains="${['sensor']}" @value-changed="${(e: CustomEvent) => this._overrideChanged('ph_value_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker>
                 <ha-entity-picker label="ORP-Sensor (override)" .hass="${this.hass}" .value="${this._config.orp_value_entity || ''}" .includeDomains="${['sensor']}" @value-changed="${(e: CustomEvent) => this._overrideChanged('orp_value_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker>
               ` : ''}
@@ -489,6 +402,89 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
           </details>
         ` : ''}
 
+        <!-- Premium Design Options -->
+        <div class="config-section premium-section">
+          <div class="section-header premium-header">
+            <ha-icon icon="mdi:palette"></ha-icon>
+            <span>✨ Premium Design</span>
+          </div>
+
+          <!-- Size Picker -->
+          <div class="picker-container">
+            <label>Card Size</label>
+            <div class="size-picker">
+              ${['small', 'medium', 'large', 'fullscreen'].map(
+                (size) => html` <button class="size-button ${this._config.size === size ? 'active' : ''}" @click="${() => this._sizeChanged(size)}" ><div class="size-preview size-${size}"></div><span>${this._formatSizeName(size)}</span></button> `
+              )}
+            </div>
+          </div>
+
+          <!-- Theme Picker -->
+          <div class="picker-container">
+            <label>Theme Style</label>
+            <div class="theme-picker">
+              ${[
+                { value: 'classic', icon: '', label: 'Classic', desc: 'Clean & Timeless', preview: '#fff' },
+                { value: 'midnight', icon: '', label: 'Midnight', desc: 'Deep Dark', preview: '#1C1C1E' },
+                { value: 'elegance', icon: '', label: 'Elegance', desc: 'Luxury Gold', preview: '#FFD700' },
+                { value: 'vibrant', icon: '', label: 'Vibrant', desc: 'Bold Colors', preview: '#FF6B6B' },
+                { value: 'pure', icon: '', label: 'Pure', desc: 'Ultra Minimal', preview: '#fff' },
+                { value: 'frost', icon: '', label: 'Frost', desc: 'Frosted Glass', preview: 'rgba(255,255,255,0.7)' },
+                { value: 'glow', icon: '', label: 'Glow', desc: 'Neon Nights', preview: '#0D0D14' },
+                { value: 'metallic', icon: '', label: 'Metallic', desc: 'Chrome Shine', preview: '#C0C0C0' },
+                { value: 'ocean', icon: '', label: 'Ocean', desc: 'Sea Blue', preview: '#0077BE' },
+                { value: 'sunset', icon: '', label: 'Sunset', desc: 'Warm Orange', preview: '#FF6B35' },
+                { value: 'forest', icon: '', label: 'Forest', desc: 'Natural Green', preview: '#228B22' },
+                { value: 'aurora', icon: '', label: 'Aurora', desc: 'Northern Lights', preview: 'linear-gradient(45deg, #00C9FF 0%, #92FE9D 100%)' },
+                { value: 'lagoon', icon: '', label: 'Lagoon', desc: 'Dark · Violet Accent', preview: 'linear-gradient(160deg, #0d1b2a 0%, #9b6dff 100%)' },
+              ].map(
+                (theme) => html` <button class="theme-button ${this._config.theme === theme.value || (!this._config.theme && theme.value === 'classic') ? 'active' : ''}" @click="${() => this._themeChanged(theme.value)}" ><div class="theme-preview theme-${theme.value}"><div class="theme-dot" style="background:${theme.preview}"></div></div><div class="theme-info"><span class="theme-label">${theme.label}</span><span class="theme-desc">${theme.desc}</span></div></button> `
+              )}
+            </div>
+          </div>
+
+          <!-- Animation Picker -->
+          <div class="picker-container">
+            <label>Animation Level</label>
+            <div class="animation-picker">
+              ${[
+                { value: 'none', icon: '⏸️', label: 'None', desc: 'Static' },
+                { value: 'subtle', icon: '🌙', label: 'Subtle', desc: 'Professional' },
+                { value: 'smooth', icon: '✨', label: 'Smooth', desc: 'Balanced' },
+                { value: 'energetic', icon: '🚀', label: 'Energetic', desc: 'Dynamic' },
+              ].map(
+                (anim) => html` <button class="animation-button ${this._config.animation === anim.value ? 'active' : ''}" @click="${() => this._animationChanged(anim.value)}" ><span class="anim-icon">${anim.icon}</span><div class="anim-info"><span class="anim-label">${anim.label}</span><span class="anim-desc">${anim.desc}</span></div></button> `
+              )}
+            </div>
+          </div>
+
+          <div class="picker-container">
+            <label>Quick Presets</label>
+            <div class="preset-picker">
+              ${this._presets.map((preset) => html`
+                <button class="preset-button" @click="${() => this._applyPreset(preset.id)}">
+                  <span class="preset-label">${preset.label}</span>
+                  <span class="preset-desc">${preset.description}</span>
+                </button>
+              `)}
+            </div>
+          </div>
+
+          <div class="config-section">
+            <div class="section-header">
+              <ha-icon icon="mdi:view-dashboard-variant"></ha-icon>
+              <span>Dashboard Layout</span>
+            </div>
+            ${this._renderSelect('Layout Variant', this._config.layout_variant || 'glass', LAYOUT_VARIANT_OPTIONS, this._layoutVariantChanged)}
+
+            ${this._renderSelect('Alarm Style', this._config.alarm_style || 'pulse', ALARM_STYLE_OPTIONS, this._alarmStyleChanged)}
+
+            ${this._renderSelect('Accessibility', this._config.accessibility_mode || 'standard', ACCESSIBILITY_OPTIONS, this._accessibilityModeChanged)}
+
+            ${this._renderSelect('Dashboard Mode', this._config.dashboard_mode || 'default', DASHBOARD_MODE_OPTIONS, this._dashboardModeChanged)}
+          </div>
+        </div>
+
         <!-- Advanced Customization -->
         <details class="advanced-section">
           <summary>
@@ -497,6 +493,40 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
           </summary>
 
           <div class="advanced-content">
+            <ha-textfield
+              label="Custom Width (px)"
+              type="number"
+              .value="${this._config.custom_width || ''}"
+              placeholder="Auto"
+              @input="${this._customWidthChanged}"
+            ></ha-textfield>
+
+            <ha-textfield
+              label="Custom Height (px)"
+              type="number"
+              .value="${this._config.custom_height || ''}"
+              placeholder="Auto"
+              @input="${this._customHeightChanged}"
+            ></ha-textfield>
+
+            <ha-textfield
+              label="Custom Padding (px)"
+              type="number"
+              .value="${this._config.custom_padding || ''}"
+              placeholder="Auto"
+              @input="${this._customPaddingChanged}"
+            ></ha-textfield>
+
+            <ha-textfield
+              label="Border Radius (px)"
+              type="number"
+              .value="${this._config.border_radius || ''}"
+              placeholder="Auto"
+              @input="${this._borderRadiusChanged}"
+            ></ha-textfield>
+
+            ${this._renderSelect('Shadow Intensity', this._config.shadow_intensity || '', SHADOW_INTENSITY_OPTIONS, this._shadowIntensityChanged)}
+
             <ha-textfield
               label="Accent Color (hex)"
               .value="${this._config.accent_color || ''}"
