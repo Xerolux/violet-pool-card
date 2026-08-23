@@ -47,6 +47,10 @@ export const CARD_TYPE_OPTIONS: SelectOption[] = [
   { value: 'calibration', label: '🎯 Calibration' },
   { value: 'update', label: '⬆️ Firmware Update' },
   { value: 'diagnostics', label: '🩺 Diagnostics' },
+  { value: 'maintenance', label: '🔧 Maintenance' },
+  { value: 'alerts', label: '🔔 Alerts' },
+  { value: 'statistics', label: '📈 Statistics' },
+  { value: 'comparison', label: '⚖️ Comparison' },
   { value: 'overview', label: '📊 Overview' },
   { value: 'compact', label: '📋 Compact' },
   { value: 'system', label: '🖥️ System Dashboard' },
@@ -56,7 +60,9 @@ export const CARD_TYPE_OPTIONS: SelectOption[] = [
 ];
 
 export const DOSING_TYPE_OPTIONS: SelectOption[] = [
-  { value: 'chlorine', label: '💧 Chlorine (ORP)' },
+  { value: 'chlorine', label: '⚡ Chlorine (Redox / ORP)' },
+  { value: 'free_chlorine', label: '🧪 Free Chlorine (mg/l)' },
+  { value: 'electrolysis', label: '⚡ Electrolysis' },
   { value: 'ph_minus', label: '➖ pH Minus' },
   { value: 'ph_plus', label: '➕ pH Plus' },
   { value: 'flocculant', label: '🌊 Flocculant' },

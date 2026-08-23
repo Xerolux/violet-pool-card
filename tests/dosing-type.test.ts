@@ -1,9 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import {
   DOSING_CHANNELS,
+  DOSING_TYPES,
   detectDosingType,
   dosingChannel,
+  dosingMeasurement,
   isDosingType,
+  normalizeDosingType,
 } from '../src/utils/dosing-type';
 
 /**
@@ -27,6 +30,7 @@ const CURRENT_IDS: ReadonlyArray<[string, string]> = [
   [`${P}dosing_ph_minus`, 'ph_minus'],
   [`${P}dosing_ph_plus`, 'ph_plus'],
   [`${P}flocculant`, 'flocculant'],
+  ['select.violet_pool_controller_electrolysis_dosing_mode', 'electrolysis'],
 ];
 
 /** What installations set up before 2.5.0 still carry. */
@@ -34,6 +38,7 @@ const LEGACY_IDS: ReadonlyArray<[string, string]> = [
   [`${P}chlor_dosierung`, 'chlorine'],
   [`${P}dosierung_ph_2`, 'ph_minus'],
   [`${P}flockmittel`, 'flocculant'],
+  ['sensor.violet_pool_controller_elektrolyse_dosiersystem', 'electrolysis'],
 ];
 
 describe('the channel comes from the registry', () => {
@@ -77,22 +82,57 @@ describe('falling back to the entity id', () => {
 });
 
 describe('the channel table', () => {
-  it('covers every dosing type exactly once', () => {
+  it('covers every physical dosing channel exactly once', () => {
     const types = DOSING_CHANNELS.map((channel) => channel.type);
     expect(new Set(types).size).toBe(types.length);
     expect(new Set(types)).toEqual(
-      new Set(['chlorine', 'ph_minus', 'ph_plus', 'flocculant'])
+      new Set(['chlorine', 'electrolysis', 'ph_minus', 'ph_plus', 'flocculant'])
     );
+  });
+
+  it('offers both chlorine measurements as selectable dosing types', () => {
+    expect(DOSING_TYPES).toContain('chlorine');
+    expect(DOSING_TYPES).toContain('free_chlorine');
   });
 
   it('resolves a type back to its channel', () => {
     expect(dosingChannel('ph_plus').translationKey).toBe('dos_5_php');
     expect(dosingChannel('chlorine').translationKey).toBe('dos_1_cl');
+    expect(dosingChannel('free_chlorine').translationKey).toBe('dos_1_cl');
+    expect(dosingChannel('electrolysis').translationKey).toBe('dos_2_elo');
   });
 
-  it('recognises the four types and nothing else', () => {
+  it('recognises every type and nothing else', () => {
     expect(isDosingType('ph_minus')).toBe(true);
+    expect(isDosingType('electrolysis')).toBe(true);
+    expect(isDosingType('free_chlorine')).toBe(true);
     expect(isDosingType('bleach')).toBe(false);
     expect(isDosingType(undefined)).toBe(false);
+  });
+
+  it('normalizes German and English electrolysis labels', () => {
+    expect(normalizeDosingType('electrolysis')).toBe('electrolysis');
+    expect(normalizeDosingType('Elektrolyse')).toBe('electrolysis');
+  });
+
+  it('normalizes German and English free-chlorine labels', () => {
+    expect(normalizeDosingType('free chlorine')).toBe('free_chlorine');
+    expect(normalizeDosingType('Freies Chlor (mg/l)')).toBe('free_chlorine');
+  });
+});
+
+describe('chlorine measurement selection', () => {
+  it('keeps legacy chlorine bound to the advertised ORP value', () => {
+    expect(dosingMeasurement('chlorine', true)).toBe('orp');
+  });
+
+  it('uses mg/l only for the explicit free-chlorine option', () => {
+    expect(dosingMeasurement('free_chlorine', true)).toBe('free_chlorine');
+    expect(dosingMeasurement('free_chlorine', false)).toBe('free_chlorine');
+  });
+
+  it('keeps electrolysis auto-detection for existing configurations', () => {
+    expect(dosingMeasurement('electrolysis', true)).toBe('free_chlorine');
+    expect(dosingMeasurement('electrolysis', false)).toBe('orp');
   });
 });

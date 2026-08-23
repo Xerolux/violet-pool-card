@@ -35,7 +35,7 @@ export type { DosingType };
  * `dosing_type`. `Electrolysis` and `H2O2` exist there too; no card shows
  * them.
  */
-export type DosingServiceType = 'pH-' | 'pH+' | 'Chlorine' | 'Flocculant';
+export type DosingServiceType = 'pH-' | 'pH+' | 'Chlorine' | 'Electrolysis' | 'Flocculant';
 
 /** What identifies one channel across the integration and the old card ids. */
 export interface DosingChannel {
@@ -68,11 +68,31 @@ export interface DosingChannel {
   idFragments: readonly string[];
 }
 
+/** Values users can select. Free chlorine shares the physical chlorine channel. */
+export const DOSING_TYPES: readonly DosingType[] = [
+  'chlorine',
+  'free_chlorine',
+  'electrolysis',
+  'ph_minus',
+  'ph_plus',
+  'flocculant',
+] as const;
+
+export type ChlorinationMeasurement = 'orp' | 'free_chlorine';
+
 /**
  * Ordered on purpose: the pH channels come before chlorine so that a
  * chlorine-flavoured fragment cannot claim a pH entity.
  */
 export const DOSING_CHANNELS: readonly DosingChannel[] = [
+  {
+    type: 'electrolysis',
+    translationKey: 'dos_2_elo',
+    serviceValue: 'Electrolysis',
+    modeTranslationKey: 'dos_elo_mode',
+    legacySuffix: 'elektrolyse',
+    idFragments: ['dos_2_elo', '_elo', 'electrolysis', 'elektrolyse'],
+  },
   {
     type: 'ph_plus',
     translationKey: 'dos_5_php',
@@ -109,13 +129,27 @@ export const DOSING_CHANNELS: readonly DosingChannel[] = [
 
 /** The channel record for a type, for callers that start from the type. */
 export function dosingChannel(type: DosingType): DosingChannel {
-  // The list covers every member of DosingType, so this cannot miss.
-  return DOSING_CHANNELS.find((channel) => channel.type === type) as DosingChannel;
+  // Both chlorine readings control the same DOS_1_CL dosing channel.
+  const channelType = type === 'free_chlorine' ? 'chlorine' : type;
+  return DOSING_CHANNELS.find((channel) => channel.type === channelType) as DosingChannel;
 }
 
-/** True when the value is one of the four channels a card can show. */
+/** True when the value is one of the dosing channels a card can show. */
 export function isDosingType(value: unknown): value is DosingType {
-  return DOSING_CHANNELS.some((channel) => channel.type === value);
+  return DOSING_TYPES.some((type) => type === value);
+}
+
+/** Selects the displayed control value without conflating ORP and free chlorine. */
+export function dosingMeasurement(
+  type: DosingType,
+  directChlorineAvailable = false
+): ChlorinationMeasurement | undefined {
+  if (type === 'chlorine') return 'orp';
+  if (type === 'free_chlorine') return 'free_chlorine';
+  if (type === 'electrolysis') {
+    return directChlorineAvailable ? 'free_chlorine' : 'orp';
+  }
+  return undefined;
 }
 
 /** Leniently parses and normalizes user input into a valid DosingType. */
@@ -126,6 +160,8 @@ export function normalizeDosingType(value: unknown): DosingType | undefined {
   if (str.includes('ph_plus') || str.includes('ph+') || str.includes('ph_pl') || str.includes('plus')) return 'ph_plus';
   if (str.includes('ph_minus') || str.includes('ph-') || str.includes('ph_min') || str.includes('minus')) return 'ph_minus';
   if (str.includes('floc') || str.includes('flock')) return 'flocculant';
+  if (str.includes('electrolysis') || str.includes('elektrolyse') || str.includes('_elo')) return 'electrolysis';
+  if (str.includes('free_chlorine') || str.includes('free chlorine') || str.includes('freies chlor') || str.includes('mg/l') || str.includes('ppm')) return 'free_chlorine';
   if (str.includes('chlor') || str.includes('cl') || str.includes('orp') || str.includes('redox')) return 'chlorine';
   return undefined;
 }

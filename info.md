@@ -68,19 +68,23 @@ A premium Lovelace card for the [Violet Pool Controller](https://github.com/Xero
 18. **pH- Canister** (`ph_minus_canister`) — pH- canister level
 19. **Flocculant Canister** (`flocculant_canister`) — flocculant canister level
 
-#### Diagnostics & maintenance (5)
+#### Diagnostics & maintenance (7)
 20. **Error Dashboard** (`error`) — active errors with severity
 21. **Digital Rules** (`digital_rules`) — rule overview with trigger / lock / unlock actions
 22. **Calibration** (`calibration`) — sensor calibration history
-23. **Firmware Update** (`update`) — installed and available version, update from the card
-24. **Diagnostics** (`diagnostics`) — support panel with quick actions and health focus
+23. **Maintenance** (`maintenance`) — maintenance view backed by the calibration status
+24. **Alerts** (`alerts`) — alert-focused alias for the error dashboard
+25. **Firmware Update** (`update`) — installed and available version, update from the card
+26. **Diagnostics** (`diagnostics`) — support panel with quick actions and health focus
 
-#### Dashboards (5)
-25. **Overview** (`overview`) — all devices and readings at a glance
-26. **Details** (`details`) — detailed entity list with toggle controls
-27. **Compact** (`compact`) — space-saving layout with icons and status
-28. **System** (`system`) — full-screen multi-channel view
-29. **Sensor** (`sensor`) — generic sensor display with units
+#### Dashboards (7)
+27. **Overview** (`overview`) — all devices and readings at a glance
+28. **Details** (`details`) — detailed entity list with toggle controls
+29. **Compact** (`compact`) — space-saving layout with icons and status
+30. **System** (`system`) — full-screen multi-channel view
+31. **Sensor** (`sensor`) — generic sensor display with units
+32. **Statistics** (`statistics`) — current value with trend, minimum, average, and maximum
+33. **Comparison** (`comparison`) — live comparison between an entity and its target
 
 ### 🎬 Animations & Visualizations
 - **SVG animations** for pump (spinning), heater (flickering), solar (breathing), cover (motor), light (glowing)
@@ -249,9 +253,11 @@ card_type: solar
 type: custom:violet-pool-card
 entity: switch.violet_pool_dos_1_cl
 card_type: dosing
-dosing_type: chlorine  # oder: ph_minus, ph_plus, flocculant
+dosing_type: chlorine  # Redox / ORP; alternativ: free_chlorine für mg/l
 show_history: true
 ```
+
+Für Chlor stehen zwei eindeutige Messvarianten bereit: `chlorine` zeigt Redox/ORP in mV, `free_chlorine` den freien Chlorgehalt in mg/l. Weitere Typen: `electrolysis`, `ph_minus`, `ph_plus` und `flocculant`.
 
 **Funktionen:**
 - Automatische Typ-Erkennung

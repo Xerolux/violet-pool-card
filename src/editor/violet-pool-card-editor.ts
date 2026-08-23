@@ -164,7 +164,7 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
                 <span>Dosing Configuration</span>
               </div>
               ${this._renderSelect('Dosing Type', this._config.dosing_type || 'chlorine', DOSING_TYPE_OPTIONS, this._dosingTypeChanged)}
-              ${this._config.dosing_type === 'chlorine' || !this._config.dosing_type ? html`
+              ${this._config.dosing_type === 'free_chlorine' || this._config.dosing_type === 'electrolysis' ? html`
                 <ha-entity-picker
                   label="${i18n.t('editor_chlorine_sensor_optional')}"
                   .hass="${this.hass}"
@@ -174,11 +174,29 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
                   allow-custom-entity
                 ></ha-entity-picker>
                 <ha-entity-picker
+                  label="${i18n.t('editor_chlorine_setpoint_optional')}"
+                  .hass="${this.hass}"
+                  .value="${this._config.target_chlorine_entity || ''}"
+                  .includeDomains="${['number', 'input_number']}"
+                  @value-changed="${(e: CustomEvent) => this._overrideChanged('target_chlorine_entity', e.detail.value)}"
+                  allow-custom-entity
+                ></ha-entity-picker>
+              ` : ''}
+              ${this._config.dosing_type === 'chlorine' || this._config.dosing_type === 'electrolysis' || !this._config.dosing_type ? html`
+                <ha-entity-picker
                   label="ORP / Redox Sensor (optional mV)"
                   .hass="${this.hass}"
                   .value="${this._config.orp_value_entity || ''}"
                   .includeDomains="${['sensor']}"
                   @value-changed="${(e: CustomEvent) => this._overrideChanged('orp_value_entity', e.detail.value)}"
+                  allow-custom-entity
+                ></ha-entity-picker>
+                <ha-entity-picker
+                  label="${i18n.t('editor_orp_setpoint_optional')}"
+                  .hass="${this.hass}"
+                  .value="${this._config.target_orp_entity || ''}"
+                  .includeDomains="${['number', 'input_number']}"
+                  @value-changed="${(e: CustomEvent) => this._overrideChanged('target_orp_entity', e.detail.value)}"
                   allow-custom-entity
                 ></ha-entity-picker>
               ` : ''}
@@ -201,6 +219,23 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
             </div>
           `
           : ''}
+
+        ${this._config.card_type === 'comparison' ? html`
+          <div class="config-section">
+            <div class="section-header">
+              <ha-icon icon="mdi:target"></ha-icon>
+              <span>Comparison Target</span>
+            </div>
+            <ha-entity-picker
+              label="Target entity"
+              .hass="${this.hass}"
+              .value="${this._config.target_entity || ''}"
+              .includeDomains="${['number', 'input_number', 'sensor']}"
+              @value-changed="${(e: CustomEvent) => this._overrideChanged('target_entity', e.detail.value)}"
+              allow-custom-entity
+            ></ha-entity-picker>
+          </div>
+        ` : ''}
 
         <!-- Chemistry Card Configuration -->
         ${this._config.card_type === 'chemical'

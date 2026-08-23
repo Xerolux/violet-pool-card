@@ -53,6 +53,7 @@ import {
 import {
   detectDosingType,
   dosingChannel,
+  dosingMeasurement,
   isDosingType,
   normalizeDosingType,
   type DosingChannel,
@@ -121,7 +122,7 @@ interface LovelaceCardConfig {
   type: string;
   entity?: string;
   entities?: (string | EntityConfig)[];
-  card_type: 'pump' | 'heater' | 'solar' | 'dosing' | 'overview' | 'details' | 'sensor' | 'cover' | 'light' | 'compact' | 'system' | 'chemical' | 'filter' | 'backwash' | 'refill' | 'overflow' | 'error' | 'calibration' | 'update' | 'solar_surplus' | 'flow_rate' | 'inlet' | 'counter_current' | 'chlorine_canister' | 'ph_plus_canister' | 'ph_minus_canister' | 'flocculant_canister' | 'digital_rules' | 'diagnostics';
+  card_type: 'pump' | 'heater' | 'solar' | 'dosing' | 'overview' | 'details' | 'sensor' | 'cover' | 'light' | 'compact' | 'system' | 'chemical' | 'filter' | 'backwash' | 'refill' | 'overflow' | 'error' | 'calibration' | 'update' | 'solar_surplus' | 'flow_rate' | 'inlet' | 'counter_current' | 'chlorine_canister' | 'ph_plus_canister' | 'ph_minus_canister' | 'flocculant_canister' | 'digital_rules' | 'diagnostics' | 'maintenance' | 'alerts' | 'statistics' | 'comparison';
   name?: string;
   icon?: string;
 
@@ -153,7 +154,7 @@ interface LovelaceCardConfig {
   show_controls?: boolean;
   show_runtime?: boolean;
   show_history?: boolean;
-  dosing_type?: 'chlorine' | 'ph_minus' | 'ph_plus' | 'flocculant';
+  dosing_type?: 'chlorine' | 'free_chlorine' | 'electrolysis' | 'ph_minus' | 'ph_plus' | 'flocculant';
 
   // Customization
   accent_color?: string;
@@ -190,6 +191,8 @@ export interface VioletPoolCardConfig extends LovelaceCardConfig {
   orp_value_entity?: string;
   target_orp_entity?: string;
   target_ph_entity?: string;
+  target_chlorine_entity?: string;
+  target_entity?: string;
 
   // New entity types
   cover_entity?: string;
@@ -397,17 +400,18 @@ export class VioletPoolCard extends LitElement {
     if (config.card_type === 'dosing') {
       const type = isDosingType(config.dosing_type) ? config.dosing_type : 'chlorine';
       const channel = dosingChannel(type);
+      const isLiquidChlorine = type === 'chlorine' || type === 'free_chlorine';
       const prefix = this.config.entity_prefix || 'violet_pool_controller';
       const candidates = [
         this._registryIndex.get(`select:${channel.modeTranslationKey}`),
         this._registryIndex.get(`sensor:${channel.translationKey}`),
         this._registryIndex.get(`switch:${channel.translationKey}`),
-        `select.${prefix}_${type === 'chlorine' ? 'chlorine_dosing_mode' : type === 'ph_minus' ? 'ph_minus_dosing_mode' : type === 'ph_plus' ? 'ph_plus_dosing_mode' : 'flocculant_dosing_mode'}`,
-        `select.${prefix}_${type === 'chlorine' ? 'chlordosier_modus' : type === 'ph_minus' ? 'ph_dosier_modus' : type === 'ph_plus' ? 'ph_dosier_modus_2' : 'flockungsmittel_modus'}`,
-        `sensor.${prefix}_${type === 'chlorine' ? 'chlorine_dosing_system' : type === 'ph_minus' ? 'ph_minus_dosing_system' : type === 'ph_plus' ? 'ph_plus_dosing_system' : 'flocculant_dosing_system'}`,
-        `sensor.${prefix}_${type === 'chlorine' ? 'chlor_dosiersystem' : type === 'ph_minus' ? 'ph_dosiersystem' : type === 'ph_plus' ? 'ph_dosiersystem_2' : 'flockmittel_dosiersystem'}`,
-        `sensor.${prefix}_${type === 'chlorine' ? 'chlordosierung' : type === 'ph_minus' ? 'ph_dosierung' : type === 'ph_plus' ? 'ph_dosierung_2' : 'flockungsmitteldosierung'}`,
-        `switch.${prefix}_${type === 'chlorine' ? 'chlorine_dosing' : type === 'ph_minus' ? 'dosing_ph_minus' : type === 'ph_plus' ? 'dosing_ph_plus' : 'flocculant_dosing'}`,
+        `select.${prefix}_${isLiquidChlorine ? 'chlorine_dosing_mode' : type === 'ph_minus' ? 'ph_minus_dosing_mode' : type === 'ph_plus' ? 'ph_plus_dosing_mode' : 'flocculant_dosing_mode'}`,
+        `select.${prefix}_${isLiquidChlorine ? 'chlordosier_modus' : type === 'ph_minus' ? 'ph_dosier_modus' : type === 'ph_plus' ? 'ph_dosier_modus_2' : 'flockungsmittel_modus'}`,
+        `sensor.${prefix}_${isLiquidChlorine ? 'chlorine_dosing_system' : type === 'ph_minus' ? 'ph_minus_dosing_system' : type === 'ph_plus' ? 'ph_plus_dosing_system' : 'flocculant_dosing_system'}`,
+        `sensor.${prefix}_${isLiquidChlorine ? 'chlor_dosiersystem' : type === 'ph_minus' ? 'ph_dosiersystem' : type === 'ph_plus' ? 'ph_dosiersystem_2' : 'flockmittel_dosiersystem'}`,
+        `sensor.${prefix}_${isLiquidChlorine ? 'chlordosierung' : type === 'ph_minus' ? 'ph_dosierung' : type === 'ph_plus' ? 'ph_dosierung_2' : 'flockungsmitteldosierung'}`,
+        `switch.${prefix}_${isLiquidChlorine ? 'chlorine_dosing' : type === 'ph_minus' ? 'dosing_ph_minus' : type === 'ph_plus' ? 'dosing_ph_plus' : 'flocculant_dosing'}`,
         `switch.${prefix}_${channel.legacySuffix}`,
       ];
       for (const cand of candidates) {
@@ -622,7 +626,7 @@ export class VioletPoolCard extends LitElement {
     const level = currentValue ?? maxValue ?? 66;
     const capacity = maxValue || 100;
 
-    if (dosingType === 'chlorine') {
+    if (dosingType === 'chlorine' || dosingType === 'free_chlorine') {
       return html`<span class="chem-svg-icon" aria-hidden="true">${chlorineCanisterSVG(level, capacity, color)}</span>`;
     }
     if (dosingType === 'ph_plus') {
@@ -789,6 +793,14 @@ export class VioletPoolCard extends LitElement {
         result = this.renderDigitalRulesCard(); break;
       case 'diagnostics':
         result = this.renderDiagnosticsCard(); break;
+      case 'maintenance':
+        result = this.renderCalibrationCard(); break;
+      case 'alerts':
+        result = this.renderErrorCard(); break;
+      case 'statistics':
+        result = this.renderStatisticsCard(); break;
+      case 'comparison':
+        result = this.renderComparisonCard(); break;
       case 'calibration':
         result = this.renderCalibrationCard(); break;
       case 'error':
@@ -1433,7 +1445,6 @@ export class VioletPoolCard extends LitElement {
         color: '#FF5722',
       },
     ];
-
     const isHeating = state === 'heating' || state === 'heat' || state === 'on';
     const heaterRecommendations = SeverityModel.getHeaterRecommendations({
       currentTemp,
@@ -1781,8 +1792,11 @@ export class VioletPoolCard extends LitElement {
       detectDosingType(entityId, this._translationKeyOf(entityId)) ??
       'chlorine';
     const channel = dosingChannel(dosingType);
+    const isLiquidChlorine = dosingType === 'chlorine' || dosingType === 'free_chlorine';
+    const isChlorination = isLiquidChlorine || dosingType === 'electrolysis';
+    const supportsManualDosing = dosingType !== 'electrolysis';
     /** What the `smart_dosing` service calls this channel. */
-    const dosName = channel.serviceValue;
+    const dosName = dosingType === 'electrolysis' ? 'Electrolysis' : channel.serviceValue;
 
     // Status: from entity attributes, or fall back to controller sensors
     const prefix = this.config.entity_prefix || 'violet_pool_controller';
@@ -1791,9 +1805,9 @@ export class VioletPoolCard extends LitElement {
       this._dosingChannelState(channel, 'state')?.state ??
       (() => {
         const candidates = [
-          `sensor.${prefix}_${dosingType === 'chlorine' ? 'chlordosierung' : dosingType === 'ph_minus' ? 'ph_dosierung' : dosingType === 'ph_plus' ? 'ph_dosierung_2' : 'flockungsmitteldosierung'}`,
-          `sensor.${prefix}_${dosingType === 'chlorine' ? 'chlor_dosiersystem' : dosingType === 'ph_minus' ? 'ph_dosiersystem' : dosingType === 'ph_plus' ? 'ph_dosiersystem_2' : 'flockmittel_dosiersystem'}`,
-          `sensor.${prefix}_${dosingType === 'chlorine' ? 'chlorine_dosing_system' : dosingType === 'ph_minus' ? 'ph_minus_dosing_system' : dosingType === 'ph_plus' ? 'ph_plus_dosing_system' : 'flocculant_dosing_system'}`,
+          `sensor.${prefix}_${isLiquidChlorine ? 'chlordosierung' : dosingType === 'electrolysis' ? 'electrolysis_status' : dosingType === 'ph_minus' ? 'ph_dosierung' : dosingType === 'ph_plus' ? 'ph_dosierung_2' : 'flockungsmitteldosierung'}`,
+          `sensor.${prefix}_${isLiquidChlorine ? 'chlor_dosiersystem' : dosingType === 'electrolysis' ? 'elektrolyse_dosiersystem' : dosingType === 'ph_minus' ? 'ph_dosiersystem' : dosingType === 'ph_plus' ? 'ph_dosiersystem_2' : 'flockmittel_dosiersystem'}`,
+          `sensor.${prefix}_${isLiquidChlorine ? 'chlorine_dosing_system' : dosingType === 'electrolysis' ? 'electrolysis_system' : dosingType === 'ph_minus' ? 'ph_minus_dosing_system' : dosingType === 'ph_plus' ? 'ph_plus_dosing_system' : 'flocculant_dosing_system'}`,
         ];
         for (const cand of candidates) {
           if (this.hass?.states?.[cand]) return this.hass.states[cand].state;
@@ -1815,21 +1829,28 @@ export class VioletPoolCard extends LitElement {
       config.chlorine_value_entity ||
       (chlorineSensor && !isNaN(parseFloat(chlorineSensor.state)))
     );
+    const chlorinationMeasurement = dosingMeasurement(dosingType, hasDirectChlorine);
+    const usesDirectChlorine = chlorinationMeasurement === 'free_chlorine';
 
-    if (dosingType === 'chlorine') {
-      if (hasDirectChlorine && chlorineSensor) {
-        currentValue = parseFloat(chlorineSensor.state);
-        const targetClId = this._getEntityId('target_chlorine_entity' as any, 'number', 'chlor_sollwert');
+    if (isChlorination) {
+      if (usesDirectChlorine) {
+        const parsedChlorine = chlorineSensor ? parseFloat(chlorineSensor.state) : NaN;
+        currentValue = Number.isFinite(parsedChlorine) ? parsedChlorine : undefined;
+        const targetClId = dosingType === 'electrolysis'
+          ? this._registryIndex.get('number:chlorine_setpoint_electrolysis') ?? this._getEntityId('target_chlorine_entity', 'number', 'chlor_sollwert')
+          : this._getEntityId('target_chlorine_entity', 'number', 'chlor_sollwert');
         const targetEntity = this.hass.states[targetClId];
         targetValue = targetEntity ? parseFloat(targetEntity.state) : undefined;
         minValue = Number(targetEntity?.attributes?.min) || 0.1;
         maxValue = Number(targetEntity?.attributes?.max) || 2.5;
-        unit = (chlorineSensor.attributes?.unit_of_measurement as string) || 'mg/l';
+        unit = (chlorineSensor?.attributes?.unit_of_measurement as string) || 'mg/l';
       } else {
         const orpSensorId = this._getEntityId('orp_value_entity', 'sensor', 'redoxpotential');
         const orpSensor = this.hass.states[orpSensorId];
         currentValue = orpSensor ? parseFloat(orpSensor.state) : undefined;
-        const targetOrpId = this._getEntityId('target_orp_entity', 'number', 'redox_sollwert');
+        const targetOrpId = dosingType === 'electrolysis'
+          ? this._registryIndex.get('number:orp_setpoint_electrolysis') ?? this._getEntityId('target_orp_entity', 'number', 'redox_sollwert')
+          : this._getEntityId('target_orp_entity', 'number', 'redox_sollwert');
         const targetEntity = this.hass.states[targetOrpId];
         targetValue = targetEntity ? parseFloat(targetEntity.state) : undefined;
         minValue = Number(targetEntity?.attributes?.min) || 600;
@@ -1856,8 +1877,8 @@ export class VioletPoolCard extends LitElement {
         if (Number.isFinite(parsed)) return parsed;
 
         const candidates = [
-          `sensor.${prefix}_${dosingType === 'chlorine' ? 'chlor_tagesdosierung_ml' : dosingType === 'ph_minus' ? 'ph_tagesdosierung_ml' : dosingType === 'ph_plus' ? 'ph_tagesdosierung_ml_2' : 'flockmittel_tagesdosierung_ml'}`,
-          `sensor.${prefix}_dos_${dosingType === 'chlorine' ? '1_cl' : dosingType === 'ph_minus' ? '4_phm' : dosingType === 'ph_plus' ? '5_php' : '6_floc'}_daily`,
+          `sensor.${prefix}_${isLiquidChlorine ? 'chlor_tagesdosierung_ml' : dosingType === 'electrolysis' ? 'electrolysis_daily_production' : dosingType === 'ph_minus' ? 'ph_tagesdosierung_ml' : dosingType === 'ph_plus' ? 'ph_tagesdosierung_ml_2' : 'flockmittel_tagesdosierung_ml'}`,
+          `sensor.${prefix}_dos_${isLiquidChlorine ? '1_cl' : dosingType === 'electrolysis' ? '2_elo' : dosingType === 'ph_minus' ? '4_phm' : dosingType === 'ph_plus' ? '5_php' : '6_floc'}_daily`,
         ];
         for (const cand of candidates) {
           if (this.hass?.states?.[cand]) {
@@ -1867,6 +1888,7 @@ export class VioletPoolCard extends LitElement {
         }
         return undefined;
       })();
+    const dosingDailyUnit = dosingType === 'electrolysis' ? 'mg' : 'ml';
 
     const quickActions: QuickAction[] = [
       {
@@ -1934,6 +1956,7 @@ export class VioletPoolCard extends LitElement {
         confirmMessage: 'Stop current dosing?',
       },
     ];
+    const visibleQuickActions = supportsManualDosing ? quickActions : quickActions.slice(0, 2);
 
     // On means the channel is switched on right now; the status says so a
     // second time while it runs. Neither is `ACTIVE`, which is what this used
@@ -1943,8 +1966,8 @@ export class VioletPoolCard extends LitElement {
     // Get color and percent for current value – judged against the same
     // user-configurable target ranges the chemistry card uses.
     const dosingBands = resolveThresholds(config.thresholds);
-    const dosingBand = dosingType === 'chlorine'
-      ? (hasDirectChlorine ? (dosingBands.chlorine ?? { min: 0.3, max: 1.5, low: 0.1, high: 2.0, range: [0, 3] as [number, number] }) : dosingBands.orp)
+    const dosingBand = isChlorination
+      ? (usesDirectChlorine ? (dosingBands.chlorine ?? { min: 0.3, max: 1.5, low: 0.1, high: 2.0, range: [0, 3] as [number, number] }) : dosingBands.orp)
       : dosingBands.ph;
     const dosingEval = evaluate(currentValue, dosingBand);
     const valueColor = currentValue !== undefined
@@ -1958,8 +1981,8 @@ export class VioletPoolCard extends LitElement {
       ? this._getValuePercent(targetValue, minValue, maxValue)
       : undefined;
 
-    const decimals = dosingType === 'chlorine' ? (hasDirectChlorine ? 2 : 0) : 1;
-    const dosingLabel = dosingType === 'chlorine' ? (hasDirectChlorine ? 'Chlor' : 'ORP') : dosingType === 'ph_minus' ? 'pH' : dosingType === 'ph_plus' ? 'pH' : 'Floc';
+    const decimals = isChlorination ? (usesDirectChlorine ? 2 : 0) : 1;
+    const dosingLabel = isChlorination ? (usesDirectChlorine ? 'Chlor' : 'ORP') : dosingType === 'ph_minus' ? 'pH' : dosingType === 'ph_plus' ? 'pH' : 'Floc';
     const valueStatusLabel = valueColor ? levelLabel(dosingEval) : '';
     const dosingRecommendations = SeverityModel.getDosingRecommendations({
       dosingType,
@@ -1983,16 +2006,16 @@ export class VioletPoolCard extends LitElement {
             </div>
             <div class="insight-card">
               <span class="insight-label">${i18n.t('dosing_24h_label')}</span>
-              <span class="insight-value">${typeof dosingVolume24h === 'number' ? `${dosingVolume24h.toFixed(0)} ml` : 'n/a'}</span>
+              <span class="insight-value">${typeof dosingVolume24h === 'number' ? `${dosingVolume24h.toFixed(0)} ${dosingDailyUnit}` : 'n/a'}</span>
             </div>
           </div>
 
           ${currentValue !== undefined
             ? html` <!-- Dosing value hero with progress bar --><div class="dosing-value-block tooltip-wrap" style="position:relative"><div class="dosing-value-row"><div class="dosing-value-main" style="color: ${valueColor?.color || 'var(--vpc-text)'}"><span class="dosing-label-tag">${dosingLabel}</span><span class="dosing-current-value">${currentValue.toFixed(decimals)}</span><span class="dosing-current-unit">${unit}</span></div><div class="dosing-status-pill" style="background: ${valueColor?.color ? valueColor.color + '18' : 'rgba(0,0,0,0.05)'}; color: ${valueColor?.color || 'var(--vpc-text-secondary)'}"> ${valueStatusLabel} </div></div>
               <div class="t-tip t-up">
-                <div class="t-tip-title"><ha-icon icon="${this._getDosingIcon(dosingType)}"></ha-icon>${dosingType === 'chlorine' ? (hasDirectChlorine ? i18n.t('dosing_tooltip_chlorine') : i18n.t('dosing_tooltip_orp')) : i18n.t('dosing_tooltip_ph')}</div>
-                <div class="t-tip-desc">${dosingType === 'chlorine' ? (hasDirectChlorine ? i18n.t('chlorine_desc_value', { value: currentValue.toFixed(2), unit, target: targetValue !== undefined ? i18n.t('target_suffix', { value: `${targetValue.toFixed(2)} ${unit}` }) : '' }) : i18n.t('orp_desc_value', { value: currentValue.toFixed(0), target: targetValue !== undefined ? i18n.t('target_suffix_mv', { value: targetValue.toFixed(0) }) : '' })) : i18n.t('ph_desc_value', { value: currentValue.toFixed(1), target: targetValue !== undefined ? i18n.t('target_suffix', { value: targetValue.toFixed(1) }) : '' })}</div>
-                <div class="t-tip-ideal"><ha-icon icon="mdi:target"></ha-icon>${dosingType === 'chlorine' ? (hasDirectChlorine ? i18n.t('dosing_optimal_chlorine') : i18n.t('dosing_optimal_orp')) : i18n.t('dosing_optimal_ph')}</div>
+                <div class="t-tip-title"><ha-icon icon="${this._getDosingIcon(dosingType)}"></ha-icon>${isChlorination ? (usesDirectChlorine ? i18n.t('dosing_tooltip_chlorine') : i18n.t('dosing_tooltip_orp')) : i18n.t('dosing_tooltip_ph')}</div>
+                <div class="t-tip-desc">${isChlorination ? (usesDirectChlorine ? i18n.t('chlorine_desc_value', { value: currentValue.toFixed(2), unit, target: targetValue !== undefined ? i18n.t('target_suffix', { value: `${targetValue.toFixed(2)} ${unit}` }) : '' }) : i18n.t('orp_desc_value', { value: currentValue.toFixed(0), target: targetValue !== undefined ? i18n.t('target_suffix_mv', { value: targetValue.toFixed(0) }) : '' })) : i18n.t('ph_desc_value', { value: currentValue.toFixed(1), target: targetValue !== undefined ? i18n.t('target_suffix', { value: targetValue.toFixed(1) }) : '' })}</div>
+                <div class="t-tip-ideal"><ha-icon icon="mdi:target"></ha-icon>${isChlorination ? (usesDirectChlorine ? i18n.t('dosing_optimal_chlorine') : i18n.t('dosing_optimal_orp')) : i18n.t('dosing_optimal_ph')}</div>
               </div> ${valuePct !== undefined ? html`
                         <div class="chem-range-bar">
                           <div class="chem-range-track">
@@ -2016,12 +2039,17 @@ export class VioletPoolCard extends LitElement {
             ? html`<vpc-warning-chips .warnings="${dosingState}" defaultType="warning" styleVariant="${this._getEffectiveAlarmStyle(config)}"></vpc-warning-chips>`
             : ''}
 
-          ${readOnly ? this._renderDisabledSwitchNote(slot?.unavailableSwitch) : ''}
+          ${readOnly
+            ? this._renderDisabledSwitchNote(
+                slot?.unavailableSwitch ?? this._buildEntityId('switch', channel.legacySuffix)
+              )
+            : ''}
 
           ${config.show_controls && !readOnly
             ? html`
-              <!-- Enhanced Dosing Controls -->
-              <div style="background: var(--vpc-surface); border-radius: 10px; padding: 12px; margin-bottom: 12px;">
+              ${supportsManualDosing ? html`
+                <!-- Enhanced Dosing Controls -->
+                <div style="background: var(--vpc-surface); border-radius: 10px; padding: 12px; margin-bottom: 12px;">
                 <div style="font-size: 11px; font-weight: 600; color: var(--vpc-text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">
                   ${i18n.t('dosing_manual_control')}
                 </div>
@@ -2043,14 +2071,15 @@ export class VioletPoolCard extends LitElement {
                     <ha-icon icon="mdi:stop" style="--mdc-icon-size: 14px;"></ha-icon> Stop
                   </button>
                 </div>
-              </div>
+                </div>
+              ` : ''}
 
-              <vpc-quick-actions .actions="${quickActions}"></vpc-quick-actions>
+              <vpc-quick-actions .actions="${visibleQuickActions}"></vpc-quick-actions>
             `
             : ''}
 
           ${config.show_history && dosingVolume24h !== undefined
-            ? html` <div class="info-row"><ha-icon icon="mdi:chart-line"></ha-icon><span class="info-label">${i18n.t('dosing_last_24h')}</span><span class="info-value">${dosingVolume24h}ml</span></div> `
+            ? html` <div class="info-row"><ha-icon icon="mdi:chart-line"></ha-icon><span class="info-label">${i18n.t('dosing_last_24h')}</span><span class="info-value">${dosingVolume24h}${dosingDailyUnit}</span></div> `
             : ''}
           ${this._renderRecommendationList(dosingRecommendations)}
         </div>
@@ -2061,6 +2090,8 @@ export class VioletPoolCard extends LitElement {
   private _getDosingIcon(dosingType: string): string {
     switch (dosingType) {
       case 'chlorine': return 'mdi:flask-outline';
+      case 'free_chlorine': return 'mdi:test-tube';
+      case 'electrolysis': return 'mdi:lightning-bolt-circle';
       case 'ph_minus': return 'mdi:flask-minus';
       case 'ph_plus': return 'mdi:flask-plus';
       case 'flocculant': return 'mdi:flask';
@@ -2709,14 +2740,23 @@ export class VioletPoolCard extends LitElement {
         detailStatus = EntityHelper.formatSnakeCase(dosingState[0]);
       }
 
-      const dosingType =
+      const dosingType = config.dosing_type ??
         detectDosingType(entityId, this._translationKeyOf(entityId)) ?? 'chlorine';
-      if (dosingType === 'chlorine') {
-        const orpSensorId = this._getEntityId('orp_value_entity', 'sensor', 'redoxpotential');
-        const orpSensor = this.hass.states[orpSensorId];
-        if (orpSensor) {
-          const orpVal = parseFloat(orpSensor.state);
-          if (!isNaN(orpVal)) currentValue = `${orpVal.toFixed(0)}mV`;
+      if (dosingType === 'chlorine' || dosingType === 'free_chlorine' || dosingType === 'electrolysis') {
+        const chlorineSensorId = this._getEntityId('chlorine_value_entity', 'sensor', 'chlorgehalt');
+        const chlorineSensor = this.hass.states[chlorineSensorId];
+        const chlorineValue = chlorineSensor ? parseFloat(chlorineSensor.state) : NaN;
+        const measurement = dosingMeasurement(dosingType, Number.isFinite(chlorineValue));
+        if (measurement === 'free_chlorine' && Number.isFinite(chlorineValue)) {
+          const chlorineUnit = (chlorineSensor.attributes.unit_of_measurement as string) || 'mg/l';
+          currentValue = `${chlorineValue.toFixed(2)} ${chlorineUnit}`;
+        } else if (measurement === 'orp') {
+          const orpSensorId = this._getEntityId('orp_value_entity', 'sensor', 'redoxpotential');
+          const orpSensor = this.hass.states[orpSensorId];
+          if (orpSensor) {
+            const orpVal = parseFloat(orpSensor.state);
+            if (!isNaN(orpVal)) currentValue = `${orpVal.toFixed(0)}mV`;
+          }
         }
       } else if (dosingType === 'ph_minus' || dosingType === 'ph_plus') {
         const phSensorId = this._getEntityId('ph_value_entity', 'sensor', 'ph_wert');
@@ -2897,7 +2937,9 @@ export class VioletPoolCard extends LitElement {
     const poolTempSensorId = showTemp ? this._getEntityId('pool_temp_entity', 'sensor', 'beckenwasser', 5) : null;
     const phSensorId = showPh ? this._getEntityId('ph_value_entity', 'sensor', 'ph_wert', 6) : null;
     const orpSensorId = showOrp ? this._getEntityId('orp_value_entity', 'sensor', 'redoxpotential', 7) : null;
-    const chlorineSensorId = showChlorine ? (config.chlorine_entity || this._buildEntityId('sensor', 'chlorgehalt')) : null;
+    const chlorineSensorId = showChlorine
+      ? this._getEntityId('chlorine_value_entity', 'sensor', 'chlorgehalt')
+      : null;
     const saltSensorId = showSalt ? (config.salt_level_entity || this._buildEntityId('sensor', 'salzgehalt')) : null;
     const inletEntityId = showInlet ? (config.inlet_entity || this._buildEntityId('switch', 'inlet')) : null;
     const targetPhId = this._getEntityId('target_ph_entity', 'number', 'ph_sollwert');
@@ -3315,6 +3357,94 @@ export class VioletPoolCard extends LitElement {
     `;
   }
 
+  private renderStatisticsCard(config: VioletPoolCardConfig = this.config): TemplateResult {
+    const entityId = config.entity;
+    if (!entityId) return this._renderEntityNotFound('statistics.entity');
+    const entity = this.hass.states[entityId];
+    if (!entity) return this._renderEntityNotFound(entityId);
+
+    const currentValue = Number(entity.state);
+    if (!Number.isFinite(currentValue)) return this.renderSensorCard(config);
+
+    const trend = TrendHelper.getEntityTrend(entity);
+    const samples = trend.length ? trend : [currentValue];
+    const minimum = Math.min(...samples);
+    const maximum = Math.max(...samples);
+    const average = samples.reduce((sum, value) => sum + value, 0) / samples.length;
+    const unit = (entity.attributes.unit_of_measurement as string) || '';
+    const name = config.name || (entity.attributes.friendly_name as string) || 'Statistics';
+    const accentColor = config.accent_color || this._getAccentColor('overview', config);
+    const decimals = Math.abs(currentValue) >= 100 ? 0 : 1;
+    const format = (value: number): string => `${value.toFixed(decimals)}${unit ? ` ${unit}` : ''}`;
+
+    return html`
+      <ha-card class="${this._getCardClasses(false, config)}" style="--card-accent:${accentColor}" @click="${() => this._showMoreInfo(entityId)}">
+        <div class="accent-bar"></div>
+        <div class="card-content">
+          <div class="header">
+            <div class="header-icon" style="--icon-accent:${accentColor}"><ha-icon icon="${config.icon || 'mdi:chart-line'}"></ha-icon></div>
+            <div class="header-info"><span class="name">${name}</span><span class="header-subtitle">${i18n.t('label_trend')}</span></div>
+          </div>
+          <div class="sensor-big-value" style="margin:12px 0 8px;">
+            <span class="sensor-num">${currentValue.toFixed(decimals)}</span>${unit ? html`<span class="sensor-unit">${unit}</span>` : ''}
+          </div>
+          ${samples.length > 1 ? this._renderSparkline(samples, accentColor, `${name} Trend`) : ''}
+          <div class="insight-grid" style="margin-top:12px;">
+            <div class="insight-card"><span class="insight-label">Minimum</span><span class="insight-value">${format(minimum)}</span></div>
+            <div class="insight-card"><span class="insight-label">Mittelwert</span><span class="insight-value">${format(average)}</span></div>
+            <div class="insight-card"><span class="insight-label">Maximum</span><span class="insight-value">${format(maximum)}</span></div>
+          </div>
+        </div>
+      </ha-card>
+    `;
+  }
+
+  private renderComparisonCard(config: VioletPoolCardConfig = this.config): TemplateResult {
+    const entityId = config.entity;
+    const targetEntityId = config.target_entity;
+    if (!entityId) return this._renderEntityNotFound('comparison.entity');
+    if (!targetEntityId) return this._renderEntityNotFound('comparison.target_entity');
+
+    const entity = this.hass.states[entityId];
+    const targetEntity = this.hass.states[targetEntityId];
+    if (!entity) return this._renderEntityNotFound(entityId);
+    if (!targetEntity) return this._renderEntityNotFound(targetEntityId);
+
+    const currentValue = Number(entity.state);
+    const targetValue = Number(targetEntity.state);
+    if (!Number.isFinite(currentValue) || !Number.isFinite(targetValue)) {
+      return html`<ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">Comparison requires numeric entities</span><span class="error-entity">${entityId} / ${targetEntityId}</span></div></div></ha-card>`;
+    }
+
+    const name = config.name || `${entity.attributes.friendly_name || entityId} vs. Soll`;
+    const unit = (entity.attributes.unit_of_measurement as string) || (targetEntity.attributes.unit_of_measurement as string) || '';
+    const delta = currentValue - targetValue;
+    const entityKey = entityId.toLowerCase();
+    const tolerance = entityKey.includes('ph_') ? 0.2 : entityKey.includes('orp') || entityKey.includes('redox') ? 40 : Math.max(0.5, Math.abs(targetValue) * 0.03);
+    const withinTarget = Math.abs(delta) <= tolerance;
+    const accentColor = withinTarget ? 'var(--vpc-success,#34C759)' : 'var(--vpc-warning,#FF9F0A)';
+    const decimals = entityKey.includes('ph_') ? 2 : Math.abs(currentValue) >= 100 ? 0 : 1;
+    const relativeDelta = targetValue === 0 ? undefined : (delta / Math.abs(targetValue)) * 100;
+
+    return html`
+      <ha-card class="${this._getCardClasses(!withinTarget, config)}" style="--card-accent:${accentColor}" @click="${() => this._showMoreInfo(entityId)}">
+        <div class="accent-bar"></div>
+        <div class="card-content">
+          <div class="header">
+            <div class="header-icon" style="--icon-accent:${accentColor}"><ha-icon icon="${config.icon || 'mdi:compare-horizontal'}"></ha-icon></div>
+            <div class="header-info"><span class="name">${name}</span><span class="header-subtitle">${withinTarget ? i18n.t('within_target') : i18n.t('off_target')}</span></div>
+          </div>
+          <div class="insight-grid">
+            <div class="insight-card"><span class="insight-label">${i18n.t('label_actual')}</span><span class="insight-value">${currentValue.toFixed(decimals)}${unit ? ` ${unit}` : ''}</span></div>
+            <div class="insight-card"><span class="insight-label">${i18n.t('label_target')}</span><span class="insight-value">${targetValue.toFixed(decimals)}${unit ? ` ${unit}` : ''}</span></div>
+            <div class="insight-card"><span class="insight-label">Differenz</span><span class="insight-value" style="color:${accentColor}">${delta > 0 ? '+' : ''}${delta.toFixed(decimals)}${unit ? ` ${unit}` : ''}</span></div>
+          </div>
+          ${relativeDelta !== undefined ? html`<div class="info-row" style="margin-top:10px;"><ha-icon icon="${delta >= 0 ? 'mdi:trending-up' : 'mdi:trending-down'}"></ha-icon><span class="info-label">Relative Abweichung</span><span class="info-value">${relativeDelta > 0 ? '+' : ''}${relativeDelta.toFixed(1)} %</span></div>` : ''}
+        </div>
+      </ha-card>
+    `;
+  }
+
   private renderCoverCard(config: VioletPoolCardConfig = this.config): TemplateResult {
     const entityId = config.cover_entity || config.entity || this._buildEntityId('cover', 'abdeckung');
     const entity = this.hass.states[entityId];
@@ -3709,8 +3839,8 @@ export class VioletPoolCard extends LitElement {
       config.backwash_entity ||
       config.entity ||
       slot?.entityId ||
-      this._getEntityId('backwash_entity' as any, 'switch', 'ruckspulung');
-    const readOnly = slot ? !slot.controllable : false;
+      this._getEntityId('backwash_entity', 'switch', 'ruckspulung');
+    const readOnly = slot ? !slot.controllable : !entityId.startsWith('switch.');
     const entity = this.hass.states[entityId];
     if (!entity) {
       return html`<ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">${i18n.t('backwash_not_found')}</span><span class="error-entity">${entityId}</span></div></div></ha-card>`;
@@ -3724,7 +3854,9 @@ export class VioletPoolCard extends LitElement {
     const name = config.name || entity.attributes.friendly_name || i18n.t('backwash_name');
     const accentColor = this._getAccentColor('backwash', config);
     const disabledNote = readOnly
-      ? this._renderDisabledSwitchNote(slot?.unavailableSwitch)
+      ? this._renderDisabledSwitchNote(
+          slot?.unavailableSwitch ?? this._buildEntityId('switch', 'ruckspulung')
+        )
       : '';
 
     // Get optional duration info
@@ -3815,7 +3947,7 @@ export class VioletPoolCard extends LitElement {
             </div>
           </div>
 
-          ${config.show_controls !== false ? html`
+          ${config.show_controls !== false && !readOnly ? html`
             <div class="cover-controls" style="margin-top: 12px;">
               <button class="cover-btn ${isRunning ? 'cover-btn-close cvr-active' : 'cover-btn-open'}"
                       style="--cvr-btn-color: ${isRunning ? '#FF3B30' : accentColor}"
@@ -3854,7 +3986,13 @@ export class VioletPoolCard extends LitElement {
     const accentColor = this._getAccentColor('refill', config);
 
     const valveEntity = valveEntityId ? this.hass.states[valveEntityId] : undefined;
-    const isRefilling = valveEntity ? valveEntity.state === 'on' : false;
+    const valveState = valveEntity
+      ? outputStateFromCode(valveEntity.state) ?? valveEntity.state
+      : undefined;
+    const valveReadOnly = valveSlot
+      ? !valveSlot.controllable
+      : Boolean(valveEntityId && !valveEntityId.startsWith('switch.'));
+    const isRefilling = valveState === 'on';
     const isLow = level < (maxLevel * 0.3);
 
     const percent = Math.min((level / maxLevel) * 100, 100);
@@ -3894,6 +4032,11 @@ export class VioletPoolCard extends LitElement {
                @click="${() => this._showMoreInfo(levelSensorId)}">
         <div class="accent-bar"></div>
         <div class="card-content">
+          ${valveReadOnly
+            ? this._renderDisabledSwitchNote(
+                valveSlot?.unavailableSwitch ?? this._buildEntityId('switch', 'refill')
+              )
+            : ''}
           <div class="header">
             <div class="header-icon" style="--icon-accent: ${isLow ? '#FF3B30' : accentColor}">
               ${config.icon
@@ -3957,7 +4100,7 @@ export class VioletPoolCard extends LitElement {
             </div>
           </div>
 
-          ${valveEntity && config.show_controls !== false ? html`
+          ${valveEntity && config.show_controls !== false && !valveReadOnly ? html`
             <div class="cover-controls" style="margin-top: 12px;">
               <button class="cover-btn ${isRefilling ? 'cover-btn-close cvr-active' : 'cover-btn-open'}"
                       style="--cvr-btn-color: ${isRefilling ? '#34C759' : accentColor}"

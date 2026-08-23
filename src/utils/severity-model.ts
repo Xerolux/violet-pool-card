@@ -144,19 +144,24 @@ export class SeverityModel {
     const alerts: SeverityAlert[] = [];
     const { dosingType, currentValue, targetValue, dosingState = [] } = options;
 
-    if (dosingType === 'chlorine' && currentValue !== undefined && targetValue !== undefined) {
-      if (currentValue < targetValue - 40) {
+    if ((dosingType === 'chlorine' || dosingType === 'free_chlorine' || dosingType === 'electrolysis') && currentValue !== undefined && targetValue !== undefined) {
+      // Direct chlorine sensors report mg/l (small decimal targets), while
+      // ORP-controlled installations report mV. A fixed 40-point tolerance
+      // silently disabled recommendations for direct chlorine measurements.
+      const tolerance = targetValue < 10 ? Math.max(0.1, targetValue * 0.25) : 40;
+      const directChlorine = targetValue < 10;
+      if (currentValue < targetValue - tolerance) {
         alerts.push({
-          text: i18n.t('orp_below_target'),
+          text: directChlorine ? i18n.t('chlorine_below_target') : i18n.t('orp_below_target'),
           severity: 'warning',
           icon: 'mdi:lightning-bolt',
           recommendation: i18n.t('dosing_check_chlorine'),
           source: 'dosing',
         });
       }
-      if (currentValue > targetValue + 40) {
+      if (currentValue > targetValue + tolerance) {
         alerts.push({
-          text: i18n.t('orp_above_target'),
+          text: directChlorine ? i18n.t('chlorine_above_target') : i18n.t('orp_above_target'),
           severity: 'warning',
           icon: 'mdi:lightning-bolt-outline',
           recommendation: i18n.t('dosing_reduce_verify'),

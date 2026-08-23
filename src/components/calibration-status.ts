@@ -7,6 +7,7 @@
 
 import { LitElement, html, css, TemplateResult, CSSResultGroup } from 'lit';
 import { property } from 'lit/decorators.js';
+import { VIOLET_PLATFORM } from '../utils/entity-registry';
 
 export interface CalibrationInfo {
   sensor_type: string;
@@ -18,10 +19,51 @@ export interface CalibrationInfo {
   next_calibration: string | null;
 }
 
+/**
+ * Turns an optional calibration timestamp into an honest status record.
+ * Missing or invalid timestamps stay unknown; the card must never invent a
+ * recent calibration date just to make the component look populated.
+ */
+export function calibrationInfo(
+  sensorType: string,
+  lastCalibration: unknown,
+  nextCalibration: unknown = null,
+  now: number = Date.now()
+): CalibrationInfo {
+  const validTimestamp = (value: unknown): value is string =>
+    typeof value === 'string' &&
+    /^\d{4}-\d{2}-\d{2}(?:[T ][0-9:.+-]+Z?)?$/.test(value) &&
+    Number.isFinite(Date.parse(value));
+  const last = validTimestamp(lastCalibration) ? lastCalibration : null;
+  const next = validTimestamp(nextCalibration) ? nextCalibration : null;
+  const daysSince = last
+    ? Math.max(0, Math.floor((now - Date.parse(last)) / 86_400_000))
+    : null;
+  const isExpired = daysSince !== null && daysSince > 90;
+  const isWarning = daysSince !== null && daysSince > 60 && daysSince <= 90;
+
+  return {
+    sensor_type: sensorType,
+    last_calibration: last,
+    days_since: daysSince,
+    status: isExpired ? 'Expired' : isWarning ? 'Warning' : daysSince !== null ? 'OK' : 'Unknown',
+    is_expired: isExpired,
+    is_warning: isWarning,
+    next_calibration: next,
+  };
+}
+
 export class CalibrationStatus extends LitElement {
   @property({ type: Object }) calibrations: Record<string, CalibrationInfo> = {};
   @property({ type: String }) deviceName: string = '';
   @property({ type: Object }) hass: any;
+
+  /** Keep this specialised card from collecting unrelated pH sensors. */
+  private _isVioletEntity(entityId: string): boolean {
+    const platform = this.hass?.entities?.[entityId]?.platform;
+    if (platform) return platform === VIOLET_PLATFORM;
+    return entityId.toLowerCase().includes('violet');
+  }
 
   private _getEffectiveCalibrations(): Record<string, CalibrationInfo> {
     if (Object.keys(this.calibrations).length > 0) {
@@ -38,6 +80,7 @@ export class CalibrationStatus extends LitElement {
     // Scan for calibration sensors or attributes
     for (const [entityId, entity] of Object.entries(states)) {
       if (!entityId.startsWith('sensor.')) continue;
+      if (!this._isVioletEntity(entityId)) continue;
       const lower = entityId.toLowerCase();
       const friendlyName = (entity.attributes?.friendly_name as string) || entityId;
 
@@ -48,28 +91,13 @@ export class CalibrationStatus extends LitElement {
         else if (lower.includes('temp')) sensorType = 'Temperature Probe';
         else if (lower.includes('conduct') || lower.includes('leit')) sensorType = 'Conductivity Sensor';
 
-        const lastCal = entity.attributes?.last_calibration as string | null || (entity.state !== 'unknown' && entity.state !== 'unavailable' ? entity.state : null);
-        const daysSince = typeof entity.attributes?.days_since === 'number'
-          ? entity.attributes.days_since
-          : typeof entity.attributes?.days_since_calibration === 'number'
-          ? entity.attributes.days_since_calibration
-          : lastCal && !isNaN(Date.parse(lastCal))
-          ? Math.floor((Date.now() - Date.parse(lastCal)) / (1000 * 60 * 60 * 24))
-          : null;
-
-        const isExpired = daysSince !== null ? daysSince > 90 : false;
-        const isWarning = daysSince !== null ? daysSince > 60 && daysSince <= 90 : false;
-        const status = isExpired ? 'Expired' : isWarning ? 'Warning' : daysSince !== null ? 'OK' : 'Unknown';
-
-        result[friendlyName] = {
-          sensor_type: sensorType,
-          last_calibration: lastCal,
-          days_since: daysSince,
-          status,
-          is_expired: isExpired,
-          is_warning: isWarning,
-          next_calibration: entity.attributes?.next_calibration as string | null || null,
-        };
+        const lastCal = entity.attributes?.last_calibration ??
+          (entity.state !== 'unknown' && entity.state !== 'unavailable' ? entity.state : null);
+        result[friendlyName] = calibrationInfo(
+          sensorType,
+          lastCal,
+          entity.attributes?.next_calibration
+        );
       }
     }
 
@@ -77,38 +105,17 @@ export class CalibrationStatus extends LitElement {
     if (Object.keys(result).length === 0) {
       for (const [entityId, entity] of Object.entries(states)) {
         if (!entityId.startsWith('sensor.')) continue;
+        if (!this._isVioletEntity(entityId)) continue;
         const lower = entityId.toLowerCase();
 
         if ((lower.includes('ph_wert') || lower.includes('ph_value') || lower.endsWith('_ph')) && !lower.includes('target') && !lower.includes('soll')) {
-          const lastCal = (entity.attributes?.last_calibration as string) || (entity.attributes?.last_cal as string) || null;
-          const daysSince = lastCal && !isNaN(Date.parse(lastCal))
-            ? Math.floor((Date.now() - Date.parse(lastCal)) / (1000 * 60 * 60 * 24))
-            : 14;
-          result['pH Sonde'] = {
-            sensor_type: 'pH Electrode',
-            last_calibration: lastCal || new Date(Date.now() - 14 * 86400000).toISOString(),
-            days_since: daysSince,
-            status: daysSince > 90 ? 'Expired' : daysSince > 60 ? 'Warning' : 'OK',
-            is_expired: daysSince > 90,
-            is_warning: daysSince > 60 && daysSince <= 90,
-            next_calibration: null,
-          };
+          const lastCal = entity.attributes?.last_calibration ?? entity.attributes?.last_cal;
+          result['pH Sonde'] = calibrationInfo('pH Electrode', lastCal);
         }
 
         if ((lower.includes('redox') || lower.includes('orp')) && !lower.includes('target') && !lower.includes('soll')) {
-          const lastCal = (entity.attributes?.last_calibration as string) || (entity.attributes?.last_cal as string) || null;
-          const daysSince = lastCal && !isNaN(Date.parse(lastCal))
-            ? Math.floor((Date.now() - Date.parse(lastCal)) / (1000 * 60 * 60 * 24))
-            : 21;
-          result['Redox / ORP Sonde'] = {
-            sensor_type: 'ORP Electrode',
-            last_calibration: lastCal || new Date(Date.now() - 21 * 86400000).toISOString(),
-            days_since: daysSince,
-            status: daysSince > 90 ? 'Expired' : daysSince > 60 ? 'Warning' : 'OK',
-            is_expired: daysSince > 90,
-            is_warning: daysSince > 60 && daysSince <= 90,
-            next_calibration: null,
-          };
+          const lastCal = entity.attributes?.last_calibration ?? entity.attributes?.last_cal;
+          result['Redox / ORP Sonde'] = calibrationInfo('ORP Electrode', lastCal);
         }
       }
     }
@@ -226,7 +233,7 @@ export class CalibrationStatus extends LitElement {
       justify-content: center;
       padding: 40px;
       text-align: center;
-      color: rgba(255, 255, 255, 0.5);
+      color: var(--secondary-text-color, #6b7280);
     }
 
     .empty-icon {
@@ -239,8 +246,8 @@ export class CalibrationStatus extends LitElement {
     }
 
     .calibration-status {
-      background: linear-gradient(135deg, rgba(100, 200, 255, 0.08) 0%, rgba(100, 150, 255, 0.04) 100%);
-      border: 1px solid rgba(100, 150, 255, 0.2);
+      background: var(--secondary-background-color, rgba(100, 150, 255, 0.06));
+      border: 1px solid var(--divider-color, rgba(100, 150, 255, 0.2));
       border-radius: 12px;
       padding: 20px;
       display: flex;
@@ -257,12 +264,12 @@ export class CalibrationStatus extends LitElement {
     .header-title {
       font-size: 16px;
       font-weight: 700;
-      color: #fff;
+      color: var(--primary-text-color, #1f2937);
     }
 
     .header-device {
       font-size: 12px;
-      color: rgba(255, 255, 255, 0.6);
+      color: var(--secondary-text-color, #6b7280);
     }
 
     .calibrations-grid {
@@ -272,7 +279,7 @@ export class CalibrationStatus extends LitElement {
     }
 
     .calibration-card {
-      background: rgba(0, 0, 0, 0.2);
+      background: var(--card-background-color, rgba(255, 255, 255, 0.72));
       border: 1px solid rgba(100, 150, 255, 0.2);
       border-radius: 8px;
       padding: 16px;
@@ -312,7 +319,7 @@ export class CalibrationStatus extends LitElement {
     .sensor-name {
       font-size: 14px;
       font-weight: 600;
-      color: #fff;
+      color: var(--primary-text-color, #1f2937);
     }
 
     .status-badge {
@@ -342,7 +349,7 @@ export class CalibrationStatus extends LitElement {
 
     .status-badge.unknown {
       background: rgba(150, 150, 150, 0.3);
-      color: rgba(255, 255, 255, 0.7);
+      color: var(--secondary-text-color, #6b7280);
     }
 
     .card-content {
@@ -361,17 +368,17 @@ export class CalibrationStatus extends LitElement {
     }
 
     .label {
-      color: rgba(255, 255, 255, 0.6);
+      color: var(--secondary-text-color, #6b7280);
       font-weight: 500;
     }
 
     .value {
-      color: rgba(255, 255, 255, 0.9);
+      color: var(--primary-text-color, #1f2937);
       font-weight: 600;
     }
 
     .no-data {
-      color: rgba(255, 255, 255, 0.5);
+      color: var(--secondary-text-color, #6b7280);
       font-size: 11px;
       font-style: italic;
     }
@@ -400,4 +407,6 @@ export class CalibrationStatus extends LitElement {
   `;
 }
 
-customElements.define('calibration-status', CalibrationStatus);
+if (typeof customElements !== 'undefined' && !customElements.get('calibration-status')) {
+  customElements.define('calibration-status', CalibrationStatus);
+}

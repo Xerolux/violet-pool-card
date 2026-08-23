@@ -112,6 +112,10 @@ export type CardType =
   | 'counter_current'
   | 'digital_rules'
   | 'diagnostics'
+  | 'maintenance'
+  | 'alerts'
+  | 'statistics'
+  | 'comparison'
   | 'chlorine_canister'
   | 'ph_plus_canister'
   | 'ph_minus_canister'
@@ -140,7 +144,7 @@ export type AlarmStyle = 'soft' | 'outline' | 'pulse';
 export type AccessibilityMode = 'standard' | 'high_contrast' | 'reduced_motion';
 export type DashboardMode = 'default' | 'operations' | 'chemistry' | 'maintenance' | 'compact_mobile' | 'alarm_center';
 
-export type DosingType = 'chlorine' | 'ph_minus' | 'ph_plus' | 'flocculant';
+export type DosingType = 'chlorine' | 'free_chlorine' | 'electrolysis' | 'ph_minus' | 'ph_plus' | 'flocculant';
 
 export type { ThresholdsConfig, ThresholdBandConfig, AlertLevel } from '../utils/thresholds';
 
@@ -175,6 +179,8 @@ export interface VioletPoolCardConfig {
   orp_value_entity?: string;
   target_orp_entity?: string;
   target_ph_entity?: string;
+  target_chlorine_entity?: string;
+  target_entity?: string;
   cover_entity?: string;
   light_entity?: string;
   filter_entity?: string;
