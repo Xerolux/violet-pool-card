@@ -55,6 +55,7 @@ import {
   detectDosingType,
   dosingChannel,
   isDosingType,
+  normalizeDosingType,
   type DosingChannel,
   type DosingType,
 } from './utils/dosing-type';
@@ -282,18 +283,11 @@ export class VioletPoolCard extends LitElement {
       throw new Error('You need to define an entity');
     }
 
-    // A `dosing_type` the card does not know used to be carried through the
-    // whole render: it picked no channel, translated to nothing and left the
-    // card half drawn. Saying which values exist is the shortest way out of
-    // that - reported on the forum for 0.5.2, from a configuration pasted as
-    // `dosing_type: ph_minus | ph_plus | flocculant`, which YAML reads as one
-    // string rather than a choice of three.
-    if (config.dosing_type !== undefined && !isDosingType(config.dosing_type)) {
-      throw new Error(
-        `dosing_type must be one of ${DOSING_CHANNELS.map((channel) => channel.type).join(
-          ', '
-        )} - got "${String(config.dosing_type)}"`
-      );
+    if (config.dosing_type !== undefined) {
+      const normalized = normalizeDosingType(config.dosing_type);
+      if (normalized) {
+        config = { ...config, dosing_type: normalized };
+      }
     }
 
     // Enable performance monitoring in development
@@ -406,12 +400,15 @@ export class VioletPoolCard extends LitElement {
       const channel = dosingChannel(type);
       const prefix = this.config.entity_prefix || 'violet_pool_controller';
       const candidates = [
-        // The registry knows the mode select by its key, whatever it is named.
         this._registryIndex.get(`select:${channel.modeTranslationKey}`),
+        this._registryIndex.get(`sensor:${channel.translationKey}`),
+        this._registryIndex.get(`switch:${channel.translationKey}`),
+        `select.${prefix}_${type === 'chlorine' ? 'chlorine_dosing_mode' : type === 'ph_minus' ? 'ph_minus_dosing_mode' : type === 'ph_plus' ? 'ph_plus_dosing_mode' : 'flocculant_dosing_mode'}`,
         `select.${prefix}_${type === 'chlorine' ? 'chlordosier_modus' : type === 'ph_minus' ? 'ph_dosier_modus' : type === 'ph_plus' ? 'ph_dosier_modus_2' : 'flockungsmittel_modus'}`,
+        `sensor.${prefix}_${type === 'chlorine' ? 'chlorine_dosing_system' : type === 'ph_minus' ? 'ph_minus_dosing_system' : type === 'ph_plus' ? 'ph_plus_dosing_system' : 'flocculant_dosing_system'}`,
         `sensor.${prefix}_${type === 'chlorine' ? 'chlor_dosiersystem' : type === 'ph_minus' ? 'ph_dosiersystem' : type === 'ph_plus' ? 'ph_dosiersystem_2' : 'flockmittel_dosiersystem'}`,
         `sensor.${prefix}_${type === 'chlorine' ? 'chlordosierung' : type === 'ph_minus' ? 'ph_dosierung' : type === 'ph_plus' ? 'ph_dosierung_2' : 'flockungsmitteldosierung'}`,
-        `sensor.${prefix}_${type === 'chlorine' ? 'chlorine_dosing_system' : type === 'ph_minus' ? 'ph_minus_dosing_system' : type === 'ph_plus' ? 'ph_plus_dosing_system' : 'flocculant_dosing_system'}`,
+        `switch.${prefix}_${type === 'chlorine' ? 'chlorine_dosing' : type === 'ph_minus' ? 'dosing_ph_minus' : type === 'ph_plus' ? 'dosing_ph_plus' : 'flocculant_dosing'}`,
         `switch.${prefix}_${channel.legacySuffix}`,
       ];
       for (const cand of candidates) {
@@ -457,38 +454,55 @@ export class VioletPoolCard extends LitElement {
     }
 
     const candidateMap: Record<string, string[]> = {
-      beckenwasser: ['poolwasser', 'wassertemperatur', 'pool_temperature', 'water_temperature', 'pool_temp'],
-      poolwasser: ['beckenwasser', 'pool_temperature', 'wassertemperatur'],
-      redoxpotential: ['orp_wert', 'redox_potential', 'orp_value', 'orp', 'redox'],
-      orp_wert: ['redoxpotential', 'redox_potential', 'orp_value'],
-      solarabsorber: ['solar_heizer', 'sonnenkollektor', 'solar', 'solar_absorber'],
-      sonnenkollektor: ['solar_heizer', 'solarabsorber', 'solar'],
-      chlor_dosierung: ['chlordosierung', 'chlorine_dosing_system', 'chlorine_dosing', 'chlordosier_modus'],
-      dosierung_ph_2: ['ph_dosierung', 'ph_minus_dosing_system', 'ph_minus_dosing', 'ph_dosier_modus'],
-      dosierung_ph_1: ['ph_dosierung_2', 'ph_plus_dosing_system', 'ph_plus_dosing', 'ph_dosier_modus_2'],
-      flockmittel: ['flockungsmitteldosierung', 'flocculant_dosing_system', 'flocculant_dosing', 'flockungsmittel_modus'],
-      abdeckung: ['pool_abdeckung', 'cover', 'pool_cover'],
-      redox_sollwert: ['orp_sollwert', 'orp_setpoint', 'target_orp', 'redox_sollwert'],
-      dos_1_cl_remaining_range: ['chlor_kanisterinhalt_ml', 'chlorine_level', 'dos_1_cl_remaining_range'],
-      dos_4_phm_remaining_range: ['ph_kanisterinhalt_ml', 'ph_minus_level', 'dos_4_phm_remaining_range'],
-      dos_5_php_remaining_range: ['ph_kanisterinhalt_ml_2', 'ph_plus_level', 'dos_5_php_remaining_range'],
-      dos_6_floc_remaining_range: ['flockmittel_kanisterinhalt_ml', 'flocculant_level', 'dos_6_floc_remaining_range'],
-      chlorine_level: ['chlor_kanisterinhalt_ml', 'dos_1_cl_remaining_range', 'chlorine_canister_level'],
-      ph_minus_level: ['ph_kanisterinhalt_ml', 'dos_4_phm_remaining_range', 'ph_minus_canister_level'],
-      ph_plus_level: ['ph_kanisterinhalt_ml_2', 'dos_5_php_remaining_range', 'ph_plus_canister_level'],
-      flocculant_level: ['flockmittel_kanisterinhalt_ml', 'dos_6_floc_remaining_range', 'flocculant_canister_level'],
-      filterdruck: ['filter_pressure'],
-      uberlaufbehalter: ['overflow_level', 'water_level'],
-      pumpen_durchfluss: ['durchfluss', 'flow_rate'],
-      durchfluss: ['pumpen_durchfluss', 'flow_rate'],
-      heizung: ['pool_heizer', 'heater', 'pool_heater', 'heizer'],
+      beckenwasser: ['pool_temperature', 'water_temperature', 'poolwasser', 'wassertemperatur', 'beckenwasser', 'onewire1_value'],
+      poolwasser: ['pool_temperature', 'water_temperature', 'beckenwasser', 'wassertemperatur', 'poolwasser', 'onewire1_value'],
+      redoxpotential: ['orp_value', 'redox_potential', 'orp_wert', 'pool_redox', 'redox', 'orp', 'redoxpotential'],
+      orp_wert: ['orp_value', 'redox_potential', 'redoxpotential', 'pool_redox', 'orp_wert'],
+      solarabsorber: ['solar', 'solar_absorber', 'solar_heizer', 'sonnenkollektor', 'solarabsorber'],
+      sonnenkollektor: ['solar', 'solar_absorber', 'solar_heizer', 'solarabsorber', 'sonnenkollektor'],
+      chlor_dosierung: ['chlorine_dosing_mode', 'chlordosier_modus', 'chlorine_dosing_system', 'chlor_dosiersystem', 'chlordosierung', 'chlorine_dosing', 'chlor_dosierung'],
+      dosierung_ph_2: ['ph_minus_dosing_mode', 'ph_dosier_modus', 'ph_minus_dosing_system', 'ph_dosiersystem', 'ph_dosierung', 'dosing_ph_minus', 'dosierung_ph_2'],
+      dosierung_ph_1: ['ph_plus_dosing_mode', 'ph_dosier_modus_2', 'ph_plus_dosing_system', 'ph_dosiersystem_2', 'ph_dosierung_2', 'dosing_ph_plus', 'dosierung_ph_1'],
+      flockmittel: ['flocculant_dosing_mode', 'flockungsmittel_modus', 'flocculant_dosing_system', 'flockmittel_dosiersystem', 'flockungsmitteldosierung', 'flocculant_dosing', 'flockmittel'],
+      abdeckung: ['pool_cover', 'cover', 'pool_abdeckung', 'abdeckung'],
+      redox_sollwert: ['orp_setpoint', 'target_orp', 'orp_sollwert', 'redox_sollwert'],
+      ph_sollwert: ['ph_setpoint', 'target_ph', 'ph_sollwert'],
+      dos_1_cl_remaining_range: ['dos_1_cl_remaining_range', 'chlor_kanisterinhalt_ml', 'chlorine_level', 'chlorine_canister_level'],
+      dos_4_phm_remaining_range: ['dos_4_phm_remaining_range', 'ph_kanisterinhalt_ml', 'ph_minus_level', 'ph_minus_canister_level'],
+      dos_5_php_remaining_range: ['dos_5_php_remaining_range', 'ph_kanisterinhalt_ml_2', 'ph_plus_level', 'ph_plus_canister_level'],
+      dos_6_floc_remaining_range: ['dos_6_floc_remaining_range', 'flockmittel_kanisterinhalt_ml', 'flocculant_level', 'flocculant_canister_level'],
+      chlorine_level: ['dos_1_cl_remaining_range', 'chlor_kanisterinhalt_ml', 'chlorine_level', 'chlorine_canister_level'],
+      ph_minus_level: ['dos_4_phm_remaining_range', 'ph_kanisterinhalt_ml', 'ph_minus_level', 'ph_minus_canister_level'],
+      ph_plus_level: ['dos_5_php_remaining_range', 'ph_kanisterinhalt_ml_2', 'ph_plus_level', 'ph_plus_canister_level'],
+      flocculant_level: ['dos_6_floc_remaining_range', 'flockmittel_kanisterinhalt_ml', 'flocculant_level', 'flocculant_canister_level'],
+      filterdruck: ['filter_pressure', 'filterdruck', 'adc1_value'],
+      uberlaufbehalter: ['overflow_level', 'water_level', 'uberlaufbehalter', 'adc2_value'],
+      pumpen_durchfluss: ['flow_rate', 'durchfluss', 'pumpen_durchfluss'],
+      durchfluss: ['flow_rate', 'pumpen_durchfluss', 'durchfluss'],
+      heizung: ['heater', 'pool_heater', 'pool_heizer', 'heizer', 'heizung'],
+      ruckspulung: ['backwash_status', 'backwash_mode', 'backwash', 'ruckspulstatus', 'ruckspul_modus', 'ruckspulung'],
+      refill: ['refill_status', 'refill_mode', 'refill', 'nachfullung', 'nachfullstatus', 'nachfull_modus', 'uberlaufbehalter'],
+      chlorgehalt: ['chlorine_value', 'chlorine', 'pot_value', 'chlorgehalt'],
     };
 
-    const candidates = candidateMap[suffix] || [];
-    for (const alt of candidates) {
-      const altId = this._buildEntityId(domain, alt);
-      if (this.hass?.states && this.hass.states[altId]) {
-        return altId;
+    const domainCandidates: Record<string, string[]> = {
+      switch: ['switch', 'binary_sensor', 'sensor', 'select'],
+      climate: ['climate', 'switch', 'sensor'],
+      sensor: ['sensor', 'binary_sensor', 'number'],
+      number: ['number', 'sensor'],
+      select: ['select', 'sensor', 'switch'],
+      cover: ['cover'],
+    };
+
+    const domains = domainCandidates[domain] || [domain];
+    const candidates = candidateMap[suffix] || [suffix];
+
+    for (const d of domains) {
+      for (const alt of candidates) {
+        const altId = this._buildEntityId(d, alt);
+        if (this.hass?.states && this.hass.states[altId]) {
+          return altId;
+        }
       }
     }
 
@@ -1329,34 +1343,39 @@ export class VioletPoolCard extends LitElement {
           ${config.show_detail_status && detailState
             ? html`<vpc-detail-status .raw="${detailState}" alertStyle="${this._getEffectiveAlarmStyle(config)}"></vpc-detail-status>`
             : ''}
-
-
           ${config.show_runtime && runtimeSeconds > 0
             ? html` <div class="info-row"><ha-icon icon="mdi:timer-outline"></ha-icon><span class="info-label">Runtime</span><span class="info-value">${runtimeDisplay}</span></div> `
             : ''}
-          ${this._renderRecommendationList(pumpRecommendations)}
         </div>
       </ha-card>
     `;
   }
 
-
   private renderHeaterCard(config: VioletPoolCardConfig = this.config): TemplateResult {
-    const entityId = this._mainEntityId(config)!;
+    const entityId = config.entity || this._mainEntityId(config);
+    if (!entityId) return this._renderLoadingSkeleton(config);
     const entity = this.hass.states[entityId];
-    if (!entity) return this._renderLoadingSkeleton(config);
+    if (!entity) return this._renderEntityNotFound(entityId);
     const state = entity.state;
     const name = config.name || entity.attributes.friendly_name || 'Heater';
     const accentColor = this._getAccentColor('heater', config);
 
-    const currentTemp = EntityHelper.getCurrentTemperature(entity);
-    const targetTemp = EntityHelper.getTargetTemperature(entity);
+    const poolTempSensorId = this._getEntityId('pool_temp_entity', 'sensor', 'beckenwasser');
+    const poolTempSensor = this.hass.states[poolTempSensorId];
+    const currentTemp = EntityHelper.getCurrentTemperature(entity) ?? (poolTempSensor ? parseFloat(poolTempSensor.state) : undefined);
+
+    const targetTempSensorId = this._getEntityId('target_heater_temp_entity' as any, 'number', 'heizer_sollwert');
+    const targetTempEntity = this.hass.states[targetTempSensorId];
+    const targetTemp = EntityHelper.getTargetTemperature(entity) ?? (targetTempEntity ? parseFloat(targetTempEntity.state) : undefined);
+
     const minTemp = EntityHelper.getMinTemperature(entity) || 18;
     const maxTemp = EntityHelper.getMaxTemperature(entity) || 35;
 
     const heaterState = (entity.attributes?.HEATERSTATE as string) || '';
 
-    const outsideTemp = entity.attributes?.outside_temperature as number | null | undefined;
+    const outsideSensorId = this._getEntityId('outside_temp_entity' as any, 'sensor', 'aussentemperatur');
+    const outsideSensor = this.hass.states[outsideSensorId];
+    const outsideTemp = (entity.attributes?.outside_temperature as number | null | undefined) ?? (outsideSensor ? parseFloat(outsideSensor.state) : undefined);
     const minOutsideTemp = (entity.attributes?.min_outside_temperature as number) || 14.5;
 
     const isBlockedByOutsideTemp =
@@ -1376,7 +1395,11 @@ export class VioletPoolCard extends LitElement {
         label: 'OFF',
         action: async () => {
           const serviceCaller = new ServiceCaller(this.hass);
-          await serviceCaller.setHvacMode(entityId, 'off');
+          if (entityId.startsWith('climate.')) {
+            await serviceCaller.setHvacMode(entityId, 'off');
+          } else {
+            await serviceCaller.turnOff(entityId);
+          }
         },
         active: state === 'off',
         color: '#757575',
@@ -1387,7 +1410,11 @@ export class VioletPoolCard extends LitElement {
         label: 'AUTO',
         action: async () => {
           const serviceCaller = new ServiceCaller(this.hass);
-          await serviceCaller.setHvacMode(entityId, 'auto');
+          if (entityId.startsWith('climate.')) {
+            await serviceCaller.setHvacMode(entityId, 'auto');
+          } else {
+            await serviceCaller.turnOn(entityId);
+          }
         },
         active: state === 'auto',
         color: '#2196F3',
@@ -1397,14 +1424,18 @@ export class VioletPoolCard extends LitElement {
         label: 'HEAT',
         action: async () => {
           const serviceCaller = new ServiceCaller(this.hass);
-          await serviceCaller.setHvacMode(entityId, 'heat');
+          if (entityId.startsWith('climate.')) {
+            await serviceCaller.setHvacMode(entityId, 'heat');
+          } else {
+            await serviceCaller.turnOn(entityId);
+          }
         },
-        active: state === 'heat' || state === 'heating',
+        active: state === 'heat' || state === 'heating' || state === 'on',
         color: '#FF5722',
       },
     ];
 
-    const isHeating = state === 'heating' || state === 'heat';
+    const isHeating = state === 'heating' || state === 'heat' || state === 'on';
     const heaterRecommendations = SeverityModel.getHeaterRecommendations({
       currentTemp,
       targetTemp,
@@ -1438,54 +1469,60 @@ export class VioletPoolCard extends LitElement {
             </div>
           </div>
 
-          ${currentTemp !== undefined
-            ? html` <div class="temp-hero tooltip-wrap" style="--temp-color: ${tempColor?.color || 'var(--vpc-primary)'}; position: relative;"><div class="temp-hero-main"><span class="temp-hero-value">${currentTemp.toFixed(1)}</span><span class="temp-hero-unit">°C</span></div> ${targetTemp !== undefined ? html`
-                        <div class="temp-hero-target-pill">
-                          <ha-icon icon="mdi:target" style="--mdc-icon-size: 13px"></ha-icon>
-                          <span>${targetTemp.toFixed(1)}°C</span>
-                        </div>
-                      `
-                    : ''}
-                <div class="t-tip">
-                  <div class="t-tip-title"><ha-icon icon="mdi:thermometer-water"></ha-icon>Wassertemperatur</div>
-                  <div class="t-tip-desc">Aktuelle Pooltemperatur${targetTemp !== undefined ? `. Ziel: ${targetTemp.toFixed(1)}°C` : ''}. ${currentTemp < 24 ? 'Noch kalt zum Schwimmen.' : currentTemp <= 30 ? 'Ideale Badetemperatur.' : i18n.t('temp_hint_warm')}</div>
-                  <div class="t-tip-ideal"><ha-icon icon="mdi:target"></ha-icon>${formatRange(bands.temperature, 0, '°C')} Komfort</div>
-                </div>
-                </div>
-                ${tempPct !== undefined
-                  ? html` <div class="temp-range-bar"><div class="temp-range-track"><div class="temp-range-fill" style="width: ${tempPct}%; background: ${tempColor?.color || accentColor}"></div> ${targetPct !== undefined ? html`<div class="temp-range-target" style="left: ${targetPct}%"></div>`
-                            : ''}
-                        </div>
-                        <div class="temp-range-labels">
-                          <span>${minTemp}°C</span>
-                          <span>${maxTemp}°C</span>
-                        </div>
-                      </div>
-                    `
-                  : ''}
-              `
-            : ''}
-
           ${config.show_detail_status && heaterState
             ? html`<vpc-detail-status .raw="${heaterState}" alertStyle="${this._getEffectiveAlarmStyle(config)}"></vpc-detail-status>`
             : ''}
 
-          ${outsideTemp != null
-            ? html` <div class="info-row tooltip-wrap ${isBlockedByOutsideTemp ? 'info-row-warning' : ''}" style="position:relative"><ha-icon icon="mdi:thermometer"></ha-icon><span class="info-label">${i18n.t('outside_temp')}</span><span class="info-value">${outsideTemp.toFixed(1)}°C</span> ${isBlockedByOutsideTemp ? html`<span class="info-badge warning">Min ${minOutsideTemp}°C</span>`
-                    : ''}
-                <div class="t-tip">
-                  <div class="t-tip-title">${i18n.t('outside_temp')}</div>
-                  <div class="t-tip-desc">${isBlockedByOutsideTemp ? i18n.t('heater_blocked_frost', { temp: outsideTemp.toFixed(1), min: minOutsideTemp }) : i18n.t('outside_temp_desc', { min: minOutsideTemp })}</div>
-                  ${isBlockedByOutsideTemp ? html`<div class="t-tip-warn"><ha-icon icon="mdi:snowflake-alert"></ha-icon>Heizung gesperrt</div>` : ''}
-                </div>
+          <div class="temp-section">
+            <div class="temp-display">
+              <span class="temp-current" style="color: ${tempColor?.color || 'inherit'}">
+                ${currentTemp !== undefined ? currentTemp.toFixed(1) : '--'}°C
+              </span>
+              ${targetTemp !== undefined
+                ? html`<span class="temp-target">/ ${targetTemp.toFixed(1)}°C</span>`
+                : ''}
+            </div>
+
+            ${tempPct !== undefined
+              ? html`
+                <div class="temp-slider-wrap">
+                  <div class="temp-slider-bar">
+                    <div class="temp-slider-fill" style="width: ${tempPct}%; background: ${tempColor?.color || accentColor};"></div>
+                    ${targetPct !== undefined
+                      ? html`<div class="temp-slider-target" style="left: ${targetPct}%"></div>`
+                      : ''}
+                  </div>
+                  <div class="temp-slider-labels">
+                    <span>${minTemp}°C</span>
+                    <span>${maxTemp}°C</span>
+                  </div>
                 </div>
               `
+              : ''}
+          </div>
+
+          <!-- Info rows -->
+          ${outsideTemp != null
+            ? html`
+              <div class="info-row tooltip-wrap" style="margin-top: 8px;">
+                <ha-icon icon="mdi:sun-thermometer" style="--mdc-icon-size:17px;color:var(--vpc-text-secondary)"></ha-icon>
+                <span class="info-label">${i18n.t('label_outside')}</span>
+                <span class="info-value">${outsideTemp.toFixed(1)}°C</span>
+                <div class="t-tip">
+                  <div class="t-tip-title">${i18n.t('outside_temp')}</div>
+                  <div class="t-tip-desc">${i18n.t('outside_temp_desc')}</div>
+                  <div class="t-tip-ideal"><ha-icon icon="mdi:snowflake-alert"></ha-icon>Min. Freigabetemperatur: ${minOutsideTemp.toFixed(1)}°C</div>
+                </div>
+              </div>
+            `
             : ''}
 
           ${config.show_controls
-            ? html` ${targetTemp !== undefined ? html`
+            ? html`
+                ${targetTemp !== undefined
+                  ? html`
                       <vpc-slider-control
-                        label="Target Temperature"
+                        .label="${i18n.t('target')}"
                         .min="${minTemp}"
                         .max="${maxTemp}"
                         step="0.5"
@@ -1508,23 +1545,39 @@ export class VioletPoolCard extends LitElement {
   private async _handleTemperatureChange(e: CustomEvent, entityId: string) {
     const temperature = e.detail.value;
     const serviceCaller = new ServiceCaller(this.hass);
-    await serviceCaller.setTemperature(entityId, temperature);
+    if (entityId.startsWith('climate.')) {
+      await serviceCaller.setTemperature(entityId, temperature);
+    } else {
+      const targetEntity = this._getEntityId('target_heater_temp_entity' as any, 'number', 'heizer_sollwert');
+      if (targetEntity && this.hass?.states[targetEntity]) {
+        await this.hass.callService('number', 'set_value', { entity_id: targetEntity, value: temperature });
+      }
+    }
   }
 
   private renderSolarCard(config: VioletPoolCardConfig = this.config): TemplateResult {
-    const entityId = this._mainEntityId(config)!;
+    const entityId = config.entity || this._mainEntityId(config);
+    if (!entityId) return this._renderLoadingSkeleton(config);
     const entity = this.hass.states[entityId];
-    if (!entity) return this._renderLoadingSkeleton(config);
+    if (!entity) return this._renderEntityNotFound(entityId);
     const state = entity.state;
     const name = config.name || entity.attributes.friendly_name || 'Solar';
     const accentColor = this._getAccentColor('solar', config);
 
-    const poolTemp = EntityHelper.getCurrentTemperature(entity);
-    const targetTemp = EntityHelper.getTargetTemperature(entity);
+    const poolTempSensorId = this._getEntityId('pool_temp_entity', 'sensor', 'beckenwasser');
+    const poolTempSensor = this.hass.states[poolTempSensorId];
+    const poolTemp = EntityHelper.getCurrentTemperature(entity) ?? (poolTempSensor ? parseFloat(poolTempSensor.state) : undefined);
+
+    const absorberSensorId = this._getEntityId('absorber_temp_entity' as any, 'sensor', 'solarabsorber');
+    const absorberSensor = this.hass.states[absorberSensorId];
+    const absorberTemp = (entity.attributes?.absorber_temperature as number | null | undefined) ?? (absorberSensor ? parseFloat(absorberSensor.state) : undefined);
+
+    const targetTempSensorId = this._getEntityId('target_solar_temp_entity' as any, 'number', 'solar_sollwert');
+    const targetTempEntity = this.hass.states[targetTempSensorId];
+    const targetTemp = EntityHelper.getTargetTemperature(entity) ?? (targetTempEntity ? parseFloat(targetTempEntity.state) : undefined);
+
     const minTemp = EntityHelper.getMinTemperature(entity) || 18;
     const maxTemp = EntityHelper.getMaxTemperature(entity) || 32;
-
-    const absorberTemp = entity.attributes?.absorber_temperature as number | null | undefined;
 
     const tempDelta = absorberTemp != null && poolTemp !== undefined
       ? absorberTemp - poolTemp
@@ -1538,34 +1591,47 @@ export class VioletPoolCard extends LitElement {
         label: 'OFF',
         action: async () => {
           const serviceCaller = new ServiceCaller(this.hass);
-          await serviceCaller.setHvacMode(entityId, 'off');
+          if (entityId.startsWith('climate.')) {
+            await serviceCaller.setHvacMode(entityId, 'off');
+          } else {
+            await serviceCaller.turnOff(entityId);
+          }
         },
         active: state === 'off',
         color: '#757575',
+        confirmMessage: undefined,
       },
       {
         icon: 'mdi:autorenew',
         label: 'AUTO',
         action: async () => {
           const serviceCaller = new ServiceCaller(this.hass);
-          await serviceCaller.setHvacMode(entityId, 'auto');
+          if (entityId.startsWith('climate.')) {
+            await serviceCaller.setHvacMode(entityId, 'auto');
+          } else {
+            await serviceCaller.turnOn(entityId);
+          }
         },
         active: state === 'auto',
         color: '#2196F3',
       },
       {
-        icon: 'mdi:sun-thermometer',
-        label: 'HEAT',
+        icon: 'mdi:white-balance-sunny',
+        label: 'SOLAR',
         action: async () => {
           const serviceCaller = new ServiceCaller(this.hass);
-          await serviceCaller.setHvacMode(entityId, 'heat');
+          if (entityId.startsWith('climate.')) {
+            await serviceCaller.setHvacMode(entityId, 'heat');
+          } else {
+            await serviceCaller.turnOn(entityId);
+          }
         },
-        active: state === 'heat' || state === 'heating',
+        active: state === 'heat' || state === 'heating' || state === 'on',
         color: '#FF9800',
       },
       {
-        icon: 'mdi:lightning-bolt',
-        label: 'PV BOOST',
+        icon: 'mdi:solar-power',
+        label: 'PV+',
         action: async () => {
           const serviceCaller = new ServiceCaller(this.hass);
           await serviceCaller.managePvSurplus('activate', 2);
@@ -1576,7 +1642,7 @@ export class VioletPoolCard extends LitElement {
       },
     ];
 
-    const isSolarActive = state === 'heating' || state === 'heat';
+    const isSolarActive = state === 'heating' || state === 'heat' || state === 'on';
     const solarRecommendations = SeverityModel.getSolarRecommendations({
       poolTemp,
       targetTemp,
@@ -1682,17 +1748,16 @@ export class VioletPoolCard extends LitElement {
     const channel = isDosingType(config.dosing_type)
       ? dosingChannel(config.dosing_type)
       : dosingChannel('chlorine');
-    return this._resolveSlot('switch', channel.legacySuffix);
+    const slot = this._resolveSlot('switch', channel.legacySuffix);
+    if (slot && this.hass?.states?.[slot.entityId]) {
+      return slot;
+    }
+    return undefined;
   }
 
   /**
    * A reading of the channel the dosing card is showing, by the suffix the
    * integration files it under - `dos_1_cl_daily`, `dos_4_phm_state`.
-   *
-   * The switch carries the status and the dosed volume as attributes, but the
-   * switches are disabled by default: on the reporter's installation the card
-   * shows the read-only sensor instead, and that one has no attributes at all.
-   * The same figures have their own sensors, and those are enabled.
    */
   private _dosingChannelState(channel: DosingChannel, suffix: string): HassEntity | undefined {
     const entityId = this._registryIndex.get(`sensor:${channel.translationKey}_${suffix}`);
@@ -1701,10 +1766,11 @@ export class VioletPoolCard extends LitElement {
 
   private renderDosingCard(config: VioletPoolCardConfig = this.config): TemplateResult {
     const slot = this._dosingSlot(config);
-    const entityId = slot?.entityId ?? this._mainEntityId(config)!;
+    const entityId = config.entity || slot?.entityId || this._mainEntityId(config);
+    if (!entityId) return this._renderLoadingSkeleton(config);
     const entity = this.hass.states[entityId];
     if (!entity) return this._renderEntityNotFound(entityId);
-    const readOnly = slot ? !slot.controllable : false;
+    const readOnly = slot ? !slot.controllable : entityId.startsWith('sensor.');
     // The sensor standing in for a disabled switch passes the controller's
     // numeric state through, so `0` arrives where `off` belongs.
     const state = outputStateFromCode(entity.state) ?? entity.state;
@@ -1719,11 +1785,24 @@ export class VioletPoolCard extends LitElement {
     /** Map from config dosing_type to the service-layer literal expected by ServiceCaller. */
     const dosName = (dosingType === 'chlorine' ? 'Chlor' : dosingType === 'ph_minus' ? 'pH-' : dosingType === 'ph_plus' ? 'pH+' : 'Flockmittel') as 'Chlor' | 'pH-' | 'pH+' | 'Flockmittel';
 
-    // The switch publishes the status; the sensor standing in for it does not,
-    // so the channel's own status sensor answers for it.
-    const dosingState = dosingStatusEntries(
-      dosingStatus(entity.attributes) ?? this._dosingChannelState(channel, 'state')?.state
-    );
+    // Status: from entity attributes, or fall back to controller sensors
+    const prefix = this.config.entity_prefix || 'violet_pool_controller';
+    const rawDosingState =
+      dosingStatus(entity.attributes) ??
+      this._dosingChannelState(channel, 'state')?.state ??
+      (() => {
+        const candidates = [
+          `sensor.${prefix}_${dosingType === 'chlorine' ? 'chlordosierung' : dosingType === 'ph_minus' ? 'ph_dosierung' : dosingType === 'ph_plus' ? 'ph_dosierung_2' : 'flockungsmitteldosierung'}`,
+          `sensor.${prefix}_${dosingType === 'chlorine' ? 'chlor_dosiersystem' : dosingType === 'ph_minus' ? 'ph_dosiersystem' : dosingType === 'ph_plus' ? 'ph_dosiersystem_2' : 'flockmittel_dosiersystem'}`,
+          `sensor.${prefix}_${dosingType === 'chlorine' ? 'chlorine_dosing_system' : dosingType === 'ph_minus' ? 'ph_minus_dosing_system' : dosingType === 'ph_plus' ? 'ph_plus_dosing_system' : 'flocculant_dosing_system'}`,
+        ];
+        for (const cand of candidates) {
+          if (this.hass?.states?.[cand]) return this.hass.states[cand].state;
+        }
+        return undefined;
+      })();
+
+    const dosingState = dosingStatusEntries(rawDosingState);
 
     let currentValue: number | undefined;
     let targetValue: number | undefined;
@@ -1758,7 +1837,19 @@ export class VioletPoolCard extends LitElement {
       (() => {
         const daily = this._dosingChannelState(channel, 'daily')?.state;
         const parsed = daily !== undefined ? Number(daily) : NaN;
-        return Number.isFinite(parsed) ? parsed : undefined;
+        if (Number.isFinite(parsed)) return parsed;
+
+        const candidates = [
+          `sensor.${prefix}_${dosingType === 'chlorine' ? 'chlor_tagesdosierung_ml' : dosingType === 'ph_minus' ? 'ph_tagesdosierung_ml' : dosingType === 'ph_plus' ? 'ph_tagesdosierung_ml_2' : 'flockmittel_tagesdosierung_ml'}`,
+          `sensor.${prefix}_dos_${dosingType === 'chlorine' ? '1_cl' : dosingType === 'ph_minus' ? '4_phm' : dosingType === 'ph_plus' ? '5_php' : '6_floc'}_daily`,
+        ];
+        for (const cand of candidates) {
+          if (this.hass?.states?.[cand]) {
+            const val = parseFloat(this.hass.states[cand].state);
+            if (!isNaN(val)) return val;
+          }
+        }
+        return undefined;
       })();
 
     const quickActions: QuickAction[] = [
@@ -1766,20 +1857,34 @@ export class VioletPoolCard extends LitElement {
         icon: 'mdi:power-off',
         label: 'OFF',
         action: async () => {
-          const serviceCaller = new ServiceCaller(this.hass);
-          await serviceCaller.turnOff(entityId);
+          if (entityId.startsWith('select.')) {
+            await this.hass.callService('select', 'select_option', { entity_id: entityId, option: 'off' });
+          } else if (entityId.startsWith('switch.')) {
+            const serviceCaller = new ServiceCaller(this.hass);
+            await serviceCaller.turnOff(entityId);
+          } else {
+            const serviceCaller = new ServiceCaller(this.hass);
+            await serviceCaller.smartDosing(dosName, 'stop');
+          }
         },
-        active: state === 'off',
+        active: state === 'off' || state === '0',
         color: '#757575',
       },
       {
         icon: 'mdi:autorenew',
         label: 'AUTO',
         action: async () => {
-          const serviceCaller = new ServiceCaller(this.hass);
-          await serviceCaller.turnOn(entityId);
+          if (entityId.startsWith('select.')) {
+            await this.hass.callService('select', 'select_option', { entity_id: entityId, option: 'auto' });
+          } else if (entityId.startsWith('switch.')) {
+            const serviceCaller = new ServiceCaller(this.hass);
+            await serviceCaller.turnOn(entityId);
+          } else {
+            const serviceCaller = new ServiceCaller(this.hass);
+            await serviceCaller.smartDosing(dosName, 'auto');
+          }
         },
-        active: state === 'on' || state === 'auto',
+        active: state === 'on' || state === 'auto' || state === '1' || state === 'ready',
         color: '#2196F3',
       },
       {
@@ -1787,7 +1892,7 @@ export class VioletPoolCard extends LitElement {
         label: 'Dose 30s',
         action: async () => {
           const serviceCaller = new ServiceCaller(this.hass);
-          await serviceCaller.manualDosing(entityId, 30);
+          await serviceCaller.smartDosing(dosName, 'manual_dose', 30);
         },
         color: '#4CAF50',
         confirmMessage: 'Start manual dosing for 30 seconds?',
@@ -1797,7 +1902,7 @@ export class VioletPoolCard extends LitElement {
         label: 'Dose 60s',
         action: async () => {
           const serviceCaller = new ServiceCaller(this.hass);
-          await serviceCaller.manualDosing(entityId, 60);
+          await serviceCaller.smartDosing(dosName, 'manual_dose', 60);
         },
         color: '#FF9800',
         confirmMessage: 'Start manual dosing for 60 seconds?',
@@ -1807,8 +1912,7 @@ export class VioletPoolCard extends LitElement {
         label: 'STOP',
         action: async () => {
           const serviceCaller = new ServiceCaller(this.hass);
-          const dosType = (dosingType === 'chlorine' ? 'Chlor' : dosingType === 'ph_minus' ? 'pH-' : dosingType === 'ph_plus' ? 'pH+' : 'Flockmittel') as 'Chlor' | 'pH-' | 'pH+' | 'Flockmittel';
-          await serviceCaller.stopDosing(dosType);
+          await serviceCaller.stopDosing(dosName);
         },
         color: '#FF3B30',
         confirmMessage: 'Stop current dosing?',
@@ -3578,9 +3682,6 @@ export class VioletPoolCard extends LitElement {
       </ha-card>`;
   }
 
-  /**
-   * Render Backwash Card - shows backwash status and controls
-   */
   private renderBackwashCard(config: VioletPoolCardConfig = this.config): TemplateResult {
     const slot =
       config.backwash_entity || config.entity
@@ -3590,7 +3691,7 @@ export class VioletPoolCard extends LitElement {
       config.backwash_entity ||
       config.entity ||
       slot?.entityId ||
-      this._buildEntityId('switch', 'ruckspulung');
+      this._getEntityId('backwash_entity' as any, 'switch', 'ruckspulung');
     const readOnly = slot ? !slot.controllable : false;
     const entity = this.hass.states[entityId];
     if (!entity) {
@@ -3718,13 +3819,11 @@ export class VioletPoolCard extends LitElement {
    * Render Refill Card - shows water level and refill status
    */
   private renderRefillCard(config: VioletPoolCardConfig = this.config): TemplateResult {
-    const levelSensorId = config.water_level_entity || config.entity || this._buildEntityId('sensor', 'uberlaufbehalter');
-    // The refill valve is one of the switches the integration creates
-    // disabled, so it is resolved the same way as the dosing channels.
+    const levelSensorId = config.water_level_entity || config.entity || this._getEntityId('water_level_entity', 'sensor', 'uberlaufbehalter');
     const valveSlot = config.refill_valve_entity
       ? undefined
       : this._resolveSlot('switch', 'refill');
-    const valveEntityId = config.refill_valve_entity ?? valveSlot?.entityId;
+    const valveEntityId = config.refill_valve_entity || valveSlot?.entityId || this._getEntityId('refill_valve_entity', 'switch', 'refill');
 
     const levelSensor = this.hass.states[levelSensorId];
     if (!levelSensor) {
@@ -3958,9 +4057,10 @@ export class VioletPoolCard extends LitElement {
    * Render Flow Rate Card - displays water flow rate with animation
    */
   private renderFlowRateCard(config: VioletPoolCardConfig = this.config): TemplateResult {
-    const entityId = this._mainEntityId(config)!;
+    const entityId = config.entity || this._mainEntityId(config);
+    if (!entityId) return this._renderLoadingSkeleton(config);
     const entity = this.hass.states[entityId];
-    if (!entity) return this._renderLoadingSkeleton(config);
+    if (!entity) return this._renderEntityNotFound(entityId);
     const flowRate = parseFloat(entity.state);
     const unit = entity.attributes?.unit_of_measurement || 'm³/h';
     const name = config.name || entity.attributes.friendly_name || 'Flow Rate';
@@ -3996,37 +4096,18 @@ export class VioletPoolCard extends LitElement {
         recommendation: 'Fuer Boost-Betrieb ok, aber auf Energiebedarf und Leitungsgeraeusche achten.',
       });
     }
-    
-    const quickActions: QuickAction[] = [
-      {
-        icon: 'mdi:water-pump',
-        label: 'Test Flow',
-        action: async () => {
-          const serviceCaller = new ServiceCaller(this.hass);
-          await serviceCaller.callService('violet_pool_controller', 'test_flow_rate', {
-            entity_id: entityId,
-          });
-        },
-        color: accentColor,
-      },
-      {
-        icon: 'mdi:cog',
-        label: 'Calibrate',
-        action: async () => {
-          const serviceCaller = new ServiceCaller(this.hass);
-          await serviceCaller.calibrateSensor('flow', flowRate);
-        },
-        color: '#FF9F0A',
-      },
-    ];
 
     return html`
-      <ha-card class="${this._getCardClasses(isFlowing, config)}" style="--card-accent: ${accentColor}" @click="${() => this._showMoreInfo(entityId)}">
+      <ha-card class="${this._getCardClasses(isFlowing, config)}"
+               style="--card-accent: ${accentColor}"
+               @click="${() => this._showMoreInfo(entityId)}">
         <div class="accent-bar"></div>
         <div class="card-content">
           <div class="header">
             <div class="header-icon ${isFlowing ? 'icon-active' : ''}" style="--icon-accent: ${accentColor}">
-              ${flowRateSVG(flowRate, 30, accentColor)}
+              ${config.icon
+                ? html`<ha-icon icon="${config.icon}" class="${isFlowing ? 'flow-active' : ''}"></ha-icon>`
+                : flowRateSVG(flowRate, 30, accentColor)}
             </div>
             <div class="header-info">
               <span class="name">${name}</span>
@@ -4084,11 +4165,6 @@ export class VioletPoolCard extends LitElement {
             </div>
           ` : ''}
 
-          ${config.show_controls ? html`
-            <div style="margin-top: 12px;">
-              <vpc-quick-actions .actions="${quickActions}"></vpc-quick-actions>
-            </div>
-          ` : ''}
           ${this._renderRecommendationList(flowRecommendations)}
         </div>
       </ha-card>

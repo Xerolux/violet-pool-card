@@ -34,7 +34,7 @@ describe('CHANGELOG.md', () => {
 
   it('dates the section', () => {
     const heading = changelog
-      .split('\n')
+      .split(/\r?\n/)
       .find((line) => line.startsWith(`## [${version}]`));
 
     expect(heading).toMatch(/^## \[[^\]]+\] - \d{4}-\d{2}-\d{2}$/);
