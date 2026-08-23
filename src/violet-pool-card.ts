@@ -454,6 +454,8 @@ export class VioletPoolCard extends LitElement {
     }
 
     const candidateMap: Record<string, string[]> = {
+      filterpumpe: ['filter_pump', 'pump', 'filterpumpe', 'pumpe'],
+      beleuchtung: ['light', 'lighting', 'beleuchtung'],
       beckenwasser: ['pool_temperature', 'water_temperature', 'poolwasser', 'wassertemperatur', 'beckenwasser', 'onewire1_value'],
       poolwasser: ['pool_temperature', 'water_temperature', 'beckenwasser', 'wassertemperatur', 'poolwasser', 'onewire1_value'],
       redoxpotential: ['orp_value', 'redox_potential', 'orp_wert', 'pool_redox', 'redox', 'orp', 'redoxpotential'],
