@@ -9,7 +9,7 @@ anyone there either.
 > **Historical note:** entries up to and including 0.4.1 were written in
 > German, before the language policy existed. They are kept as published.
 
-## [0.5.7] - 2026-08-23
+## [0.5.7] - 2026-08-26
 
 ### 🐛 Bug Fixes
 
