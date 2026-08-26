@@ -222,12 +222,12 @@ export class PoolFlowDiagram extends LitElement {
   public static get styles(): CSSResultGroup {
     return css`
       :host{display:block;color:var(--primary-text-color,#1d1d1f);font-family:var(--vpc-font,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif);}
-      .diagram-shell{display:flex;flex-direction:column;gap:14px;}
+      .diagram-shell{display:flex;container:pool-flow / inline-size;flex-direction:column;gap:14px;}
       .diagram-header{display:flex;align-items:center;justify-content:space-between;gap:16px;}
       .title-block{display:flex;align-items:center;gap:11px;min-width:0;}
       .title-block>span:last-child{display:flex;flex-direction:column;gap:2px;min-width:0;}
-      .title-block strong{font-size:17px;line-height:1.2;letter-spacing:-.25px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-      .title-block small{font-size:11px;color:var(--secondary-text-color,#68686f);text-transform:uppercase;letter-spacing:.55px;}
+      .title-block strong{font-size:17px;line-height:1.2;letter-spacing:-.25px;color:var(--vpc-text,var(--primary-text-color,#1d1d1f));white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+      .title-block small{font-size:11px;color:var(--vpc-text-secondary,var(--secondary-text-color,#68686f));text-transform:uppercase;letter-spacing:.55px;}
       .title-icon{width:42px;height:42px;display:flex;align-items:center;justify-content:center;border-radius:14px;background:color-mix(in srgb,var(--vpc-primary,#00A6FB) 14%,transparent);color:var(--vpc-primary,#00A6FB);}
       .title-icon ha-icon{--mdc-icon-size:23px;}
       .flow-status{display:inline-flex;align-items:center;gap:7px;padding:6px 11px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;}
@@ -251,7 +251,7 @@ export class PoolFlowDiagram extends LitElement {
       .node-icon{font-size:23px;dominant-baseline:middle;}
       .node-label{font-size:12px;font-weight:750;fill:var(--primary-text-color,#1d1d1f);}
       .node-value{font-size:10px;font-weight:650;fill:var(--secondary-text-color,#68686f);text-transform:capitalize;}
-      .facts-heading{display:flex;align-items:center;justify-content:space-between;padding:0 2px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--secondary-text-color,#68686f);}
+      .facts-heading{display:flex;align-items:center;justify-content:space-between;padding:0 2px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--vpc-text-secondary,var(--secondary-text-color,#68686f));}
       .facts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:8px;}
       .fact{appearance:none;border:1px solid color-mix(in srgb,var(--vpc-primary,#00A6FB) 10%,var(--divider-color,transparent));background:var(--ha-card-background,var(--card-background-color,#fff));color:var(--primary-text-color,#1d1d1f);border-radius:13px;padding:10px 11px;display:flex;align-items:center;gap:9px;text-align:left;font:inherit;min-width:0;transition:transform .16s ease,border-color .16s ease,background .16s ease;}
       .fact:not(:disabled){cursor:pointer;}
@@ -265,7 +265,7 @@ export class PoolFlowDiagram extends LitElement {
       .fact-value{font-size:14px;font-weight:750;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:capitalize;}
       @keyframes pool-flow-dash{to{stroke-dashoffset:-22;}}
       @keyframes pool-status-pulse{50%{opacity:.55;transform:scale(.86);}}
-      @media(max-width:600px){.diagram-header{align-items:flex-start;}.flow-status{padding:5px 8px;font-size:10px;}.flow-canvas{width:720px;max-width:none;min-height:216px;}.facts-grid{grid-template-columns:repeat(2,minmax(0,1fr));}.title-block strong{font-size:15px;}}
+      @container pool-flow (max-width:600px){.diagram-header{align-items:flex-start;}.flow-status{padding:5px 8px;font-size:10px;}.flow-canvas{width:720px;max-width:none;min-height:216px;}.facts-grid{grid-template-columns:repeat(2,minmax(0,1fr));}.title-block strong{font-size:15px;}}
       @media(prefers-reduced-motion:reduce){.flow-line.flow-active,.status-active .status-dot{animation:none!important;}.fact,.node-panel{transition:none!important;}}
     `;
   }

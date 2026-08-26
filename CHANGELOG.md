@@ -9,6 +9,18 @@ anyone there either.
 > **Historical note:** entries up to and including 0.4.1 were written in
 > German, before the language policy existed. They are kept as published.
 
+## [0.6.1] - 2026-08-26
+
+### 📱 Pool Flow Responsiveness
+
+- **Narrow masonry columns now keep the flow diagram readable.** Responsive
+  layout follows the card's own width instead of the browser viewport, keeps
+  the nodes at a legible size with horizontal scrolling and arranges facts in
+  two compact columns.
+- **Pool flow headings now inherit the selected card theme.** Ocean and other
+  dark themes use their intended high-contrast title and secondary text
+  colours.
+
 ## [0.6.0] - 2026-08-26
 
 ### 🌊 Pool Flow Diagram
