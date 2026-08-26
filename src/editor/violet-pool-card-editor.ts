@@ -7,7 +7,7 @@
  * Created by Xerolux | MIT License
  */
 
-import { i18n } from '../utils/i18n';
+import { i18n, type TranslationKey } from '../utils/i18n';
 import { CARD_TYPES_REQUIRING_ENTITY, CARD_TYPE_MAIN_ENTITY } from '../utils/entity-registry';
 import { LitElement, html, css, TemplateResult, CSSResultGroup } from 'lit';
 import { property, state } from 'lit/decorators.js';
@@ -22,6 +22,7 @@ import {
   DASHBOARD_MODE_OPTIONS,
   DOSING_TYPE_OPTIONS,
   LAYOUT_VARIANT_OPTIONS,
+  poolFlowModeOptions,
   SHADOW_INTENSITY_OPTIONS,
   selectedValue,
   type SelectOption,
@@ -237,6 +238,34 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
           </div>
         ` : ''}
 
+        ${this._config.card_type === 'pool_flow' ? html`
+          <div class="config-section">
+            <div class="section-header">
+              <ha-icon icon="mdi:pipe"></ha-icon>
+              <span>${i18n.t('pool_flow_editor_title')}</span>
+            </div>
+            ${this._renderSelect(
+              i18n.t('pool_flow_mode_label'),
+              this._config.flow_mode || 'complete',
+              poolFlowModeOptions(),
+              this._poolFlowModeChanged
+            )}
+            ${this._config.flow_mode === 'complete' || !this._config.flow_mode ? html`
+              ${this._renderFlowToggle('flow_show_heater', 'pool_flow_show_heater')}
+              ${this._renderFlowToggle('flow_show_solar', 'pool_flow_show_solar')}
+            ` : ''}
+            ${this._config.flow_mode !== 'circulation'
+              ? this._renderFlowToggle('flow_show_dosing', 'pool_flow_show_dosing')
+              : ''}
+            ${this._renderFlowToggle('flow_show_facts', 'pool_flow_show_facts')}
+            ${this._config.flow_show_facts !== false ? html`
+              ${this._renderFlowToggle('flow_show_chemistry', 'pool_flow_show_chemistry')}
+              ${this._renderFlowToggle('flow_show_backwash', 'pool_flow_show_backwash')}
+              ${this._renderFlowToggle('flow_show_refill', 'pool_flow_show_refill')}
+            ` : ''}
+          </div>
+        ` : ''}
+
         <!-- Chemistry Card Configuration -->
         ${this._config.card_type === 'chemical'
           ? html`
@@ -415,32 +444,39 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
         ` : ''}
 
         <!-- Entity Overrides (card-type specific) -->
-        ${['pump','heater','solar','dosing','overview','system','chemical'].includes(this._config.card_type) ? html`
+        ${['pump','heater','solar','dosing','overview','system','chemical','pool_flow'].includes(this._config.card_type) ? html`
           <details class="advanced-section">
             <summary>
               <ha-icon icon="mdi:swap-horizontal"></ha-icon>
               <span>${i18n.t('override_entities')}</span>
             </summary>
             <div class="advanced-content">
-              ${this._config.card_type === 'pump' || this._config.card_type === 'overview' || this._config.card_type === 'system' ? html`
+              ${['pump','overview','system','pool_flow'].includes(this._config.card_type) ? html`
                 <ha-entity-picker label="${i18n.t('editor_override_pump')}" .hass="${this.hass}" .value="${this._config.pump_entity || ''}" .includeDomains="${['switch']}" @value-changed="${(e: CustomEvent) => this._overrideChanged('pump_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker>
               ` : ''}
-              ${this._config.card_type === 'heater' || this._config.card_type === 'overview' || this._config.card_type === 'system' ? html`
+              ${['heater','overview','system','pool_flow'].includes(this._config.card_type) ? html`
                 <ha-entity-picker label="Heater (override)" .hass="${this.hass}" .value="${this._config.heater_entity || ''}" .includeDomains="${['climate']}" @value-changed="${(e: CustomEvent) => this._overrideChanged('heater_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker>
               ` : ''}
-              ${this._config.card_type === 'solar' || this._config.card_type === 'overview' || this._config.card_type === 'system' ? html`
+              ${['solar','overview','system','pool_flow'].includes(this._config.card_type) ? html`
                 <ha-entity-picker label="Solar (override)" .hass="${this.hass}" .value="${this._config.solar_entity || ''}" .includeDomains="${['climate']}" @value-changed="${(e: CustomEvent) => this._overrideChanged('solar_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker>
               ` : ''}
-              ${this._config.card_type === 'dosing' || this._config.card_type === 'overview' || this._config.card_type === 'system' ? html`
+              ${['dosing','overview','system','pool_flow'].includes(this._config.card_type) ? html`
                 <ha-entity-picker label="Chlorine Dosing (override)" .hass="${this.hass}" .value="${this._config.chlorine_entity || ''}" .includeDomains="${['switch']}" @value-changed="${(e: CustomEvent) => this._overrideChanged('chlorine_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker>
               ` : ''}
-              ${['dosing','overview','system','chemical'].includes(this._config.card_type) ? html`
+              ${['dosing','overview','system','chemical','pool_flow'].includes(this._config.card_type) ? html`
                 <ha-entity-picker label="${i18n.t('editor_override_chlorine_sensor')}" .hass="${this.hass}" .value="${this._config.chlorine_value_entity || ''}" .includeDomains="${['sensor']}" @value-changed="${(e: CustomEvent) => this._overrideChanged('chlorine_value_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker>
                 <ha-entity-picker label="${i18n.t('editor_override_ph')}" .hass="${this.hass}" .value="${this._config.ph_value_entity || ''}" .includeDomains="${['sensor']}" @value-changed="${(e: CustomEvent) => this._overrideChanged('ph_value_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker>
                 <ha-entity-picker label="ORP-Sensor (override)" .hass="${this.hass}" .value="${this._config.orp_value_entity || ''}" .includeDomains="${['sensor']}" @value-changed="${(e: CustomEvent) => this._overrideChanged('orp_value_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker>
               ` : ''}
-              ${['heater','solar','overview','system','chemical'].includes(this._config.card_type) ? html`
+              ${['heater','solar','overview','system','chemical','pool_flow'].includes(this._config.card_type) ? html`
                 <ha-entity-picker label="${i18n.t('editor_override_pool_temp')}" .hass="${this.hass}" .value="${this._config.pool_temp_entity || ''}" .includeDomains="${['sensor']}" @value-changed="${(e: CustomEvent) => this._overrideChanged('pool_temp_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker>
+              ` : ''}
+              ${this._config.card_type === 'pool_flow' ? html`
+                <ha-entity-picker label="${i18n.t('pool_flow_flow_rate')} (override)" .hass="${this.hass}" .value="${this._config.flow_rate_entity || ''}" .includeDomains="${['sensor']}" @value-changed="${(e: CustomEvent) => this._overrideChanged('flow_rate_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker>
+                <ha-entity-picker label="${i18n.t('pool_flow_filter_pressure')} (override)" .hass="${this.hass}" .value="${this._config.filter_pressure_entity || ''}" .includeDomains="${['sensor']}" @value-changed="${(e: CustomEvent) => this._overrideChanged('filter_pressure_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker>
+                <ha-entity-picker label="${i18n.t('pool_flow_water_level')} (override)" .hass="${this.hass}" .value="${this._config.pool_level_entity || ''}" .includeDomains="${['sensor']}" @value-changed="${(e: CustomEvent) => this._overrideChanged('pool_level_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker>
+                <ha-entity-picker label="${i18n.t('backwash_name')} (override)" .hass="${this.hass}" .value="${this._config.backwash_entity || ''}" .includeDomains="${['select','switch','binary_sensor']}" @value-changed="${(e: CustomEvent) => this._overrideChanged('backwash_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker>
+                <ha-entity-picker label="${i18n.t('pool_flow_refill')} (override)" .hass="${this.hass}" .value="${this._config.refill_entity || ''}" .includeDomains="${['select','switch','binary_sensor']}" @value-changed="${(e: CustomEvent) => this._overrideChanged('refill_entity', e.detail.value)}" allow-custom-entity></ha-entity-picker>
               ` : ''}
             </div>
           </details>
@@ -796,6 +832,55 @@ export class VioletPoolCardEditor extends LitElement implements LovelaceCardEdit
     this._config = {
       ...this._config,
       chemistry_type: value as VioletPoolCardConfig['chemistry_type'],
+    };
+    this._fireConfigChanged();
+  }
+
+  private _poolFlowModeChanged(ev: Event): void {
+    const value = selectedValue(ev);
+    if (!value) return;
+    this._config = {
+      ...this._config,
+      flow_mode: value as VioletPoolCardConfig['flow_mode'],
+    };
+    this._fireConfigChanged();
+  }
+
+  private _renderFlowToggle(
+    key:
+      | 'flow_show_heater'
+      | 'flow_show_solar'
+      | 'flow_show_dosing'
+      | 'flow_show_backwash'
+      | 'flow_show_refill'
+      | 'flow_show_chemistry'
+      | 'flow_show_facts',
+    label: TranslationKey
+  ): TemplateResult {
+    return html`
+      <ha-formfield label="${i18n.t(label)}">
+        <ha-switch
+          .checked="${this._config[key] !== false}"
+          @change="${(ev: Event) => this._poolFlowToggleChanged(key, ev)}"
+        ></ha-switch>
+      </ha-formfield>
+    `;
+  }
+
+  private _poolFlowToggleChanged(
+    key:
+      | 'flow_show_heater'
+      | 'flow_show_solar'
+      | 'flow_show_dosing'
+      | 'flow_show_backwash'
+      | 'flow_show_refill'
+      | 'flow_show_chemistry'
+      | 'flow_show_facts',
+    ev: Event
+  ): void {
+    this._config = {
+      ...this._config,
+      [key]: (ev.target as HaElement).checked,
     };
     this._fireConfigChanged();
   }

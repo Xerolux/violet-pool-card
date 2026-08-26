@@ -92,6 +92,22 @@ views:
     type: masonry
     cards:
       - type: custom:violet-pool-card
+        card_type: pool_flow
+        name: 🌊 Poolkreislauf
+        entity_prefix: violet_pool_controller
+        flow_mode: complete
+        flow_show_heater: true
+        flow_show_solar: true
+        flow_show_dosing: true
+        flow_show_backwash: true
+        flow_show_refill: true
+        flow_show_chemistry: true
+        flow_show_facts: true
+        size: large
+        theme: ocean
+        animation: smooth
+
+      - type: custom:violet-pool-card
         card_type: pump
         entity: switch.violet_pool_controller_filter_pump
         name: 💨 Filterpumpe
@@ -652,14 +668,14 @@ views:
         theme: minimalist
         show_state: true
         entities:
-          - switch.violet_pool_controller_extension_1_1
-          - switch.violet_pool_controller_extension_1_2
-          - switch.violet_pool_controller_extension_1_3
-          - switch.violet_pool_controller_extension_1_4
-          - switch.violet_pool_controller_extension_1_5
-          - switch.violet_pool_controller_extension_1_6
-          - switch.violet_pool_controller_extension_1_7
-          - switch.violet_pool_controller_extension_1_8
+          - sensor.violet_pool_controller_erweiterung_1_1
+          - sensor.violet_pool_controller_erweiterung_1_2
+          - sensor.violet_pool_controller_erweiterung_1_3
+          - sensor.violet_pool_controller_erweiterung_1_4
+          - sensor.violet_pool_controller_erweiterung_1_5
+          - sensor.violet_pool_controller_erweiterung_1_6
+          - sensor.violet_pool_controller_erweiterung_1_7
+          - sensor.violet_pool_controller_erweiterung_1_8
 
       - type: custom:violet-pool-card
         card_type: details
@@ -669,14 +685,14 @@ views:
         theme: minimalist
         show_state: true
         entities:
-          - switch.violet_pool_controller_extension_2_1
-          - switch.violet_pool_controller_extension_2_2
-          - switch.violet_pool_controller_extension_2_3
-          - switch.violet_pool_controller_extension_2_4
-          - switch.violet_pool_controller_extension_2_5
-          - switch.violet_pool_controller_extension_2_6
-          - switch.violet_pool_controller_extension_2_7
-          - switch.violet_pool_controller_extension_2_8
+          - sensor.violet_pool_controller_erweiterung_2_1
+          - sensor.violet_pool_controller_erweiterung_2_2
+          - sensor.violet_pool_controller_erweiterung_2_3
+          - sensor.violet_pool_controller_erweiterung_2_4
+          - sensor.violet_pool_controller_erweiterung_2_5
+          - sensor.violet_pool_controller_erweiterung_2_6
+          - sensor.violet_pool_controller_erweiterung_2_7
+          - sensor.violet_pool_controller_erweiterung_2_8
 
       - type: custom:violet-pool-card
         card_type: details

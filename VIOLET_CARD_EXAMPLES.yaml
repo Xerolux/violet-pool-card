@@ -135,6 +135,20 @@
   card_type: flow_rate
   name: Durchfluss
 
+# --- Pool-Flussdiagramm ---
+- type: custom:violet-pool-card
+  card_type: pool_flow
+  name: Poolkreislauf
+  entity_prefix: violet_pool_controller
+  flow_mode: complete
+  flow_show_heater: true
+  flow_show_solar: true
+  flow_show_dosing: true
+  flow_show_backwash: true
+  flow_show_refill: true
+  flow_show_chemistry: true
+  flow_show_facts: true
+
 # --- Anströmung Card ---
 - type: custom:violet-pool-card
   entity: switch.violet_pool_inlet

@@ -59,6 +59,13 @@
     <!-- Premium Theme Gallery -->
     <h2>Premium Theme Gallery</h2>
 
+    <h3>Pool Flow Diagram — Complete System</h3>
+    <div class="card-container" style="max-width: 1000px;">
+      <div class="card-wrapper" style="flex-basis: 100%; max-width: 100%;">
+        <violet-pool-card id="pool-flow-complete"></violet-pool-card>
+      </div>
+    </div>
+
     <h3>Details Card (List View)</h3>
     <div class="card-container">
       <div class="card-wrapper" style="flex-basis: 100%; max-width: 600px;">
@@ -249,6 +256,36 @@
              entity_id: 'sensor.violet_pool_temperature',
              state: '24.5',
              attributes: { unit_of_measurement: '°C' }
+          },
+          'sensor.violet_pool_filter_pressure': {
+             entity_id: 'sensor.violet_pool_filter_pressure',
+             state: '0.84',
+             attributes: { unit_of_measurement: 'bar' }
+          },
+          'sensor.violet_pool_flow_rate': {
+             entity_id: 'sensor.violet_pool_flow_rate',
+             state: '12.6',
+             attributes: { unit_of_measurement: 'm³/h' }
+          },
+          'sensor.violet_pool_level': {
+             entity_id: 'sensor.violet_pool_level',
+             state: '73',
+             attributes: { unit_of_measurement: '%' }
+          },
+          'sensor.violet_pool_chlorine': {
+             entity_id: 'sensor.violet_pool_chlorine',
+             state: '0.76',
+             attributes: { unit_of_measurement: 'mg/l' }
+          },
+          'select.violet_pool_backwash': {
+             entity_id: 'select.violet_pool_backwash',
+             state: 'automatic',
+             attributes: {}
+          },
+          'select.violet_pool_refill': {
+             entity_id: 'select.violet_pool_refill',
+             state: 'off',
+             attributes: {}
           }
         },
         callService: async (domain, service, data) => {
@@ -289,6 +326,28 @@
       };
 
       // --- Premium Theme Gallery ---
+
+      configureCard('pool-flow-complete', {
+        card_type: 'pool_flow',
+        name: 'Poolkreislauf',
+        size: 'large',
+        theme: 'ocean',
+        animation: 'smooth',
+        flow_mode: 'complete',
+        pump_entity: 'switch.violet_pool_pump',
+        filter_pressure_entity: 'sensor.violet_pool_filter_pressure',
+        flow_rate_entity: 'sensor.violet_pool_flow_rate',
+        pool_temp_entity: 'sensor.violet_pool_temperature',
+        pool_level_entity: 'sensor.violet_pool_level',
+        heater_entity: 'climate.violet_pool_heater',
+        solar_entity: 'climate.violet_pool_solar',
+        chlorine_entity: 'switch.violet_pool_dos_1_cl',
+        backwash_entity: 'select.violet_pool_backwash',
+        refill_entity: 'select.violet_pool_refill',
+        ph_value_entity: 'sensor.violet_pool_ph_value',
+        orp_value_entity: 'sensor.violet_pool_orp_value',
+        chlorine_value_entity: 'sensor.violet_pool_chlorine'
+      });
 
       // Details Card Demo
       configureCard('details-card-demo', {

@@ -12,6 +12,7 @@ import {
   DASHBOARD_MODE_OPTIONS,
   DOSING_TYPE_OPTIONS,
   LAYOUT_VARIANT_OPTIONS,
+  poolFlowModeOptions,
   SHADOW_INTENSITY_OPTIONS,
   selectedValue,
   type SelectOption,
@@ -27,6 +28,7 @@ const ALL_TABLES: Record<string, SelectOption[]> = {
   DASHBOARD_MODE_OPTIONS,
   DOSING_TYPE_OPTIONS,
   LAYOUT_VARIANT_OPTIONS,
+  POOL_FLOW_MODE_OPTIONS: poolFlowModeOptions(),
   SHADOW_INTENSITY_OPTIONS,
 };
 

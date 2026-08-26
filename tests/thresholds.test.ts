@@ -8,6 +8,7 @@ import {
   percentOfRange,
   resolveAlertLevel,
   resolveBand,
+  resolveOrpBand,
   resolveThresholds,
   shouldReport,
 } from '../src/utils/thresholds';
@@ -99,6 +100,28 @@ describe('evaluate', () => {
   it('suppresses the alert entirely when the metric is ignored', () => {
     const ignored = resolveBand('orp', { ignore: true });
     expect(evaluate(950, ignored).ok).toBe(true);
+  });
+});
+
+describe('resolveOrpBand', () => {
+  it('centres the default-width band on the live controller target', () => {
+    const band = resolveOrpBand(undefined, 850);
+
+    expect(band.min).toBe(800);
+    expect(band.max).toBe(900);
+    expect(evaluate(859, band).ok).toBe(true);
+  });
+
+  it('keeps explicit card limits instead of the controller target', () => {
+    const band = resolveOrpBand({ min: 650, max: 750 }, 850);
+
+    expect(band.min).toBe(650);
+    expect(band.max).toBe(750);
+    expect(evaluate(859, band).side).toBe('high');
+  });
+
+  it('falls back to the standard ORP band without a valid target', () => {
+    expect(resolveOrpBand(undefined, Number.NaN)).toEqual(DEFAULT_THRESHOLDS.orp);
   });
 });
 

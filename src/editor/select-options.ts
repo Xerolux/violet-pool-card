@@ -24,6 +24,7 @@ export interface SelectOption {
  */
 /** Every card type the card can render - see the switch in violet-pool-card.ts. */
 export const CARD_TYPE_OPTIONS: SelectOption[] = [
+  { value: 'pool_flow', label: '🌊 Pool Flow Diagram' },
   { value: 'pump', label: '🔵 Pump' },
   { value: 'heater', label: '🔥 Heater' },
   { value: 'solar', label: '☀️ Solar' },
@@ -57,6 +58,13 @@ export const CARD_TYPE_OPTIONS: SelectOption[] = [
   { value: 'details', label: '📝 Details' },
   { value: 'chemical', label: '🧪 Chemistry' },
   { value: 'sensor', label: '📡 Sensor' },
+];
+
+/** Scope choices for the pool circulation diagram, translated at render time. */
+export const poolFlowModeOptions = (): SelectOption[] => [
+  { value: 'circulation', label: i18n.t('pool_flow_mode_circulation') },
+  { value: 'treatment', label: i18n.t('pool_flow_mode_treatment') },
+  { value: 'complete', label: i18n.t('pool_flow_mode_complete') },
 ];
 
 export const DOSING_TYPE_OPTIONS: SelectOption[] = [

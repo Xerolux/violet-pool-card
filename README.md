@@ -56,7 +56,7 @@ A premium Lovelace card for the [Violet Pool Controller](https://github.com/Xero
 - **Dark/Light Mode Support** — Automatische Anpassung ans Home Assistant Theme
 - **Responsive design** - optimised for desktop, tablet and phone
 
-### 🎴 Card Types (28 Total)
+### 🎴 Card Types (34 Total)
 
 #### Equipment (7)
 1. **Pump** (`pump`) — speed control with ECO/normal/boost, RPM readout, animated icon
@@ -67,39 +67,40 @@ A premium Lovelace card for the [Violet Pool Controller](https://github.com/Xero
 6. **Light** (`light`) — RGB colour picker, brightness, animated glow
 7. **Filter** (`filter`) — pressure with colour-coded warning (green / yellow / red)
 
-#### Water treatment (8)
+#### Water treatment (9)
 8. **Backwash** (`backwash`) — cycle progress, remaining time, maintenance hints
 9. **Refill** (`refill`) — level, trend, valve status, level warnings
 10. **Overflow** (`overflow`) — overflow tank state and protection
 11. **PV Surplus** (`solar_surplus`) — solar surplus and grid export
 12. **Flow Rate** (`flow_rate`) — flow in m³/h with min/max warnings
-13. **Inlet** (`inlet`) — inlet status, trend check, flow plausibility
-14. **Counter Current** (`counter_current`) — power profile for training, soft and power mode
-15. **Chemistry** (`chemical`) — pH / ORP / temperature with recommendations
+13. **Pool Flow Diagram** (`pool_flow`) — animated circulation path with pump, filter, heating, dosing and live facts
+14. **Inlet** (`inlet`) — inlet status, trend check, flow plausibility
+15. **Counter Current** (`counter_current`) — power profile for training, soft and power mode
+16. **Chemistry** (`chemical`) — pH / ORP / temperature with recommendations
 
 #### Canisters (4)
-16. **Chlorine Canister** (`chlorine_canister`) — chlorine canister level
-17. **pH+ Canister** (`ph_plus_canister`) — pH+ canister level
-18. **pH- Canister** (`ph_minus_canister`) — pH- canister level
-19. **Flocculant Canister** (`flocculant_canister`) — flocculant canister level
+17. **Chlorine Canister** (`chlorine_canister`) — chlorine canister level
+18. **pH+ Canister** (`ph_plus_canister`) — pH+ canister level
+19. **pH- Canister** (`ph_minus_canister`) — pH- canister level
+20. **Flocculant Canister** (`flocculant_canister`) — flocculant canister level
 
 #### Diagnostics & maintenance (7)
-20. **Error Dashboard** (`error`) — active errors with severity
-21. **Digital Rules** (`digital_rules`) — rule overview with trigger / lock / unlock actions
-22. **Calibration** (`calibration`) — sensor calibration history
-23. **Maintenance** (`maintenance`) — maintenance view backed by the calibration status
-24. **Alerts** (`alerts`) — alert-focused alias for the error dashboard
-25. **Firmware Update** (`update`) — installed and available version, update from the card
-26. **Diagnostics** (`diagnostics`) — support panel with quick actions and health focus
+21. **Error Dashboard** (`error`) — active errors with severity
+22. **Digital Rules** (`digital_rules`) — rule overview with trigger / lock / unlock actions
+23. **Calibration** (`calibration`) — sensor calibration history
+24. **Maintenance** (`maintenance`) — maintenance view backed by the calibration status
+25. **Alerts** (`alerts`) — alert-focused alias for the error dashboard
+26. **Firmware Update** (`update`) — installed and available version, update from the card
+27. **Diagnostics** (`diagnostics`) — support panel with quick actions and health focus
 
 #### Dashboards (7)
-27. **Overview** (`overview`) — all devices and readings at a glance
-28. **Details** (`details`) — detailed entity list with toggle controls
-29. **Compact** (`compact`) — space-saving layout with icons and status
-30. **System** (`system`) — full-screen multi-channel view
-31. **Sensor** (`sensor`) — generic sensor display with units
-32. **Statistics** (`statistics`) — current value with trend, minimum, average, and maximum
-33. **Comparison** (`comparison`) — live comparison between an entity and its target
+28. **Overview** (`overview`) — all devices and readings at a glance
+29. **Details** (`details`) — detailed entity list with toggle controls
+30. **Compact** (`compact`) — space-saving layout with icons and status
+31. **System** (`system`) — full-screen multi-channel view
+32. **Sensor** (`sensor`) — generic sensor display with units
+33. **Statistics** (`statistics`) — current value with trend, minimum, average, and maximum
+34. **Comparison** (`comparison`) — live comparison between an entity and its target
 
 ### 🎬 Animations & Visualizations
 - **SVG animations** for pump (spinning), heater (flickering), solar (breathing), cover (motor), light (glowing)
@@ -107,6 +108,10 @@ A premium Lovelace card for the [Violet Pool Controller](https://github.com/Xero
 - **Charts & graphs** - line charts for trends, pressure gauge with live readout
 - **Loading-Skelette** — Placeholder-Animation beim Laden von Entitäten
 - **Pulse animations** - pulsing icons for active and critical states
+
+### 🧭 Violet entity reference
+
+The repository includes a privacy-safe [Violet entity catalog](docs/VIOLET_ENTITY_CATALOG.md): 266 entity IDs returned by the running Home Assistant integration, plus the generated 583-key capability catalog from the integration source. No states, registry/device identifiers, addresses, or credentials are stored.
 
 ### 📊 Features & Funktionen
 - **25+ Keyframe-Animationen** — Dropdown, Gauge-Fill, Alert-Pulse, Shimmer, Rainbow-Border, etc.
@@ -452,6 +457,29 @@ entity_prefix: violet_pool_controller
 - Installed and available version
 - Start the update from the card
 
+#### Pool-Flussdiagramm (`pool_flow`)
+
+The additional flow card visualises the complete water path and resolves the matching Violet entities automatically. Clicking a component or fact opens its Home Assistant details.
+
+```yaml
+type: custom:violet-pool-card
+card_type: pool_flow
+name: Poolkreislauf
+entity_prefix: violet_pool_controller
+flow_mode: complete
+flow_show_heater: true
+flow_show_solar: true
+flow_show_dosing: true
+flow_show_backwash: true
+flow_show_refill: true
+flow_show_chemistry: true
+flow_show_facts: true
+theme: ocean
+animation: smooth
+```
+
+`flow_mode` selects `circulation` (pool, pump, filter), `treatment` (plus dosing), or `complete` (plus heating and solar). All `flow_show_*` options are available in the visual editor. The advanced editor section also lets you override automatically discovered entities individually.
+
 ### Allgemein
 
 | Option | Wert | Standard | Beschreibung |
@@ -487,6 +515,19 @@ entity_prefix: violet_pool_controller
 | `show_controls` | boolean | true | Control-Buttons anzeigen |
 | `show_runtime` | boolean | false | Betriebsstunden anzeigen |
 | `show_history` | boolean | false | Historie anzeigen |
+
+### Pool-Flussdiagramm
+
+| Option | Value | Default | Description |
+|--------|-------|---------|-------------|
+| `flow_mode` | circulation/treatment/complete | complete | Visible plant scope |
+| `flow_show_heater` | boolean | true | Show heater in complete mode |
+| `flow_show_solar` | boolean | true | Show solar heating in complete mode |
+| `flow_show_dosing` | boolean | true | Show dosing in treatment/complete mode |
+| `flow_show_facts` | boolean | true | Show live data tiles |
+| `flow_show_chemistry` | boolean | true | Show pH, ORP and chlorine facts |
+| `flow_show_backwash` | boolean | true | Show backwash state |
+| `flow_show_refill` | boolean | true | Show refill state |
 
 ### Thresholds (target ranges for the water values)
 
@@ -818,29 +859,29 @@ accessibility_mode: reduced_motion
 ```yaml
 # Extension Module 1
 type: custom:violet-pool-card
-card_type: compact
+card_type: details
 entities:
-  - switch.violet_pool_controller_extension_1_1
-  - switch.violet_pool_controller_extension_1_2
-  - switch.violet_pool_controller_extension_1_3
-  - switch.violet_pool_controller_extension_1_4
-  - switch.violet_pool_controller_extension_1_5
-  - switch.violet_pool_controller_extension_1_6
-  - switch.violet_pool_controller_extension_1_7
-  - switch.violet_pool_controller_extension_1_8
+  - sensor.violet_pool_controller_erweiterung_1_1
+  - sensor.violet_pool_controller_erweiterung_1_2
+  - sensor.violet_pool_controller_erweiterung_1_3
+  - sensor.violet_pool_controller_erweiterung_1_4
+  - sensor.violet_pool_controller_erweiterung_1_5
+  - sensor.violet_pool_controller_erweiterung_1_6
+  - sensor.violet_pool_controller_erweiterung_1_7
+  - sensor.violet_pool_controller_erweiterung_1_8
 
 # Extension Module 2
 type: custom:violet-pool-card
-card_type: compact
+card_type: details
 entities:
-  - switch.violet_pool_controller_extension_2_1
-  - switch.violet_pool_controller_extension_2_2
-  - switch.violet_pool_controller_extension_2_3
-  - switch.violet_pool_controller_extension_2_4
-  - switch.violet_pool_controller_extension_2_5
-  - switch.violet_pool_controller_extension_2_6
-  - switch.violet_pool_controller_extension_2_7
-  - switch.violet_pool_controller_extension_2_8
+  - sensor.violet_pool_controller_erweiterung_2_1
+  - sensor.violet_pool_controller_erweiterung_2_2
+  - sensor.violet_pool_controller_erweiterung_2_3
+  - sensor.violet_pool_controller_erweiterung_2_4
+  - sensor.violet_pool_controller_erweiterung_2_5
+  - sensor.violet_pool_controller_erweiterung_2_6
+  - sensor.violet_pool_controller_erweiterung_2_7
+  - sensor.violet_pool_controller_erweiterung_2_8
 ```
 
 ### Maintenance, support and special cards
@@ -1140,7 +1181,7 @@ A premium Lovelace dashboard card for the [Violet Pool Controller](https://githu
 
 ## Key Features
 
-- **28 Card Types** — Standard equipment + newly added expansion, monitoring, and analytics cards
+- **34 Card Types** — Standard equipment + expansion, flow, monitoring, and analytics cards
 - **6 Premium Themes** — Luxury, Modern, Glass, Neon, Premium, Minimalist
 - **4 Sizes** — Small, Medium, Large, Fullscreen
 - **SVG Animations** — Rotating pump, pulsing heater, animated cover, glowing lights

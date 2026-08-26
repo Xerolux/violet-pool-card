@@ -249,24 +249,24 @@ eco_mode:
 
 extensions:
   ext1:
-    ext1_1: switch.violet_pool_controller_extension_1_1
-    ext1_2: switch.violet_pool_controller_extension_1_2
-    ext1_3: switch.violet_pool_controller_extension_1_3
-    ext1_4: switch.violet_pool_controller_extension_1_4
-    ext1_5: switch.violet_pool_controller_extension_1_5
-    ext1_6: switch.violet_pool_controller_extension_1_6
-    ext1_7: switch.violet_pool_controller_extension_1_7
-    ext1_8: switch.violet_pool_controller_extension_1_8
+    ext1_1: sensor.violet_pool_controller_erweiterung_1_1
+    ext1_2: sensor.violet_pool_controller_erweiterung_1_2
+    ext1_3: sensor.violet_pool_controller_erweiterung_1_3
+    ext1_4: sensor.violet_pool_controller_erweiterung_1_4
+    ext1_5: sensor.violet_pool_controller_erweiterung_1_5
+    ext1_6: sensor.violet_pool_controller_erweiterung_1_6
+    ext1_7: sensor.violet_pool_controller_erweiterung_1_7
+    ext1_8: sensor.violet_pool_controller_erweiterung_1_8
 
   ext2:
-    ext2_1: switch.violet_pool_controller_extension_2_1
-    ext2_2: switch.violet_pool_controller_extension_2_2
-    ext2_3: switch.violet_pool_controller_extension_2_3
-    ext2_4: switch.violet_pool_controller_extension_2_4
-    ext2_5: switch.violet_pool_controller_extension_2_5
-    ext2_6: switch.violet_pool_controller_extension_2_6
-    ext2_7: switch.violet_pool_controller_extension_2_7
-    ext2_8: switch.violet_pool_controller_extension_2_8
+    ext2_1: sensor.violet_pool_controller_erweiterung_2_1
+    ext2_2: sensor.violet_pool_controller_erweiterung_2_2
+    ext2_3: sensor.violet_pool_controller_erweiterung_2_3
+    ext2_4: sensor.violet_pool_controller_erweiterung_2_4
+    ext2_5: sensor.violet_pool_controller_erweiterung_2_5
+    ext2_6: sensor.violet_pool_controller_erweiterung_2_6
+    ext2_7: sensor.violet_pool_controller_erweiterung_2_7
+    ext2_8: sensor.violet_pool_controller_erweiterung_2_8
 
 # =============================
 # 🎬 DMX & SZENEN (DMX & Scenes)

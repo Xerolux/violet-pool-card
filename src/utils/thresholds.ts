@@ -161,6 +161,26 @@ export function resolveThresholds(config?: ThresholdsConfig): ResolvedThresholds
   return resolved;
 }
 
+/**
+ * Resolves the ORP band around the controller setpoint when the user has not
+ * configured explicit min/max limits. The default ORP band is centred on
+ * 700 mV; keeping its width while moving the centre to the live setpoint makes
+ * installations with a deliberately higher target (for example 850 mV) rate
+ * their normal operating point correctly. Explicit card limits always win.
+ */
+export function resolveOrpBand(config?: ThresholdBandConfig, target?: number): ThresholdBand {
+  const hasExplicitLimits = config?.min !== undefined || config?.max !== undefined;
+  if (hasExplicitLimits || !isFiniteNumber(target)) return resolveBand('orp', config);
+
+  const base = DEFAULT_THRESHOLDS.orp;
+  const halfWidth = (base.max - base.min) / 2;
+  return resolveBand('orp', {
+    ...config,
+    min: target - halfWidth,
+    max: target + halfWidth,
+  });
+}
+
 /** Normalisiert die `alerts`-Option; unbekannte Werte ergeben `all`. */
 export function resolveAlertLevel(value?: string, showAlerts?: boolean): AlertLevel {
   if (showAlerts === false) return 'none';

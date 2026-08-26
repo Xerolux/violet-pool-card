@@ -24,6 +24,7 @@ import './components/speed-slider';
 import './components/calibration-status';
 import './components/error-dashboard';
 import './components/system-update';
+import './components/pool-flow-diagram';
 import type { QuickAction } from './components/quick-actions';
 
 // Import utilities
@@ -72,7 +73,14 @@ import { SeverityModel, type SeverityAlert } from './utils/severity-model';
 import { TrendHelper } from './utils/trend-helper';
 import { getSystemCardGroups } from './utils/system-dashboard';
 import {
+  buildPoolFlowModel,
+  type PoolFlowEntities,
+  type PoolFlowMode,
+  type PoolFlowOptions,
+} from './utils/pool-flow';
+import {
   resolveThresholds,
+  resolveOrpBand,
   resolveAlertLevel,
   evaluate,
   levelColor,
@@ -122,7 +130,7 @@ interface LovelaceCardConfig {
   type: string;
   entity?: string;
   entities?: (string | EntityConfig)[];
-  card_type: 'pump' | 'heater' | 'solar' | 'dosing' | 'overview' | 'details' | 'sensor' | 'cover' | 'light' | 'compact' | 'system' | 'chemical' | 'filter' | 'backwash' | 'refill' | 'overflow' | 'error' | 'calibration' | 'update' | 'solar_surplus' | 'flow_rate' | 'inlet' | 'counter_current' | 'chlorine_canister' | 'ph_plus_canister' | 'ph_minus_canister' | 'flocculant_canister' | 'digital_rules' | 'diagnostics' | 'maintenance' | 'alerts' | 'statistics' | 'comparison';
+  card_type: 'pump' | 'heater' | 'solar' | 'dosing' | 'overview' | 'pool_flow' | 'details' | 'sensor' | 'cover' | 'light' | 'compact' | 'system' | 'chemical' | 'filter' | 'backwash' | 'refill' | 'overflow' | 'error' | 'calibration' | 'update' | 'solar_surplus' | 'flow_rate' | 'inlet' | 'counter_current' | 'chlorine_canister' | 'ph_plus_canister' | 'ph_minus_canister' | 'flocculant_canister' | 'digital_rules' | 'diagnostics' | 'maintenance' | 'alerts' | 'statistics' | 'comparison';
   name?: string;
   icon?: string;
 
@@ -134,6 +142,16 @@ interface LovelaceCardConfig {
   show_chlorine?: boolean;
   show_salt?: boolean;
   show_inlet?: boolean;
+
+  // Pool flow diagram options
+  flow_mode?: PoolFlowMode;
+  flow_show_heater?: boolean;
+  flow_show_solar?: boolean;
+  flow_show_dosing?: boolean;
+  flow_show_backwash?: boolean;
+  flow_show_refill?: boolean;
+  flow_show_chemistry?: boolean;
+  flow_show_facts?: boolean;
 
   // PREMIUM DESIGN SYSTEM
   size?: CardSize;
@@ -753,6 +771,8 @@ export class VioletPoolCard extends LitElement {
         result = this.renderDosingCard(); break;
       case 'overview':
         result = this.renderOverviewCard(); break;
+      case 'pool_flow':
+        result = this.renderPoolFlowCard(); break;
       case 'compact':
         result = this.renderCompactCard(); break;
       case 'system':
@@ -1140,6 +1160,7 @@ export class VioletPoolCard extends LitElement {
       case 'refill': return this.renderRefillCard(card);
       case 'solar_surplus': return this.renderSolarSurplusCard(card);
       case 'flow_rate': return this.renderFlowRateCard(card);
+      case 'pool_flow': return this.renderPoolFlowCard(card);
       case 'inlet': return this.renderInletCard(card);
       case 'counter_current': return this.renderCounterCurrentCard(card);
       case 'chlorine_canister': return this.renderChlorineCanisterCard(card);
@@ -1967,7 +1988,7 @@ export class VioletPoolCard extends LitElement {
     // user-configurable target ranges the chemistry card uses.
     const dosingBands = resolveThresholds(config.thresholds);
     const dosingBand = isChlorination
-      ? (usesDirectChlorine ? (dosingBands.chlorine ?? { min: 0.3, max: 1.5, low: 0.1, high: 2.0, range: [0, 3] as [number, number] }) : dosingBands.orp)
+      ? (usesDirectChlorine ? (dosingBands.chlorine ?? { min: 0.3, max: 1.5, low: 0.1, high: 2.0, range: [0, 3] as [number, number] }) : resolveOrpBand(config.thresholds?.orp, targetValue))
       : dosingBands.ph;
     const dosingEval = evaluate(currentValue, dosingBand);
     const valueColor = currentValue !== undefined
@@ -2120,17 +2141,21 @@ export class VioletPoolCard extends LitElement {
     const poolTempSensorId = this._getEntityId('pool_temp_entity', 'sensor', 'beckenwasser', 5);
     const phSensorId = this._getEntityId('ph_value_entity', 'sensor', 'ph_wert', 6);
     const orpSensorId = this._getEntityId('orp_value_entity', 'sensor', 'redoxpotential', 7);
+    const targetOrpId = this._getEntityId('target_orp_entity', 'number', 'redox_sollwert');
 
     const poolTempSensor = this.hass.states[poolTempSensorId];
     const phSensor = this.hass.states[phSensorId];
     const orpSensor = this.hass.states[orpSensorId];
+    const targetOrpEntity = this.hass.states[targetOrpId];
 
     const poolTemp = poolTempSensor ? parseFloat(poolTempSensor.state) : undefined;
     const phValue = phSensor ? parseFloat(phSensor.state) : undefined;
     const orpValue = orpSensor ? parseFloat(orpSensor.state) : undefined;
+    const targetOrp = targetOrpEntity ? parseFloat(targetOrpEntity.state) : undefined;
 
     // User-configurable target ranges (see `thresholds` in the card config).
     const bands = resolveThresholds(config.thresholds);
+    bands.orp = resolveOrpBand(config.thresholds?.orp, targetOrp);
     const alertLevel = resolveAlertLevel(config.alerts, config.show_alerts);
 
     const tempEval = evaluate(poolTemp, bands.temperature);
@@ -2557,6 +2582,53 @@ export class VioletPoolCard extends LitElement {
     `;
   }
 
+  private renderPoolFlowCard(config: VioletPoolCardConfig = this.config): TemplateResult {
+    const entities: PoolFlowEntities = {
+      pump: config.pump_entity || this._getEntityId('pump_entity', 'switch', 'filterpumpe'),
+      filterPressure: config.filter_pressure_entity || this._getEntityId('filter_pressure_entity', 'sensor', 'filterdruck'),
+      flowRate: config.flow_rate_entity || this._getEntityId('flow_rate_entity', 'sensor', 'pumpen_durchfluss'),
+      poolTemperature: config.pool_temp_entity || this._getEntityId('pool_temp_entity', 'sensor', 'beckenwasser'),
+      poolLevel: config.pool_level_entity || this._getEntityId('pool_level_entity', 'sensor', 'uberlaufbehalter'),
+      heater: config.heater_entity || this._getEntityId('heater_entity', 'climate', 'heizung'),
+      solar: config.solar_entity || this._getEntityId('solar_entity', 'climate', 'solarabsorber'),
+      dosing: config.chlorine_entity || this._getEntityId('chlorine_entity', 'switch', 'chlor_dosierung'),
+      backwash: config.backwash_entity || this._getEntityId('backwash_entity', 'select', 'ruckspul_modus'),
+      refill: config.refill_entity || this._getEntityId('refill_entity', 'select', 'refill_mode'),
+      ph: config.ph_value_entity || this._getEntityId('ph_value_entity', 'sensor', 'ph_wert'),
+      orp: config.orp_value_entity || this._getEntityId('orp_value_entity', 'sensor', 'redoxpotential'),
+      chlorine: config.chlorine_value_entity || this._getEntityId('chlorine_value_entity', 'sensor', 'chlorgehalt'),
+    };
+    const options: PoolFlowOptions = {
+      mode: config.flow_mode || 'complete',
+      showHeater: config.flow_show_heater !== false,
+      showSolar: config.flow_show_solar !== false,
+      showDosing: config.flow_show_dosing !== false,
+      showBackwash: config.flow_show_backwash !== false,
+      showRefill: config.flow_show_refill !== false,
+      showChemistry: config.flow_show_chemistry !== false,
+      showFacts: config.flow_show_facts !== false,
+    };
+    const model = buildPoolFlowModel(this.hass, entities, options);
+    const accentColor = this._getAccentColor('flow_rate', config);
+
+    return html`
+      <ha-card
+        class="${this._getCardClasses(model.active, config)}"
+        style="--card-accent:${accentColor};${this._getCardStyles(config)}"
+      >
+        <div class="accent-bar"></div>
+        <div class="card-content">
+          <pool-flow-diagram
+            .hass="${this.hass}"
+            .entities="${entities}"
+            .options="${options}"
+            .title="${config.name || i18n.t('pool_flow_title')}"
+          ></pool-flow-diagram>
+        </div>
+      </ha-card>
+    `;
+  }
+
   private renderDetailsCard(config: VioletPoolCardConfig = this.config): TemplateResult {
     const title = config.name || config.title || 'Details';
     const icon = config.icon;
@@ -2967,6 +3039,7 @@ export class VioletPoolCard extends LitElement {
 
     // User-configurable target ranges (see `thresholds` in the card config).
     const bands = resolveThresholds(config.thresholds);
+    bands.orp = resolveOrpBand(config.thresholds?.orp, targetOrp);
     const alertLevel = resolveAlertLevel(config.alerts, config.show_alerts);
 
     const tempEval = evaluate(poolTemp, bands.temperature);
@@ -4983,6 +5056,8 @@ ha-card.theme-glass .header-icon,ha-card.layout-glass .header-icon{box-shadow:in
         return 1;
       case 'overview':
         return 5;
+      case 'pool_flow':
+        return 6;
       case 'details':
         return Math.ceil((this.config.entities?.length || 1) / 2) + 1;
       case 'chemical':
@@ -5006,6 +5081,7 @@ ha-card.theme-glass .header-icon,ha-card.layout-glass .header-icon{box-shadow:in
       case 'sensor':
         return { columns: 6, min_columns: 4, min_rows: 2 };
       case 'overview':
+      case 'pool_flow':
       case 'chemical':
       case 'system':
       case 'details':
