@@ -1,27 +1,12 @@
 # Violet Pool Card
 
-
 <img src="https://raw.githubusercontent.com/Xerolux/violet-pool-card/main/logo.png" width="360" alt="Violet Pool Card">
 
-
-
-
-
 [![License][license-shield]](LICENSE)
-
-
-
-
-
-
-
-
 
 A premium Lovelace card for the [Violet Pool Controller](https://github.com/Xerolux/violet-hass) Integration in Home Assistant.
 
 **[English version below](#english-version)**
-
-
 
 ---
 
@@ -1236,7 +1221,6 @@ Full configuration options, examples, and troubleshooting available above in Ger
 ---
 
 **For support and feature requests, visit the GitHub repository.**
-
 
 [releases-shield]: https://img.shields.io/github/release/xerolux/violet-pool-card.svg?style=for-the-badge
 [releases]: https://github.com/xerolux/violet-pool-card/releases
