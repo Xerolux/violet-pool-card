@@ -6,7 +6,7 @@ import { CARD_TYPE_MAIN_ENTITY, LEGACY_SUFFIX_TO_SLOT } from '../src/utils/entit
 import {
   ALARM_STYLE_OPTIONS,
   ACCESSIBILITY_OPTIONS,
-  ALERT_LEVEL_OPTIONS,
+  alertLevelOptions,
   CARD_TYPE_OPTIONS,
   CHEMISTRY_TYPE_OPTIONS,
   DASHBOARD_MODE_OPTIONS,
@@ -20,7 +20,8 @@ import {
 const ALL_TABLES: Record<string, SelectOption[]> = {
   ALARM_STYLE_OPTIONS,
   ACCESSIBILITY_OPTIONS,
-  ALERT_LEVEL_OPTIONS,
+  // Built per call, so the labels follow the language the card was given.
+  ALERT_LEVEL_OPTIONS: alertLevelOptions(),
   CARD_TYPE_OPTIONS,
   CHEMISTRY_TYPE_OPTIONS,
   DASHBOARD_MODE_OPTIONS,

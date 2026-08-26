@@ -587,7 +587,7 @@ export class VioletPoolCard extends LitElement {
     `;
   }
 
-  private _renderSparkline(values: number[], color = 'var(--card-accent,var(--vpc-primary))', ariaLabel = 'Trend'): TemplateResult {
+  private _renderSparkline(values: number[], color = 'var(--card-accent,var(--vpc-primary))', ariaLabel = i18n.t('label_trend')): TemplateResult {
     if (values.length < 2) return html``;
 
     const min = Math.min(...values);
@@ -1080,7 +1080,7 @@ export class VioletPoolCard extends LitElement {
           <div class="system-hero-copy">
             <span class="system-kicker">Violet Control Center</span>
             <h2>${this.config.name || 'Pool Dashboard'}</h2>
-            <p>${totalCards} Karten mit Steuerung, Wasserwerten und Alarmstatus im Modus ${dashboardMode.replace('_', ' ')}.</p>
+            <p>${i18n.t('dashboard_summary', { count: totalCards, mode: dashboardMode.replace('_', ' ') })}</p>
           </div>
           <div class="system-hero-pills">
             <span class="system-pill">Layout: ${layoutVariant}</span>
@@ -1114,7 +1114,7 @@ export class VioletPoolCard extends LitElement {
             <div class="system-section-header">
               <div>
                 <span class="system-section-kicker">Peripherie</span>
-                <h3>Komfort und Wartung</h3>
+                <h3>${i18n.t('overview_comfort_maintenance')}</h3>
               </div>
               <span class="system-section-count">${utilityCards.length} Karten</span>
             </div>
@@ -1292,11 +1292,11 @@ export class VioletPoolCard extends LitElement {
 
           <div class="insight-grid insight-grid-pump">
             <div class="insight-card">
-              <span class="insight-label">Modus</span>
+              <span class="insight-label">${i18n.t('label_mode')}</span>
               <span class="insight-value">${currentMode.toUpperCase()}</span>
             </div>
             <div class="insight-card">
-              <span class="insight-label">Leistung</span>
+              <span class="insight-label">${i18n.t('label_power')}</span>
               <span class="insight-value" style="color:${speedColor.color}">${speedLabels[currentSpeed]}</span>
             </div>
             <div class="insight-card">
@@ -1330,7 +1330,7 @@ export class VioletPoolCard extends LitElement {
             >
               <ha-icon icon="mdi:power" style="--mdc-icon-size: 16px"></ha-icon>
               <div class="t-tip t-up">
-                <div class="t-tip-title">Pumpe AUS</div>
+                <div class="t-tip-title">${i18n.t('pump_off_title')}</div>
                 <div class="t-tip-desc">${i18n.t('pump_off_desc')}</div>
               </div>
             </button>
@@ -1466,11 +1466,11 @@ export class VioletPoolCard extends LitElement {
 
           <div class="insight-grid">
             <div class="insight-card">
-              <span class="insight-label">Ist</span>
+              <span class="insight-label">${i18n.t('label_actual')}</span>
               <span class="insight-value">${currentTemp !== undefined ? `${currentTemp.toFixed(1)}°C` : 'n/a'}</span>
             </div>
             <div class="insight-card">
-              <span class="insight-label">Ziel</span>
+              <span class="insight-label">${i18n.t('label_target')}</span>
               <span class="insight-value">${targetTemp !== undefined ? `${targetTemp.toFixed(1)}°C` : 'n/a'}</span>
             </div>
             <div class="insight-card">
@@ -1521,7 +1521,7 @@ export class VioletPoolCard extends LitElement {
                 <div class="t-tip">
                   <div class="t-tip-title">${i18n.t('outside_temp')}</div>
                   <div class="t-tip-desc">${i18n.t('outside_temp_desc')}</div>
-                  <div class="t-tip-ideal"><ha-icon icon="mdi:snowflake-alert"></ha-icon>Min. Freigabetemperatur: ${minOutsideTemp.toFixed(1)}°C</div>
+                  <div class="t-tip-ideal"><ha-icon icon="mdi:snowflake-alert"></ha-icon>${i18n.t('min_release_temp', { value: minOutsideTemp.toFixed(1) })}</div>
                 </div>
               </div>
             `
@@ -1699,7 +1699,7 @@ export class VioletPoolCard extends LitElement {
                 ? html` <div class="solar-delta-badge tooltip-wrap ${tempDelta >= 3 ? 'delta-great' : tempDelta > 0 ? 'delta-ok' : 'delta-low'}" style="position:relative"><ha-icon icon="${tempDelta >= 0 ? 'mdi:trending-up' : 'mdi:trending-down'}" style="--mdc-icon-size: 16px"></ha-icon><span>${tempDelta > 0 ? '+' : ''}${tempDelta.toFixed(1)}°C</span>
                   <div class="t-tip">
                     <div class="t-tip-title"><ha-icon icon="mdi:delta"></ha-icon>Temperaturdifferenz</div>
-                    <div class="t-tip-desc">Differenz zwischen Absorber (Kollektor) und Pool. ${tempDelta >= 3 ? 'Sehr gute Solarbedingungen! Heizung wird aktiv.' : tempDelta > 0 ? i18n.t('solar_delta_weak') : i18n.t('solar_delta_none')}</div>
+                    <div class="t-tip-desc">${i18n.t('solar_delta_desc')} ${tempDelta >= 3 ? i18n.t('solar_delta_strong') : tempDelta > 0 ? i18n.t('solar_delta_weak') : i18n.t('solar_delta_none')}</div>
                     <div class="t-tip-ideal"><ha-icon icon="mdi:target"></ha-icon>${i18n.t('solar_delta_ideal')}</div>
                   </div>
                 </div> `
@@ -1795,8 +1795,8 @@ export class VioletPoolCard extends LitElement {
     const isLiquidChlorine = dosingType === 'chlorine' || dosingType === 'free_chlorine';
     const isChlorination = isLiquidChlorine || dosingType === 'electrolysis';
     const supportsManualDosing = dosingType !== 'electrolysis';
-    /** Map from config dosing_type to the service-layer literal expected by ServiceCaller. */
-    const dosName = (isChlorination ? 'Chlor' : dosingType === 'ph_minus' ? 'pH-' : dosingType === 'ph_plus' ? 'pH+' : 'Flockmittel') as 'Chlor' | 'pH-' | 'pH+' | 'Flockmittel';
+    /** What the `smart_dosing` service calls this channel. */
+    const dosName = dosingType === 'electrolysis' ? 'Electrolysis' : channel.serviceValue;
 
     // Status: from entity attributes, or fall back to controller sensors
     const prefix = this.config.entity_prefix || 'violet_pool_controller';
@@ -1902,7 +1902,7 @@ export class VioletPoolCard extends LitElement {
             await serviceCaller.turnOff(entityId);
           } else {
             const serviceCaller = new ServiceCaller(this.hass);
-            await serviceCaller.smartDosing(dosName, 'stop');
+            await serviceCaller.smartDosing(entityId, dosName, 'stop');
           }
         },
         active: state === 'off' || state === '0',
@@ -1919,7 +1919,7 @@ export class VioletPoolCard extends LitElement {
             await serviceCaller.turnOn(entityId);
           } else {
             const serviceCaller = new ServiceCaller(this.hass);
-            await serviceCaller.smartDosing(dosName, 'auto');
+            await serviceCaller.smartDosing(entityId, dosName, 'auto');
           }
         },
         active: state === 'on' || state === 'auto' || state === '1' || state === 'ready',
@@ -1930,7 +1930,7 @@ export class VioletPoolCard extends LitElement {
         label: 'Dose 30s',
         action: async () => {
           const serviceCaller = new ServiceCaller(this.hass);
-          await serviceCaller.smartDosing(dosName, 'manual_dose', 30);
+          await serviceCaller.manualDose(entityId, dosName, 30);
         },
         color: '#4CAF50',
         confirmMessage: 'Start manual dosing for 30 seconds?',
@@ -1940,7 +1940,7 @@ export class VioletPoolCard extends LitElement {
         label: 'Dose 60s',
         action: async () => {
           const serviceCaller = new ServiceCaller(this.hass);
-          await serviceCaller.smartDosing(dosName, 'manual_dose', 60);
+          await serviceCaller.manualDose(entityId, dosName, 60);
         },
         color: '#FF9800',
         confirmMessage: 'Start manual dosing for 60 seconds?',
@@ -1950,7 +1950,7 @@ export class VioletPoolCard extends LitElement {
         label: 'STOP',
         action: async () => {
           const serviceCaller = new ServiceCaller(this.hass);
-          await serviceCaller.stopDosing(dosName);
+          await serviceCaller.stopDosing(entityId, dosName);
         },
         color: '#FF3B30',
         confirmMessage: 'Stop current dosing?',
@@ -2055,19 +2055,19 @@ export class VioletPoolCard extends LitElement {
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
                   <button style="padding: 8px; border: none; border-radius: 6px; background: ${accentColor}; color: white; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
-                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).manualDose(dosName, 30, false); }}">
+                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).manualDose(entityId, dosName, 30, false); }}">
                     <ha-icon icon="mdi:play" style="--mdc-icon-size: 14px;"></ha-icon> 30s
                   </button>
                   <button style="padding: 8px; border: none; border-radius: 6px; background: ${accentColor}; color: white; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
-                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).manualDose(dosName, 60, false); }}">
+                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).manualDose(entityId, dosName, 60, false); }}">
                     <ha-icon icon="mdi:play" style="--mdc-icon-size: 14px;"></ha-icon> 60s
                   </button>
                   <button style="padding: 8px; border: none; border-radius: 6px; background: #34C759; color: white; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
-                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).autoDose(dosName); }}">
+                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).autoDose(entityId, dosName); }}">
                     <ha-icon icon="mdi:auto-fix" style="--mdc-icon-size: 14px;"></ha-icon> Auto
                   </button>
                   <button style="padding: 8px; border: none; border-radius: 6px; background: #FF3B30; color: white; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
-                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).stopDosing(dosName); }}">
+                          @click="${(e: Event) => { e.stopPropagation(); new ServiceCaller(this.hass).stopDosing(entityId, dosName); }}">
                     <ha-icon icon="mdi:stop" style="--mdc-icon-size: 14px;"></ha-icon> Stop
                   </button>
                 </div>
@@ -2219,7 +2219,7 @@ export class VioletPoolCard extends LitElement {
       const isMoving = coverEntity.state === 'opening' || coverEntity.state === 'closing';
       activeDevices.push({
         icon: coverEntity.state === 'open' ? 'mdi:window-shutter-open' : isMoving ? 'mdi:window-shutter' : 'mdi:window-shutter',
-        name: (coverEntity.attributes.friendly_name as string) || 'Abdeckung',
+        name: (coverEntity.attributes.friendly_name as string) || i18n.t('device_cover'),
         status: pos != null ? `${Math.round(Number(pos))}%${isMoving ? (coverEntity.state === 'opening' ? ' ↑' : ' ↓') : ''}` : (coverEntity.state === 'open' ? 'Offen' : 'Zu'),
         state: coverEntity.state === 'open' ? 'on' : coverEntity.state === 'closed' ? 'off' : 'auto',
         entityId: coverEntityId,
@@ -2234,8 +2234,8 @@ export class VioletPoolCard extends LitElement {
       const brText = br != null ? ` · ${Math.round(br / 255 * 100)}%` : '';
       activeDevices.push({
         icon: lightEntity.state === 'on' ? 'mdi:lightbulb-on' : 'mdi:lightbulb-off-outline',
-        name: (lightEntity.attributes.friendly_name as string) || 'Beleuchtung',
-        status: lightEntity.state === 'on' ? `An${brText}` : 'Aus',
+        name: (lightEntity.attributes.friendly_name as string) || i18n.t('device_light'),
+        status: lightEntity.state === 'on' ? `${i18n.t('state_on_short')}${brText}` : i18n.t('state_off'),
         state: lightEntity.state,
         entityId: lightEntityId,
       });
@@ -2279,7 +2279,7 @@ export class VioletPoolCard extends LitElement {
       const unit = flowRateEntity.attributes.unit_of_measurement || 'm³/h';
       activeDevices.push({
         icon: 'mdi:water-flow',
-        name: (flowRateEntity.attributes.friendly_name as string) || 'Durchfluss',
+        name: (flowRateEntity.attributes.friendly_name as string) || i18n.t('device_flow_rate'),
         status: !isNaN(flowVal) ? `${flowVal.toFixed(2)} ${unit}` : flowRateEntity.state,
         state: flowVal > 0 ? 'on' : 'off',
         entityId: flowRateEntityId,
@@ -2309,7 +2309,7 @@ export class VioletPoolCard extends LitElement {
       const unit = chlorineValueEntity.attributes.unit_of_measurement || 'ppm';
       activeDevices.push({
         icon: 'mdi:flask-outline',
-        name: (chlorineValueEntity.attributes.friendly_name as string) || 'Chlor-Wert',
+        name: (chlorineValueEntity.attributes.friendly_name as string) || i18n.t('device_chlorine_value'),
         status: !isNaN(clVal) ? `${clVal.toFixed(2)} ${unit}` : chlorineValueEntity.state,
         state: 'on',
         entityId: chlorineValueEntityId,
@@ -2356,14 +2356,14 @@ export class VioletPoolCard extends LitElement {
     const heroTitle = criticalAlerts > 0
       ? i18n.t('check_now')
       : alertCount > 0
-      ? 'Aufmerksamkeit empfohlen'
+      ? i18n.t('hero_attention')
       : anyActive
-      ? 'Anlage arbeitet stabil'
-      : 'Anlage im Ruhemodus';
+      ? i18n.t('hero_running_stable')
+      : i18n.t('hero_idle');
     const heroMessage = criticalAlerts > 0
       ? i18n.t('critical_alarms', { count: criticalAlerts })
       : alertCount > 0
-      ? `${alertCount} Hinweis${alertCount === 1 ? '' : 'e'} erkannt.`
+      ? (alertCount === 1 ? i18n.t('hero_one_notice') : i18n.t('hero_notices', { count: alertCount }))
       : anyActive
       ? `${activeCount} aktive Funktion${activeCount === 1 ? '' : 'en'} laufen aktuell.`
       : i18n.t('status_all_quiet');
@@ -2388,19 +2388,19 @@ export class VioletPoolCard extends LitElement {
     const metricSnapshot = [
       {
         label: 'Wassertemp.',
-        value: poolTemp !== undefined ? `${poolTemp.toFixed(1)}°C` : 'Keine Daten',
+        value: poolTemp !== undefined ? `${poolTemp.toFixed(1)}°C` : i18n.t('no_data'),
         tone: tempColor?.color || 'var(--vpc-text-secondary)',
         trend: TrendHelper.getEntityTrend(poolTempSensor),
       },
       {
         label: 'pH',
-        value: phValue !== undefined ? phValue.toFixed(1) : 'Keine Daten',
+        value: phValue !== undefined ? phValue.toFixed(1) : i18n.t('no_data'),
         tone: phColor?.color || 'var(--vpc-text-secondary)',
         trend: TrendHelper.getEntityTrend(phSensor),
       },
       {
         label: 'ORP',
-        value: orpValue !== undefined ? `${orpValue.toFixed(0)} mV` : 'Keine Daten',
+        value: orpValue !== undefined ? `${orpValue.toFixed(0)} mV` : i18n.t('no_data'),
         tone: orpColor?.color || 'var(--vpc-text-secondary)',
         trend: TrendHelper.getEntityTrend(orpSensor),
       },
@@ -2464,7 +2464,7 @@ export class VioletPoolCard extends LitElement {
                   <div class="t-tip">
                     <div class="t-tip-title"><ha-icon icon="mdi:thermometer-water"></ha-icon>Wassertemperatur</div>
                     <div class="t-tip-desc">${i18n.t('pool_temp_desc_comfort')}</div>
-                    <div class="t-tip-ideal"><ha-icon icon="mdi:target"></ha-icon>${formatRange(bands.temperature, 0, '°C')} Komfort</div>
+                    <div class="t-tip-ideal"><ha-icon icon="mdi:target"></ha-icon>${formatRange(bands.temperature, 0, '°C')} ${i18n.t('label_comfort')}</div>
                   </div>
                   </div>
                 `
@@ -2478,7 +2478,7 @@ export class VioletPoolCard extends LitElement {
                         `
                       : ''}
                   <div class="t-tip">
-                    <div class="t-tip-title"><ha-icon icon="mdi:ph"></ha-icon>pH-Wert</div>
+                    <div class="t-tip-title"><ha-icon icon="mdi:ph"></ha-icon>${i18n.t('metric_ph')}</div>
                     <div class="t-tip-desc">${i18n.t('ph_desc_long')}</div>
                     <div class="t-tip-ideal"><ha-icon icon="mdi:target"></ha-icon>${formatRange(bands.ph, METRIC_DECIMALS.ph)} Optimal</div>
                     ${!phEval.ok && phEval.side === 'low' ? html`<div class="t-tip-warn"><ha-icon icon="mdi:arrow-up"></ha-icon>${i18n.t('ph_add_plus')}</div>` : !phEval.ok && phEval.side === 'high' ? html`<div class="t-tip-warn"><ha-icon icon="mdi:arrow-down"></ha-icon>${i18n.t('ph_add_minus')}</div>` : ''}
@@ -3053,7 +3053,7 @@ export class VioletPoolCard extends LitElement {
         kind: 'temperature' as const,
         label: 'Wassertemperatur',
         reading: poolTemp !== undefined ? `${poolTemp.toFixed(METRIC_DECIMALS.temperature)} °C` : '',
-        advice: tempEval.side === 'low' ? 'Wasser aufheizen oder Abdeckung nutzen' : i18n.t('advice_cool_down'),
+        advice: tempEval.side === 'low' ? i18n.t('advice_warm_up') : i18n.t('advice_cool_down'),
         color: tempColor.color,
       },
     ].filter(({ visible, evaluation }) => visible && shouldReport(evaluation.level, alertLevel));
@@ -3137,7 +3137,7 @@ export class VioletPoolCard extends LitElement {
               <div class="t-tip">
                 <div class="t-tip-title"><ha-icon icon="mdi:thermometer-water"></ha-icon>Wassertemperatur</div>
                 <div class="t-tip-desc">${i18n.t('pool_temp_desc_configured')}</div>
-                <div class="t-tip-ideal"><ha-icon icon="mdi:target"></ha-icon>${formatRange(bands.temperature, 0, '°C')} Komfort</div>
+                <div class="t-tip-ideal"><ha-icon icon="mdi:target"></ha-icon>${formatRange(bands.temperature, 0, '°C')} ${i18n.t('label_comfort')}</div>
               </div>
             </div>
           ` : ''}
@@ -3160,7 +3160,7 @@ export class VioletPoolCard extends LitElement {
               <div class="chem-metric-card tooltip-wrap" style="--chem-color: ${phColor?.color || '#4CAF50'}" @click="${(e: Event) => { e.stopPropagation(); this._showMoreInfo(phSensorId!); }}">
                 <div class="chem-metric-header">
                   <span class="chem-inline-icon">${this._renderChemIcon('ph', phColor?.color || '#4CAF50', phOk)}</span>
-                  <span>pH-Wert</span>
+                  <span>${i18n.t('metric_ph')}</span>
                 </div>
                 <div class="chem-gauge-slot">
                   ${chemGaugeSVG({
@@ -3174,7 +3174,7 @@ export class VioletPoolCard extends LitElement {
                 </div>
                 <div class="chem-metric-status" style="color: ${phColor.color}">${getPhStatus(phValue)}</div>
                 <div class="t-tip">
-                  <div class="t-tip-title"><ha-icon icon="mdi:ph"></ha-icon>pH-Wert</div>
+                  <div class="t-tip-title"><ha-icon icon="mdi:ph"></ha-icon>${i18n.t('metric_ph')}</div>
                   <div class="t-tip-desc">${i18n.t('ph_desc_target', { target: targetPh.toFixed(1) })}</div>
                   <div class="t-tip-ideal"><ha-icon icon="mdi:target"></ha-icon>${formatRange(bands.ph, METRIC_DECIMALS.ph)} Optimal</div>
                   ${!phOk ? html`<div class="t-tip-warn"><ha-icon icon="mdi:flask"></ha-icon>${phEval.side === 'low' ? 'pH+ zugeben' : 'pH- zugeben'}</div>` : ''}
@@ -3204,7 +3204,7 @@ export class VioletPoolCard extends LitElement {
                   <div class="t-tip-title"><ha-icon icon="mdi:lightning-bolt"></ha-icon>Redoxwert (ORP)</div>
                   <div class="t-tip-desc">${i18n.t('orp_desc_target', { target: targetOrp?.toFixed(0) || '700' })}</div>
                   <div class="t-tip-ideal"><ha-icon icon="mdi:target"></ha-icon>${formatRange(bands.orp, METRIC_DECIMALS.orp, METRIC_UNITS.orp)} Optimal</div>
-                  ${!orpOk ? html`<div class="t-tip-warn"><ha-icon icon="mdi:flask-outline"></ha-icon>${orpEval.side === 'low' ? i18n.t('chlorine_raise') : 'Chlor reduzieren'}</div>` : ''}
+                  ${!orpOk ? html`<div class="t-tip-warn"><ha-icon icon="mdi:flask-outline"></ha-icon>${orpEval.side === 'low' ? i18n.t('chlorine_raise') : i18n.t('chlorine_reduce')}</div>` : ''}
                 </div>
               </div>
             ` : ''}
@@ -3225,7 +3225,7 @@ export class VioletPoolCard extends LitElement {
                 <div class="t-tip-title"><ha-icon icon="mdi:flask"></ha-icon>Chlorgehalt</div>
                 <div class="t-tip-desc">${i18n.t('chlorine_desc')}</div>
                 <div class="t-tip-ideal"><ha-icon icon="mdi:target"></ha-icon>${formatRange(bands.chlorine, METRIC_DECIMALS.chlorine, METRIC_UNITS.chlorine)} Optimal</div>
-                ${!chlorineOk ? html`<div class="t-tip-warn"><ha-icon icon="mdi:alert"></ha-icon>${chlorineEval.side === 'low' ? 'Chlor zu niedrig - Nachdosieren erforderlich' : i18n.t('chlorine_too_high')}</div>` : ''}
+                ${!chlorineOk ? html`<div class="t-tip-warn"><ha-icon icon="mdi:alert"></ha-icon>${chlorineEval.side === 'low' ? i18n.t('chlorine_too_low') : i18n.t('chlorine_too_high')}</div>` : ''}
               </div>
             </div>
           ` : ''}
@@ -3302,13 +3302,13 @@ export class VioletPoolCard extends LitElement {
     const deviceClass = entity.attributes.device_class as string | undefined;
 
     const tooltipMap: Record<string, { title: string; desc: string; ideal?: string }> = {
-      temperature: { title: 'Temperatur', desc: 'Aktuelle Temperaturmessung des Sensors.', ideal: '24°C – 30°C (Pool)' },
-      ph: { title: 'pH-Wert', desc: i18n.t('ph_desc_short'), ideal: '7.0 – 7.4' },
-      voltage: { title: 'ORP / Spannung', desc: 'Redoxpotential – Desinfektionskraft des Wassers.', ideal: '650 – 750 mV' },
-      humidity: { title: 'Luftfeuchtigkeit', desc: 'Relative Luftfeuchtigkeit in Prozent.' },
-      pressure: { title: 'Druck', desc: 'Aktueller Druckwert.' },
+      temperature: { title: i18n.t('metric_temperature'), desc: i18n.t('sensor_desc_temperature'), ideal: '24 - 30 °C' },
+      ph: { title: i18n.t('metric_ph'), desc: i18n.t('ph_desc_short'), ideal: '7.0 – 7.4' },
+      voltage: { title: i18n.t('metric_orp_voltage'), desc: i18n.t('sensor_desc_orp'), ideal: '650 - 750 mV' },
+      humidity: { title: i18n.t('metric_humidity'), desc: i18n.t('sensor_desc_humidity') },
+      pressure: { title: i18n.t('metric_pressure'), desc: i18n.t('sensor_desc_pressure') },
     };
-    const tooltip = (deviceClass && tooltipMap[deviceClass]) || { title: name, desc: 'Sensorwert aus dem Violet Pool System.' };
+    const tooltip = (deviceClass && tooltipMap[deviceClass]) || { title: name, desc: i18n.t('sensor_desc_generic') };
 
     const displayValue = isNumeric
       ? (numValue % 1 === 0 ? numValue.toFixed(0) : numValue.toFixed(1))
@@ -3383,7 +3383,7 @@ export class VioletPoolCard extends LitElement {
         <div class="card-content">
           <div class="header">
             <div class="header-icon" style="--icon-accent:${accentColor}"><ha-icon icon="${config.icon || 'mdi:chart-line'}"></ha-icon></div>
-            <div class="header-info"><span class="name">${name}</span><span class="header-subtitle">Trend</span></div>
+            <div class="header-info"><span class="name">${name}</span><span class="header-subtitle">${i18n.t('label_trend')}</span></div>
           </div>
           <div class="sensor-big-value" style="margin:12px 0 8px;">
             <span class="sensor-num">${currentValue.toFixed(decimals)}</span>${unit ? html`<span class="sensor-unit">${unit}</span>` : ''}
@@ -3432,11 +3432,11 @@ export class VioletPoolCard extends LitElement {
         <div class="card-content">
           <div class="header">
             <div class="header-icon" style="--icon-accent:${accentColor}"><ha-icon icon="${config.icon || 'mdi:compare-horizontal'}"></ha-icon></div>
-            <div class="header-info"><span class="name">${name}</span><span class="header-subtitle">${withinTarget ? 'Im Zielbereich' : 'Abweichung vom Sollwert'}</span></div>
+            <div class="header-info"><span class="name">${name}</span><span class="header-subtitle">${withinTarget ? i18n.t('within_target') : i18n.t('off_target')}</span></div>
           </div>
           <div class="insight-grid">
-            <div class="insight-card"><span class="insight-label">Ist</span><span class="insight-value">${currentValue.toFixed(decimals)}${unit ? ` ${unit}` : ''}</span></div>
-            <div class="insight-card"><span class="insight-label">Soll</span><span class="insight-value">${targetValue.toFixed(decimals)}${unit ? ` ${unit}` : ''}</span></div>
+            <div class="insight-card"><span class="insight-label">${i18n.t('label_actual')}</span><span class="insight-value">${currentValue.toFixed(decimals)}${unit ? ` ${unit}` : ''}</span></div>
+            <div class="insight-card"><span class="insight-label">${i18n.t('label_target')}</span><span class="insight-value">${targetValue.toFixed(decimals)}${unit ? ` ${unit}` : ''}</span></div>
             <div class="insight-card"><span class="insight-label">Differenz</span><span class="insight-value" style="color:${accentColor}">${delta > 0 ? '+' : ''}${delta.toFixed(decimals)}${unit ? ` ${unit}` : ''}</span></div>
           </div>
           ${relativeDelta !== undefined ? html`<div class="info-row" style="margin-top:10px;"><ha-icon icon="${delta >= 0 ? 'mdi:trending-up' : 'mdi:trending-down'}"></ha-icon><span class="info-label">Relative Abweichung</span><span class="info-value">${relativeDelta > 0 ? '+' : ''}${relativeDelta.toFixed(1)} %</span></div>` : ''}
@@ -3449,11 +3449,11 @@ export class VioletPoolCard extends LitElement {
     const entityId = config.cover_entity || config.entity || this._buildEntityId('cover', 'abdeckung');
     const entity = this.hass.states[entityId];
     if (!entity) {
-      return html`<ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">Cover nicht gefunden</span><span class="error-entity">${entityId}</span></div></div></ha-card>`;
+      return html`<ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">${i18n.t('cover_not_found')}</span><span class="error-entity">${entityId}</span></div></div></ha-card>`;
     }
 
     const state = entity.state;
-    const name = config.name || entity.attributes.friendly_name || 'Pool Abdeckung';
+    const name = config.name || entity.attributes.friendly_name || i18n.t('cover_name');
     const isOpen = state === 'open' || state === 'opening';
     const isMoving = state === 'opening' || state === 'closing';
     const accentColor = this._getAccentColor('cover', config);
@@ -3527,12 +3527,12 @@ export class VioletPoolCard extends LitElement {
     const entityId = config.light_entity || config.entity || this._buildEntityId('switch', 'beleuchtung');
     const entity = this.hass.states[entityId];
     if (!entity) {
-      return html`<ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">Licht nicht gefunden</span><span class="error-entity">${entityId}</span></div></div></ha-card>`;
+      return html`<ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">${i18n.t('light_not_found')}</span><span class="error-entity">${entityId}</span></div></div></ha-card>`;
     }
 
     const state = entity.state;
     const isOn = state === 'on';
-    const name = config.name || entity.attributes.friendly_name || 'Pool Licht';
+    const name = config.name || entity.attributes.friendly_name || i18n.t('light_name');
     const brightness: number = Number(entity.attributes.brightness ?? 128);
     const brightnessPercent = Math.round((brightness / 255) * 100);
     const rgb: [number, number, number] | null = (entity.attributes.rgb_color as [number, number, number]) ?? null;
@@ -3721,7 +3721,7 @@ export class VioletPoolCard extends LitElement {
               <button class="cover-btn cover-btn-close ${!isOn ? 'cvr-active' : ''}"
                       @click="${(e: Event) => { e.stopPropagation(); this.hass.callService(entityId.startsWith('light.') ? 'light' : 'switch', 'turn_off', { entity_id: entityId }); }}">
                 <ha-icon icon="mdi:lightbulb-off" style="--mdc-icon-size:17px"></ha-icon>
-                <span>Aus</span>
+                <span>${i18n.t('state_off')}</span>
               </button>
             </div>
           ` : ''}
@@ -3735,11 +3735,11 @@ export class VioletPoolCard extends LitElement {
 
     const pressureEntity = this.hass.states[pressureEntityId];
     if (!pressureEntity) {
-      return html`<ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">Filter nicht gefunden</span><span class="error-entity">${pressureEntityId}</span></div></div></ha-card>`;
+      return html`<ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">${i18n.t('filter_not_found')}</span><span class="error-entity">${pressureEntityId}</span></div></div></ha-card>`;
     }
 
     const pressure: number = parseFloat(pressureEntity.state) || 0;
-    const name = config.name || pressureEntity.attributes.friendly_name || 'Filterdruck';
+    const name = config.name || pressureEntity.attributes.friendly_name || i18n.t('filter_pressure_name');
     const accentColor = this._getAccentColor('filter', config);
     
 
@@ -3753,16 +3753,16 @@ export class VioletPoolCard extends LitElement {
       : pressure < 1.2 ? 'var(--vpc-success,#34C759)'
       : pressure < 1.6 ? 'var(--vpc-warning,#FF9F0A)'
       : 'var(--vpc-danger,#FF3B30)';
-    const pressureLabel = pressure < 0.5 ? 'Niedrig'
+    const pressureLabel = pressure < 0.5 ? i18n.t('level_low_short')
       : pressure < 1.2 ? 'Normal'
       : pressure < 1.6 ? i18n.t('filter_pressure_raised')
       : i18n.t('filter_pressure_critical');
-    const maintenanceLevel = pressure < 1.2 ? 'Wartung ok' : pressure < 1.6 ? 'Service bald' : 'Sofort handeln';
+    const maintenanceLevel = pressure < 1.2 ? i18n.t('maintenance_ok') : pressure < 1.6 ? i18n.t('maintenance_soon') : i18n.t('maintenance_now');
     const filterRecommendations: SeverityAlert[] = pressure < 1.2
-      ? [{ text: 'Filter arbeitet im Sollbereich', severity: 'ok', icon: 'mdi:check-circle', recommendation: i18n.t('filter_no_action') }]
+      ? [{ text: i18n.t('filter_in_range'), severity: 'ok', icon: 'mdi:check-circle', recommendation: i18n.t('filter_no_action') }]
       : pressure < 1.6
       ? [{ text: i18n.t('filter_pressure_high'), severity: 'warning', icon: 'mdi:filter-alert', recommendation: i18n.t('filter_plan_backwash') }]
-      : [{ text: 'Filterdruck kritisch', severity: 'critical', icon: 'mdi:alert-octagon', recommendation: i18n.t('filter_backwash_now') }];
+      : [{ text: i18n.t('filter_pressure_critical_alert'), severity: 'critical', icon: 'mdi:alert-octagon', recommendation: i18n.t('filter_backwash_now') }];
     const trendDelta = TrendHelper.getTrendDelta(pressureTrend);
 
 
@@ -3793,20 +3793,20 @@ export class VioletPoolCard extends LitElement {
 
           <div class="insight-grid">
             <div class="insight-card">
-              <span class="insight-label">Druck</span>
+              <span class="insight-label">${i18n.t('metric_pressure')}</span>
               <span class="insight-value" style="color:${pressureColor}">${pressure.toFixed(2)} bar</span>
             </div>
             <div class="insight-card">
-              <span class="insight-label">Wartung</span>
+              <span class="insight-label">${i18n.t('label_maintenance')}</span>
               <span class="insight-value">${maintenanceLevel}</span>
             </div>
             <div class="insight-card">
-              <span class="insight-label">Trend</span>
+              <span class="insight-label">${i18n.t('label_trend')}</span>
               <span class="insight-value">${trendDelta !== undefined ? `${trendDelta > 0 ? '+' : ''}${trendDelta.toFixed(2)} bar` : 'n/a'}</span>
             </div>
           </div>
 
-          ${pressureTrend.length > 1 ? this._renderSparkline(pressureTrend, pressureColor, 'Filterdruck Trend') : ''}
+          ${pressureTrend.length > 1 ? this._renderSparkline(pressureTrend, pressureColor, i18n.t('filter_pressure_trend')) : ''}
 
           <!-- Detailed status row -->
           <div class="info-row ${pressure >= 1.6 ? 'info-row-warning' : ''}" style="margin-top: 8px;">
@@ -3821,7 +3821,7 @@ export class VioletPoolCard extends LitElement {
                       style="--cvr-btn-color:${accentColor}"
                       @click="${(e: Event) => { e.stopPropagation(); this.hass.callService('switch', isBackwashing ? 'turn_off' : 'turn_on', { entity_id: backwashEntityId }); }}">
                 <ha-icon icon="${isBackwashing ? 'mdi:stop' : 'mdi:rotate-right'}" style="--mdc-icon-size:16px"></ha-icon>
-                <span style="font-size: 12px;">${isBackwashing ? 'Stoppen' : i18n.t('backwash_action')}</span>
+                <span style="font-size: 12px;">${isBackwashing ? i18n.t('action_stop') : i18n.t('backwash_action')}</span>
               </button>
             </div>
           ` : ''}
@@ -3877,7 +3877,7 @@ export class VioletPoolCard extends LitElement {
           severity: 'warning',
           icon: 'mdi:timer-alert-outline',
           text: i18n.t('backwash_long_cycle'),
-          recommendation: 'Hauefige oder lange Zyklen koennen auf hohen Schmutzeintrag oder einen zugesetzten Filter hinweisen.',
+          recommendation: i18n.t('backwash_long_cycle_hint'),
         });
       }
     } else {
@@ -3885,7 +3885,7 @@ export class VioletPoolCard extends LitElement {
         severity: 'info',
         icon: 'mdi:check-circle-outline',
         text: i18n.t('backwash_ready'),
-        recommendation: 'Nur bei erhoehtem Filterdruck oder als Teil der Wartung starten.',
+        recommendation: i18n.t('backwash_when_hint'),
       });
     }
 
@@ -3956,7 +3956,7 @@ export class VioletPoolCard extends LitElement {
                         this.hass.callService('switch', isRunning ? 'turn_off' : 'turn_on', { entity_id: entityId });
                       }}">
                 <ha-icon icon="${isRunning ? 'mdi:stop' : 'mdi:play'}" style="--mdc-icon-size:17px"></ha-icon>
-                <span>${isRunning ? 'Stoppen' : 'Starten'}</span>
+                <span>${isRunning ? i18n.t('action_stop') : i18n.t('action_start')}</span>
               </button>
             </div>
           ` : ''}
@@ -3997,7 +3997,7 @@ export class VioletPoolCard extends LitElement {
 
     const percent = Math.min((level / maxLevel) * 100, 100);
     const levelColor = isLow ? 'var(--vpc-danger,#FF3B30)' : level < maxLevel * 0.7 ? 'var(--vpc-warning,#FF9F0A)' : 'var(--vpc-success,#34C759)';
-    const levelLabel = isLow ? 'Niedrig' : level < maxLevel * 0.7 ? 'Normal' : 'Voll';
+    const levelLabel = isLow ? i18n.t('level_low_short') : level < maxLevel * 0.7 ? i18n.t('level_normal') : i18n.t('level_full');
     const levelTrend = TrendHelper.getEntityTrend(levelSensor);
     const levelDelta = TrendHelper.getTrendDelta(levelTrend) ?? 0;
     const refillRecommendations: SeverityAlert[] = [];
@@ -4006,7 +4006,7 @@ export class VioletPoolCard extends LitElement {
       refillRecommendations.push({
         severity: 'critical',
         icon: 'mdi:water-alert',
-        text: 'Wasserstand niedrig',
+        text: i18n.t('water_level_low'),
         recommendation: isRefilling ? i18n.t('refill_running_hint') : i18n.t('refill_start_hint'),
       });
     } else if (isRefilling) {
@@ -4062,7 +4062,7 @@ export class VioletPoolCard extends LitElement {
               <span class="insight-value">${percent.toFixed(0)}%</span>
             </div>
             <div class="insight-card">
-              <span class="insight-label">Trend</span>
+              <span class="insight-label">${i18n.t('label_trend')}</span>
               <span class="insight-value">${levelTrend.length > 1 ? `${levelDelta >= 0 ? '+' : ''}${levelDelta.toFixed(1)}` : 'n/a'}</span>
             </div>
             <div class="insight-card">
@@ -4085,7 +4085,7 @@ export class VioletPoolCard extends LitElement {
               <!-- Percentage text on bar -->
               <span style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 11px; font-weight: bold; color: ${percent > 50 ? 'white' : 'var(--vpc-text)'}; text-shadow: 0 0 2px rgba(0,0,0,0.3); z-index: 1; pointer-events: none;">${percent.toFixed(0)}%</span>
             </div>
-            ${levelTrend.length > 1 ? this._renderSparkline(levelTrend, levelColor, 'Wasserstand Trend') : ''}
+            ${levelTrend.length > 1 ? this._renderSparkline(levelTrend, levelColor, i18n.t('water_level_trend')) : ''}
           </div>
 
           <!-- Info rows -->
@@ -4109,7 +4109,7 @@ export class VioletPoolCard extends LitElement {
                         this.hass.callService('switch', isRefilling ? 'turn_off' : 'turn_on', { entity_id: valveEntityId });
                       }}">
                 <ha-icon icon="${isRefilling ? 'mdi:stop' : 'mdi:water-plus'}" style="--mdc-icon-size:17px"></ha-icon>
-                <span>${isRefilling ? 'Stoppen' : i18n.t('refill_action')}</span>
+                <span>${isRefilling ? i18n.t('action_stop') : i18n.t('refill_action')}</span>
               </button>
             </div>
           ` : ''}
@@ -4169,7 +4169,7 @@ export class VioletPoolCard extends LitElement {
           <!-- Power visualization -->
           <div style="margin: 12px 0; padding: 12px; background: var(--vpc-surface); border-radius: 12px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-              <span style="font-size: 12px; font-weight: 600; color: var(--vpc-text);">Leistung</span>
+              <span style="font-size: 12px; font-weight: 600; color: var(--vpc-text);">${i18n.t('label_power')}</span>
               <span style="font-size: 12px; color: var(--vpc-text-secondary);">Schwellwert: ${threshold} W</span>
             </div>
             <div style="width: 100%; height: 24px; background: var(--vpc-bg); border-radius: 12px; overflow: hidden; position: relative;">
@@ -4206,7 +4206,7 @@ export class VioletPoolCard extends LitElement {
                         this.hass.callService('switch', isExporting ? 'turn_off' : 'turn_on', { entity_id: exportEntityId });
                       }}">
                 <ha-icon icon="${isExporting ? 'mdi:export' : 'mdi:import'}" style="--mdc-icon-size:17px"></ha-icon>
-                <span>${isExporting ? 'Stoppen' : 'Einspeisen'}</span>
+                <span>${isExporting ? i18n.t('action_stop') : i18n.t('action_feed_in')}</span>
               </button>
             </div>
           ` : ''}
@@ -4239,22 +4239,22 @@ export class VioletPoolCard extends LitElement {
       flowRecommendations.push({
         severity: 'critical',
         icon: 'mdi:water-off-outline',
-        text: 'Kein Durchfluss erkannt',
+        text: i18n.t('flow_none'),
         recommendation: i18n.t('flow_check_path'),
       });
     } else if (flowRate < 10) {
       flowRecommendations.push({
         severity: 'warning',
         icon: 'mdi:trending-down',
-        text: 'Durchfluss niedrig',
-        recommendation: 'Filterdruck, Pumpendrehzahl und Engstellen kontrollieren.',
+        text: i18n.t('flow_low'),
+        recommendation: i18n.t('flow_low_hint'),
       });
     } else if (flowRate > 25) {
       flowRecommendations.push({
         severity: 'info',
         icon: 'mdi:trending-up',
-        text: 'Durchfluss hoch',
-        recommendation: 'Fuer Boost-Betrieb ok, aber auf Energiebedarf und Leitungsgeraeusche achten.',
+        text: i18n.t('flow_high'),
+        recommendation: i18n.t('flow_high_hint'),
       });
     }
 
@@ -4287,7 +4287,7 @@ export class VioletPoolCard extends LitElement {
               <span class="insight-value">${minToday.toFixed(1)} / ${maxToday.toFixed(1)}</span>
             </div>
             <div class="insight-card">
-              <span class="insight-label">Trend</span>
+              <span class="insight-label">${i18n.t('label_trend')}</span>
               <span class="insight-value">${flowTrend.length > 1 ? `${flowDelta >= 0 ? '+' : ''}${flowDelta.toFixed(1)}` : 'n/a'}</span>
             </div>
           </div>
@@ -4311,7 +4311,7 @@ export class VioletPoolCard extends LitElement {
             </div>
             <span style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 11px; font-weight: bold; color: var(--vpc-text); z-index: 1;">${Math.round((flowRate / 30) * 100)}%</span>
           </div>
-          ${flowTrend.length > 1 ? this._renderSparkline(flowTrend, flowColor?.color || accentColor, 'Durchfluss Trend') : ''}
+          ${flowTrend.length > 1 ? this._renderSparkline(flowTrend, flowColor?.color || accentColor, i18n.t('flow_trend')) : ''}
 
           ${config.show_detail_status ? html`
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px;">
@@ -4368,15 +4368,15 @@ export class VioletPoolCard extends LitElement {
       inletRecommendations.push({
         severity: 'warning',
         icon: 'mdi:water-sync',
-        text: 'Restdurchfluss trotz Aus-Zustand',
-        recommendation: 'Moeglichen Nachlauf oder eine undichte Ventilstellung kontrollieren.',
+        text: i18n.t('flow_residual'),
+        recommendation: i18n.t('flow_residual_hint'),
       });
     } else if (isInflowing) {
       inletRecommendations.push({
         severity: 'info',
         icon: 'mdi:check-circle-outline',
         text: i18n.t('inlet_stable'),
-        recommendation: 'Gute Beckendurchmischung unterstuetzt Temperatur- und Chemieverteilung.',
+        recommendation: i18n.t('flow_mixing_hint'),
       });
     }
 
@@ -4415,7 +4415,7 @@ export class VioletPoolCard extends LitElement {
               <span class="insight-value">${flow !== undefined ? `${flow.toFixed(1)} m³/h` : 'n/a'}</span>
             </div>
             <div class="insight-card">
-              <span class="insight-label">Trend</span>
+              <span class="insight-label">${i18n.t('label_trend')}</span>
               <span class="insight-value">${inletTrend.length > 1 ? `${inletDelta >= 0 ? '+' : ''}${inletDelta.toFixed(1)}` : 'n/a'}</span>
             </div>
           </div>
@@ -4436,7 +4436,7 @@ export class VioletPoolCard extends LitElement {
             <div class="info-row tooltip-wrap" style="margin-top: 8px; flex-direction: column; align-items: stretch;">
               <div style="display:flex;align-items:center;gap:10px;">
                 <ha-icon icon="mdi:speedometer" style="--mdc-icon-size:17px"></ha-icon>
-                <span class="info-label">Durchfluss</span>
+                <span class="info-label">${i18n.t('device_flow_rate')}</span>
                 <span class="info-value">${flow.toFixed(1)} m³/h</span>
               </div>
               ${inletTrend.length > 1 ? this._renderSparkline(inletTrend, inflowColor, i18n.t('inlet_trend')) : ''}
@@ -4457,7 +4457,7 @@ export class VioletPoolCard extends LitElement {
                         this.hass.callService('switch', isInflowing ? 'turn_off' : 'turn_on', { entity_id: entityId });
                       }}">
                 <ha-icon icon="${isInflowing ? 'mdi:stop' : 'mdi:play'}" style="--mdc-icon-size:17px"></ha-icon>
-                <span>${isInflowing ? 'Stoppen' : 'Starten'}</span>
+                <span>${isInflowing ? i18n.t('action_stop') : i18n.t('action_start')}</span>
               </button>
             </div>
           ` : ''}
@@ -4472,7 +4472,7 @@ export class VioletPoolCard extends LitElement {
     const entityId = config.entity || this._buildEntityId('switch', 'counter_current');
     const entity = this.hass.states[entityId];
     if (!entity) {
-      return html`<ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">Gegenstromanlage nicht gefunden</span><span class="error-entity">${entityId}</span></div></div></ha-card>`;
+      return html`<ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">${i18n.t('counter_current_not_found')}</span><span class="error-entity">${entityId}</span></div></div></ha-card>`;
     }
 
     const state = entity.state;
@@ -4485,17 +4485,17 @@ export class VioletPoolCard extends LitElement {
     // Check for speed/power level
     const speedLevel = entity.attributes?.speed_level as number | undefined || entity.attributes?.power_level as number | undefined;
     const speedPercent = speedLevel !== undefined ? (speedLevel / 10) * 100 : undefined;
-    const performanceLabel = speedLevel === undefined ? 'Manuell' : speedLevel <= 3 ? 'Soft' : speedLevel <= 7 ? 'Sport' : 'Power';
+    const performanceLabel = speedLevel === undefined ? i18n.t('state_manual') : speedLevel <= 3 ? 'Soft' : speedLevel <= 7 ? 'Sport' : 'Power';
     const currentRecommendations: SeverityAlert[] = [];
 
     if (isActive && speedLevel !== undefined && speedLevel <= 3) {
-      currentRecommendations.push({ severity: 'info', icon: 'mdi:swim', text: 'Sanfter Gegenstrom', recommendation: 'Ideal fuer lockeres Schwimmen oder Techniktraining.' });
+      currentRecommendations.push({ severity: 'info', icon: 'mdi:swim', text: i18n.t('counter_current_gentle'), recommendation: i18n.t('counter_current_gentle_hint') });
     }
     if (isActive && speedLevel !== undefined && speedLevel >= 8) {
-      currentRecommendations.push({ severity: 'warning', icon: 'mdi:lightning-bolt-outline', text: 'Hohe Gegenstromleistung', recommendation: 'Nur kurzzeitig auf hohen Stufen fahren und Motorlast beobachten.' });
+      currentRecommendations.push({ severity: 'warning', icon: 'mdi:lightning-bolt-outline', text: i18n.t('counter_current_high'), recommendation: i18n.t('counter_current_high_hint') });
     }
     if (!isActive) {
-      currentRecommendations.push({ severity: 'info', icon: 'mdi:power-standby', text: 'Gegenstrom bereit', recommendation: 'Vor dem Start passende Leistungsstufe fuer Training oder Spielbetrieb festlegen.' });
+      currentRecommendations.push({ severity: 'info', icon: 'mdi:power-standby', text: i18n.t('counter_current_ready'), recommendation: i18n.t('counter_current_ready_hint') });
     }
 
     return html`
@@ -4518,15 +4518,15 @@ export class VioletPoolCard extends LitElement {
             </div>
             ${config.show_state !== false && speedPercent !== undefined ? html`
               <div style="text-align: right;">
-                <span style="font-size: 18px; font-weight: bold; color: ${activeColor};">Stufe ${speedLevel}</span>
+                <span style="font-size: 18px; font-weight: bold; color: ${activeColor};">${i18n.t('level_step', { value: speedLevel ?? 0 })}</span>
               </div>
             ` : ''}
           </div>
 
           <div class="insight-grid">
             <div class="insight-card">
-              <span class="insight-label">Leistung</span>
-              <span class="insight-value">${speedLevel !== undefined ? `Stufe ${speedLevel}` : 'n/a'}</span>
+              <span class="insight-label">${i18n.t('label_power')}</span>
+              <span class="insight-value">${speedLevel !== undefined ? i18n.t('level_step', { value: speedLevel }) : 'n/a'}</span>
             </div>
             <div class="insight-card">
               <span class="insight-label">Profil</span>
@@ -4543,7 +4543,7 @@ export class VioletPoolCard extends LitElement {
             <div style="margin: 12px 0; padding: 12px; background: var(--vpc-surface); border-radius: 12px;">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                 <span style="font-size: 12px; font-weight: 600; color: var(--vpc-text);">Leistungsstufe</span>
-                <span style="font-size: 12px; color: var(--vpc-text-secondary);">Stufe ${speedLevel}/10</span>
+                <span style="font-size: 12px; color: var(--vpc-text-secondary);">${i18n.t('level_step_of', { value: speedLevel ?? 0 })}</span>
               </div>
               <div style="width: 100%; height: 24px; background: var(--vpc-bg); border-radius: 12px; overflow: hidden; position: relative;">
                 <div style="height: 100%; background: linear-gradient(90deg, var(--vpc-text-secondary) 0%, ${activeColor} 100%); width: ${speedPercent}%; transition: width 0.5s ease;"></div>
@@ -4566,8 +4566,8 @@ export class VioletPoolCard extends LitElement {
           ${speedLevel !== undefined ? html`
             <div class="info-row tooltip-wrap" style="margin-top: 8px;">
               <ha-icon icon="mdi:speedometer" style="--mdc-icon-size:17px"></ha-icon>
-              <span class="info-label">Leistung</span>
-              <span class="info-value">Stufe ${speedLevel}/10</span>
+              <span class="info-label">${i18n.t('label_power')}</span>
+              <span class="info-value">${i18n.t('level_step_of', { value: speedLevel ?? 0 })}</span>
               <div class="t-tip">
                 <div class="t-tip-title">Leistungsstufe</div>
                 <div class="t-tip-desc">${i18n.t('counter_current_level_desc')}</div>
@@ -4584,7 +4584,7 @@ export class VioletPoolCard extends LitElement {
                         this.hass.callService('switch', isActive ? 'turn_off' : 'turn_on', { entity_id: entityId });
                       }}">
                 <ha-icon icon="${isActive ? 'mdi:stop' : 'mdi:play'}" style="--mdc-icon-size:17px"></ha-icon>
-                <span>${isActive ? 'Stoppen' : 'Starten'}</span>
+                <span>${isActive ? i18n.t('action_stop') : i18n.t('action_start')}</span>
               </button>
             </div>
           ` : ''}
@@ -4601,8 +4601,8 @@ export class VioletPoolCard extends LitElement {
       config,
       'chlorine_canister',
       'chlorine',
-      'Chlor',
-      'Chlorkanister',
+      i18n.t('dosing_type_chlorine'),
+      i18n.t('canister_chlorine'),
       'mdi:flask',
       chlorineCanisterSVG
     );
@@ -4617,7 +4617,7 @@ export class VioletPoolCard extends LitElement {
       'ph_plus_canister',
       'ph_plus',
       'pH Plus',
-      'pH Plus Kanister',
+      i18n.t('canister_ph_plus'),
       'mdi:flask-plus',
       phPlusCanisterSVG
     );
@@ -4632,7 +4632,7 @@ export class VioletPoolCard extends LitElement {
       'ph_minus_canister',
       'ph_minus',
       'pH Minus',
-      'pH Minus Kanister',
+      i18n.t('canister_ph_minus'),
       'mdi:flask-minus',
       phMinusCanisterSVG
     );
@@ -4646,8 +4646,8 @@ export class VioletPoolCard extends LitElement {
       config,
       'flocculant_canister',
       'flocculant',
-      'Flockung',
-      'Flockungsmittel Kanister',
+      i18n.t('dosing_type_flocculant'),
+      i18n.t('canister_flocculant'),
       'mdi:water-opacity',
       flocculantCanisterSVG
     );
@@ -4675,7 +4675,7 @@ export class VioletPoolCard extends LitElement {
     const sensorEntity = this.hass.states[sensorEntityId];
 
     if (!sensorEntity) {
-      return html`<ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">${defaultName} Sensor nicht gefunden</span><span class="error-entity">${sensorEntityId}</span></div></div></ha-card>`;
+      return html`<ha-card><div class="error-state"><div class="error-icon"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></div><div class="error-info"><span class="error-title">${i18n.t('sensor_not_found', { name: defaultName })}</span><span class="error-entity">${sensorEntityId}</span></div></div></ha-card>`;
     }
 
     const currentLevel = parseFloat(sensorEntity.state) || 0;
@@ -4686,7 +4686,7 @@ export class VioletPoolCard extends LitElement {
     const isLow = fillPercent < 20;
     const isEmpty = fillPercent < 5;
     const statusColor = isEmpty ? 'var(--vpc-danger, #FF3B30)' : isLow ? 'var(--vpc-warning, #FF9F0A)' : accentColor;
-    const statusText = isEmpty ? 'Leer' : isLow ? 'Niedrig' : 'OK';
+    const statusText = isEmpty ? i18n.t('level_empty') : isLow ? i18n.t('level_low_short') : 'OK';
     const canisterTrend = TrendHelper.getEntityTrend(sensorEntity);
     const canisterDelta = TrendHelper.getTrendDelta(canisterTrend) ?? 0;
     const usagePerDay = Number(sensorEntity.attributes?.daily_usage_ml || 0);
@@ -4699,7 +4699,7 @@ export class VioletPoolCard extends LitElement {
       canisterRecommendations.push({ severity: 'warning', icon: 'mdi:cup-water', text: `${shortLabel} knapp`, recommendation: estimatedDays !== undefined ? `Voraussichtliche Reserve: ${estimatedDays.toFixed(1)} Tage.` : 'Ersatzkanister bereitlegen.' });
     }
     if (canisterDelta < -50) {
-      canisterRecommendations.push({ severity: 'info', icon: 'mdi:trending-down', text: 'Verbrauch sichtbar', recommendation: 'Trend mit Sollwerten und Dosierintervallen abgleichen.' });
+      canisterRecommendations.push({ severity: 'info', icon: 'mdi:trending-down', text: i18n.t('canister_usage_visible'), recommendation: i18n.t('canister_usage_hint') });
     }
 
     return html`
@@ -4733,7 +4733,7 @@ export class VioletPoolCard extends LitElement {
               <span class="insight-value">${fillPercent.toFixed(0)}%</span>
             </div>
             <div class="insight-card">
-              <span class="insight-label">Trend</span>
+              <span class="insight-label">${i18n.t('label_trend')}</span>
               <span class="insight-value">${canisterTrend.length > 1 ? `${canisterDelta >= 0 ? '+' : ''}${canisterDelta.toFixed(0)} ml` : 'n/a'}</span>
             </div>
             <div class="insight-card">
@@ -4762,7 +4762,7 @@ export class VioletPoolCard extends LitElement {
             <span class="info-label">Status</span>
             <span class="info-value" style="color:${statusColor}">${isEmpty ? i18n.t('canister_empty_hint') : isLow ? i18n.t('level_low') : i18n.t('level_sufficient')}</span>
             <div class="t-tip">
-              <div class="t-tip-title"><ha-icon icon="${defaultIcon}"></ha-icon>${shortLabel} Kanister</div>
+              <div class="t-tip-title"><ha-icon icon="${defaultIcon}"></ha-icon>${i18n.t('canister_of', { label: shortLabel })}</div>
               <div class="t-tip-desc">${i18n.t('canister_level_desc', { label: shortLabel })}</div>
               ${isEmpty ? html`<div class="t-tip-warn"><ha-icon icon="mdi:alert"></ha-icon>${i18n.t('canister_is_empty')}</div>` : isLow ? html`<div class="t-tip-warn"><ha-icon icon="mdi:alert"></ha-icon>${i18n.t('canister_refill_soon')}</div>` : html`<div class="t-tip-ideal"><ha-icon icon="mdi:check-circle"></ha-icon>${i18n.t('level_in_range')}</div>`}
             </div>
@@ -5020,18 +5020,18 @@ ha-card.theme-glass .header-icon,ha-card.layout-glass .header-icon{box-shadow:in
 
     type DigitalRuleKey = 'DIRULE_1' | 'DIRULE_2' | 'DIRULE_3' | 'DIRULE_4' | 'DIRULE_5' | 'DIRULE_6' | 'DIRULE_7';
     const rules: Array<{ id: DigitalRuleKey; label: string; tone: string; summary: string }> = [
-      { id: 'DIRULE_1', label: 'Rule 1', tone: '#34C759', summary: 'Automatischer Trigger' },
-      { id: 'DIRULE_2', label: 'Rule 2', tone: '#00BCD4', summary: 'Eingangslogik / Freigabe' },
-      { id: 'DIRULE_3', label: 'Rule 3', tone: '#FF9F0A', summary: 'Wartungsroutine' },
-      { id: 'DIRULE_4', label: 'Rule 4', tone: '#AF52DE', summary: 'Zeit- oder Modusprofil' },
-      { id: 'DIRULE_5', label: 'Rule 5', tone: '#5AC8FA', summary: 'Energieoptimierung' },
-      { id: 'DIRULE_6', label: 'Rule 6', tone: '#FF6B35', summary: 'Sicherheitslogik' },
-      { id: 'DIRULE_7', label: 'Rule 7', tone: '#5856D6', summary: 'Fallback / Override' },
+      { id: 'DIRULE_1', label: 'Rule 1', tone: '#34C759', summary: i18n.t('rule_summary_1') },
+      { id: 'DIRULE_2', label: 'Rule 2', tone: '#00BCD4', summary: i18n.t('rule_summary_2') },
+      { id: 'DIRULE_3', label: 'Rule 3', tone: '#FF9F0A', summary: i18n.t('rule_summary_3') },
+      { id: 'DIRULE_4', label: 'Rule 4', tone: '#AF52DE', summary: i18n.t('rule_summary_4') },
+      { id: 'DIRULE_5', label: 'Rule 5', tone: '#5AC8FA', summary: i18n.t('rule_summary_5') },
+      { id: 'DIRULE_6', label: 'Rule 6', tone: '#FF6B35', summary: i18n.t('rule_summary_6') },
+      { id: 'DIRULE_7', label: 'Rule 7', tone: '#5856D6', summary: i18n.t('rule_summary_7') },
     ];
     const activeRules = rules.length;
     const ruleRecommendations: SeverityAlert[] = [
-      { severity: 'info', icon: 'mdi:flash-outline', text: 'Rules direkt aus der Karte steuerbar', recommendation: 'Trigger ist gut fuer Tests, Lock/Unlock fuer kontrollierte Wartung oder Eingriffs-Schutz.' },
-      { severity: 'warning', icon: 'mdi:shield-lock-outline', text: 'Regeln bewusst sperren', recommendation: 'Nur waehrend Wartung oder Fehlersuche locken, damit Automationen nicht unbeabsichtigt blockiert bleiben.' },
+      { severity: 'info', icon: 'mdi:flash-outline', text: i18n.t('rules_controllable'), recommendation: i18n.t('rules_controllable_hint') },
+      { severity: 'warning', icon: 'mdi:shield-lock-outline', text: i18n.t('rules_lock_deliberately'), recommendation: i18n.t('rules_lock_hint') },
     ];
 
     return html`
@@ -5099,8 +5099,8 @@ ha-card.theme-glass .header-icon,ha-card.layout-glass .header-icon{box-shadow:in
     const deviceId = config.entity || 'violet_pool_controller';
     const diagnosticsActive = true;
     const diagnosticRecommendations: SeverityAlert[] = [
-      { severity: 'info', icon: 'mdi:wifi-check', text: i18n.t('check_connection_first'), recommendation: 'Mit Connection Test schnell zwischen Integrationsproblem und reiner Sensorabweichung unterscheiden.' },
-      { severity: 'warning', icon: 'mdi:file-document-outline', text: 'Logs bei Fehlern exportieren', recommendation: 'Vor Reset oder Verlauf-Loeschung immer erst Logs sichern, damit Ursachen sauber nachvollziehbar bleiben.' },
+      { severity: 'info', icon: 'mdi:wifi-check', text: i18n.t('check_connection_first'), recommendation: i18n.t('diagnostics_connection_hint') },
+      { severity: 'warning', icon: 'mdi:file-document-outline', text: i18n.t('diagnostics_export_logs'), recommendation: i18n.t('diagnostics_export_hint') },
     ];
 
     return html`
@@ -5127,7 +5127,7 @@ ha-card.theme-glass .header-icon,ha-card.layout-glass .header-icon{box-shadow:in
               <span class="insight-value">4 Aktionen</span>
             </div>
             <div class="insight-card">
-              <span class="insight-label">Modus</span>
+              <span class="insight-label">${i18n.t('label_mode')}</span>
               <span class="insight-value">Support</span>
             </div>
           </div>

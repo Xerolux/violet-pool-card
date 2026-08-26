@@ -30,6 +30,13 @@ import type { DosingType } from '../types';
 
 export type { DosingType };
 
+/**
+ * The values the integration's `smart_dosing` service accepts for
+ * `dosing_type`. `Electrolysis` and `H2O2` exist there too; no card shows
+ * them.
+ */
+export type DosingServiceType = 'pH-' | 'pH+' | 'Chlorine' | 'Electrolysis' | 'Flocculant';
+
 /** What identifies one channel across the integration and the old card ids. */
 export interface DosingChannel {
   type: DosingType;
@@ -41,6 +48,16 @@ export interface DosingChannel {
    * back to when neither the switch nor the sensor is registered.
    */
   modeTranslationKey: string;
+  /**
+   * What the channel is called in the `smart_dosing` service.
+   *
+   * The card sent `Chlor` and `Flockmittel` - the names the *controller's*
+   * HTTP API uses. The service takes the English ones and translates them for
+   * the controller itself (`DOSING_API_MAPPING` in the integration), so
+   * `vol.In` rejected both before the handler ever ran: chlorine and
+   * flocculant dosing could not be triggered from the card at all.
+   */
+  serviceValue: DosingServiceType;
   /** The suffix the card used to guess before it read the registry. */
   legacySuffix: string;
   /**
@@ -71,6 +88,7 @@ export const DOSING_CHANNELS: readonly DosingChannel[] = [
   {
     type: 'electrolysis',
     translationKey: 'dos_2_elo',
+    serviceValue: 'Electrolysis',
     modeTranslationKey: 'dos_elo_mode',
     legacySuffix: 'elektrolyse',
     idFragments: ['dos_2_elo', '_elo', 'electrolysis', 'elektrolyse'],
@@ -78,6 +96,7 @@ export const DOSING_CHANNELS: readonly DosingChannel[] = [
   {
     type: 'ph_plus',
     translationKey: 'dos_5_php',
+    serviceValue: 'pH+',
     modeTranslationKey: 'dos_php_mode',
     legacySuffix: 'dosierung_ph_plus',
     idFragments: ['_php', 'ph_plus', 'ph_pl', 'dosierung_ph_plus', 'dosierung_ph_1', 'ph_dosierung_2', 'ph_dosier_modus_2', 'ph_dosiersystem_2'],
@@ -85,6 +104,7 @@ export const DOSING_CHANNELS: readonly DosingChannel[] = [
   {
     type: 'ph_minus',
     translationKey: 'dos_4_phm',
+    serviceValue: 'pH-',
     modeTranslationKey: 'dos_phm_mode',
     legacySuffix: 'dosierung_ph_2',
     idFragments: ['_phm', 'ph_minus', 'ph_min', 'dosierung_ph_2', 'ph_dosierung', 'ph_dosier_modus', 'ph_dosiersystem'],
@@ -92,6 +112,7 @@ export const DOSING_CHANNELS: readonly DosingChannel[] = [
   {
     type: 'flocculant',
     translationKey: 'dos_6_floc',
+    serviceValue: 'Flocculant',
     modeTranslationKey: 'dos_floc_mode',
     legacySuffix: 'flockmittel',
     idFragments: ['_floc', 'flocculant', 'flockmittel', 'flockung'],
@@ -99,6 +120,7 @@ export const DOSING_CHANNELS: readonly DosingChannel[] = [
   {
     type: 'chlorine',
     translationKey: 'dos_1_cl',
+    serviceValue: 'Chlorine',
     modeTranslationKey: 'dos_cl_mode',
     legacySuffix: 'chlor_dosierung',
     idFragments: ['_cl', 'chlorine', 'chlor', 'chlordosier'],

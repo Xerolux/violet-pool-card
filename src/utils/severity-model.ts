@@ -74,7 +74,7 @@ export class SeverityModel {
 
     if (currentTemp !== undefined && targetTemp !== undefined && currentTemp + 1.5 < targetTemp) {
       alerts.push({
-        text: 'Wassertemperatur deutlich unter Zielwert',
+        text: i18n.t('water_below_target'),
         severity: 'warning',
         icon: 'mdi:thermometer-chevron-up',
         recommendation: i18n.t('heater_check_output'),
@@ -84,7 +84,7 @@ export class SeverityModel {
 
     if (outsideTemp != null && outsideTemp > minOutsideTemp + 4 && currentTemp !== undefined && targetTemp !== undefined && currentTemp >= targetTemp) {
       alerts.push({
-        text: 'Heizung kann in Effizienzmodus wechseln',
+        text: i18n.t('heater_efficiency_mode'),
         severity: 'info',
         icon: 'mdi:leaf',
         recommendation: i18n.t('heater_auto_enough'),
@@ -109,7 +109,7 @@ export class SeverityModel {
       });
     } else if (tempDelta !== undefined && tempDelta >= 3) {
       alerts.push({
-        text: 'Sehr gute Solarbedingungen',
+        text: i18n.t('solar_conditions_great'),
         severity: 'info',
         icon: 'mdi:weather-sunny',
         recommendation: i18n.t('solar_ideal_hint'),
@@ -119,7 +119,7 @@ export class SeverityModel {
 
     if (poolTemp !== undefined && targetTemp !== undefined && poolTemp >= targetTemp) {
       alerts.push({
-        text: 'Zieltemperatur erreicht',
+        text: i18n.t('target_temp_reached'),
         severity: 'ok',
         icon: 'mdi:check-circle',
         recommendation: i18n.t('solar_maintain_hint'),
@@ -129,7 +129,7 @@ export class SeverityModel {
 
     if (absorberTemp != null && absorberTemp > 45) {
       alerts.push({
-        text: 'Sehr hoher Kollektorwert',
+        text: i18n.t('collector_very_hot'),
         severity: 'info',
         icon: 'mdi:solar-power-variant',
         recommendation: i18n.t('solar_surplus_hint'),
@@ -152,7 +152,7 @@ export class SeverityModel {
       const directChlorine = targetValue < 10;
       if (currentValue < targetValue - tolerance) {
         alerts.push({
-          text: directChlorine ? i18n.t('chlorine_below_target') : 'ORP unter Zielbereich',
+          text: directChlorine ? i18n.t('chlorine_below_target') : i18n.t('orp_below_target'),
           severity: 'warning',
           icon: 'mdi:lightning-bolt',
           recommendation: i18n.t('dosing_check_chlorine'),
@@ -176,7 +176,7 @@ export class SeverityModel {
       const phHigh = targetValue !== undefined ? targetValue + 0.3 : 7.4;
       if (currentValue < phLow) {
         alerts.push({
-          text: 'pH zu niedrig',
+          text: i18n.t('ph_too_low'),
           severity: 'warning',
           icon: 'mdi:ph',
           recommendation: i18n.t('dosing_check_ph_plus'),
@@ -185,7 +185,7 @@ export class SeverityModel {
       }
       if (currentValue > phHigh) {
         alerts.push({
-          text: 'pH zu hoch',
+          text: i18n.t('ph_too_high'),
           severity: 'warning',
           icon: 'mdi:ph',
           recommendation: i18n.t('dosing_check_ph_minus'),
@@ -196,7 +196,7 @@ export class SeverityModel {
 
     if (isDosingBlocked(dosingState)) {
       alerts.push({
-        text: 'Dosierung blockiert',
+        text: i18n.t('dosing_blocked'),
         severity: 'critical',
         icon: 'mdi:alert-octagon',
         recommendation: i18n.t('dosing_check_release'),

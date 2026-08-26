@@ -7,6 +7,12 @@
  */
 
 import { i18n } from './i18n';
+import { detectDosingType, dosingChannel, type DosingServiceType } from './dosing-type';
+
+/** What the service accepts for `duration`, and what the card asks for. */
+const MIN_DOSING_SECONDS = 5;
+const MAX_DOSING_SECONDS = 300;
+const DEFAULT_DOSING_SECONDS = 30;
 
 interface HomeAssistant {
   callService: (domain: string, service: string, serviceData?: Record<string, unknown>) => Promise<unknown>;
@@ -41,7 +47,9 @@ export class ServiceCaller {
    */
   private _isRateLimited(domain: string, service: string): boolean {
     const key = `${domain}.${service}`;
-    const last = this._lastCallTs.get(key) ?? 0;
+    // Not 0: that is a real timestamp, and comparing against it would drop
+    // the first call of a session whenever the clock reads under RATE_LIMIT_MS.
+    const last = this._lastCallTs.get(key) ?? Number.NEGATIVE_INFINITY;
     const now = Date.now();
     if (now - last < RATE_LIMIT_MS) {
       return true;
@@ -137,20 +145,38 @@ export class ServiceCaller {
   // ============================================================================
   // SMART DOSING - Full API Support
   // ============================================================================
+  /**
+   * Triggers the integration's `smart_dosing` service.
+   *
+   * Its schema is stricter than the card was: it wants an `entity_id` (or a
+   * device), a `dosing_type` from its own list, and a `duration` on every
+   * action - `vol.Required`, not defaulted. The card sent no entity at all,
+   * German channel names, and no duration for `auto` and `stop`, so every one
+   * of the dosing buttons was rejected before the handler ran.
+   *
+   * @param entity The channel's switch - the entity the service acts on.
+   * @param dosingType The channel, as the service names it.
+   * @param action What to do with the channel.
+   * @param duration Seconds to dose; clamped to the service's 5..300 and sent
+   *   for every action, because the schema requires it even for `stop`.
+   */
   async smartDosing(
-    dosingType: 'pH-' | 'pH+' | 'Chlor' | 'Flockmittel',
+    entity: string,
+    dosingType: DosingServiceType,
     action: 'manual_dose' | 'auto' | 'stop',
-    duration?: number,
+    duration = DEFAULT_DOSING_SECONDS,
     safetyOverride?: boolean
   ): Promise<ServiceCallResult> {
+    const seconds = Math.min(
+      MAX_DOSING_SECONDS,
+      Math.max(MIN_DOSING_SECONDS, Math.round(duration))
+    );
     const serviceData: Record<string, unknown> = {
+      entity_id: entity,
       dosing_type: dosingType,
       action,
+      duration: seconds,
     };
-
-    if (duration !== undefined && duration >= 5 && duration <= 300) {
-      serviceData.duration = duration;
-    }
 
     if (safetyOverride !== undefined) {
       serviceData.safety_override = safetyOverride;
@@ -164,50 +190,53 @@ export class ServiceCaller {
         auto: 'svc_dosing_auto',
         stop: 'svc_dosing_stop',
       };
-      const durationLabel = duration !== undefined ? ` ${i18n.t('svc_duration_label')} ${duration}${i18n.t('svc_seconds_label')}` : '';
+      // Only a manual dose runs for a time; the duration the schema demands
+      // for `auto` and `stop` means nothing there and is not worth announcing.
+      const durationLabel =
+        action === 'manual_dose'
+          ? ` ${i18n.t('svc_duration_label')} ${seconds}${i18n.t('svc_seconds_label')}`
+          : '';
       this.showToast(`${dosingType} - ${i18n.t(actionLabelKeys[action])}${durationLabel}`);
     }
 
     return result;
   }
 
-  async manualDose(dosingType: 'pH-' | 'pH+' | 'Chlor' | 'Flockmittel', duration = 30, safetyOverride = false): Promise<ServiceCallResult> {
-    return this.smartDosing(dosingType, 'manual_dose', duration, safetyOverride);
+  async manualDose(
+    entity: string,
+    dosingType: DosingServiceType,
+    duration = DEFAULT_DOSING_SECONDS,
+    safetyOverride = false
+  ): Promise<ServiceCallResult> {
+    return this.smartDosing(entity, dosingType, 'manual_dose', duration, safetyOverride);
   }
 
-  // Legacy support: extract dosing type from entity name
-  async manualDosing(entity: string, duration = 30): Promise<ServiceCallResult> {
-    const dosingTypeMatch = entity.match(/(?:dos_\d+_(cl|phm|php|floc))|(chlor_dosierung|dosierung_ph_2|dosierung_ph|flockmittel)/);
-    if (!dosingTypeMatch) {
+  /**
+   * Doses the channel an entity belongs to.
+   *
+   * The channel used to be read out of the entity id with a list of German
+   * spellings - none of which an installation set up since integration 2.5.0
+   * has. `detectDosingType` asks the registry first and knows the current ids.
+   */
+  async manualDosing(
+    entity: string,
+    duration = DEFAULT_DOSING_SECONDS,
+    translationKey?: string
+  ): Promise<ServiceCallResult> {
+    const type = detectDosingType(entity, translationKey);
+    if (!type) {
       return { success: false, error: 'Could not determine dosing type from entity' };
     }
 
-    const dosingTypeMap: Record<string, 'pH-' | 'pH+' | 'Chlor' | 'Flockmittel'> = {
-      'chlor_dosierung': 'Chlor',
-      'dosierung_ph': 'pH+',
-      'dosierung_ph_2': 'pH-',
-      'flockmittel': 'Flockmittel',
-      cl: 'Chlor',
-      phm: 'pH-',
-      php: 'pH+',
-      floc: 'Flockmittel',
-    };
-
-    const matchedValue = dosingTypeMatch[1] || dosingTypeMatch[2];
-    const dosingType = dosingTypeMap[matchedValue];
-    if (!dosingType) {
-      return { success: false, error: `Unknown dosing type: ${matchedValue}` };
-    }
-
-    return this.manualDose(dosingType, duration);
+    return this.manualDose(entity, dosingChannel(type).serviceValue, duration);
   }
 
-  async autoDose(dosingType: 'pH-' | 'pH+' | 'Chlor' | 'Flockmittel'): Promise<ServiceCallResult> {
-    return this.smartDosing(dosingType, 'auto');
+  async autoDose(entity: string, dosingType: DosingServiceType): Promise<ServiceCallResult> {
+    return this.smartDosing(entity, dosingType, 'auto');
   }
 
-  async stopDosing(dosingType: 'pH-' | 'pH+' | 'Chlor' | 'Flockmittel'): Promise<ServiceCallResult> {
-    return this.smartDosing(dosingType, 'stop');
+  async stopDosing(entity: string, dosingType: DosingServiceType): Promise<ServiceCallResult> {
+    return this.smartDosing(entity, dosingType, 'stop');
   }
 
   // ============================================================================

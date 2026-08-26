@@ -1,5 +1,5 @@
 import { readFileSync, readdirSync, statSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
@@ -61,9 +61,12 @@ const sourceFiles = (dir: string): string[] => {
   return out;
 };
 
-const codeFiles = [...sourceFiles('src'), ...sourceFiles('scripts')].filter(
-  (file) => relative(I18N, file) !== ''
-);
+/**
+ * Every source file, i18n.ts included: its German *strings* are the
+ * localisation and stay, but a comment in it is prose about the product like
+ * any other and is English. Its header was not, which is how this got noticed.
+ */
+const codeFiles = [...sourceFiles('src'), ...sourceFiles('scripts')];
 
 describe('language policy', () => {
   it.each(codeFiles)('%s has no German comments', (file) => {
