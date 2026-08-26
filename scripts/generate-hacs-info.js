@@ -11,6 +11,11 @@ const infoPath = path.join(__dirname, '..', 'info.md');
 try {
   let readme = fs.readFileSync(readmePath, 'utf-8');
 
+  // Keep the generated artifact identical on Windows and Linux. Without
+  // normalising CRLF first, the empty-line cleanup below only sees the `\n`
+  // half of each line ending and leaves platform-specific whitespace behind.
+  readme = readme.replace(/\r\n?/g, '\n');
+
   // Remove HTML elements like <div align="center">
   readme = readme.replace(/<div[^>]*>/g, '');
   readme = readme.replace(/<\/div>/g, '');
